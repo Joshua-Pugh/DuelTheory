@@ -539,12 +539,12 @@
       "rarity": "Legendary",
       "attack": null,
       "defense": null,
-      "effectText": "You may play Korgath, Lord of Ruin from your hand or discard.\nKorgath, Lord of Ruin enters with Charge and gains +3A/+0D until end of turn.\nIf you sacrificed 3 or more Brutes this turn, heal 5 HP to your Command Station.",
+      "effectText": "You may play Korgath, Lord of Ruin from your hand or discard without paying its Essence cost.\nKorgath, Lord of Ruin enters with Charge and gains +3A/+0D until end of turn.\nIf you sacrificed 3 or more Brutes this turn, heal 5 HP to your Command Station.",
       "effectStatus": "source-transcribed",
       "artStatus": "placeholder",
       "sourceDeck": "Clan of the Broken Fist",
       "flavorText": "",
-      "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+      "effectSource": "Creator clarification — 2026-10-17: hand or graveyard, no Essence cost"
     },
     {
       "id": "ashen-brute-bloodrush-gambit",

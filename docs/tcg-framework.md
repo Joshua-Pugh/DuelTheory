@@ -1,4 +1,6 @@
-# Reusable TCG framework: first implementation
+# Reusable TCG framework
+
+**Current status (17 October 2026):** the Brute duel prototype now has the full Brute catalog, phase/Clash controller and combat. See [Brute duel prototype](brute-duel-prototype.md) for controls, rules and limits. The implementation stages below record earlier states and are superseded by that document for current support coverage.
 
 ## Product direction
 
