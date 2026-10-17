@@ -11,6 +11,7 @@ export type Card = {
   card_sets?: Array<{set_name: string; set_code: string; set_rarity?: string}>;
   image?: string;
   fullImage?: string;
+  goatText?: {originalDesc:string;originalImage?:string;originalFullImage?:string};
 };
 export type Deck = { id: string; name: string; main: number[]; side: number[]; extra: number[] };
 export type DeckZone = 'main' | 'side' | 'extra';

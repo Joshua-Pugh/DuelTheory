@@ -1,0 +1,62 @@
+{
+  "26202165": {
+    "name": "Sangan",
+    "text": "When this card is sent from the field to the Graveyard, select 1 monster with an ATK of 1500 or less from your Deck, show it to your opponent, and add it to your hand. Then shuffle your Deck.",
+    "source": "https://www.goatformat.com/rulings7.html",
+    "sourceSection": "SANGAN / Card Errata",
+    "printingReference": "DB2-EN042",
+    "cutoff": "2005-08-17",
+    "verifiedOn": "2026-10-17",
+    "verification": "historical-errata",
+    "overlay": "/cards/goat/26202165.svg",
+    "originalSha256": "d255f30baf1f8d8f1bc70cfff7fe187e420c520945ea3a1eeed1a3faee4e0370"
+  },
+  "8131171": {
+    "name": "Sinister Serpent",
+    "text": "During your Standby Phase, if a \"Sinister Serpent\" exists in your Graveyard, you can return the \"Sinister Serpent\" to your hand.",
+    "source": "https://www.goatformat.com/rulings7.html",
+    "sourceSection": "SINISTER SERPENT / Card Errata",
+    "printingReference": "SDD-002",
+    "cutoff": "2005-08-17",
+    "verifiedOn": "2026-10-17",
+    "verification": "historical-errata",
+    "overlay": "/cards/goat/8131171.svg",
+    "originalSha256": "3b7b093d176c02352889925f416c9922a1e0b277a36683bc843ca907e0f30006"
+  },
+  "16226786": {
+    "name": "Night Assailant",
+    "text": "FLIP: Select 1 monster on your opponent's side of the field and destroy it. When this card is sent directly from your hand to the Graveyard, return 1 Flip Effect Monster from your Graveyard to your hand.",
+    "source": "https://www.goatformat.com/rulings5.html",
+    "sourceSection": "NIGHT ASSAILANT / Card Errata",
+    "printingReference": "AST-080",
+    "cutoff": "2005-08-17",
+    "verifiedOn": "2026-10-17",
+    "verification": "historical-errata",
+    "overlay": "/cards/goat/16226786.svg",
+    "originalSha256": "3140465a1dd9568782b505ac403f48d9386d561b27fcef898a3fcbaa5bf46cc3"
+  },
+  "40737112": {
+    "name": "Dark Magician of Chaos",
+    "text": "When this card is Normal Summoned or Special Summoned, you can add 1 Spell Card from your Graveyard to your hand. A monster that is destroyed by this monster as a result of battle is removed from play instead of going to the Graveyard. If this face-up card is destroyed or removed from the field, it is removed from play.",
+    "source": "https://www.goatformat.com/rulings2.html",
+    "sourceSection": "DARK MAGICIAN OF CHAOS / Card Errata",
+    "printingReference": "IOC-065",
+    "cutoff": "2005-08-17",
+    "verifiedOn": "2026-10-17",
+    "verification": "historical-errata",
+    "overlay": "/cards/goat/40737112.svg",
+    "originalSha256": "7eb1d045e0eb3f8a428851a7b7a8cfc3d6cd957749db86c70c56dddc87d82dda"
+  },
+  "83555666": {
+    "name": "Ring of Destruction",
+    "text": "Destroy 1 face-up monster and inflict damage equal to the destroyed card's ATK to the Life Points of both you and your opponent.",
+    "source": "https://www.goatformat.com/rulings6.html",
+    "sourceSection": "RING OF DESTRUCTION / Card Errata",
+    "printingReference": "PGD-000",
+    "cutoff": "2005-08-17",
+    "verifiedOn": "2026-10-17",
+    "verification": "historical-errata",
+    "overlay": "/cards/goat/83555666.svg",
+    "originalSha256": "981c8de991ca7bba8de98a79fde0e280fc3b3a8cbfd113474ef83ef0fa1ea847"
+  }
+}

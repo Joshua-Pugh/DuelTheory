@@ -135,13 +135,7 @@ export function deckResponseActions(s:DuelState,ctx:EngineContext,seat:Seat):Leg
  }
  return [...actions,...chaosResponses(s,ctx,seat)];
 }
-export const historicalDeckText:Readonly<Record<number,string>>={
- 16226786:'GOAT effect: FLIP: Destroy 1 monster your opponent controls. When this card is sent directly from the hand to the Graveyard, return 1 Flip Effect Monster from your Graveyard to your hand, except this card. Another copy of Night Assailant is a legal target.',
- 26202165:'GOAT effect: When sent from the field to the Graveyard, add a monster with 1500 or less ATK from your Deck to your hand, then shuffle.',
- [SERPENT]:'GOAT effect: During your Standby Phase, you may return this card from your Graveyard to your hand.',
- 40737112:'GOAT effect: When Normal or Special Summoned, you may recover a Spell from your Graveyard. Monsters destroyed by this card in battle are banished. If this face-up card leaves the field, banish it.',
- 83555666:'GOAT effect: Destroy a face-up monster and inflict damage equal to its ATK to both players.',
-};
+
 
 /** Avalanche adjacent session seeds before a replayable random effect. */
 function effectRandom(s:DuelState){let n=(s.seed+Math.imul(s.events.length+1,0x9e3779b9))>>>0;n=Math.imul(n^(n>>>16),0x21f0aaad);n=Math.imul(n^(n>>>15),0x735a2d97);return (n^(n>>>15))>>>0;}
