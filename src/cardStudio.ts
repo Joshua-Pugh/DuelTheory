@@ -1,0 +1,10 @@
+export const FRAME_TEMPLATES = ['ornate','classic','minimal','fullart','tactical','print'] as const;
+export type FrameTemplate = typeof FRAME_TEMPLATES[number];
+export const FRAME_LABELS:Record<FrameTemplate,string>={ornate:'Ashen Ornate',classic:'Classic Fantasy',minimal:'Modern Minimal',fullart:'Full Art',tactical:'Tactical',print:'Print & Play'};
+export const ART_DB_NAME='dueltheory-artworks-v1';
+const STORE='artwork';
+export function openArtworkDB():Promise<IDBDatabase>{return new Promise((resolve,reject)=>{if(!('indexedDB' in window)){reject(new Error('IndexedDB unavailable'));return;}const req=indexedDB.open(ART_DB_NAME,1);req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains(STORE))req.result.createObjectStore(STORE)};req.onerror=()=>reject(req.error);req.onsuccess=()=>resolve(req.result);});}
+export async function getArtwork(key:string):Promise<Blob|undefined>{const db=await openArtworkDB();return new Promise((resolve,reject)=>{const tr=db.transaction(STORE,'readonly');const req=tr.objectStore(STORE).get(key);req.onsuccess=()=>resolve(req.result as Blob|undefined);req.onerror=()=>reject(req.error);tr.oncomplete=()=>db.close();tr.onerror=()=>{db.close();reject(tr.error)}});}
+export async function putArtwork(key:string,blob:Blob|null):Promise<void>{const db=await openArtworkDB();return new Promise((resolve,reject)=>{const tr=db.transaction(STORE,'readwrite');if(blob)tr.objectStore(STORE).put(blob,key);else tr.objectStore(STORE).delete(key);tr.oncomplete=()=>{db.close();window.dispatchEvent(new CustomEvent('dueltheory-artwork',{detail:key}));resolve()};tr.onerror=()=>{db.close();reject(tr.error)}});}
+export function loadTemplate():FrameTemplate{try{const s=localStorage.getItem('dueltheory-frame-template-v1');return FRAME_TEMPLATES.includes(s as FrameTemplate)?s as FrameTemplate:'ornate';}catch{return 'ornate';}}
+export function saveTemplate(t:FrameTemplate){try{localStorage.setItem('dueltheory-frame-template-v1',t);return true;}catch{return false;}}

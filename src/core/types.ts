@@ -1,0 +1,21 @@
+export type Card = {
+  id: number;
+  name: string;
+  type: string;
+  desc: string;
+  race?: string;
+  attribute?: string;
+  level?: number;
+  atk?: number;
+  def?: number;
+  card_sets?: Array<{set_name: string; set_code: string; set_rarity?: string}>;
+  image?: string;
+  fullImage?: string;
+};
+export type Deck = { id: string; name: string; main: number[]; side: number[]; extra: number[] };
+export type DeckZone = 'main' | 'side' | 'extra';
+export type LegalityIssue = { kind: 'error'|'warning'; message: string };
+export type GamePhase = 'DRAW'|'STANDBY'|'MAIN_1'|'BATTLE'|'MAIN_2'|'END';
+export type PlayerState = {lifePoints: number; hand: number[]; deck: number[]; graveyard: number[]; banished: number[]; monsters: Array<number|null>; spells: Array<number|null>};
+export type GameState = {formatId: string; turn: number; currentPlayer: 0|1; phase: GamePhase; players: [PlayerState, PlayerState]; log: string[]};
+export type GameAction = {type:'DRAW'; player:0|1; count:number} | {type:'ADVANCE_PHASE'} | {type:'ADJUST_LP'; player:0|1; amount:number};

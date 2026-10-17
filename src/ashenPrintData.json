@@ -1,0 +1,672 @@
+{
+  "ashen-noble-shieldbearer-noble": {
+    "resourceCost": {
+      "oath": 1
+    },
+    "frameFaction": "Noble",
+    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-spearman-of-the-crown": {
+    "resourceCost": {
+      "oath": 1
+    },
+    "frameFaction": "Noble",
+    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-court-scribe": {
+    "resourceCost": {
+      "oath": 1
+    },
+    "frameFaction": "Noble",
+    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-banner-guard": {
+    "resourceCost": {
+      "untuned": 1,
+      "oath": 2
+    },
+    "frameFaction": "Noble",
+    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-junior-tactician": {
+    "resourceCost": {
+      "oath": 2
+    },
+    "frameFaction": "Noble",
+    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-crown-archer": {
+    "resourceCost": {
+      "oath": 2
+    },
+    "frameFaction": "Noble",
+    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-watchtower-scout": {
+    "resourceCost": {
+      "untuned": 1,
+      "oath": 1
+    },
+    "frameFaction": "Noble",
+    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-court-strategist": {
+    "resourceCost": {
+      "untuned": 1,
+      "oath": 2
+    },
+    "frameFaction": "Noble",
+    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-royal-guard": {
+    "resourceCost": {
+      "oath": 1
+    },
+    "frameFaction": "Noble",
+    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-ballista-crew": {
+    "resourceCost": {
+      "untuned": 1,
+      "oath": 3
+    },
+    "frameFaction": "Noble",
+    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-griffin-knight-of-ashenfield": {
+    "resourceCost": {
+      "untuned": 2,
+      "oath": 2
+    },
+    "frameFaction": "Noble",
+    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-archivist-of-the-crown": {
+    "resourceCost": {
+      "untuned": 2,
+      "oath": 2
+    },
+    "frameFaction": "Noble",
+    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-high-strategist": {
+    "resourceCost": {
+      "untuned": 2,
+      "oath": 2
+    },
+    "frameFaction": "Noble",
+    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-ashenfield-war-ram": {
+    "resourceCost": {
+      "untuned": 2,
+      "oath": 3
+    },
+    "frameFaction": "Noble",
+    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-griffin-lancer": {
+    "resourceCost": {
+      "untuned": 1,
+      "oath": 3
+    },
+    "frameFaction": "Noble",
+    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-crown-s-cavalier": {
+    "resourceCost": {
+      "untuned": 3,
+      "oath": 2
+    },
+    "frameFaction": "Noble",
+    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-royal-longbowman": {
+    "resourceCost": {
+      "untuned": 1,
+      "oath": 3
+    },
+    "frameFaction": "Noble",
+    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-garrett-of-ashenfield": {
+    "resourceCost": {
+      "untuned": 4,
+      "oath": 2
+    },
+    "frameFaction": "Noble",
+    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-seraphine-royal-advisor": {
+    "resourceCost": {
+      "untuned": 3,
+      "oath": 2
+    },
+    "frameFaction": "Noble",
+    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-royal-crusher": {
+    "resourceCost": {
+      "untuned": 2,
+      "oath": 4
+    },
+    "frameFaction": "Noble",
+    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-rune-of-foresight": {
+    "resourceCost": {
+      "oath": 2
+    },
+    "frameFaction": "Noble",
+    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-rune-of-clarity": {
+    "resourceCost": {
+      "oath": 2
+    },
+    "frameFaction": "Noble",
+    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-rune-of-the-banner": {
+    "resourceCost": {
+      "untuned": 1,
+      "oath": 2
+    },
+    "frameFaction": "Noble",
+    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-rune-of-the-crown": {
+    "resourceCost": {
+      "untuned": 2,
+      "oath": 3
+    },
+    "frameFaction": "Noble",
+    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-ring-of-the-ley": {
+    "resourceCost": {
+      "untuned": 1
+    },
+    "frameFaction": "Neutral",
+    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-ashenfield-lance": {
+    "resourceCost": {
+      "untuned": 2
+    },
+    "frameFaction": "Neutral",
+    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx",
+    "outfitCost": 1
+  },
+  "ashen-noble-oathfire-decree": {
+    "resourceCost": {
+      "untuned": 1,
+      "oath": 2
+    },
+    "frameFaction": "Noble",
+    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-crown-of-dominion": {
+    "resourceCost": {
+      "untuned": 2,
+      "oath": 3
+    },
+    "frameFaction": "Noble",
+    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-royal-decree": {
+    "resourceCost": {
+      "untuned": 1,
+      "oath": 1
+    },
+    "frameFaction": "Noble",
+    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-purge-the-unworthy": {
+    "resourceCost": {
+      "untuned": 1,
+      "oath": 2
+    },
+    "frameFaction": "Noble",
+    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-judgment-of-the-crown": {
+    "resourceCost": {
+      "untuned": 2,
+      "oath": 2
+    },
+    "frameFaction": "Noble",
+    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-order-s-end": {
+    "resourceCost": {
+      "untuned": 2,
+      "oath": 3
+    },
+    "frameFaction": "Noble",
+    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-mandate-of-dominion": {
+    "resourceCost": {
+      "untuned": 2,
+      "oath": 4
+    },
+    "frameFaction": "Noble",
+    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-law-of-precedence": {
+    "resourceCost": {
+      "oath": 1
+    },
+    "frameFaction": "Noble",
+    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-crown-s-verdict": {
+    "resourceCost": {
+      "oath": 1
+    },
+    "frameFaction": "Noble",
+    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-throne-s-will": {
+    "resourceCost": {
+      "oath": 3
+    },
+    "frameFaction": "Noble",
+    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-enforce-the-law": {
+    "resourceCost": {
+      "untuned": 1,
+      "oath": 1
+    },
+    "frameFaction": "Noble",
+    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-the-king-s-will": {
+    "resourceCost": {
+      "untuned": 2,
+      "oath": 2
+    },
+    "frameFaction": "Noble",
+    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-oath-font": {
+    "resourceCost": {},
+    "frameFaction": "Noble",
+    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-oath-sanctum": {
+    "resourceCost": {},
+    "frameFaction": "Noble",
+    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-oath-forge": {
+    "resourceCost": {},
+    "frameFaction": "Noble",
+    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-verdant-veil-fount": {
+    "resourceCost": {},
+    "frameFaction": "Noble",
+    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-the-crown-s-bastion": {
+    "resourceCost": {},
+    "frameFaction": "Noble",
+    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-brute-frenzied-grunt": {
+    "resourceCost": {
+      "fury": 1
+    },
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-bloodfang-raider": {
+    "resourceCost": {
+      "fury": 1
+    },
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-bloodpit-initiate": {
+    "resourceCost": {
+      "fury": 1
+    },
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-raging-mauler": {
+    "resourceCost": {
+      "untuned": 1,
+      "fury": 1
+    },
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-ashen-warhawk": {
+    "resourceCost": {
+      "fury": 3
+    },
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-rubble-flinger": {
+    "resourceCost": {
+      "untuned": 1,
+      "fury": 1
+    },
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-savage-warcaller": {
+    "resourceCost": {
+      "untuned": 1,
+      "fury": 2
+    },
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-feral-axebreaker": {
+    "resourceCost": {
+      "fury": 2
+    },
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-battlefield-howler": {
+    "resourceCost": {
+      "untuned": 1,
+      "fury": 2
+    },
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-crude-spearthrower": {
+    "resourceCost": {
+      "fury": 3
+    },
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-warhowl-instigator": {
+    "resourceCost": {
+      "fury": 2
+    },
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-warband-overseer": {
+    "resourceCost": {
+      "untuned": 1,
+      "fury": 2
+    },
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-bonespike-hurler": {
+    "resourceCost": {
+      "fury": 3
+    },
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-howling-skyterror": {
+    "resourceCost": {
+      "untuned": 3,
+      "fury": 1
+    },
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-pit-sired-warmonger": {
+    "resourceCost": {
+      "untuned": 2,
+      "fury": 1
+    },
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-warchanter-savage": {
+    "resourceCost": {
+      "untuned": 2,
+      "fury": 1
+    },
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-stonehide-juggernaut": {
+    "resourceCost": {
+      "untuned": 1,
+      "fury": 3
+    },
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-skyclaw-raider": {
+    "resourceCost": {
+      "untuned": 1,
+      "fury": 2
+    },
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-ironhide-catapult": {
+    "resourceCost": {
+      "untuned": 1,
+      "fury": 2
+    },
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-siegebreaker-ram": {
+    "resourceCost": {
+      "untuned": 2,
+      "fury": 3
+    },
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-ashclaw-skyreaver": {
+    "resourceCost": {
+      "untuned": 2,
+      "fury": 3
+    },
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-bonecrusher-catapult": {
+    "resourceCost": {
+      "untuned": 1,
+      "fury": 4
+    },
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-korgath-lord-of-ruin": {
+    "resourceCost": {
+      "untuned": 3,
+      "fury": 3
+    },
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-skarn-the-unchained": {
+    "resourceCost": {
+      "untuned": 3,
+      "fury": 3
+    },
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-banner-of-the-broken-fist": {
+    "resourceCost": {
+      "fury": 2
+    },
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-flesh-slinger-s-chant": {
+    "resourceCost": {
+      "untuned": 1,
+      "fury": 1
+    },
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-pit-of-the-frenzied": {
+    "resourceCost": {
+      "untuned": 2,
+      "fury": 1
+    },
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-warband-of-bloodfire": {
+    "resourceCost": {
+      "untuned": 2,
+      "fury": 3
+    },
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-flamebelcher-rig": {
+    "resourceCost": {
+      "untuned": 2
+    },
+    "frameFaction": "Neutral",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx",
+    "outfitCost": 1
+  },
+  "ashen-brute-drum-of-the-pit": {
+    "resourceCost": {
+      "untuned": 1,
+      "fury": 2
+    },
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-ring-of-the-ley": {
+    "resourceCost": {
+      "untuned": 1
+    },
+    "frameFaction": "Neutral",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-blood-cauldron": {
+    "resourceCost": {
+      "untuned": 1,
+      "fury": 2
+    },
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-frenzied-stampede": {
+    "resourceCost": {
+      "untuned": 2,
+      "fury": 1
+    },
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-fury-offering": {
+    "resourceCost": {
+      "untuned": 1,
+      "fury": 2
+    },
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-bloodfire-collapse": {
+    "resourceCost": {
+      "untuned": 2,
+      "fury": 3
+    },
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-korgath-s-call": {
+    "resourceCost": {
+      "untuned": 3,
+      "fury": 3
+    },
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-ashen-strike": {
+    "resourceCost": {
+      "fury": 1
+    },
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-bloodrush-gambit": {
+    "resourceCost": {
+      "untuned": 1,
+      "fury": 1
+    },
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-rites-of-ragefire": {
+    "resourceCost": {
+      "untuned": 1,
+      "fury": 1
+    },
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-skullsplitter-s-roar": {
+    "resourceCost": {
+      "untuned": 2,
+      "fury": 1
+    },
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-pit-digger-s-howl": {
+    "resourceCost": {
+      "fury": 1
+    },
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-ragekindle": {
+    "resourceCost": {
+      "fury": 2
+    },
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-fury-font": {
+    "resourceCost": {},
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-fury-pit": {
+    "resourceCost": {},
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-bloodforge-hollow": {
+    "resourceCost": {},
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-ashfang-ravine": {
+    "resourceCost": {},
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-the-maw-below": {
+    "resourceCost": {},
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-the-broken-fist-keep": {
+    "resourceCost": {},
+    "frameFaction": "Brute",
+    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  }
+}

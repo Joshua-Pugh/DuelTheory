@@ -1,0 +1,9 @@
+import {describe,it,expect} from 'vitest';
+import {GOAT_TABLETOP,ASHEN_TABLETOP,createTabletop,tabletopDispatch} from './CreatorTabletop';
+const cards=Array.from({length:10},(_,i)=>({cardId:String(i),name:`Card ${i}`,type:'Monster'}));
+describe('rules-neutral tabletop',()=>{
+ it('deals configured starting hands and keeps independent game definitions',()=>{const goat=createTabletop(GOAT_TABLETOP,[cards,cards]);const ashen=createTabletop(ASHEN_TABLETOP,[cards,cards]);expect(goat.piles['0:hand']).toHaveLength(5);expect(ashen.piles['0:hand']).toHaveLength(6);expect(goat.health).toEqual([8000,8000]);expect(ashen.health).toEqual([20,20]);});
+ it('moves cards by explicit action without mutating source and supports undo snapshots',()=>{const a=createTabletop(GOAT_TABLETOP,[cards,cards]);const id=a.piles['0:hand'][0];const b=tabletopDispatch(a,{type:'MOVE',instanceId:id,seat:0,zone:'monster'});expect(b.cards[id].faceDown).toBe(true);expect(b.piles['0:monster']).toContain(id);expect(a.piles['0:hand']).toContain(id);expect(b.verified).toBe(false);});
+ it('rejects invalid targets and full zones',()=>{let s=createTabletop(GOAT_TABLETOP,[cards,cards]);expect(()=>tabletopDispatch(s,{type:'MOVE',instanceId:'missing',seat:0,zone:'monster'})).toThrow();const ids=[...s.piles['0:hand']];for(const id of ids)s=tabletopDispatch(s,{type:'MOVE',instanceId:id,seat:0,zone:'monster'});expect(()=>tabletopDispatch(s,{type:'MOVE',instanceId:s.piles['0:deck'][0],seat:0,zone:'monster'})).toThrow('full');});
+ it('tracks counters and health independently of game rules',()=>{let s=createTabletop(ASHEN_TABLETOP,[cards,cards]);const id=s.piles['0:hand'][0];s=tabletopDispatch(s,{type:'COUNTER',instanceId:id,delta:2});s=tabletopDispatch(s,{type:'HEALTH',seat:0,delta:-3});expect(s.cards[id].counters).toBe(2);expect(s.health[0]).toBe(17);});
+});

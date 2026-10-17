@@ -1,0 +1,812 @@
+{
+  "schemaVersion": 1,
+  "coreCandidates": [],
+  "promoReview": [
+    {
+      "id": 23995346,
+      "name": "Blue-Eyes Ultimate Dragon",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "JMP",
+          "setCode": "JMP-EN005",
+          "setName": "Shonen Jump Vol. 4, Issue 1 promotional card"
+        },
+        {
+          "prefix": "JMP",
+          "setCode": "JMP-EN005",
+          "setName": "Ultimate Edition"
+        }
+      ]
+    },
+    {
+      "id": 79853073,
+      "name": "Cipher Soldier",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "TFK",
+          "setCode": "TFK-EN002",
+          "setName": "Yu-Gi-Oh! The Falsebound Kingdom promotional cards"
+        },
+        {
+          "prefix": "WC4",
+          "setCode": "WC4-002",
+          "setName": "Yu-Gi-Oh! World Championship Tournament 2004 promotional cards"
+        }
+      ]
+    },
+    {
+      "id": 38999506,
+      "name": "Cosmo Queen",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "MP1",
+          "setCode": "MP1-002",
+          "setName": "McDonald's Promotional Cards"
+        }
+      ]
+    },
+    {
+      "id": 80316585,
+      "name": "Cyber Harpie Lady",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "SP1",
+          "setCode": "SP1-EN001",
+          "setName": "Flaming Eternity Sneak Peek Participation Card"
+        }
+      ]
+    },
+    {
+      "id": 70074904,
+      "name": "D.D. Assailant",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "DBT",
+          "setCode": "DBT-EN002",
+          "setName": "Yu-Gi-Oh! Destiny Board Traveler promotional cards"
+        }
+      ]
+    },
+    {
+      "id": 50725996,
+      "name": "Dark Magician Knight",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "ROD",
+          "setCode": "ROD-EN001",
+          "setName": "Yu-Gi-Oh! Double Pack promotional cards"
+        },
+        {
+          "prefix": "ROD",
+          "setCode": "ROD-EN001",
+          "setName": "Yu-Gi-Oh! Reshef of Destruction promotional cards"
+        }
+      ]
+    },
+    {
+      "id": 28649820,
+      "name": "Embodiment of Apophis",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "SP1",
+          "setCode": "SP1-EN003",
+          "setName": "Cybernetic Revolution Sneak Peek Participation Card"
+        }
+      ]
+    },
+    {
+      "id": 43580269,
+      "name": "Emes the Infinity",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "DBT",
+          "setCode": "DBT-EN001",
+          "setName": "Yu-Gi-Oh! Destiny Board Traveler promotional cards"
+        }
+      ]
+    },
+    {
+      "id": 17484499,
+      "name": "Exchange of the Spirit",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "SP1",
+          "setCode": "SP1-EN004",
+          "setName": "Elemental Energy Sneak Peek Participation Card"
+        }
+      ]
+    },
+    {
+      "id": 45425051,
+      "name": "Fairy King Truesdale",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "TFK",
+          "setCode": "TFK-EN001",
+          "setName": "Yu-Gi-Oh! The Falsebound Kingdom promotional cards"
+        },
+        {
+          "prefix": "WC4",
+          "setCode": "WC4-001",
+          "setName": "Yu-Gi-Oh! World Championship Tournament 2004 promotional cards"
+        }
+      ]
+    },
+    {
+      "id": 68401546,
+      "name": "Fairy's Gift",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "MP1",
+          "setCode": "MP1-012",
+          "setName": "McDonald's Promotional Cards"
+        }
+      ]
+    },
+    {
+      "id": 89731911,
+      "name": "Familiar Knight",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "EP1",
+          "setCode": "EP1-EN006",
+          "setName": "Exclusive Pack"
+        }
+      ]
+    },
+    {
+      "id": 5628232,
+      "name": "Flying Penguin",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "MP1",
+          "setCode": "MP1-011",
+          "setName": "McDonald's Promotional Cards"
+        }
+      ]
+    },
+    {
+      "id": 4149689,
+      "name": "Goblin Fan",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "TFK",
+          "setCode": "TFK-003",
+          "setName": "Yu-Gi-Oh! The Falsebound Kingdom promotional cards"
+        }
+      ]
+    },
+    {
+      "id": 67959180,
+      "name": "Goddess of Whim",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "MP1",
+          "setCode": "MP1-003",
+          "setName": "McDonald's Promotional Cards"
+        }
+      ]
+    },
+    {
+      "id": 74137509,
+      "name": "Graceful Dice",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "EDS",
+          "setCode": "EDS-002",
+          "setName": "Yu-Gi-Oh! The Eternal Duelist Soul promotional cards"
+        },
+        {
+          "prefix": "TSC",
+          "setCode": "TSC-E002",
+          "setName": "Yu-Gi-Oh! The Sacred Cards promotional cards"
+        }
+      ]
+    },
+    {
+      "id": 18144507,
+      "name": "Harpie's Feather Duster",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "WC4",
+          "setCode": "WC4-E003",
+          "setName": "Yu-Gi-Oh! World Championship Tournament 2004 promotional cards"
+        },
+        {
+          "prefix": "SDD",
+          "setCode": "SDD-003",
+          "setName": "Yu-Gi-Oh! Worldwide Edition: Stairway to the Destined Duel promotional cards"
+        }
+      ]
+    },
+    {
+      "id": 52040216,
+      "name": "Harpie's Pet Dragon",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "FMR",
+          "setCode": "FMR-002",
+          "setName": "Yu-Gi-Oh! Forbidden Memories promotional cards"
+        }
+      ]
+    },
+    {
+      "id": 17185260,
+      "name": "Inferno Hammer",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "CMC",
+          "setCode": "CMC-EN002",
+          "setName": "Yu-Gi-Oh! Capsule Monster Coliseum promotional cards"
+        }
+      ]
+    },
+    {
+      "id": 14391920,
+      "name": "Inferno Tempest",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "EP1",
+          "setCode": "EP1-EN007",
+          "setName": "Exclusive Pack"
+        }
+      ]
+    },
+    {
+      "id": 34627841,
+      "name": "Kaibaman",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "WC5",
+          "setCode": "WC5-EN002",
+          "setName": "Yu-Gi-Oh! 7 Trials to Glory: World Championship Tournament 2005 promotional cards"
+        }
+      ]
+    },
+    {
+      "id": 87210505,
+      "name": "Knight's Title",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "ROD",
+          "setCode": "ROD-EN002",
+          "setName": "Yu-Gi-Oh! Double Pack promotional cards"
+        },
+        {
+          "prefix": "ROD",
+          "setCode": "ROD-EN002",
+          "setName": "Yu-Gi-Oh! Reshef of Destruction promotional cards"
+        }
+      ]
+    },
+    {
+      "id": 7562372,
+      "name": "Megasonic Eye",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "MP1",
+          "setCode": "MP1-008",
+          "setName": "McDonald's Promotional Cards"
+        }
+      ]
+    },
+    {
+      "id": 48642904,
+      "name": "Mesmeric Control",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "DOD",
+          "setCode": "DOD-EN001",
+          "setName": "Yu-Gi-Oh! The Dawn of Destiny promotional cards"
+        }
+      ]
+    },
+    {
+      "id": 68540059,
+      "name": "Metalmorph",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "FMR",
+          "setCode": "FMR-003",
+          "setName": "Yu-Gi-Oh! Forbidden Memories promotional cards"
+        }
+      ]
+    },
+    {
+      "id": 50705071,
+      "name": "Metalzoa",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "TFK",
+          "setCode": "TFK-002",
+          "setName": "Yu-Gi-Oh! The Falsebound Kingdom promotional cards"
+        }
+      ]
+    },
+    {
+      "id": 32012841,
+      "name": "Millennium Shield",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "MP1",
+          "setCode": "MP1-001",
+          "setName": "McDonald's Promotional Cards"
+        }
+      ]
+    },
+    {
+      "id": 14315573,
+      "name": "Negate Attack",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "TSC",
+          "setCode": "TSC-003",
+          "setName": "Yu-Gi-Oh! The Sacred Cards promotional cards"
+        }
+      ]
+    },
+    {
+      "id": 52624755,
+      "name": "Peten the Dark Clown",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "EP1",
+          "setCode": "EP1-EN005",
+          "setName": "Exclusive Pack"
+        }
+      ]
+    },
+    {
+      "id": 53569894,
+      "name": "Pyramid of Light",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "MOV",
+          "setCode": "MOV-EN004",
+          "setName": "Movie Pack"
+        }
+      ]
+    },
+    {
+      "id": 25236056,
+      "name": "Rare Metal Dragon",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "EP1",
+          "setCode": "EP1-EN004",
+          "setName": "Exclusive Pack"
+        }
+      ]
+    },
+    {
+      "id": 64335805,
+      "name": "Red-Eyes Black Metal Dragon",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "FMR",
+          "setCode": "FMR-001",
+          "setName": "Yu-Gi-Oh! Forbidden Memories promotional cards"
+        }
+      ]
+    },
+    {
+      "id": 27174286,
+      "name": "Return from the Different Dimension",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "EP1",
+          "setCode": "EP1-EN008",
+          "setName": "Exclusive Pack"
+        }
+      ]
+    },
+    {
+      "id": 34016756,
+      "name": "Riryoku",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "TSC",
+          "setCode": "TSC-002",
+          "setName": "Yu-Gi-Oh! The Sacred Cards promotional cards"
+        }
+      ]
+    },
+    {
+      "id": 13604200,
+      "name": "Sage's Stone",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "ROD",
+          "setCode": "ROD-EN003",
+          "setName": "Yu-Gi-Oh! Reshef of Destruction promotional cards"
+        }
+      ]
+    },
+    {
+      "id": 32268901,
+      "name": "Salamandra",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "DDS",
+          "setCode": "DDS-006",
+          "setName": "Yu-Gi-Oh! Dark Duel Stories promotional cards"
+        },
+        {
+          "prefix": "SDD",
+          "setCode": "SDD-E003",
+          "setName": "Yu-Gi-Oh! Worldwide Edition: Stairway to the Destined Duel promotional cards"
+        }
+      ]
+    },
+    {
+      "id": 97809599,
+      "name": "Seal of the Ancients",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "PCK",
+          "setCode": "PCK-003",
+          "setName": "Yu-Gi-Oh! Power of Chaos: Kaiba the Revenge promotional cards"
+        },
+        {
+          "prefix": "PCK",
+          "setCode": "PCK-E003",
+          "setName": "Yu-Gi-Oh! Power of Chaos: Kaiba the Revenge promotional cards"
+        }
+      ]
+    },
+    {
+      "id": 22537443,
+      "name": "Sebek's Blessing",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "PCJ",
+          "setCode": "PCJ-EN002",
+          "setName": "Yu-Gi-Oh! Power of Chaos: Joey the Passion promotional cards"
+        }
+      ]
+    },
+    {
+      "id": 37267041,
+      "name": "Silent Swordsman LV7",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "WC5",
+          "setCode": "WC5-EN001",
+          "setName": "Yu-Gi-Oh! 7 Trials to Glory: World Championship Tournament 2005 promotional cards"
+        }
+      ]
+    },
+    {
+      "id": 126218,
+      "name": "Skull Dice",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "EDS",
+          "setCode": "EDS-003",
+          "setName": "Yu-Gi-Oh! The Eternal Duelist Soul promotional cards"
+        },
+        {
+          "prefix": "TSC",
+          "setCode": "TSC-E003",
+          "setName": "Yu-Gi-Oh! The Sacred Cards promotional cards"
+        }
+      ]
+    },
+    {
+      "id": 68638985,
+      "name": "Slime Toad",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "MP1",
+          "setCode": "MP1-004",
+          "setName": "McDonald's Promotional Cards"
+        }
+      ]
+    },
+    {
+      "id": 88619463,
+      "name": "Sorcerer of Dark Magic",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "MOV",
+          "setCode": "MOV-EN002",
+          "setName": "Movie Pack"
+        }
+      ]
+    },
+    {
+      "id": 61405855,
+      "name": "Sword of Dragon's Soul",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "PCJ",
+          "setCode": "PCJ-EN003",
+          "setName": "Yu-Gi-Oh! Power of Chaos: Joey the Passion promotional cards"
+        }
+      ]
+    },
+    {
+      "id": 44073668,
+      "name": "Takriminos",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "MP1",
+          "setCode": "MP1-006",
+          "setName": "McDonald's Promotional Cards"
+        }
+      ]
+    },
+    {
+      "id": 16469012,
+      "name": "Teva",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "CMC",
+          "setCode": "CMC-EN003",
+          "setName": "Yu-Gi-Oh! Capsule Monster Coliseum promotional cards"
+        }
+      ]
+    },
+    {
+      "id": 87997872,
+      "name": "Theinen the Great Sphinx",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "EP1",
+          "setCode": "EP1-EN001",
+          "setName": "Exclusive Pack"
+        }
+      ]
+    },
+    {
+      "id": 63391643,
+      "name": "Thousand Knives",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "PCY",
+          "setCode": "PCY-003",
+          "setName": "Yu-Gi-Oh! Power of Chaos: Yugi the Destiny promotional cards"
+        },
+        {
+          "prefix": "PCY",
+          "setCode": "PCY-E003",
+          "setName": "Yu-Gi-Oh! Power of Chaos: Yugi the Destiny promotional cards"
+        }
+      ]
+    },
+    {
+      "id": 33734439,
+      "name": "Three-Legged Zombies",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "MP1",
+          "setCode": "MP1-010",
+          "setName": "McDonald's Promotional Cards"
+        }
+      ]
+    },
+    {
+      "id": 72929454,
+      "name": "Turtle Bird",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "MP1",
+          "setCode": "MP1-014",
+          "setName": "McDonald's Promotional Cards"
+        }
+      ]
+    },
+    {
+      "id": 82035781,
+      "name": "Twinheaded Beast",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "DBT",
+          "setCode": "DBT-EN003",
+          "setName": "Yu-Gi-Oh! Destiny Board Traveler promotional cards"
+        }
+      ]
+    },
+    {
+      "id": 48649353,
+      "name": "Ushi Oni",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "MP1",
+          "setCode": "MP1-013",
+          "setName": "McDonald's Promotional Cards"
+        }
+      ]
+    },
+    {
+      "id": 87774234,
+      "name": "Watapon",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "MOV",
+          "setCode": "MOV-EN003",
+          "setName": "Movie Pack"
+        }
+      ]
+    },
+    {
+      "id": 77754944,
+      "name": "Widespread Ruin",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "DOD",
+          "setCode": "DOD-003",
+          "setName": "Yu-Gi-Oh! The Dawn of Destiny promotional cards"
+        },
+        {
+          "prefix": "DOD",
+          "setCode": "DOD-EN003",
+          "setName": "Yu-Gi-Oh! The Dawn of Destiny promotional cards"
+        }
+      ]
+    },
+    {
+      "id": 59744639,
+      "name": "Windstorm of Etaqua",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "PCY",
+          "setCode": "PCY-001",
+          "setName": "Yu-Gi-Oh! Power of Chaos: Yugi the Destiny promotional cards"
+        },
+        {
+          "prefix": "PCY",
+          "setCode": "PCY-E001",
+          "setName": "Yu-Gi-Oh! Power of Chaos: Yugi the Destiny promotional cards"
+        }
+      ]
+    },
+    {
+      "id": 70345785,
+      "name": "Yamadron",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "MP1",
+          "setCode": "MP1-009",
+          "setName": "McDonald's Promotional Cards"
+        }
+      ]
+    },
+    {
+      "id": 71280811,
+      "name": "Yaranzo",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "MP1",
+          "setCode": "MP1-005",
+          "setName": "McDonald's Promotional Cards"
+        }
+      ]
+    },
+    {
+      "id": 24311372,
+      "name": "Zoa",
+      "status": "promo-review",
+      "reason": "Promotion: requires release-date and region confirmation",
+      "proof": [
+        {
+          "prefix": "TFK",
+          "setCode": "TFK-001",
+          "setName": "Yu-Gi-Oh! The Falsebound Kingdom promotional cards"
+        }
+      ]
+    }
+  ]
+}

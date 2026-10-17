@@ -1,0 +1,233 @@
+{
+  "runAt": "2026-10-16T01:54:23.358Z",
+  "existing": 1654,
+  "manifest": 55,
+  "added": [
+    {
+      "id": 79853073,
+      "name": "Cipher Soldier"
+    },
+    {
+      "id": 38999506,
+      "name": "Cosmo Queen"
+    },
+    {
+      "id": 80316585,
+      "name": "Cyber Harpie Lady"
+    },
+    {
+      "id": 70074904,
+      "name": "D.D. Assailant"
+    },
+    {
+      "id": 50725996,
+      "name": "Dark Magician Knight"
+    },
+    {
+      "id": 28649820,
+      "name": "Embodiment of Apophis"
+    },
+    {
+      "id": 43580269,
+      "name": "Emes the Infinity"
+    },
+    {
+      "id": 45425051,
+      "name": "Fairy King Truesdale"
+    },
+    {
+      "id": 68401546,
+      "name": "Fairy's Gift"
+    },
+    {
+      "id": 89731911,
+      "name": "Familiar Knight"
+    },
+    {
+      "id": 5628232,
+      "name": "Flying Penguin"
+    },
+    {
+      "id": 4149689,
+      "name": "Goblin Fan"
+    },
+    {
+      "id": 67959180,
+      "name": "Goddess of Whim"
+    },
+    {
+      "id": 74137509,
+      "name": "Graceful Dice"
+    },
+    {
+      "id": 18144507,
+      "name": "Harpie's Feather Duster"
+    },
+    {
+      "id": 52040216,
+      "name": "Harpie's Pet Dragon"
+    },
+    {
+      "id": 17185260,
+      "name": "Inferno Hammer"
+    },
+    {
+      "id": 14391920,
+      "name": "Inferno Tempest"
+    },
+    {
+      "id": 34627841,
+      "name": "Kaibaman"
+    },
+    {
+      "id": 87210505,
+      "name": "Knight's Title"
+    },
+    {
+      "id": 7562372,
+      "name": "Megasonic Eye"
+    },
+    {
+      "id": 48642904,
+      "name": "Mesmeric Control"
+    },
+    {
+      "id": 68540059,
+      "name": "Metalmorph"
+    },
+    {
+      "id": 50705071,
+      "name": "Metalzoa"
+    },
+    {
+      "id": 32012841,
+      "name": "Millennium Shield"
+    },
+    {
+      "id": 14315573,
+      "name": "Negate Attack"
+    },
+    {
+      "id": 52624755,
+      "name": "Peten the Dark Clown"
+    },
+    {
+      "id": 53569894,
+      "name": "Pyramid of Light"
+    },
+    {
+      "id": 25236056,
+      "name": "Rare Metal Dragon"
+    },
+    {
+      "id": 64335805,
+      "name": "Red-Eyes Black Metal Dragon"
+    },
+    {
+      "id": 27174286,
+      "name": "Return from the Different Dimension"
+    },
+    {
+      "id": 34016756,
+      "name": "Riryoku"
+    },
+    {
+      "id": 13604200,
+      "name": "Sage's Stone"
+    },
+    {
+      "id": 32268901,
+      "name": "Salamandra"
+    },
+    {
+      "id": 97809599,
+      "name": "Seal of the Ancients"
+    },
+    {
+      "id": 22537443,
+      "name": "Sebek's Blessing"
+    },
+    {
+      "id": 37267041,
+      "name": "Silent Swordsman LV7"
+    },
+    {
+      "id": 126218,
+      "name": "Skull Dice"
+    },
+    {
+      "id": 68638985,
+      "name": "Slime Toad"
+    },
+    {
+      "id": 88619463,
+      "name": "Sorcerer of Dark Magic"
+    },
+    {
+      "id": 61405855,
+      "name": "Sword of Dragon's Soul"
+    },
+    {
+      "id": 44073668,
+      "name": "Takriminos"
+    },
+    {
+      "id": 16469012,
+      "name": "Teva"
+    },
+    {
+      "id": 87997872,
+      "name": "Theinen the Great Sphinx"
+    },
+    {
+      "id": 63391643,
+      "name": "Thousand Knives"
+    },
+    {
+      "id": 33734439,
+      "name": "Three-Legged Zombies"
+    },
+    {
+      "id": 72929454,
+      "name": "Turtle Bird"
+    },
+    {
+      "id": 82035781,
+      "name": "Twinheaded Beast"
+    },
+    {
+      "id": 48649353,
+      "name": "Ushi Oni"
+    },
+    {
+      "id": 87774234,
+      "name": "Watapon"
+    },
+    {
+      "id": 77754944,
+      "name": "Widespread Ruin"
+    },
+    {
+      "id": 59744639,
+      "name": "Windstorm of Etaqua"
+    },
+    {
+      "id": 70345785,
+      "name": "Yamadron"
+    },
+    {
+      "id": 71280811,
+      "name": "Yaranzo"
+    },
+    {
+      "id": 24311372,
+      "name": "Zoa"
+    }
+  ],
+  "alreadyPresent": 0,
+  "newThumbnails": 55,
+  "newFullImages": 55,
+  "unresolved": [],
+  "imageFailures": [],
+  "scope": "Targeted manifest only; NOT a complete GOAT historical pool verification."
+}

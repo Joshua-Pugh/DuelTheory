@@ -1,0 +1,13 @@
+{
+  "generatedAt": "2026-10-16T01:40:38.397Z",
+  "source": "YGOPRODeck cardinfo API; historical family list from GoatFormat.com",
+  "method": "CANDIDATE reconciliation only; core prefix does not prove date or legal status; promos always need review",
+  "catalogCount": 1654,
+  "apiCards": 14615,
+  "coreCandidates": 1571,
+  "promoCandidates": 130,
+  "missingCoreCandidates": 0,
+  "missingPromoCandidates": 57,
+  "existingOutsideMatchedFamilies": 10,
+  "countIsNotFinal": true
+}

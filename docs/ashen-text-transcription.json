@@ -1,0 +1,548 @@
+{
+  "ashen-noble-shieldbearer-noble": {
+    "effectText": "When Shieldbearer Noble enters the frontline, Refine 1 (Draw 1 card, then place 1 card from your hand on the bottom of your deck.)",
+    "flavorText": "",
+    "subtype": "Unit — Noble Soldier",
+    "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-spearman-of-the-crown": {
+    "effectText": "At the start of your turn, Plan 1.\nWhenever you Plan, Spearman of the Crown gets Fortify 1.",
+    "flavorText": "",
+    "subtype": "Unit — Noble Soldier",
+    "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-court-scribe": {
+    "effectText": "When Court Scribe enters the frontline, Plan 1 (Look at the top card of your deck. You may move that card to the bottom of your deck.)",
+    "flavorText": "",
+    "subtype": "Unit — Noble Advisor",
+    "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-banner-guard": {
+    "effectText": "Other Nobles you control gain +1A/+1D, for as long as Banner Guard remains on the frontline.",
+    "flavorText": "",
+    "subtype": "Unit — Noble Soldier",
+    "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-junior-tactician": {
+    "effectText": "When Junior Tactician enters the frontline, Plan 1.\nIf you control a Noble Advisor, Refine 1 instead.\nExhaust: The next time you Plan this turn, you may have target Noble gain Fortify 1.",
+    "flavorText": "",
+    "subtype": "Unit — Noble Aide",
+    "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-crown-archer": {
+    "effectText": "Ranged (Cannot be blocked by units without Ranged. Can block Soar Units.)\nWhenever you Plan, Crown Archer deals 1 damage to target Command Station.",
+    "flavorText": "",
+    "subtype": "Unit — Noble Archer",
+    "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-watchtower-scout": {
+    "effectText": "Ranged\nWhen Watchtower Scout enters the frontline, Plan 1.\nWhenever you Fortify a Noble you control, draw 1 card.",
+    "flavorText": "",
+    "subtype": "Unit — Noble Archer",
+    "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-court-strategist": {
+    "effectText": "Command\nWhen Court Strategist enters the frontline, target Noble gets Fortify 1.\nExhaust and pay {Oath} : Plan 1, then draw 1 card.",
+    "flavorText": "",
+    "subtype": "Unit — Noble Advisor",
+    "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-royal-guard": {
+    "effectText": "At the start of your turn, Refine 1.\nWhenever you Refine, Royal Guard gets +1A/+0D until end of turn.",
+    "flavorText": "",
+    "subtype": "Unit — Noble Soldier",
+    "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-ballista-crew": {
+    "effectText": "Siege (Deals 2x damage to Command Stations and cannot block Soar or Ranged units.)",
+    "flavorText": "",
+    "subtype": "Unit — Noble Siege Engine",
+    "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-griffin-knight-of-ashenfield": {
+    "effectText": "Soar\nWhen Griffin Knight of Ashenfield enters the frontline, Refine 2 (Draw 2 cards, then put 2 cards from your hand on the bottom of your deck.)",
+    "flavorText": "",
+    "subtype": "Unit — Noble Griffin Knight",
+    "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-archivist-of-the-crown": {
+    "effectText": "Whenever you place a card on the bottom of your deck, add {Untuned} to your Ley Basin.",
+    "flavorText": "",
+    "subtype": "Unit — Noble Advisor",
+    "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-high-strategist": {
+    "effectText": "Command\nWhen High Strategist enters the frontline, Plan 3.\nExhaust: Choose one:\n-Plan 2, then draw a card.\n-Add {Oath} to your Ley Basin.",
+    "flavorText": "",
+    "subtype": "Unit — Noble Advisor",
+    "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-ashenfield-war-ram": {
+    "effectText": "Siege\nWhenever Ashenfield War Ram deals damage to a Command Station, each Noble your control gets Fortify 1.",
+    "flavorText": "",
+    "subtype": "Unit — Noble Siege Engine",
+    "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-griffin-lancer": {
+    "effectText": "Soar\nWhenever Griffin Lancer deals damage to an opponent’s Command Station, target Noble you control gets Fortify 1.",
+    "flavorText": "",
+    "subtype": "Unit — Noble Griffin Knight",
+    "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-crown-s-cavalier": {
+    "effectText": "Duelist’s Edge, Soar\nWhenever you Refine for the first time each turn, Crown’s Cavalier deals double damage to Command Stations this turn.",
+    "flavorText": "",
+    "subtype": "Unit — Noble Pegasus Knight",
+    "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-royal-longbowman": {
+    "effectText": "Ranged\nWhen Royal Longbowman enters the frontline, Refine 2. Whenever you Refine, Royal Longbowman deals 1 damage to target Command Station.",
+    "flavorText": "",
+    "subtype": "Unit — Noble Archer",
+    "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-garrett-of-ashenfield": {
+    "effectText": "Command\nWhen Garrett of Ashenfield enters the frontline, all Nobles you control get Fortify 1.\nWhenever a Noble you control deals damage to a Command Station, Garrett of Ashenfield deals 1 damage to any target.",
+    "flavorText": "",
+    "subtype": "Legendary Unit — Noble Captain",
+    "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-seraphine-royal-advisor": {
+    "effectText": "Command\nAt the start of your turn, if you Planned or Refined last turn, you may deploy a Noble with cost 5 or less from your hand without paying its cost.",
+    "flavorText": "",
+    "subtype": "Legendary Unit — Noble Advisor",
+    "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-royal-crusher": {
+    "effectText": "Siege, Pierce\nWhen Royal Crusher enters the frontline, up to three Nobles you control get Fortify 2.",
+    "flavorText": "",
+    "subtype": "Legendary Unit — Noble Siege Engine",
+    "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-rune-of-foresight": {
+    "effectText": "Pay {Oath} : Plan 2.\nWhenever you place a card on the bottom of your deck, deal 1 damage to target Command Station.",
+    "flavorText": "",
+    "subtype": "Rune",
+    "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-rune-of-clarity": {
+    "effectText": "Pay {Oath} : Refine 2.\nWhenever you draw a card, deal 1 damage to target Command Station.",
+    "flavorText": "",
+    "subtype": "Rune",
+    "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-rune-of-the-banner": {
+    "effectText": "When Rune of the Banner enters the frontline, choose one:\nRally the Ranks: Nobles you control get +1A/+1D.\nHold the line: Whenever you Plan, target Noble you control gets Fortify 1.",
+    "flavorText": "",
+    "subtype": "Rune",
+    "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-rune-of-the-crown": {
+    "effectText": "When Rune of the Crown enters the frontline, Nobles you control get Fortify 1.\nWhenever you Fortify a Noble, Rune of the Crown deals 2 damage to target Command Station.",
+    "flavorText": "",
+    "subtype": "Legendary Rune",
+    "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-ring-of-the-ley": {
+    "effectText": "Exhaust: Add {Untuned} {Untuned} to your Ley Basin.",
+    "flavorText": "“A crown for none, a curse for all who wear it.”",
+    "subtype": "Legendary Relic",
+    "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-ashenfield-lance": {
+    "effectText": "Outfit ( {Untuned} ): Attach to a unit you control.\nOutfitted unit gets +2A/+0D.\nWhen outfitted unit attacks, it gains Siege until the end of the turn.",
+    "flavorText": "",
+    "subtype": "Relic — Weapon",
+    "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-oathfire-decree": {
+    "effectText": "Exhaust: Target Noble gets Fortify 1.\nWhenever you Fortify a Noble, you may pay 1 {Oath} . If you do, Oathfire Decree deals 1 damage to any target.",
+    "flavorText": "",
+    "subtype": "Relic",
+    "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-crown-of-dominion": {
+    "effectText": "Whenever Plan, Refine, or Fortify, place a Dominion counter on Crown of Dominion.\nOnce per turn, you may remove a counter to Nullify an enemy action.\nWhile Crown of Dominion has 5 or more counters on it, units you control have Aegis.",
+    "flavorText": "",
+    "subtype": "Legendary Relic",
+    "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-royal-decree": {
+    "effectText": "Choose one:\n-Destroy target unit with Attack 2 or less.\n-Return target Relic to its owner’s hand.",
+    "flavorText": "",
+    "subtype": "Strategy",
+    "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-purge-the-unworthy": {
+    "effectText": "Destroy target Unit or Rune.\nIf you Planned or Refined this turn, target Noble you control gets Fortify 1.",
+    "flavorText": "",
+    "subtype": "Strategy",
+    "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-judgment-of-the-crown": {
+    "effectText": "Choose one:\n-Destroy up to two non-Legendary Units.\n-Destroy target Relic or Rune.\nIf you Refined this turn, you may do both instead.",
+    "flavorText": "",
+    "subtype": "Strategy",
+    "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-order-s-end": {
+    "effectText": "Choose one:\n-Banish all enemy Units with Defense 3 or less.\n-Destroy all Relics or Runes controlled by target opponent.",
+    "flavorText": "",
+    "subtype": "Strategy",
+    "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-mandate-of-dominion": {
+    "effectText": "Destroy all non-Noble Units.\nDeal damage equal to the number of Units destroyed this way divided as you choose among enemy Command Stations.\nAll Nobles you control get Fortify 1.",
+    "flavorText": "",
+    "subtype": "Legendary Strategy",
+    "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-law-of-precedence": {
+    "effectText": "Choose one:\n-Target Unit gets +0A/+3D until end of turn.\n-Nullify target Tactic.",
+    "flavorText": "",
+    "subtype": "Tactic",
+    "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-crown-s-verdict": {
+    "effectText": "Deal 2 damage to target Unit.\nIf you have Planned or Refined this turn, deal 3 damage to any target instead.",
+    "flavorText": "“When the Crown speaks, even flame obeys.”",
+    "subtype": "Legendary Tactic",
+    "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-throne-s-will": {
+    "effectText": "Nullify target Action.",
+    "flavorText": "",
+    "subtype": "Tactic",
+    "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-enforce-the-law": {
+    "effectText": "Choose one:\n-Place target Unit on the bottom of its owner’s deck.\n-Destroy target Relic or Rune.\nIf you fortified this turn, do both instead.",
+    "flavorText": "",
+    "subtype": "Tactic",
+    "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-the-king-s-will": {
+    "effectText": "Choose up to two:\n-Destroy all Units.\n-Destroy all Relics.\n-Destroy all Runes.\n-Nullify target Action or Effect.\nIf you Planned, Refined, and Fortified this turn, resolve all four instead.",
+    "flavorText": "",
+    "subtype": "Legendary Tactic",
+    "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-oath-font": {
+    "effectText": "Burn – Flip this card facedown: Add {Oath} (Oath Essence) to your Ley Basin.\n(Essence fades at end of turn.)",
+    "flavorText": "“Oaths carve their mark in the ley – as deep as blood.”",
+    "subtype": "Basic Ley Font — Oath",
+    "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-oath-sanctum": {
+    "effectText": "When Oath Sanctum enters play, heal 1 HP to your Command Station.\nBurn (flip facedown): Add {Oath} (Oath Essence) to your Ley Basin.\n(Essence fades at end of turn.)",
+    "flavorText": "“Every vow leaves a scar – and some can still bleed.”",
+    "subtype": "Advanced Ley Font — Oath",
+    "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-oath-forge": {
+    "effectText": "When Oath Forge enters play, if you control a Fortified Noble, heal 2 HP to your Command Station.\nBurn (flip facedown): Add {Oath} (Oath Essence) to your Ley Basin.\n(Essence fades at end of turn.)",
+    "flavorText": "“Where faith defends, faith endures.”",
+    "subtype": "Advanced Ley Font — Oath",
+    "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-verdant-veil-fount": {
+    "effectText": "Verdant Veil Font enters play spent.\nBurn (flip facedown): Add {Untuned} (Untuned Essence) to your Ley Basin.\nPay {Untuned} {Untuned} (2 Essence of any type): Target unit gains Evade until end of turn. Active only once per turn.",
+    "flavorText": "“Walk where shadows refuse to follow.”",
+    "subtype": "Advanced Ley Font — Untuned",
+    "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-noble-the-crown-s-bastion": {
+    "effectText": "HP: 20\nPassive – Law of Order:\nWhenever you Plan or Refine, choose one:\n-Draw 1 card.\n-Add {Untuned} to your Ley Basin.\nIf you have both Planned and Refined this turn, target Noble you control gets Fortify 1 at the end of your turn.",
+    "flavorText": "“By stone, by steel, by solemn vow – the Crown endures.”",
+    "subtype": "Command Station",
+    "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+  },
+  "ashen-brute-frenzied-grunt": {
+    "effectText": "Charge (Frenzied Grunt may attack the same turn it enters the Frontline. Ignores deployment fatigue.)",
+    "flavorText": "",
+    "subtype": "Unit — Brute Warrior",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-bloodfang-raider": {
+    "effectText": "When Bloodfang Raider enters the Front Line, create a 1A/1D frenzied brute token.\nExhaust: Draw 1 card, then discard 1 card.",
+    "flavorText": "",
+    "subtype": "Unit — Brute Raider",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-bloodpit-initiate": {
+    "effectText": "Charge\nWhen Bloodpit Initiate enters the frontline, create a 1A/1D frenzied brute token.",
+    "flavorText": "",
+    "subtype": "Unit — Brute Berserker",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-raging-mauler": {
+    "effectText": "Rage (When Raging Mauler attacks, it gains +2A/+0D until end of turn for each other attacking unit you control of the same type.)",
+    "flavorText": "",
+    "subtype": "Unit — Brute Warrior",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-ashen-warhawk": {
+    "effectText": "Charge, Soar (Cannot be blocked by units without Soar or Ranged.)",
+    "flavorText": "",
+    "subtype": "Unit — Brute Warbeast",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-rubble-flinger": {
+    "effectText": "Ranged (Cannot be blocked by units without Ranged. Can block Soar Units.)\nWhen Rubble Flinger enters the Front Line, it deals 1 damage to target Command Station.",
+    "flavorText": "",
+    "subtype": "Unit — Brute Slinger",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-savage-warcaller": {
+    "effectText": "Soar\nWhen a Brute you control dies, Savage Warcaller gains +2A/+0D until end of turn and you draw 1 card.",
+    "flavorText": "",
+    "subtype": "Unit — Brute Shaman",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-feral-axebreaker": {
+    "effectText": "Exhaust and pay {Fury} : Create a 1A/1D frenzied brute token.",
+    "flavorText": "",
+    "subtype": "Unit — Brute Berserker",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-battlefield-howler": {
+    "effectText": "Whenever Battlefield Howler attacks, create a 1A/1D frenzied brute token exhausted and attacking. (Place a fatigue token on it.)",
+    "flavorText": "",
+    "subtype": "Unit — Brute Berserker",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-crude-spearthrower": {
+    "effectText": "Ranged\nSoar Units blocked by Crude Spearthrower, take 1 damage before combat damage is delt.",
+    "flavorText": "",
+    "subtype": "Unit — Brute Hunter",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-warhowl-instigator": {
+    "effectText": "Whenever a non-token Brute enters the frontline under your, draw a card.",
+    "flavorText": "",
+    "subtype": "Unit — Brute Raider",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-warband-overseer": {
+    "effectText": "Charge\nOther Brutes you control get +1A/+1D and gain Charge.",
+    "flavorText": "",
+    "subtype": "Unit — Brute Captain",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-bonespike-hurler": {
+    "effectText": "Ranged\nExhaust and sacrifice a Brute: Bonespike Hurler deals 2 damage to any target.\nWhen Bonespike Hurler dies, deal 2 damage to target Command Station.",
+    "flavorText": "",
+    "subtype": "Unit — Brute Hunter",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-howling-skyterror": {
+    "effectText": "Charge, Soar",
+    "flavorText": "",
+    "subtype": "Unit — Brute Warbeast",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-pit-sired-warmonger": {
+    "effectText": "When a non-token Brute enters the frontline under your control, create a 1A/1D frenzied brute token.",
+    "flavorText": "“Each warrior brings his own madness.”",
+    "subtype": "Unit — Brute Warchief",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-warchanter-savage": {
+    "effectText": "Ranged\nWhenever a Brute you control dies, Warchanter Savage gains +1A/+0D until end of turn.",
+    "flavorText": "",
+    "subtype": "Unit — Brute Shaman",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-stonehide-juggernaut": {
+    "effectText": "Charge, Reckless, Siege",
+    "flavorText": "",
+    "subtype": "Unit — Brute Siege Engine",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-skyclaw-raider": {
+    "effectText": "Charge, Soar\nWhen Skyclaw Raider enters the frontline, it deals 1 damage to target Command Station.\nWhenever Skyclaw Raider attacks, if you control another attacking Brute, it gains +1A/+0D until end of turn.",
+    "flavorText": "",
+    "subtype": "Unit — Brute Marauder",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-ironhide-catapult": {
+    "effectText": "Siege(Deals 2x damage to Command Stations and cannot block Soar or Ranged units.)",
+    "flavorText": "",
+    "subtype": "Unit — Brute Siege Engine",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-siegebreaker-ram": {
+    "effectText": "Siege, Pierce,\nRelentless (When this unit is destroyed, deal damage equal to its Attack to any target.)",
+    "flavorText": "",
+    "subtype": "Unit — Brute Siege Engine",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-ashclaw-skyreaver": {
+    "effectText": "Soar\nWhen Ashclaw Skyreaver enters the Front Line, create three 1A/1D frenzied brute tokens.\nPay 1{Untuned} and sacrifice a Brute: deal 1 damage to ant target.",
+    "flavorText": "",
+    "subtype": "Unit — Brute Warbeast",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-bonecrusher-catapult": {
+    "effectText": "Siege\nWhenever another Brute you control dies, Bonecrusher Catapult gets +1A/+0D until end of turn.",
+    "flavorText": "",
+    "subtype": "Unit — Brute Siege Engine",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-korgath-lord-of-ruin": {
+    "effectText": "Charge, Relentless\nWhenever a Brute you control dies, Kordath, Lord of Ruin deals 1 damage to each Command Station.",
+    "flavorText": "",
+    "subtype": "Legendary Unit — Brute Warlord",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-skarn-the-unchained": {
+    "effectText": "Charge, Pierce, Reckless\nWhenever Skarn the Unchained attacks, create 2 1A/1D frenzied brute tokens exhausted and attacking. (Place a fatigue token on each one.)",
+    "flavorText": "",
+    "subtype": "Legendary Unit — Brute Titan",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-banner-of-the-broken-fist": {
+    "effectText": "Brutes you control have Charge.",
+    "flavorText": "",
+    "subtype": "Rune",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-flesh-slinger-s-chant": {
+    "effectText": "Sacrifice a Brute: deal 2 damage to target Command Station.",
+    "flavorText": "",
+    "subtype": "Rune",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-pit-of-the-frenzied": {
+    "effectText": "At the start of your turn, create a 1A/1D frenzied brute token.\nIf you control 5 or more Brutes, create two tokens instead.",
+    "flavorText": "",
+    "subtype": "Rune",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-warband-of-bloodfire": {
+    "effectText": "Brutes you control get +1A/+1D for each Brute on the frontline.\nWhenever a Brute enters the frontline under your control, put a Fury counter on Warband of Bloodfire.\nExhaust and remove 3 Fury counters: All Brutes gain Charge and Pierce until end of turn.",
+    "flavorText": "",
+    "subtype": "Legendary Relic — Banner of Fury",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-flamebelcher-rig": {
+    "effectText": "Outfit (1{Untuned}): Attach to a unit you control.\nOutfitted unit gains Ranged and, Exhaust and Sacrifice a Unit: Deal 2 damage to any target.",
+    "flavorText": "“The more it feeds, the louder it screams.”",
+    "subtype": "Relic — Siege Weapon",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-drum-of-the-pit": {
+    "effectText": "Whenever a Brute you control attacks, put a Momentum counter on Drum of the Pit.\nExhaust and remove 3 Momentum counters: Search your deck for a Brute Unit, reveal it, and put it into your hand. Then, shuffle your deck.",
+    "flavorText": "“The Iron remembers its masters – and calls them back to war.”",
+    "subtype": "Relic",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-ring-of-the-ley": {
+    "effectText": "Exhaust: Add {Untuned} {Untuned} to your Ley Basin.",
+    "flavorText": "“A crown for none, a curse for all who wear it.”",
+    "subtype": "Legendary Relic",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-blood-cauldron": {
+    "effectText": "Exhaust and sacrifice 2 Brutes: create a 4A/4D Brute Berserker with Charge.",
+    "flavorText": "“Feed the pit. Wake the beast.”",
+    "subtype": "Relic",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-frenzied-stampede": {
+    "effectText": "All Brutes you control gain +3A/+3D and Pierce until end of turn.",
+    "flavorText": "",
+    "subtype": "Strategy",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-fury-offering": {
+    "effectText": "Sacrifice a Brute you control. Deal damage equal to its Attack to any target.\nThen, draw that many cards and discard 2 at random.",
+    "flavorText": "“The pit gives gifts – but never for free.”",
+    "subtype": "Strategy",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-bloodfire-collapse": {
+    "effectText": "Destroy all Units.\nFor each Unit destroyed this way, deal 1 damage to each Command Station.",
+    "flavorText": "“One death is a spark. A thousand is a collapse”",
+    "subtype": "Strategy",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-korgath-s-call": {
+    "effectText": "You may play Korgath, Lord of Ruin from your hand or discard.\nKorgath, Lord of Ruin enters with Charge and gains +3A/+0D until end of turn.\nIf you sacrificed 3 or more Brutes this turn, heal 5 HP to your Command Station.",
+    "flavorText": "",
+    "subtype": "Legendary Strategy",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-ashen-strike": {
+    "effectText": "Deal 3 damage to any target.\nIf a Unit is destroyed this way, draw 1 card.",
+    "flavorText": "“The sky still remembers the forge that birthed it”",
+    "subtype": "Legendary Tactic",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-bloodrush-gambit": {
+    "effectText": "Discard a card, then draw 2 cards.\nIf you discarded a Brute Unit, add {Fury} to your Ley Basin.",
+    "flavorText": "“Think? No. Feel. Then kill.”",
+    "subtype": "Tactic",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-rites-of-ragefire": {
+    "effectText": "Destroy target Relic or Rune.\nIf that card was a Rune, deal 2 damage to its controller’s Command Station.",
+    "flavorText": "",
+    "subtype": "Tactic",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-skullsplitter-s-roar": {
+    "effectText": "Deal 2 damage to each Unit target opponent controls.\nFor each Unit destroyed this way, create a 1A/1D frenzied brute token.",
+    "flavorText": "“The roar that drowns out mercy.”",
+    "subtype": "Tactic",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-pit-digger-s-howl": {
+    "effectText": "Additional Cost – Sacrifice a Unit.\nDraw 2 cards",
+    "flavorText": "“The pit takes one, gives two back.”",
+    "subtype": "Tactic",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-ragekindle": {
+    "effectText": "Add {Fury} to your Ley Basin for each Unit you control.",
+    "flavorText": "“The spark that lights the slaughter”",
+    "subtype": "Tactic",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-fury-font": {
+    "effectText": "Burn – Flip this card facedown: Add {Fury} (Fury Essence) to your Ley Basin.\n(Essence fades at end of turn.)",
+    "flavorText": "“The ley runs hottest where blood has been spilled. Rage remembers.”",
+    "subtype": "Basic Ley Font — Fury",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-fury-pit": {
+    "effectText": "Fury Pit enters spent.\nWhen Fury Pit is Burned for essence, Units you control get +1A/+0D until end of turn.\nBurn – Flip this card facedown: Add {Fury} (Fury Essence) to your Ley Basin.\n(Essence fades at end of turn.)",
+    "flavorText": "“The ground itself howls for blood.”",
+    "subtype": "Advanced Ley Font — Fury",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-bloodforge-hollow": {
+    "effectText": "When Bloodforge Hollow enters play, create a 1A/1D frenzied brute token.\nBurn – Flip this card facedown: Add {Fury} (Fury Essence) to your Ley Basin.\n(Essence fades at end of turn.)",
+    "flavorText": "“Steel is not born in forges like these. It crawls out, screaming.”",
+    "subtype": "Advanced Ley Font — Fury",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-ashfang-ravine": {
+    "effectText": "When Ashfang Ravine enters play, it deals 2 damage to any target.\nBurn – Flip this card facedown: Add {Fury} (Fury Essence) to your Ley Basin.\n(Essence fades at end of turn.)",
+    "flavorText": "“Rivers of fire still carve their mark through the old empire’s bones.”",
+    "subtype": "Advanced Ley Font — Fury",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-the-maw-below": {
+    "effectText": "Enters Spent. When Readied, you may sacrifice a Unit. If you do, add {Fury} {Fury} to your Ley Basin.\nBurn – Flip this card facedown: Add {Fury} (Fury Essence) to your Ley Basin.\n(Essence fades at end of turn.)",
+    "flavorText": "“Some say the Ley has a hunger.”",
+    "subtype": "Advanced Ley Font — Fury",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-the-broken-fist-keep": {
+    "effectText": "HP: 20\nPassive – Law of Blood and Fire:\nWhen a Brute you control attacks, it gains +1A/+0D until end of turn.\nWhen a Brute you control is destroyed, create a 1A/1D frenzied brute token (triggers only 3 times per turn).",
+    "flavorText": "“The first blow is always the hardest – and the last.”",
+    "subtype": "Command Station",
+    "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  }
+}
