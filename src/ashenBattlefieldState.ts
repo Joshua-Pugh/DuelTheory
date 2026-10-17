@@ -2,7 +2,9 @@ import {ASHEN_TABLETOP,createTabletop,tabletopDispatch,type TabletopAction,type 
 import {ashenCardMap,starterDeck} from './ashenDecks';
 import {RESOURCES,type Resource} from './ashenPresentation';
 export type Basin=Record<Resource,number>;
-export type Battlefield={version:1;table:TabletopState;basins:[Basin,Basin];preview:boolean};
+export type AshenRulesState={turn:number;fontPlayed:[boolean,boolean];damage:Record<string,number>;modifiers:{id:string;stats:Record<string,number>;keywords:string[];duration:'turn'|'permanent'}[];serial:number;triggerUses?:Record<string,number>;counters?:Record<string,Record<string,number>>};
+export const emptyAshenRules=():AshenRulesState=>({turn:1,fontPlayed:[false,false],damage:{},modifiers:[],serial:0});
+export type Battlefield={version:1;table:TabletopState;basins:[Basin,Basin];preview:boolean;rules?:AshenRulesState};
 export const BATTLEFIELD_KEY='dueltheory-ashen-battlefield-v1';
 export const emptyBasin=():Basin=>({untuned:0,oath:0,fury:0,ash:0,veil:0});
 export function fontEssence(cardId:string):Resource{
@@ -27,7 +29,7 @@ export function newBattlefield(preview=false,random:()=>number=Math.random):Batt
   }
  }
  table.events=[preview?'Populated layout preview. Cards placed for demonstration; effects and costs are not resolved.':'Manual Ashen Throne playtest started. Resolve card effects and costs yourself.'];
- return {version:1,table,basins:[emptyBasin(),emptyBasin()],preview};
+ return {version:1,table,basins:[emptyBasin(),emptyBasin()],preview,rules:emptyAshenRules()};
 }
 export type BattlefieldAction=TabletopAction|{type:'BURN';instanceId:string}|{type:'ESSENCE';seat:0|1;resource:Resource;delta:number}|{type:'END_TURN'};
 export function battlefieldDispatch(state:Battlefield,action:BattlefieldAction):Battlefield{
@@ -47,6 +49,7 @@ export function battlefieldDispatch(state:Battlefield,action:BattlefieldAction):
   next.basins[action.seat][action.resource]=count;
   next.table.events.push(`Player ${action.seat+1}: ${action.delta>0?'+':''}${action.delta} ${action.resource} essence (manual adjustment).`);
  }else if(action.type==='END_TURN'){
+  if(next.rules){next.rules.turn++;next.rules.fontPlayed=[false,false];next.rules.damage={};next.rules.modifiers=next.rules.modifiers.filter(m=>m.duration==='permanent');next.rules.triggerUses={};}
   next.basins=[emptyBasin(),emptyBasin()];
   next.table=tabletopDispatch(next.table,{type:'PASS_TURN'});
   for(const id of next.table.piles[`${next.table.active}:ley`]){next.table.cards[id].faceDown=false;next.table.cards[id].rotated=false;}

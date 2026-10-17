@@ -16,7 +16,7 @@ export function validateProject(project:CreatorProject):string[]{
  if(!d.healthLabel.trim()||d.healthLabel.length>30)errors.push('Health label is required (30 characters maximum).');
  if(!d.zones.length||d.zones.length>20)errors.push('Define 1–20 zones.');
  const seen=new Set<string>();
- for(const z of d.zones){if(!/^[a-z][a-z0-9-]{0,30}$/.test(z.id)||forbidden.has(z.id)||seen.has(z.id))errors.push(`Invalid, duplicate or reserved zone ID: ${z.id}`);seen.add(z.id);if(!z.label.trim()||z.label.length>50)errors.push(`Invalid label for ${z.id}`);if(!Number.isInteger(z.slots)||z.slots<1||z.slots>100)errors.push(`Invalid capacity for ${z.id}`);}
+ for(const z of d.zones){if(!/^[a-z][a-z0-9-]{0,30}$/.test(z.id)||forbidden.has(z.id)||seen.has(z.id))errors.push(`Invalid, duplicate or reserved zone ID: ${z.id}`);seen.add(z.id);if(!z.label.trim()||z.label.length>50)errors.push(`Invalid label for ${z.id}`);if(!Number.isInteger(z.slots)||z.slots<0||z.slots>100)errors.push(`Invalid capacity for ${z.id}`);}
  if(project.cards.length>500)errors.push('500 distinct card entries maximum.');
  const ids=new Set<string>();
  for(const c of project.cards){if(!c.cardId||ids.has(c.cardId))errors.push(`Duplicate or missing card ID: ${c.cardId}`);ids.add(c.cardId);if(!c.name.trim()||c.name.length>100)errors.push(`Invalid card name: ${c.cardId}`);if(c.image&&!/^data:image\/(png|jpeg|webp);base64,/.test(c.image))errors.push(`Only embedded image data is supported: ${c.cardId}`);if(c.resourceCost!==undefined&&!validResourceCost(c.resourceCost))errors.push(`Invalid resource cost: ${c.cardId}`);if(c.outfitCost!=null&&(!Number.isInteger(c.outfitCost)||c.outfitCost<0||c.outfitCost>99))errors.push(`Invalid Outfit cost: ${c.cardId}`);}

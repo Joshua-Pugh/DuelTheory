@@ -1,3 +1,4 @@
+import {seededShuffle} from '../framework/random';
 import type {DeckEffectAction} from './ritualDeckEffects';
 import type {Card, Deck} from '../core/types';
 export type Seat = 0 | 1;
@@ -24,7 +25,7 @@ export const getCard=(state:DuelState,instanceId:string,ctx:EngineContext):Card=
 export const isMonster=(card:Card)=>card.type.includes('Monster');
 export const isSpellTrap=(card:Card)=>card.type.includes('Spell')||card.type.includes('Trap');
 export const isNormalSummonable=(card:Card)=>![9596126,72989439].includes(card.id)&&isMonster(card)&&!card.type.includes('Ritual')&&!card.type.includes('Fusion')&&!card.type.includes('Special Summon')&&Number(card.level||0)>0&&Number(card.level||0)<=4;
-export function seededShuffle<T>(items:readonly T[], seed:number):T[]{let s=seed>>>0;const out=[...items];for(let i=out.length-1;i>0;i--){s=(Math.imul(s,1664525)+1013904223)>>>0;const j=Math.floor((s/4294967296)*(i+1));[out[i],out[j]]=[out[j],out[i]];}return out;}
+export {seededShuffle} from '../framework/random';
 export function createDuel(a:Deck,b:Deck,ctx:EngineContext,seed=20261014,firstSeat:Seat=0):DuelState {if(firstSeat!==0&&firstSeat!==1)throw new DuelEngineError('ILLEGAL_ACTION','Starting seat must be Player 1 or Player 2');const players:[DuelPlayer,DuelPlayer]=[emptyPlayer(),emptyPlayer()];const cards:Record<string,CardInstance>={};for(const seat of [0,1] as Seat[]){const deck=seat===0?a:b;deck.main.forEach((cardId,i)=>{if(!ctx.cards.has(cardId))throw new DuelEngineError('UNKNOWN_CARD',`Card ${cardId} missing from catalog`);const instanceId=`p${seat}-${i}`;cards[instanceId]={instanceId,cardId,owner:seat,controller:seat,location:'deck'};players[seat].deck.push(instanceId);});players[seat].deck=seededShuffle(players[seat].deck,seed+seat*7919);for(let i=0;i<5;i++){const instanceId=players[seat].deck.shift();if(instanceId){players[seat].hand.push(instanceId);cards[instanceId].location='hand';}}}return {pendingTriggers:[],format:'goat-2005',turn:1,current:firstSeat,phase:'DRAW',players,cards,chain:[],events:[{type:'START',message:`Both players drew 5 cards. Player ${firstSeat+1} goes first and skips the opening Draw Phase draw.`,turn:1,seat:firstSeat}],winner:null,pendingDraw:true,seed,priority:firstSeat,consecutivePasses:0};}
 export function log(s:DuelState,type:string,message:string,seat:Seat){s.events.push({type,message,turn:s.turn,seat});}
 export function draw(s:DuelState,seat:Seat,count:number){const p=s.players[seat];for(let n=0;n<count;n++){const id=p.deck.shift();if(!id){s.winner=seat===0?1:0;log(s,'DECK_OUT',`Player ${seat+1} could not draw from an empty Deck.`,seat);return;}p.hand.push(id);s.cards[id].location='hand';}log(s,'DRAW',`Player ${seat+1} drew ${count} card(s).`,seat);}
