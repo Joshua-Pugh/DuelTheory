@@ -1,6 +1,7 @@
 import {describe,it,expect} from 'vitest';
 import {newBattlefield,battlefieldDispatch,type Battlefield} from '../../ashenBattlefieldState';
 import {playProgram,resolveAshenEffect,ashenStats,resolveBurnEffect} from './adapter';
+import {validateEffectProgram} from '../../framework';
 import {bruteEffects} from './bruteEffects';
 const idOf=(s:Battlefield,slug:string)=>Object.values(s.table.cards).find(c=>c.cardId===`ashen-brute-${slug}`)!.instanceId;
 function hand(s:Battlefield,slug:string){const id=idOf(s,slug);if(s.table.cards[id].zone!=='hand')s=battlefieldDispatch(s,{type:'MOVE',instanceId:id,seat:0,zone:'hand'});s.basins[0].fury=50;s.basins[0].untuned=50;return {s,id};}
@@ -41,4 +42,64 @@ describe('first Brute effects through the shared framework',()=>{
   const {s,id}=hand(newBattlefield(true,()=>.4),'pit-digger-s-howl');const sacrifice=s.table.piles['0:unit'][0],deck=s.table.piles['0:deck'].length;
   const result=deploy(s,id,[],[sacrifice]);expect(result.table.cards[sacrifice].zone).toBe('graveyard');expect(result.table.piles['0:deck'].length).toBe(deck-2);expect(s.table.cards[sacrifice].zone).toBe('unit');
  });
+});
+
+
+describe('Brute sacrifice abilities and continuous bonuses',()=>{
+ const field=(s:Battlefield,slug:string)=>{const id=idOf(s,slug);return {s:battlefieldDispatch(s,{type:'MOVE',instanceId:id,seat:0,zone:'unit'}),id};};
+ it('validates every registered portable effect program',()=>{
+  for(const rule of Object.values(bruteEffects))for(const p of [rule.onPlay,rule.onBurn,...(rule.activated||[]),...(rule.triggers||[]).map(t=>t.program)])if(p)expect(validateEffectProgram(p),p.id).toEqual([]);
+ });
+ it('applies Overseer to other Brutes only and removes its aura immediately on leaving play',()=>{
+  let s=newBattlefield(false,()=>.4);const grunt=field(s,'frenzied-grunt');s=grunt.s;const base=ashenStats(s,grunt.id);
+  const overseer=field(s,'warband-overseer');s=overseer.s;
+  expect(ashenStats(s,grunt.id).attack).toBe(base.attack+1);expect(ashenStats(s,grunt.id).defense).toBe(base.defense+1);
+  const own=ashenStats(s,overseer.id);expect(own.attack).toBe(2);
+  s=battlefieldDispatch(s,{type:'MOVE',instanceId:overseer.id,seat:0,zone:'graveyard'});
+  expect(ashenStats(s,grunt.id).attack).toBe(base.attack);
+ });
+ it('uses Banner Charge for deployment and preserves token Charge',()=>{
+  let s=newBattlefield(false,()=>.4);const banner=idOf(s,'banner-of-the-broken-fist');s=battlefieldDispatch(s,{type:'MOVE',instanceId:banner,seat:0,zone:'support'});
+  const raider=hand(s,'bloodfang-raider');s=deploy(raider.s,raider.id);
+  expect(s.table.cards[raider.id].rotated).toBe(false);
+  const token=Object.values(s.table.cards).find(c=>c.presentation)!;
+  expect(ashenStats(s,token.instanceId).keywords).toContain('Charge');expect(token.rotated).toBe(false);
+ });
+ it('requires two distinct sacrifices for Cauldron and creates a ready 4/4 Charge Berserker',()=>{
+  let s=newBattlefield(false,()=>.4);const cauldron=idOf(s,'blood-cauldron');s=battlefieldDispatch(s,{type:'MOVE',instanceId:cauldron,seat:0,zone:'support'});
+  const a=field(s,'frenzied-grunt');s=a.s;const b=field(s,'bloodpit-initiate');s=b.s;
+  const program=bruteEffects[s.table.cards[cauldron].cardId].activated![0],before=JSON.stringify(s);
+  expect(()=>resolveAshenEffect(s,program,{player:'0',source:cauldron,costCards:[a.id,a.id]})).toThrow();expect(JSON.stringify(s)).toBe(before);
+  s=resolveAshenEffect(s,program,{player:'0',source:cauldron,costCards:[a.id,b.id]});
+  const token=Object.values(s.table.cards).find(c=>c.name==='Brute Berserker')!;
+  expect(ashenStats(s,token.instanceId)).toMatchObject({attack:4,defense:4,keywords:['Charge']});expect(token.rotated).toBe(false);
+  expect(s.table.cards[a.id].zone).toBe('graveyard');expect(s.table.cards[cauldron].rotated).toBe(true);
+ });
+ it('sacrifice abilities trigger surviving death observers',()=>{
+  let s=newBattlefield(false,()=>.4);const watcher=field(s,'warchanter-savage');s=watcher.s;const victim=field(s,'frenzied-grunt');s=victim.s;
+  const chant=idOf(s,'flesh-slinger-s-chant');s=battlefieldDispatch(s,{type:'MOVE',instanceId:chant,seat:0,zone:'support'});
+  const station=s.table.piles['1:command'][0],attack=ashenStats(s,watcher.id).attack;
+  s=resolveAshenEffect(s,bruteEffects[s.table.cards[chant].cardId].activated![0],{player:'0',source:chant,costCards:[victim.id],targets:[station]});
+  expect(s.table.health[1]).toBe(18);expect(ashenStats(s,watcher.id).attack).toBe(attack+1);
+ });
+});
+
+it('tracks Warband Fury and atomically spends three counters on its rally',()=>{
+ let s=newBattlefield(false,()=>.4);const warband=idOf(s,'warband-of-bloodfire');s=battlefieldDispatch(s,{type:'MOVE',instanceId:warband,seat:0,zone:'support'});
+ for(const slug of ['frenzied-grunt','bloodpit-initiate']){const h=hand(s,slug);s=deploy(h.s,h.id);}
+ expect(s.rules?.counters?.[warband]?.fury).toBe(3);
+ const p=bruteEffects[s.table.cards[warband].cardId].activated![0];s=resolveAshenEffect(s,p,{player:'0',source:warband});
+ expect(s.rules?.counters?.[warband]?.fury).toBe(0);
+ for(const id of s.table.piles['0:unit'])expect(ashenStats(s,id).keywords).toContain('Pierce');
+ s=battlefieldDispatch(s,{type:'ROTATE',instanceId:warband});const before=JSON.stringify(s);
+ expect(()=>resolveAshenEffect(s,p,{player:'0',source:warband})).toThrow('counters');expect(JSON.stringify(s)).toBe(before);
+});
+
+it('Rites damages only the destroyed Rune controller, and not for a Relic',()=>{
+ for(const type of ['Rune','Relic']){
+  let s=newBattlefield(false,()=>.4);const target=Object.values(s.table.cards).find(c=>c.controller===1&&c.type===type)!;
+  s=battlefieldDispatch(s,{type:'MOVE',instanceId:target.instanceId,seat:1,zone:'support'});
+  const start=hand(s,'rites-of-ragefire');s=deploy(start.s,start.id,[target.instanceId]);
+  expect(s.table.cards[target.instanceId].zone).toBe('graveyard');expect(s.table.health).toEqual([20,type==='Rune'?18:20]);
+ }
 });

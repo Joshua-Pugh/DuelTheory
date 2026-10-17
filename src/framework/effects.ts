@@ -1,7 +1,7 @@
 /** Portable effects kernel. No game names, card catalogs, UI or player-count assumptions. */
 import {validateEffectProgram} from './schema';
 export type Entity={id:string;controller:string;zone:string;type:string;tags:string[];exhausted:boolean};
-export type Selector={zones?:string[];types?:string[];tags?:string[];excludeTags?:string[];controller?:'self'|'other'|'any';excludeSource?:boolean};
+export type Selector={zones?:string[];types?:string[];tags?:string[];excludeTags?:string[];controller?:'self'|'other'|'any'|'target';excludeSource?:boolean};
 export type Selection={filter:Selector;count:number;label:string};
 export type Targets='source'|'targets'|Selector;
 export type Amount=number|{count:Selector}|{result:'destroyed'};
@@ -16,11 +16,12 @@ export type EffectStep=
  |{op:'modify';targets:Targets;stats:Record<string,number>;keywords?:string[];duration:'turn'|'permanent'}
  |{op:'token';token:TokenDefinition;count:Amount}
  |{op:'if';condition:{kind:'destroyed';filter?:Selector}|{kind:'costCard';filter:Selector};then:EffectStep[]};
-export type EffectProgram={version:1;id:string;label:string;targets?:Selection;cost?:{resources?:Record<string,number>;generic?:number;exhaust?:boolean;cards?:Selection;cardDestination?:string};steps:EffectStep[]};
-export type EffectContext={player:string;source:string;targets?:string[];costCards?:string[]};
+export type EffectProgram={version:1;id:string;label:string;targets?:Selection;cost?:{resources?:Record<string,number>;generic?:number;exhaust?:boolean;counters?:Record<string,number>;cards?:Selection;cardDestination?:string};steps:EffectStep[]};
+export type EffectContext={player:string;source:string;targets?:string[];costCards?:string[];targetControllers?:string[]};
 export type EffectEvent={kind:string;source:string;player:string;entity?:Entity;amount?:number;resource?:string};
 export type EffectAdapter<S>={
  entities:(state:S)=>Entity[];
+ counters?:(state:S,id:string)=>Record<string,number>;
  resources:(state:S,player:string)=>Record<string,number>;
  adjustResource:(state:S,player:string,resource:string,delta:number)=>void;
  exhaust:(state:S,id:string)=>void;
@@ -33,7 +34,7 @@ export type EffectAdapter<S>={
  token:(state:S,player:string,definition:TokenDefinition)=>string;
 };
 export class EffectError extends Error{constructor(message:string){super(message);this.name='EffectError';}}
-export function matches(entity:Entity,filter:Selector,context:EffectContext){return (!filter.zones||filter.zones.includes(entity.zone))&&(!filter.types||filter.types.includes(entity.type))&&(!filter.tags||filter.tags.every(t=>entity.tags.includes(t)))&&(!filter.excludeTags||filter.excludeTags.every(t=>!entity.tags.includes(t)))&&(!filter.excludeSource||entity.id!==context.source)&&(!filter.controller||filter.controller==='any'||(filter.controller==='self'?entity.controller===context.player:entity.controller!==context.player));}
+export function matches(entity:Entity,filter:Selector,context:EffectContext){return (!filter.zones||filter.zones.includes(entity.zone))&&(!filter.types||filter.types.includes(entity.type))&&(!filter.tags||filter.tags.every(t=>entity.tags.includes(t)))&&(!filter.excludeTags||filter.excludeTags.every(t=>!entity.tags.includes(t)))&&(!filter.excludeSource||entity.id!==context.source)&&(!filter.controller||filter.controller==='any'||(filter.controller==='target'?!!context.targetControllers?.includes(entity.controller):filter.controller==='self'?entity.controller===context.player:entity.controller!==context.player));}
 export function candidates<S>(state:S,adapter:EffectAdapter<S>,selection:Selection,context:EffectContext){return adapter.entities(state).filter(e=>matches(e,selection.filter,context));}
 export function payment(pool:Record<string,number>,specific:Record<string,number>={},generic=0):Record<string,number>{
  if(Object.values(pool).some(n=>!Number.isInteger(n)||n<0))throw new EffectError('Invalid resource pool.');
@@ -66,12 +67,15 @@ export function executeProgram<S>(original:S,adapter:EffectAdapter<S>,program:Ef
  verifySelection(original,adapter,program.cost?.cards,costCards,context);
  if(program.cost?.exhaust&&source.exhausted)throw new EffectError('Source is already exhausted.');
  if(program.cost?.cards&&!program.cost.cardDestination)throw new EffectError('Missing cost destination.');
+ for(const [name,n] of Object.entries(program.cost?.counters||{}))if((adapter.counters?.(original,context.source)[name]||0)<n)throw new EffectError(`Need ${n} ${name} counters.`);
+ context={...context,targetControllers:adapter.entities(original).filter(e=>targets.includes(e.id)).map(e=>e.controller)};
  const spent=payment(adapter.resources(original,context.player),program.cost?.resources,program.cost?.generic);
  const discarded=costCards.map(id=>adapter.entities(original).find(e=>e.id===id)!);
  const state=structuredClone(original),events:EffectEvent[]=[];
  let destroyed=0,budget=256;const destroyedEntities:Entity[]=[];
  const emit=(kind:string,entity?:Entity,amount?:number,resource?:string)=>events.push({kind,source:context.source,player:context.player,entity,amount,resource});
  for(const [r,n] of Object.entries(spent))if(n){adapter.adjustResource(state,context.player,r,-n);emit('resource-paid',undefined,n,r);}
+ for(const [name,n] of Object.entries(program.cost?.counters||{}))adapter.counter(state,context.source,name,-n);
  if(program.cost?.exhaust)adapter.exhaust(state,context.source);
  for(const id of costCards){adapter.move(state,id,program.cost!.cardDestination!);emit('cost-card',discarded.find(e=>e.id===id));}
  const amount=(value:Amount)=>{

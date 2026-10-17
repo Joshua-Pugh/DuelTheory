@@ -7,13 +7,25 @@ import {bruteEffects} from './bruteEffects';
 
 const player=(id:string):0|1=>{if(id!=='0'&&id!=='1')throw Error('Unknown Ashen player.');return Number(id) as 0|1;};
 export const ashenData=(state:Battlefield,id:string)=>state.table.cards[id]?.presentation||ashenCardMap.get(state.table.cards[id]?.cardId);
-export function ashenStats(state:Battlefield,id:string){const data=ashenData(state,id);const mods=state.rules?.modifiers.filter(m=>m.id===id)||[];return {attack:(data?.attack||0)+mods.reduce((n,m)=>n+(m.stats.attack||0),0),defense:(data?.defense||0)+mods.reduce((n,m)=>n+(m.stats.defense||0),0),damage:state.rules?.damage[id]||0,keywords:[...(bruteEffects[state.table.cards[id]?.cardId]?.keywords||[]),...mods.flatMap(m=>m.keywords)]};}
+export function ashenStats(state:Battlefield,id:string){
+ const c=state.table.cards[id],data=ashenData(state,id),mods=state.rules?.modifiers.filter(m=>m.id===id)||[];
+ const keywords=[...(bruteEffects[c?.cardId]?.keywords||[]),...mods.flatMap(m=>m.keywords)];
+ let bonus=c?.counters||0;
+ if(c?.zone==='unit'&&data?.faction==='Brute')for(const aura of Object.values(state.table.cards)){
+  if(aura.controller!==c.controller||aura.faceDown)continue;
+  if(aura.zone==='unit'&&aura.instanceId!==id&&aura.cardId==='ashen-brute-warband-overseer'){bonus++;keywords.push('Charge');}
+  if(aura.zone==='support'&&aura.cardId==='ashen-brute-banner-of-the-broken-fist')keywords.push('Charge');
+  if(aura.zone==='support'&&aura.cardId==='ashen-brute-warband-of-bloodfire')bonus+=Object.values(state.table.cards).filter(b=>b.zone==='unit'&&ashenData(state,b.instanceId)?.faction==='Brute').length;
+ }
+ return {attack:(data?.attack||0)+bonus+mods.reduce((n,m)=>n+(m.stats.attack||0),0),defense:(data?.defense||0)+bonus+mods.reduce((n,m)=>n+(m.stats.defense||0),0),damage:state.rules?.damage[id]||0,keywords:[...new Set(keywords)]};
+}
 const move=(state:Battlefield,id:string,zone:string)=>{
  const c=state.table.cards[id];if(!c)throw Error('Unknown card.');
  state.table=tabletopDispatch(state.table,{type:'MOVE',instanceId:id,seat:zone==='graveyard'?c.owner:c.controller,zone});
  if(state.rules){delete state.rules.damage[id];state.rules.modifiers=state.rules.modifiers.filter(m=>m.id!==id);}
 };
 export const ashenAdapter:EffectAdapter<Battlefield>={
+ counters:(s,id)=>s.rules?.counters?.[id]||{},
  entities:s=>Object.values(s.table.cards).map(c=>({id:c.instanceId,controller:String(c.controller),zone:c.zone,type:c.type,tags:[ashenData(s,c.instanceId)?.faction||'',...(c.presentation?['Token']:[])],exhausted:c.rotated||c.faceDown})),
  resources:(s,p)=>({...s.basins[player(p)]}),
  adjustResource:(s,p,r,delta)=>{if(!['untuned','fury','oath','ash','veil'].includes(r))throw Error('Unknown essence.');const pool=s.basins[player(p)];const n=pool[r as Resource]+delta;if(n<0||n>999)throw Error('Invalid essence balance.');pool[r as Resource]=n;},
@@ -27,7 +39,7 @@ export const ashenAdapter:EffectAdapter<Battlefield>={
  },
  damage:(s,id,amount)=>{const c=s.table.cards[id];if(!c)return false;if(c.zone==='command'){s.table.health[c.controller]-=amount;return false;}if(c.zone!=='unit')throw Error('Damage requires a Unit or Command Station.');s.rules??=emptyAshenRules();s.rules.damage[id]=(s.rules.damage[id]||0)+amount;if(s.rules.damage[id]>=ashenStats(s,id).defense)return ashenAdapter.destroy(s,id);return false;},
  modify:(s,id,stats,keywords,duration)=>{s.rules??=emptyAshenRules();s.rules.modifiers.push({id,stats:{...stats},keywords:[...keywords],duration});},
- token:(s,p,definition)=>{s.rules??=emptyAshenRules();let id:string;do{id=`ashen-token-${++s.rules.serial}`;}while(s.table.cards[id]);const seat=player(p);s.table.cards[id]={instanceId:id,cardId:'token',name:definition.name,type:definition.type,owner:seat,controller:seat,zone:definition.zone,faceDown:false,rotated:true,counters:0,presentation:{name:definition.name,type:definition.type,subtype:'Unit — Brute Token',faction:'Brute',attack:definition.stats.attack,defense:definition.stats.defense,effectText:'Frenzied Brute token. Deployment Fatigue.'}};s.table.piles[`${p}:${definition.zone}`].push(id);return id;},
+ token:(s,p,definition)=>{s.rules??=emptyAshenRules();let id:string;do{id=`ashen-token-${++s.rules.serial}`;}while(s.table.cards[id]);const seat=player(p);s.table.cards[id]={instanceId:id,cardId:'token',name:definition.name,type:definition.type,owner:seat,controller:seat,zone:definition.zone,faceDown:false,rotated:!definition.keywords?.includes('Charge'),counters:0,presentation:{name:definition.name,type:definition.type,subtype:'Unit — Brute Token',faction:'Brute',attack:definition.stats.attack,defense:definition.stats.defense,effectText:definition.keywords?.join(', ')||'Deployment Fatigue.'}};s.table.piles[`${p}:${definition.zone}`].push(id);if(definition.keywords?.length)s.rules.modifiers.push({id,stats:{},keywords:[...definition.keywords],duration:'permanent'});if(ashenStats(s,id).keywords.includes('Charge'))s.table.cards[id].rotated=false;return id;},
 };
 export function playProgram(state:Battlefield,id:string):EffectProgram{
  const card=state.table.cards[id],definition=bruteEffects[card?.cardId];
@@ -50,13 +62,13 @@ export function resolveAshenEffect(state:Battlefield,program:EffectProgram,conte
  const rule=bruteEffects[original.cardId];if(!rule)throw Error('This effect is not implemented.');
  if(deploy)program=playProgram(state,context.source);
  else {const canonical=rule.activated?.find(p=>p.id===program.id);if(!canonical||!['unit','support'].includes(original.zone))throw Error('Ability unavailable here.');program=canonical;}
- if(!deploy){const result=executeProgram(state,ashenAdapter,program,context);return logResolution(drainTriggers(result.state,result.events),program);}
+ if(!deploy){const result=executeProgram(state,ashenAdapter,program,context);return logResolution(drainTriggers(result.state,sacrificeEvents(result.events)),program);}
  // Validate/pay on the original board, then deploy before resolving entry effects.
  const checked=executeProgram(state,ashenAdapter,{...program,steps:[]},context);
  let staged=checked.state;staged.rules??=emptyAshenRules();
  if(deploy){const zone=original.type==='Unit'?'unit':original.type==='Ley Font'?'ley':['Rune','Relic'].includes(original.type)?'support':'graveyard';move(staged,original.instanceId,zone);
   if(original.type==='Ley Font'){staged.rules.fontPlayed[original.controller]=true;staged.table.cards[original.instanceId].faceDown=!!rule.entersSpent;}
-  if(original.type==='Unit')staged.table.cards[original.instanceId].rotated=!rule.keywords?.includes('Charge');
+  if(original.type==='Unit')staged.table.cards[original.instanceId].rotated=!ashenStats(staged,original.instanceId).keywords.includes('Charge');
  }
  // Costs are removed from the resolution pass; its targets are revalidated.
  const resolution=executeProgram(staged,ashenAdapter,{...program,cost:undefined}, {...context,costCards:[]});
@@ -66,6 +78,7 @@ export function resolveAshenEffect(state:Battlefield,program:EffectProgram,conte
 }
 function logResolution(state:Battlefield,program:EffectProgram){state.table.events.push(`Assisted sandbox: ${program.label}. Clash/combat and unimplemented observer effects remain manual.`);return state;}
 export function resolveBurnEffect(state:Battlefield,id:string){const program=bruteEffects[state.table.cards[id]?.cardId]?.onBurn;if(!program)return state;const result=executeProgram(state,ashenAdapter,program,{player:String(state.table.cards[id].controller),source:id});return logResolution(drainTriggers(result.state,result.events),program);}
+function sacrificeEvents(events:EffectEvent[]){return events.flatMap(e=>e.kind==='cost-card'&&e.entity?.zone==='unit'?[e,{...e,kind:'destroyed'}]:[e]);}
 function drainTriggers(initial:Battlefield,events:EffectEvent[]):Battlefield{
  let state=initial;const queue=[...events];let budget=128;
  while(queue.length){if(--budget<0)throw Error('Trigger loop limit reached; action cancelled.');const event=queue.shift()!;

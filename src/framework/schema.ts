@@ -4,7 +4,7 @@ const text=(v:unknown,max=100):v is string=>typeof v==='string'&&v.length>0&&v.l
 const key=(v:unknown):v is string=>text(v,64)&&/^[a-zA-Z][a-zA-Z0-9_-]*$/.test(v)&&!['__proto__','prototype','constructor'].includes(v);
 const integer=(v:unknown,min=0,max=999)=>Number.isInteger(v)&&Number(v)>=min&&Number(v)<=max;
 const strings=(v:unknown)=>Array.isArray(v)&&v.length<=50&&v.every(s=>text(s));
-const selector=(v:unknown):boolean=>object(v)&&['zones','types','tags','excludeTags'].every(k=>v[k]===undefined||strings(v[k]))&&(v.controller===undefined||['self','other','any'].includes(String(v.controller)))&&(v.excludeSource===undefined||typeof v.excludeSource==='boolean');
+const selector=(v:unknown):boolean=>object(v)&&['zones','types','tags','excludeTags'].every(k=>v[k]===undefined||strings(v[k]))&&(v.controller===undefined||['self','other','any','target'].includes(String(v.controller)))&&(v.excludeSource===undefined||typeof v.excludeSource==='boolean');
 const amount=(v:unknown)=>integer(v)||(object(v)&&(selector(v.count)||v.result==='destroyed'));
 const targets=(v:unknown)=>v==='source'||v==='targets'||selector(v);
 const numbers=(v:unknown,min=0)=>object(v)&&Object.keys(v).length<=50&&Object.entries(v).every(([k,n])=>key(k)&&integer(n,min));
@@ -42,7 +42,7 @@ export function validateEffectProgram(value:unknown):string[]{
  if(!key(value.id)||!text(value.label,200))errors.push('Effect ID and label are required.');
  if(value.targets!==undefined&&!selection(value.targets))errors.push('Invalid target selection.');
  const c=value.cost;
- if(c!==undefined&&(!object(c)||(c.resources!==undefined&&!numbers(c.resources))||(c.generic!==undefined&&!integer(c.generic))||(c.exhaust!==undefined&&typeof c.exhaust!=='boolean')||(c.cards!==undefined&&(!selection(c.cards)||!key(c.cardDestination)))))errors.push('Invalid effect cost.');
+ if(c!==undefined&&(!object(c)||(c.resources!==undefined&&!numbers(c.resources))||(c.generic!==undefined&&!integer(c.generic))||(c.counters!==undefined&&!numbers(c.counters))||(c.exhaust!==undefined&&typeof c.exhaust!=='boolean')||(c.cards!==undefined&&(!selection(c.cards)||!key(c.cardDestination)))))errors.push('Invalid effect cost.');
  if(!steps(value.steps,0))errors.push('Invalid or excessive effect steps.');
  return errors;
 }
