@@ -48,7 +48,7 @@ export default function EnginePreview({deck,catalog,preferences,onOpenPreference
   const timer=window.setTimeout(()=>{setAttackQueue(q=>q?{...q,ids:q.ids.filter(id=>id!==attack.attackerId)}:null);perform(attack);},350);
   return()=>window.clearTimeout(timer);
  },[duel,attackQueue,showDuel]);
- const choose=(a:LegalAction)=>{if(a.type==='ADVANCE'){nextPhase();return;}if(preferences.confirmActions&&!a.type.startsWith('ACTIVATE_')&&!['DRAW_PHASE','PASS_CHAIN','RESOLVE_CHAIN','PASS_ATTACK_RESPONSE','PASS_SUMMON_RESPONSE','PASS_FREE_RESPONSE','ADVANCE_DAMAGE_STEP','CHOOSE_DISCARD','CHOOSE_RANDOM_DISCARD','COMPLETE_DUSTSHOOT','COMPLETE_DIE_ROLL','TRIGGER_SEARCH','ACTIVATE_TRIGGER'].includes(a.type))setDialog(a);else perform(a);};
+ const choose=(a:LegalAction)=>{if(a.type==='ADVANCE'){nextPhase();return;}if(preferences.confirmActions&&!a.type.startsWith('ACTIVATE_')&&!['DRAW_PHASE','PASS_CHAIN','RESOLVE_CHAIN','PASS_ATTACK_RESPONSE','PASS_SUMMON_RESPONSE','PASS_FREE_RESPONSE','ADVANCE_DAMAGE_STEP','CHOOSE_DISCARD','CHOOSE_RANDOM_DISCARD','COMPLETE_DUSTSHOOT','COMPLETE_DIE_ROLL','DECLINE_TRIGGER','DECLINE_PENDING_TRIGGER','TRIGGER_SEARCH','ACTIVATE_TRIGGER'].includes(a.type))setDialog(a);else perform(a);};
  const skipTo=(phase:Phase)=>{if(id)commit(()=>service.advancePhase(id,phase));};
  const nextPhase=()=>{if(id)commit(()=>service.advancePhase(id,'NEXT'));};
  const resolve=()=>{if(id)commit(()=>service.resolveEffect(id));};

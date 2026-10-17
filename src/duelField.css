@@ -23,3 +23,11 @@
 .dt-field-card{position:relative}.dt-counter-badge{position:absolute;right:-8px;bottom:7px;z-index:2;min-width:27px;padding:4px 6px;border:2px solid #fff0ae;border-radius:50%;background:#243d70;color:#fff4bf;font:bold 14px Georgia,serif;box-shadow:0 2px 8px #000;pointer-events:none}.dt-attack-badge{position:absolute;left:-5px;top:-5px;background:#173b30;color:#fff1b3;border:1px solid #d9ba70;border-radius:50%;padding:2px 4px;pointer-events:none}.dt-field-tools{display:flex;gap:5px;align-items:center;margin-left:auto}.dt-field-tools button{font-size:13px;white-space:nowrap;background:#213931;color:#f1d99e;border:1px solid #a58b55;border-radius:6px;padding:6px 9px}.dt-field-tools button[draggable=true]{cursor:grab}.dt-field-tools button[aria-pressed=true]{outline:2px solid #ffe4a0;background:#635536}.dt-log-override{border-left:3px solid #dda05b;padding-left:8px;color:#ffd5a7}.dt-manual-menu p{font-size:11px;color:#d5bf98;line-height:1.4}.dt-board-center{gap:8px;flex-wrap:wrap}.dt-field-tools button:disabled{opacity:.4}
 .dt-field-card .dt-counter-badge{right:2px;bottom:3px;font-size:12px;min-width:23px;padding:3px}.dt-field-card .dt-attack-badge{left:2px;top:2px}
 .dt-moving-card-image{display:block;width:100%;height:100%;object-fit:contain;border-radius:3px}
+
+/* Rotate opponent field artwork, retaining readable counter badges and zone labels. */
+.dt-opponent-half .dt-field-card>img,.dt-opponent-half .dt-field-card>.dt-card-back{transform:rotate(180deg)}
+.dt-effect-prompt>div{flex-wrap:wrap}.dt-response-cards{margin:9px 0}.dt-response-cards button{border-color:#e0c77e;background:#3c4f32;font-weight:700}
+.dt-effect-prompt.dt-response-strip{left:auto;right:12px;top:auto;bottom:calc(11% + 30px);transform:none;width:min(380px,90%);padding:9px 12px;box-shadow:0 3px 12px #0005}.dt-response-strip>strong{font-family:inherit;font-size:13px;font-weight:600}.dt-response-strip p{font-size:10px;margin:5px 0}.dt-response-strip button{padding:5px 8px;font-size:11px}
+
+@keyframes dt-card-arrival{0%,85%{opacity:0}100%{opacity:1}}
+@media(prefers-reduced-motion:reduce){.dt-field-card{animation:none!important}}

@@ -22,5 +22,5 @@ export default function DrawAnimations({state}:{state:DuelState}){
   setFlights(next);
 
  },[state]);
- return <div className="dt-draw-flights" aria-hidden="true"><style>{flights.map(f=>`.dt-field-hand [data-instance="${f.id}"]{visibility:hidden}`).join("\n")}</style>{flights.map(f=><div key={f.key} className="dt-draw-flight" style={{left:f.x,top:f.y,width:f.width,height:f.height,animationDelay:`${f.delay}ms`,'--draw-x':`${f.dx}px`,'--draw-y':`${f.dy}px`} as CSSProperties}><span className="dt-card-back"><span className="dt-back-orbit"/><img src="/branding/dueltheory-crest.png" alt=""/></span></div>)}</div>;
+ return <div className="dt-draw-flights" aria-hidden="true"><style>{flights.map(f=>`.dt-field-hand [data-instance="${f.id}"]{animation:dt-card-arrival ${f.delay+600}ms ease-out}`).join("\n")}</style>{flights.map(f=><div key={f.key} className="dt-draw-flight" onAnimationEnd={()=>setFlights(old=>old.filter(item=>item.key!==f.key))} style={{left:f.x,top:f.y,width:f.width,height:f.height,animationDelay:`${f.delay}ms`,'--draw-x':`${f.dx}px`,'--draw-y':`${f.dy}px`} as CSSProperties}><span className="dt-card-back"><span className="dt-back-orbit"/><img src="/branding/dueltheory-crest.png" alt=""/></span></div>)}</div>;
 }

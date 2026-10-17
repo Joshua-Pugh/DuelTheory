@@ -42,7 +42,7 @@ describe('tabletop counter and die tools',()=>{
   svc.dispatch(id,{type:'NORMAL_SUMMON',seat:0,instanceId:card,zone:0,position:'attack'});
   const state=svc.getState(id),actions=svc.getLegalActions(id,0);
   const html=renderToStaticMarkup(<DuelField state={state} catalog={[breaker]} actions={actions} onAction={()=>{}} onManual={()=>{}} manualMode={false} onSkipPhase={()=>{}} onUndo={()=>{}} onVerify={()=>{}} onExit={()=>{}} notice=""/>);
-  expect(html).toContain('Place a Spell Counter on Breaker?');expect(html).toContain('Place counter');
+  expect(html).toContain('Breaker must gain its Spell Counter');expect(html).toContain('Resolve required effect');expect(html).not.toContain('No · skip effect');
  });
 });
 describe('legal battle shortcuts',()=>{
