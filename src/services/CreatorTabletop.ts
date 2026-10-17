@@ -33,7 +33,7 @@ export function tabletopDispatch(state:TabletopState,action:TabletopAction):Tabl
  if(action.type==='MOVE'){
   const c=locate(action.instanceId);const key=`${action.seat}:${action.zone}`;if(!s.piles[key])throw Error('Unknown destination zone');
   const definition=s.definition.zones.find(z=>z.id===action.zone);
-  if(definition&&s.piles[key].length>=definition.slots)throw Error(`${definition.label} is full`);
+  if(definition&&definition.slots>0&&s.piles[key].length>=definition.slots)throw Error(`${definition.label} is full`);
   const sourceKey=`${c.controller}:${c.zone}`;if(sourceKey===key)throw Error('Card is already in this zone');const list=s.piles[sourceKey];if(!list||!list.includes(c.instanceId))throw Error('Card not found in its source zone');
   list.splice(list.indexOf(c.instanceId),1);s.piles[key].push(c.instanceId);c.controller=action.seat;c.zone=action.zone;
   c.faceDown=action.faceDown??(definition?.faceDownDefault??action.zone==='deck');c.rotated=false;
