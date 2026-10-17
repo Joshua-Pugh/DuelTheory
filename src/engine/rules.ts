@@ -91,6 +91,15 @@ function bookActions(s:DuelState,ctx:EngineContext,seat:Seat):LegalAction[]{
  return actions;
 }
 /** Conservative action generator. Response windows beyond an already-open chain are not implemented. */
+function ritualChoices(s:DuelState,ctx:EngineContext,seat:Seat,only?:string):LegalAction[]{const p=s.players[seat],actions:LegalAction[]=[];
+ for(const spellId of (only?[only]:[...p.hand,...p.zones.spell.filter((id):id is string=>id!==null&&Boolean(s.cards[id].faceDown))])){const definition=ritualDefinitions[s.cards[spellId].cardId];if(!definition)continue;
+ for(const ritualId of p.hand){const ritual=getCard(s,ritualId,ctx);if(!definition.eligible(ritual))continue;
+ const combos=materialCombinations(s,ctx,seat,Number(ritual.level),[spellId,ritualId],definition.levelRule);
+ for(let zone=0;zone<5;zone++)if(only?zone===(s.cards[only].zone??0):p.zones.spell[zone]===null||p.zones.spell[zone]===spellId)for(const materials of combos)for(let monsterZone=0;monsterZone<5;monsterZone++){
+ if(p.zones.monster[monsterZone]!==null&&!materials.includes(p.zones.monster[monsterZone]!))continue;
+ actions.push({type:'ACTIVATE_CONTRACT',seat,instanceId:spellId,zone,ritualId,materials,monsterZone,description:`${definition.label}: Ritual Summon ${ritual.name} with ${definition.levelRule==='EXACT'?'exactly':'at least'} ${ritual.level} Levels`});
+ }}}
+return actions;}
 export function legalActions(s:DuelState,ctx:EngineContext,seat:Seat):LegalAction[]{
  if(s.winner!==null||s.drawnGame)return [];
  if(s.pendingRoll)return seat===s.pendingRoll.controller?[{type:'COMPLETE_DIE_ROLL',seat,description:'Apply the die result'}]:[];
@@ -138,9 +147,10 @@ export function legalActions(s:DuelState,ctx:EngineContext,seat:Seat):LegalActio
   return actions;
  }
  if(s.pendingTriggers?.length)return triggerOptions(s,ctx,seat);
+ if(s.pendingRitual){if(seat!==s.pendingRitual.controller)return [];const choices=ritualChoices(s,ctx,seat,s.pendingRitual.sourceId);return choices.length?choices:[{type:'FINISH_RITUAL',seat,description:'Ritual has no remaining legal materials'}];}
  if(s.pendingSearch){if(s.pendingSearch.controller!==seat)return [];return [{type:'DECLINE_TRIGGER',seat,description:'Decline optional search trigger'},...ritualSearchable(s,ctx,seat,s.pendingSearch.kind).map(searchId=>({type:'TRIGGER_SEARCH' as const,seat,sourceId:s.pendingSearch!.sourceId,searchId,description:`Activate search trigger: add ${getCard(s,searchId,ctx).name} to hand`}))];}
  if(s.chain.length){if(seat!==s.priority)return [];const actions=[...mstActions(s,ctx,seat),...bookActions(s,ctx,seat),...deckResponseActions(s,ctx,seat)];actions.push({type:'PASS_CHAIN',seat,description:'Pass chain response priority'});if(s.consecutivePasses===1)actions.push({type:'RESOLVE_CHAIN',seat,description:'Resolve chain (both players passed)'});return actions;}
- if(s.summonResponse){if(seat!==other(s.summonResponse.summoner))return [];return [...deckResponseActions(s,ctx,seat),{type:'PASS_SUMMON_RESPONSE',seat,description:'Continue after summon'}];}
+ if(s.summonResponse){if(seat!==(s.summonResponse.priority??other(s.summonResponse.summoner)))return [];return [...deckResponseActions(s,ctx,seat),{type:'PASS_SUMMON_RESPONSE',seat,description:'Continue after summon'}];}
  if(s.current!==seat)return [];
  if(s.pendingDraw)return [{type:'DRAW_PHASE',seat,description:s.turn===1?'Begin first turn (no opening draw)':'Draw for Draw Phase'}];
  const actions:LegalAction[]=[];
@@ -177,13 +187,8 @@ export function legalActions(s:DuelState,ctx:EngineContext,seat:Seat):LegalActio
  for(let i=0;i<materials.length;i++){const sets=need===1?[[materials[i]]]:materials.slice(i+1).map(x=>[materials[i],x]);
  for(const chosen of sets)for(let zone=0;zone<5;zone++)if(p.zones.monster[zone]===null||chosen.includes(p.zones.monster[zone]!))for(const position of ['attack','faceDownDefense'] as const)actions.push({type:'TRIBUTE_SUMMON',seat,instanceId:id,zone,materials:chosen,position,description:`Tribute ${chosen.length} monster(s) to ${position==='attack'?'Summon':'Set'} ${c.name}`});}}
  // Data-driven Ritual definitions: eligibility and Level rule vary by Spell.
- for(const spellId of [...p.hand,...p.zones.spell.filter((id):id is string=>id!==null&&Boolean(s.cards[id].faceDown))]){const definition=ritualDefinitions[s.cards[spellId].cardId];if(!definition)continue;
- for(const ritualId of p.hand){const ritual=getCard(s,ritualId,ctx);if(!definition.eligible(ritual))continue;
- const combos=materialCombinations(s,ctx,seat,Number(ritual.level),[spellId,ritualId],definition.levelRule);
- for(let zone=0;zone<5;zone++)if(p.zones.spell[zone]===null||p.zones.spell[zone]===spellId)for(const materials of combos)for(let monsterZone=0;monsterZone<5;monsterZone++){
- if(p.zones.monster[monsterZone]!==null&&!materials.includes(p.zones.monster[monsterZone]!))continue;
- actions.push({type:'ACTIVATE_CONTRACT',seat,instanceId:spellId,zone,ritualId,materials,monsterZone,description:`${definition.label}: Ritual Summon ${ritual.name} with ${definition.levelRule==='EXACT'?'exactly':'at least'} ${ritual.level} Levels`});
- }}}
+ const rituals=ritualChoices(s,ctx,seat);actions.push(...rituals);
+ for(const a of rituals)if(a.type==='ACTIVATE_CONTRACT'&&!actions.some(x=>x.type==='BEGIN_RITUAL'&&x.instanceId===a.instanceId&&x.zone===a.zone))actions.push({type:'BEGIN_RITUAL',seat,instanceId:a.instanceId,zone:a.zone,description:'Activate Ritual Spell'});
  }
  actions.push(...mstActions(s,ctx,seat),...bookActions(s,ctx,seat),...deckResponseActions(s,ctx,seat));
  actions.push({type:'ADVANCE',seat,description:`Proceed from ${s.phase} to next phase`});return actions;
@@ -251,7 +256,7 @@ function calculateBasicDamage(s:DuelState,ctx:EngineContext){
   const defense=Number(wasDefense?defenderCard.def:battleAttack(s,pending.targetId,ctx));
   if(!Number.isFinite(defense)||defense<0)throw new DuelEngineError('UNSUPPORTED_EFFECT','Defender stat unavailable');
   if(atk>defense){
-   if(pending.targetId && (target.cardId===DD_WARRIOR_LADY||attacker.cardId===DD_WARRIOR_LADY))(pending.battleDestruction??=[]).push(pending.targetId);else if(attacker.cardId===40737112)toBanished(s,pending.targetId);else toGraveyard(s,pending.targetId,'battle');
+   if(pending.targetId && (target.cardId===DD_WARRIOR_LADY||attacker.cardId===DD_WARRIOR_LADY))(pending.battleDestruction??=[]).push(pending.targetId);else if(attacker.cardId===40737112)toBanished(s,pending.targetId,true);else toGraveyard(s,pending.targetId,'battle');
    if(!wasDefense)s.players[opponent].lp=Math.max(0,s.players[opponent].lp-(atk-defense));
   }else if(atk<defense){
    if(!wasDefense){if(target.cardId===DD_WARRIOR_LADY||attacker.cardId===DD_WARRIOR_LADY)(pending.battleDestruction??=[]).push(pending.attackerId);else toGraveyard(s,pending.attackerId,'battle');s.players[seat].lp=Math.max(0,s.players[seat].lp-(defense-atk));}
@@ -346,7 +351,9 @@ export function dispatchDuel(original:DuelState,action:DuelAction,ctx:EngineCont
  case 'TRIGGER_SEARCH':{const pending=s.pendingSearch!;s.pendingSearch=undefined;s.chain.push({instanceId:pending.sourceId,controller:seat,effectId:'SEARCH_RITUAL',targets:[],spellSpeed:1,searchIds:[action.searchId]});s.priority=other(seat);s.consecutivePasses=0;log(s,'ACTIVATE',`Triggered search of ${getCard(s,action.searchId,ctx).name}.`,seat);break;}
  case 'ACTIVATE_THUNDER_DRAGON':{removeFromHand(p,action.instanceId);toGraveyard(s,action.instanceId);s.chain.push({instanceId:action.instanceId,controller:seat,effectId:'THUNDER_SEARCH',targets:[],spellSpeed:1,searchIds:action.searchIds});s.priority=other(seat);s.consecutivePasses=0;log(s,'ACTIVATE',`Thunder Dragon discarded as cost to search up to two copies.`,seat);break;}
  case 'TRIBUTE_SUMMON':{const card=getCard(s,action.instanceId,ctx);for(const id of action.materials)sendMaterialToGraveyard(s,id,seat);removeFromHand(p,action.instanceId);placeMonster(s,action.instanceId,seat,action.zone,action.position,['attack','faceDownDefense']);p.normalSummoned=true;enqueueApprenticeSummon(s,action.instanceId,seat);summonDeckTriggers(s,action.instanceId,true);log(s,'TRIBUTE_SUMMON',`${card.name} ${action.position==='faceDownDefense'?'Tribute Set':'Tribute Summoned'} using ${action.materials.length} monster(s).`,seat);break;}
- case 'ACTIVATE_CONTRACT':{if(s.cards[action.instanceId].location==='hand')removeFromHand(p,action.instanceId);p.zones.spell[action.zone]=action.instanceId;Object.assign(s.cards[action.instanceId],{location:'spell',zone:action.zone,faceDown:false});s.chain.push({instanceId:action.instanceId,controller:seat,effectId:'CONTRACT_RITUAL',targets:[],spellSpeed:1,ritual:{ritualId:action.ritualId,materials:action.materials,monsterZone:action.monsterZone}});s.priority=other(seat);s.consecutivePasses=0;log(s,'ACTIVATE',`${ritualDefinitions[s.cards[action.instanceId].cardId].label} activated; Ritual materials selected.`,seat);break;}
+ case 'BEGIN_RITUAL':{if(s.cards[action.instanceId].location==='hand')removeFromHand(p,action.instanceId);p.zones.spell[action.zone]=action.instanceId;Object.assign(s.cards[action.instanceId],{location:'spell',zone:action.zone,faceDown:false});s.chain.push({instanceId:action.instanceId,controller:seat,effectId:'RITUAL_CHOOSE',targets:[],spellSpeed:1});s.priority=other(seat);s.consecutivePasses=0;log(s,'ACTIVATE','Ritual Spell activated; choose materials when it resolves.',seat);break;}
+ case 'FINISH_RITUAL':{const pending=s.pendingRitual!;s.pendingRitual=undefined;if(s.cards[pending.sourceId].location==='spell')toGraveyard(s,pending.sourceId,'rule');log(s,'RITUAL_FAILED','No legal Ritual selection remains.',seat);break;}
+ case 'ACTIVATE_CONTRACT':{const resolving=Boolean(s.pendingRitual);s.pendingRitual=undefined;if(!resolving){if(s.cards[action.instanceId].location==='hand')removeFromHand(p,action.instanceId);p.zones.spell[action.zone]=action.instanceId;Object.assign(s.cards[action.instanceId],{location:'spell',zone:action.zone,faceDown:false});}s.chain.push({instanceId:action.instanceId,controller:seat,effectId:'CONTRACT_RITUAL',targets:[],spellSpeed:1,ritual:{ritualId:action.ritualId,materials:action.materials,monsterZone:action.monsterZone}});s.priority=other(seat);s.consecutivePasses=0;log(s,'ACTIVATE',`${ritualDefinitions[s.cards[action.instanceId].cardId].label} activated; Ritual materials selected.`,seat);if(resolving)resolveChain(s,ctx);break;}
  case 'SET_SPELL_TRAP':{const card=getCard(s,action.instanceId,ctx);removeFromHand(p,action.instanceId);p.zones.spell[action.zone]=action.instanceId;Object.assign(s.cards[action.instanceId],{location:'spell',zone:action.zone,faceDown:true,setTurn:s.turn});log(s,'SET',`${card.name} set to spell/trap zone ${action.zone+1}`,seat);break;}
  case 'CHOOSE_DISCARD':{
   const pending=s.pendingDiscard!;
@@ -379,7 +386,7 @@ export function dispatchDuel(original:DuelState,action:DuelAction,ctx:EngineCont
  return s;
 }
 function reshuffleAfterSearch(deck:string[],s:DuelState,seat:Seat){let seed=(s.seed+Math.imul(s.turn,9187)+s.events.length*8719+seat*17)>>>0;const result=[...deck];for(let i=result.length-1;i>0;i--){seed=(Math.imul(seed,1664525)+1013904223)>>>0;const j=Math.floor(seed/4294967296*(i+1));[result[i],result[j]]=[result[j],result[i]];}return result;}
-function resolveChain(s:DuelState,resolveContext:EngineContext){const priorSummon=s.summonResponse?.sourceId;while(s.chain.length&&s.winner===null&&!s.drawnGame){const link=s.chain.pop()!;if(resolveDeckEffect(s,link,resolveContext)){if(s.pendingDiscard||s.pendingDeckChoice||s.pendingRoll||s.pendingRandomDiscard)return;}else if(link.effectId==='SANGAN_SEARCH'){
+function resolveChain(s:DuelState,resolveContext:EngineContext){const priorSummon=s.summonResponse?.sourceId;while(s.chain.length&&s.winner===null&&!s.drawnGame){const link=s.chain.pop()!;if(link.effectId==='RITUAL_CHOOSE'){s.pendingRitual={sourceId:link.instanceId,controller:link.controller};s.consecutivePasses=0;s.priority=s.current;return;}else if(resolveDeckEffect(s,link,resolveContext)){if(s.pendingDiscard||s.pendingDeckChoice||s.pendingRoll||s.pendingRandomDiscard)return;}else if(link.effectId==='SANGAN_SEARCH'){
  const id=link.targets[0];const success=Boolean(id)&&addDeckCardToHand(s,link.controller,id,resolveContext,x=>{const c=getCard(s,x,resolveContext);return c.type.includes('Monster')&&typeof c.atk==='number'&&c.atk<=1500;});
  s.players[link.controller].deck=reshuffleAfterSearch(s.players[link.controller].deck,s,link.controller);
  log(s,'RESOLVE',`Sangan search ${success?'succeeded':'found no valid selection'}.`,link.controller);

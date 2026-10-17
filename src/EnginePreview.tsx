@@ -1,5 +1,5 @@
 import {DIE_ROLL_DURATION} from './DuelEffectAnimations';
-import {shouldAutoResolve} from './duelResolution';
+import {shouldAutoResolve,unopposedResponse} from './duelResolution';
 import {directAttackQueue} from './battleShortcuts';
 import {useEffect,useMemo,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
@@ -50,12 +50,12 @@ export default function EnginePreview({deck,catalog,preferences,onOpenPreference
  // Deal animations run first; every later Draw Phase draws once without a separate deck click.
  useEffect(()=>{
   if(preferences.mode==='manual'||!id||!duel||!showDuel||coinSeed!==null||reveal||suppressAuto.current||(duel.winner!==null||duel.drawnGame))return;
-  const automatic=duel.pendingRoll?actions.find(a=>a.type==='COMPLETE_DIE_ROLL'):duel.pendingDraw?actions.find(a=>a.type==='DRAW_PHASE'):shouldAutoResolve(duel)?actions.find(a=>a.type==='PASS_CHAIN'):actions.find(a=>a.type==='ADVANCE_DAMAGE_STEP');
+  const automatic=duel.pendingRoll?actions.find(a=>a.type==='COMPLETE_DIE_ROLL'):duel.pendingDraw?actions.find(a=>a.type==='DRAW_PHASE'):unopposedResponse(actions)??actions.find(a=>a.type==='ADVANCE_DAMAGE_STEP');
   if(!automatic)return;
   const timer=window.setTimeout(()=>{
    if(suppressAuto.current)return;
    const fresh=sessionActions(id).find(a=>a.type===automatic.type);if(fresh)commit(()=>service.dispatch(id,fresh));
-  },duel.pendingRoll?(window.matchMedia('(prefers-reduced-motion: reduce)').matches?100:DIE_ROLL_DURATION):duel.events.length===1?1400:shouldAutoResolve(duel)?180:400);
+  },duel.pendingRoll?(window.matchMedia('(prefers-reduced-motion: reduce)').matches?100:DIE_ROLL_DURATION):duel.events.length===1?1400:shouldAutoResolve(duel,actions)?250:400);
   return()=>window.clearTimeout(timer);
  },[id,duel,showDuel,coinSeed,reveal,acknowledgedReveal,preferences.mode]);
  const undo=()=>{setAttackQueue(null);if(!id)return;try{const count=service.getHistory(id).actions.length;if(count){const rewound=service.rewind(id,count-1);suppressAuto.current=!rewound.pendingRoll;setAcknowledgedReveal(0);setDuel(rewound);setNotice(rewound.pendingRoll?'Replaying the same die result after Undo.':'Rewound one action. Automatic progression paused until your next action.');}}catch(e){setError(e instanceof Error?e.message:String(e));}};

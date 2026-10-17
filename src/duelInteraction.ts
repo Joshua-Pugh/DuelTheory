@@ -11,6 +11,7 @@ export function actionLabel(a:LegalAction):string {
   case 'DECLARE_ATTACK':return a.targetId?'Attack…':'Direct attack';
   case 'ACTIVATE_DECK_EFFECT':return a.effectId==='ZORC_ROLL'?'Activate · roll a die':'Activate effect…';
   case 'SPECIAL_SUMMON_CHAOS':return `Special Summon · ${a.position==='attack'?'ATK':'DEF'}`;
+  case 'BEGIN_RITUAL':return 'Activate · Ritual Summon';
   case 'ACTIVATE_CONTRACT':return 'Activate · Ritual Summon';
   case 'ACTIVATE_THUNDER_DRAGON':return 'Discard & search deck…';
   case 'TRIGGER_SEARCH':return 'Activate · search deck…';
@@ -22,7 +23,7 @@ export function actionLabel(a:LegalAction):string {
 }
 export function cardActionGroups(actions:LegalAction[],id:string){
  const groups=new Map<string,{label:string;options:LegalAction[]}>();
- for(const action of actions.filter(a=>actionSource(a)===id)){
+ for(const action of actions.filter(a=>actionSource(a)===id&&!(a.type==='ACTIVATE_CONTRACT'&&actions.some(x=>x.type==='BEGIN_RITUAL'&&x.instanceId===id)))){
   const label=actionLabel(action),key=`${action.type}:${label}`;
   if(!groups.has(key))groups.set(key,{label,options:[]});
   groups.get(key)!.options.push(action);
@@ -32,7 +33,7 @@ export function cardActionGroups(actions:LegalAction[],id:string){
 export type ChoiceField='costId'|'declaredType'|'discardIds'|'ritualId'|'materials'|'searchIds'|'searchId'|'choiceId'|'targetId'|'monsterZone'|'zone';
 export type ChoiceStep={field:ChoiceField;title:string;kind:'cards'|'target'|'zone'|'option';ids:string[];sets:string[][];multiple:boolean;owner:Seat;zoneKind?:'monster'|'spell';zones?:number[];deck:boolean};
 export const actionValue=(a:LegalAction,field:ChoiceField):unknown=>(a as unknown as Record<string,unknown>)[field];
-const spellActivation=(a:LegalAction)=>a.type.startsWith('ACTIVATE_')&&'zone' in a;
+const spellActivation=(a:LegalAction)=>(a.type.startsWith('ACTIVATE_')||a.type==='BEGIN_RITUAL')&&'zone' in a;
 /** Each step narrows existing legal actions; the UI never constructs a rules action. */
 export function nextChoice(options:LegalAction[],done:ChoiceField[],state:DuelState):ChoiceStep|undefined {
  const first=options[0];if(!first)return;

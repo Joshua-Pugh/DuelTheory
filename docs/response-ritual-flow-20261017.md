@@ -1,0 +1,15 @@
+# Response windows, linked cards and Ritual flow — October 17, 2026
+
+Guided/competitive progression now auto-passes attack, summon and chain windows only when the rules engine offers no supported legal card response. A card's mere presence in a Spell/Trap Zone no longer causes a prompt. Legal Quick-Play/Trap responses still pause play, including an eligible response from hand. Mandatory effects and player choices are not skipped. Manual mode retains explicit progression. This uses implemented effect coverage, not a claim that all GOAT effects are already supported.
+
+Previously Set Torrential Tribute can respond to the player's own summon. Both seats can receive the summon-response opportunity when eligible. The engine still prevents activation on the turn the Trap was Set. Snatch Steal remains an Equip Spell with normal Main Phase activation, including when previously Set; it cannot be activated during the opponent's turn.
+
+Call of the Haunted is destroyed when its linked monster is destroyed, including destruction that sends Dark Magician of Chaos to banishment instead of the GY or a monster destroyed and banished by DMOC in battle. It correctly remains without a link when the monster is banished without destruction, returned to hand, turned face-down, or Tributed. Ritual/Tribute materials now use the non-destruction cost movement reason. Leaving the field still applies Call's linked-monster destruction.
+
+The new Ritual UI starts with BEGIN_RITUAL: place the Spell face-up, open a response chain, then enter a required pendingRitual selection when it resolves. Choose the Ritual Monster, materials and destination using freshly validated combinations. Completing that choice resolves the summon and Spell cleanup without asking to resolve the same activation again. A destroyed-but-not-negated Ritual Spell can still resolve from the GY. Legacy complete ACTIVATE_CONTRACT actions are retained for existing engine fixtures; the UI offers the new activation sequence.
+
+Deck-to-hand animations now include searches such as Thunder Dragon. Temporary visibility prevents the destination card from appearing before its arrival animation completes. New hand-to-field flights show Normal Summons, Sets, Ritual activations and other cards played from hand; face-down placements use the DT back. Reduced-motion users receive immediate placement. GY animations remain in place.
+
+Browser verification used the saved Ritual fixture, seed 1194: Pot draws automatically with no empty popup; Contract appears on field before material selection; choosing Zorc plus Thunder Dragon/Tribe materials summons and cleans up in one resolution. Replay verified after 10 actions and after an unopposed 2700 direct attack at 31 actions, with opponent LP at 5300 and no attack-response popup.
+
+Next milestone requested: choose the opponent's sourced GOAT tournament deck in duel setup before the coin flip, then build effect coverage for those decks (Chaos Turbo, Goat Control and Reasoning Gate are initial candidates). AI decision-making remains a separate implementation task; deck selection alone does not provide an AI opponent.

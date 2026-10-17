@@ -14,7 +14,7 @@ function applyManualMove(before:DuelState,action:ManualMove):DuelState{
  const s=structuredClone(before), c=s.cards[action.instanceId];
  if(!c)throw new DuelEngineError('UNKNOWN_CARD','Manual card instance does not exist');
  if(c.owner!==action.seat && c.controller!==action.seat)throw new DuelEngineError('ILLEGAL_ACTION','Manual action requires card owner or controller');
- if(s.chain.length||s.pendingAttack||s.pendingTriggers?.length||s.pendingSearch||s.pendingDiscard||s.pendingDeckChoice||s.pendingRoll||s.pendingRandomDiscard||s.summonResponse)throw new DuelEngineError('ILLEGAL_ACTION','Resolve pending effects before manual movement');
+ if(s.pendingRitual||s.chain.length||s.pendingAttack||s.pendingTriggers?.length||s.pendingSearch||s.pendingDiscard||s.pendingDeckChoice||s.pendingRoll||s.pendingRandomDiscard||s.summonResponse)throw new DuelEngineError('ILLEGAL_ACTION','Resolve pending effects before manual movement');
  const p=s.players[action.seat];
  if(action.destination==='monster'||action.destination==='spell'){
   if(!Number.isInteger(action.zone)||action.zone!<0||action.zone!>4||(p.zones[action.destination][action.zone!]!==null&&p.zones[action.destination][action.zone!]!==action.instanceId))throw new DuelEngineError('ILLEGAL_ACTION','Choose an empty zone (0–4)');
@@ -41,7 +41,7 @@ function applyManualMove(before:DuelState,action:ManualMove):DuelState{
 function applyTabletop(before:DuelState,action:TabletopAction):DuelState{
  if(before.winner!==null||before.drawnGame)throw new DuelEngineError('ILLEGAL_ACTION','The duel has ended');
  if(action.type==='MANUAL_MOVE_CARD')return applyManualMove(before,action);
- if(before.chain.length||before.pendingAttack||before.pendingSearch||before.pendingTriggers?.length||before.pendingDiscard||before.pendingDeckChoice||before.pendingRoll||before.pendingRandomDiscard||before.summonResponse)throw new DuelEngineError('ILLEGAL_ACTION','Resolve pending effects before tabletop actions');
+ if(before.pendingRitual||before.chain.length||before.pendingAttack||before.pendingSearch||before.pendingTriggers?.length||before.pendingDiscard||before.pendingDeckChoice||before.pendingRoll||before.pendingRandomDiscard||before.summonResponse)throw new DuelEngineError('ILLEGAL_ACTION','Resolve pending effects before tabletop actions');
  const s=structuredClone(before),p=s.players[action.seat];
  if(action.type==='MANUAL_ROLL_DIE'){
   s.seed=(Math.imul(s.seed,1664525)+1013904223)>>>0;

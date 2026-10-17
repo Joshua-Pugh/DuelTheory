@@ -36,3 +36,7 @@ Zorc now rolls visibly before applying its result; field-to-GY moves animate; Du
 ## Counters and battle shortcuts — October 17, 2026
 
 Breaker counter placement/badges, center-field tabletop dice/counters, right-click menus and logged overrides, paused automatic progression in Manual, quick attacks and Attack with all are implemented. See [battle-tools-20261017.md](battle-tools-20261017.md) for behavior, limits and file list. Validation: 178 tests across 37 files and production build pass; browser attacks and 45-action replay verified.
+
+## Response and Ritual follow-up — October 17, 2026
+
+See [response-ritual-flow-20261017.md](response-ritual-flow-20261017.md): skip response windows only when no supported legal response exists, own-summon Torrential, Call destruction cleanup, field-first Ritual activation/resolution, search and hand-to-field animations. Next: opponent tournament-deck selector BEFORE the coin flip, then effect coverage for sourced Chaos Turbo, Goat Control and Reasoning Gate lists; AI decision-making remains separate.

@@ -1,7 +1,7 @@
 import {describe,it,expect} from 'vitest';
 import {renderToStaticMarkup} from 'react-dom/server';
 import type {Card,Deck} from '../core/types';
-import {createDuel,toGraveyard,returnToHand,type DuelState,type LegalAction,type Seat} from './model';
+import {createDuel,toGraveyard,toBanished,sendMaterialToGraveyard,returnToHand,type DuelState,type LegalAction,type Seat} from './model';
 import {dispatchDuel,legalActions} from './rules';
 import {battleAttack,TRIBE,TSUKUYOMI,CHAOS_SORCERER,BLS,BREAKER,ZORC,SERPENT,HEAVY_STORM,NOBLEMAN,DUO} from './ritualDeckEffects';
 import {auditDuelState} from '../services/duelAudit';
@@ -26,6 +26,14 @@ function move(s:DuelState,cardId:number,owner:Seat,location:'hand'|'graveyard'|'
 function act(s:DuelState,predicate:(a:LegalAction)=>boolean,seat:Seat=0){const a=legalActions(s,ctx,seat).find(predicate);expect(a).toBeDefined();const next=dispatchDuel(s,a!,ctx);expect(auditDuelState(next)).toEqual([]);return next;}
 function effect(s:DuelState,id:string,name:string){return act(s,a=>a.type==='ACTIVATE_DECK_EFFECT'&&a.instanceId===id&&a.effectId===name);}
 function resolve(s:DuelState){for(let n=0;s.chain.length&&!s.pendingDiscard&&!s.pendingDeckChoice&&s.winner===null&&!s.drawnGame&&n<5;n++)s=act(s,a=>a.type==='PASS_CHAIN',s.priority);return s;}
+
+describe('attachment destruction and own summon responses',()=>{
+ it('destroys Call when its revived monster is destroyed',()=>{let s=setup();const call=move(s,97077563,0,'spell',0,true),target=move(s,1,0,'graveyard');s=resolve(effect(s,call,'CALL'));toGraveyard(s,target,'battle');expect(s.cards[call].location).toBe('graveyard');expect(auditDuelState(s)).toEqual([]);});
+ it('destroys Call when revived DMOC is destroyed and banished instead of sent to GY',()=>{let s=setup();const call=move(s,97077563,0,'spell',0,true),target=move(s,40737112,0,'graveyard');s=resolve(effect(s,call,'CALL'));toGraveyard(s,target,'effect');expect(s.cards[target].location).toBe('banished');expect(s.cards[call].location).toBe('graveyard');expect(auditDuelState(s)).toEqual([]);});
+ it('leaves Call when the monster is banished without destruction or Tributed',()=>{for(const tribute of [false,true]){let s=setup();const call=move(s,97077563,0,'spell',0,true),target=move(s,1,0,'graveyard');s=resolve(effect(s,call,'CALL'));if(tribute)sendMaterialToGraveyard(s,target,0);else toBanished(s,target);expect(s.cards[call].location).toBe('spell');expect(s.cards[call].linkedTarget).toBeUndefined();expect(auditDuelState(s)).toEqual([]);}});
+ it('offers your previously Set Torrential after your own summon',()=>{let s=setup();const trap=move(s,53582587,0,'spell',0,true),unit=move(s,1,0,'hand');s=act(s,a=>a.type==='NORMAL_SUMMON'&&a.instanceId===unit&&a.position==='attack');expect(s.summonResponse?.priority).toBe(0);s=effect(s,trap,'TORRENTIAL');s=resolve(s);expect(s.cards[unit].location).toBe('graveyard');expect(s.cards[trap].location).toBe('graveyard');});
+ it('does not allow previously Set Snatch Steal on the opponent turn',()=>{const s=setup();const snatch=move(s,45986603,1,'spell',0,true);move(s,1,0,'monster');expect(legalActions(s,ctx,1).some(a=>'instanceId' in a&&a.instanceId===snatch)).toBe(false);});
+});
 function battle(s:DuelState,attacker:string,target:string){s.phase='BATTLE';s=act(s,a=>a.type==='DECLARE_ATTACK'&&a.attackerId===attacker&&a.targetId===target);s=act(s,a=>a.type==='PASS_ATTACK_RESPONSE',1);for(let n=0;n<4;n++)s=act(s,a=>a.type==='ADVANCE_DAMAGE_STEP');return s;}
 
 describe('Ritual deck executable effects',()=>{
