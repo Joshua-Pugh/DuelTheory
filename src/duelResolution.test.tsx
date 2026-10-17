@@ -9,7 +9,7 @@ import {dispatchDuel,legalActions} from './engine/rules';
 import type {Card,Deck} from './core/types';
 const cards:Card[]=[{id:44763025,name:'Delinquent Duo',type:'Spell Card',desc:''},{id:97642679,name:'Dark Master - Zorc',type:'Ritual Effect Monster',level:8,atk:2700,def:1500,desc:''},{id:1,name:'Hidden hand monster',type:'Normal Monster',level:4,atk:1800,def:1000,desc:''},{id:5318639,name:'Mystical Space Typhoon',type:'Spell Card',desc:''}];
 const ctx={cards:new Map(cards.map(c=>[c.id,c]))},deck=(ids:number[]):Deck=>({id:'test',name:'test',main:ids,extra:[],side:[]});
-function duoService(count=40){const service=new GameService(),id=service.createGoatSession([deck(Array(40).fill(44763025)),deck(Array(count).fill(1))],cards,19);service.dispatch(id,{type:'DRAW_PHASE',seat:0});service.advancePhase(id,'MAIN_1');return {service,id};}
+function duoService(count=40){const service=new GameService(),id=service.createGoatSession([deck(Array(40).fill(44763025)),deck(Array(count).fill(1))],cards,19,0,'fixture');service.dispatch(id,{type:'DRAW_PHASE',seat:0});service.advancePhase(id,'MAIN_1');return {service,id};}
 function resolveDuo(service:GameService,id:string){service.dispatch(id,service.getLegalActions(id,0).find(a=>a.type==='ACTIVATE_DECK_EFFECT')!);return service.resolveEffect(id);}
 describe('visible effect checkpoints',()=>{
  it('Duo pauses before the first discard, hides all identities, validates the selected slot, and resumes through the second choice',()=>{

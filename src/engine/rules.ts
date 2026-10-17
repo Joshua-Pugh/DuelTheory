@@ -1,3 +1,4 @@
+import {chaosFlip,chaosEffectIds} from './chaosTurboEffects';
 import {deckMainActions,dispatchDeckEffect,resolveDeckEffect,summonDeckTriggers,faceUpMonsters,battleAttack,deckResponseActions,ritualDeckEffectIds,TSUKUYOMI,SERPENT,SHINATO} from './ritualDeckEffects';
 import {addDeckCardToHand,recoverGraveCard,drawEffect} from './operations';
 import {ritualDefinitions,CONTRACT_WITH_THE_DARK_MASTER,SHINATOS_ARK} from './rituals';
@@ -12,7 +13,7 @@ export const THUNDER_DRAGON=31786629;
 export const SANGAN=26202165;
 export const MAGICIAN_OF_FAITH=31560081;
 export const DEKOICHI=87621407;
-export const MYSTIC_TOMATO=83011277;
+export const MYSTIC_TOMATO=83011278;
 export const SHINING_ANGEL=95956346;
 export const MIRROR_FORCE=44095762;
 export const BOOK_OF_MOON=14087893;
@@ -46,7 +47,9 @@ function triggerOptions(s:DuelState,ctx:EngineContext,seat:Seat):LegalAction[]{
  if(seat!==firstSeat)return [];
  const p=s.players[seat];
  return candidates.filter(t=>t.controller===seat).flatMap(t=>{
-  const ids=t.effectId==='DMOC_RECOVER'?p.graveyard.filter(id=>isSpell(s,id,ctx)):t.effectId==='TSUKUYOMI_SET'?faceUpMonsters(s):t.effectId==='BREAKER_COUNTER'||t.effectId==='SERPENT_RECOVER'?[]:t.effectId==='SANGAN_SEARCH'?p.deck.filter(id=>{const c=getCard(s,id,ctx);return c.type.includes('Monster')&&typeof c.atk==='number'&&c.atk<=1500;}):t.effectId==='MOF_RECOVER'?p.graveyard.filter(id=>isSpell(s,id,ctx)):(t.effectId==='TOMATO_SUMMON'||t.effectId==='SHINING_ANGEL_SUMMON')?p.deck.filter(id=>{const c=getCard(s,id,ctx);return c.type.includes('Monster')&&c.attribute===(t.effectId==='TOMATO_SUMMON'?'DARK':'LIGHT')&&typeof c.atk==='number'&&c.atk<=1500;}):t.effectId==='APPRENTICE_RECRUIT'?p.deck.filter(id=>{const c=getCard(s,id,ctx);return c.type.includes('Monster')&&c.race==='Spellcaster'&&Number(c.level)>0&&Number(c.level)<=2;}):t.effectId==='APPRENTICE_COUNTER'?spellCounterTargets(s):[];
+  if(t.effectId==='KYCOO_BANISH'){const blocked=s.players[other(seat)].zones.monster.some(id=>id&&!s.cards[id].faceDown&&s.cards[id].cardId===88240808);const ids=(blocked?[]:s.players[other(seat)].graveyard).filter(id=>getCard(s,id,ctx).type.includes('Monster')&&(!t.eligibleIds||t.eligibleIds.includes(id))),sets:string[][]=[[]];for(let i=0;i<ids.length;i++){sets.push([ids[i]]);for(let j=i+1;j<ids.length;j++)sets.push([ids[i],ids[j]]);}return sets.map(searchIds=>({type:'ACTIVATE_TRIGGER' as const,seat,sourceId:t.sourceId,searchIds,description:'Kycoo · banish up to two monsters from opponent Graveyard'}));}
+  if(t.effectId==='SPY_SUMMON'){const ids=p.deck.filter(id=>getCard(s,id,ctx).name.startsWith("Gravekeeper's")&&Number(getCard(s,id,ctx).atk)<=1500),zones=p.zones.monster.flatMap((id,i)=>id===null?[i]:[]);if(!ids.length||!zones.length)return [{type:'ACTIVATE_TRIGGER',seat,sourceId:t.sourceId,description:'Resolve Spy without a summon'}];return ids.flatMap(choiceId=>zones.flatMap(monsterZone=>['attack','faceUpDefense'].map(declaredType=>({type:'ACTIVATE_TRIGGER' as const,seat,sourceId:t.sourceId,choiceId,monsterZone,declaredType,description:'Spy · Special Summon a Gravekeeper'}))));}
+  const ids=t.effectId==='NIGHT_DESTROY'?s.players[other(seat)].zones.monster.filter((id):id is string=>Boolean(id)):t.effectId==='NIGHT_RECOVER'?p.graveyard.filter(id=>id!==t.sourceId&&getCard(s,id,ctx).type.includes('Flip')):t.effectId==='DMOC_RECOVER'?p.graveyard.filter(id=>isSpell(s,id,ctx)):t.effectId==='TSUKUYOMI_SET'?faceUpMonsters(s):t.effectId==='BREAKER_COUNTER'||t.effectId==='SERPENT_RECOVER'?[]:t.effectId==='SANGAN_SEARCH'?p.deck.filter(id=>{const c=getCard(s,id,ctx);return c.type.includes('Monster')&&typeof c.atk==='number'&&c.atk<=1500;}):t.effectId==='MOF_RECOVER'?p.graveyard.filter(id=>isSpell(s,id,ctx)):(t.effectId==='TOMATO_SUMMON'||t.effectId==='SHINING_ANGEL_SUMMON')?p.deck.filter(id=>{const c=getCard(s,id,ctx);return c.type.includes('Monster')&&c.attribute===(t.effectId==='TOMATO_SUMMON'?'DARK':'LIGHT')&&typeof c.atk==='number'&&c.atk<=1500;}):t.effectId==='APPRENTICE_RECRUIT'?p.deck.filter(id=>{const c=getCard(s,id,ctx);return c.type.includes('Monster')&&c.race==='Spellcaster'&&Number(c.level)>0&&Number(c.level)<=2;}):t.effectId==='APPRENTICE_COUNTER'?spellCounterTargets(s):[];
   if(t.effectId==='TOMATO_SUMMON'||t.effectId==='SHINING_ANGEL_SUMMON'||t.effectId==='APPRENTICE_RECRUIT'){
    const zones=p.zones.monster.map((v,i)=>v===null?i:-1).filter(i=>i>=0);
    const actions:LegalAction[]=ids.flatMap(choiceId=>zones.map(monsterZone=>({type:'ACTIVATE_TRIGGER' as const,seat,sourceId:t.sourceId,choiceId,monsterZone,description:`${t.effectId==='APPRENTICE_RECRUIT'?'Apprentice Magician':t.effectId==='TOMATO_SUMMON'?'Mystic Tomato':'Shining Angel'}: Special Summon ${getCard(s,choiceId,ctx).name} in zone ${monsterZone+1}`})));
@@ -102,6 +105,7 @@ function ritualChoices(s:DuelState,ctx:EngineContext,seat:Seat,only?:string):Leg
 return actions;}
 export function legalActions(s:DuelState,ctx:EngineContext,seat:Seat):LegalAction[]{
  if(s.winner!==null||s.drawnGame)return [];
+ if(s.pendingChaos){if(seat!==s.pendingChaos.controller)return [];const hand=s.players[other(seat)].hand;const monsters=hand.filter(id=>getCard(s,id,ctx).type.includes('Monster'));return monsters.length?monsters.map(targetId=>({type:'COMPLETE_DUSTSHOOT' as const,seat,targetId,description:'Trap Dustshoot · return a revealed monster'})):[{type:'COMPLETE_DUSTSHOOT',seat,description:'No monster in revealed hand · finish inspection'}];}
  if(s.pendingRoll)return seat===s.pendingRoll.controller?[{type:'COMPLETE_DIE_ROLL',seat,description:'Apply the die result'}]:[];
  if(s.pendingRandomDiscard)return seat===s.pendingRandomDiscard.controller?s.pendingRandomDiscard.order.map((_,index)=>({type:'CHOOSE_RANDOM_DISCARD' as const,seat,index,description:`Select face-down card ${index+1} for the random discard`})) : [];
  if(s.pendingDeckChoice){const pending=s.pendingDeckChoice;if(seat!==pending.controller)return [];return s.players[other(seat)].zones.monster.filter((id):id is string=>id!==null).map(targetId=>({type:'COMPLETE_ZORC' as const,seat,sourceId:pending.sourceId,targetId,description:'Zorc: choose a monster to destroy'}));}
@@ -151,6 +155,7 @@ export function legalActions(s:DuelState,ctx:EngineContext,seat:Seat):LegalActio
  if(s.pendingSearch){if(s.pendingSearch.controller!==seat)return [];return [{type:'DECLINE_TRIGGER',seat,description:'Decline optional search trigger'},...ritualSearchable(s,ctx,seat,s.pendingSearch.kind).map(searchId=>({type:'TRIGGER_SEARCH' as const,seat,sourceId:s.pendingSearch!.sourceId,searchId,description:`Activate search trigger: add ${getCard(s,searchId,ctx).name} to hand`}))];}
  if(s.chain.length){if(seat!==s.priority)return [];const actions=[...mstActions(s,ctx,seat),...bookActions(s,ctx,seat),...deckResponseActions(s,ctx,seat)];actions.push({type:'PASS_CHAIN',seat,description:'Pass chain response priority'});if(s.consecutivePasses===1)actions.push({type:'RESOLVE_CHAIN',seat,description:'Resolve chain (both players passed)'});return actions;}
  if(s.summonResponse){if(seat!==(s.summonResponse.priority??other(s.summonResponse.summoner)))return [];return [...deckResponseActions(s,ctx,seat),{type:'PASS_SUMMON_RESPONSE',seat,description:'Continue after summon'}];}
+ if(s.freeResponse){if(s.freeResponse.priority!==seat)return [];return [...freeResponses(s,ctx,seat),{type:'PASS_FREE_RESPONSE',seat,description:'Continue after response opportunity'}];}
  if(s.current!==seat)return [];
  if(s.pendingDraw)return [{type:'DRAW_PHASE',seat,description:s.turn===1?'Begin first turn (no opening draw)':'Draw for Draw Phase'}];
  const actions:LegalAction[]=[];
@@ -209,7 +214,7 @@ function advanceDamageStep(s:DuelState,ctx:EngineContext){
     const target=s.cards[pending.targetId];
     if(target?.location==='monster' && target.faceDown){
      target.faceDown=false;target.position='faceUpDefense';if(target.cardId===TSUKUYOMI)target.spiritReturnTurn=s.turn;
-     if(target.cardId===MAGICIAN_OF_FAITH||target.cardId===DEKOICHI||target.cardId===TSUKUYOMI)pending.revealedFlip=target.instanceId;
+     if(target.cardId===MAGICIAN_OF_FAITH||target.cardId===DEKOICHI||target.cardId===TSUKUYOMI||target.cardId===24317029||target.cardId===16226786)pending.revealedFlip=target.instanceId;
      log(s,'BATTLE_FLIP',`${getCard(s,target.instanceId,ctx).name} flipped face-up by battle.`,pending.defender);
     }
    }
@@ -227,7 +232,7 @@ function advanceDamageStep(s:DuelState,ctx:EngineContext){
    const flip=pending.revealedFlip;
    if(flip){
     const c=s.cards[flip];
-    (s.pendingTriggers??=[]).push({sourceId:flip,controller:c.owner,effectId:c.cardId===TSUKUYOMI?'TSUKUYOMI_SET':c.cardId===MAGICIAN_OF_FAITH?'MOF_RECOVER':'DEKOICHI_DRAW',mandatory:true});
+    (s.pendingTriggers??=[]).push({sourceId:flip,controller:c.owner,effectId:c.cardId===24317029?'SPY_SUMMON':c.cardId===16226786?'NIGHT_DESTROY':c.cardId===TSUKUYOMI?'TSUKUYOMI_SET':c.cardId===MAGICIAN_OF_FAITH?'MOF_RECOVER':'DEKOICHI_DRAW',mandatory:true});
     log(s,'TRIGGER_QUEUED',`${getCard(s,flip,ctx).name} Flip Effect queued after damage, including if destroyed.`,c.owner);
    }
    if(pending.shinatoDamage)(s.pendingTriggers??=[]).push({sourceId:pending.attackerId,controller:pending.attacker,effectId:'SHINATO_DAMAGE',mandatory:true,value:pending.shinatoDamage});
@@ -243,6 +248,8 @@ function calculateBasicDamage(s:DuelState,ctx:EngineContext){
  const pending=s.pendingAttack!;const seat=pending.attacker;
  const attacker=s.cards[pending.attackerId];
  const attackerCard=getCard(s,pending.attackerId,ctx);
+ const lpBefore=s.players.map(p=>p.lp),gyBefore=s.players.map(p=>[...p.graveyard]);
+ const battling=[pending.attackerId,...pending.targetId?[pending.targetId]:[]].map(id=>({id,controller:s.cards[id].controller,cardId:s.cards[id].cardId}));
  const atk=battleAttack(s,pending.attackerId,ctx);
  if(!Number.isFinite(atk)||atk<0)throw new DuelEngineError('UNSUPPORTED_EFFECT','Attack value unavailable');
  attacker.attackedTurn=s.turn;attacker.attacksThisTurn={turn:s.turn,count:attacker.attacksThisTurn?.turn===s.turn?attacker.attacksThisTurn.count+1:1};
@@ -263,17 +270,21 @@ function calculateBasicDamage(s:DuelState,ctx:EngineContext){
    else s.players[seat].lp=Math.max(0,s.players[seat].lp-(defense-atk));
   }else if(!wasDefense){if(target.cardId===DD_WARRIOR_LADY||attacker.cardId===DD_WARRIOR_LADY)pending.battleDestruction=[pending.attackerId,pending.targetId];else {toGraveyard(s,pending.attackerId,'battle');toGraveyard(s,pending.targetId,'battle');}}
   if(attacker.cardId===SHINATO&&wasDefense&&target.location==='graveyard')pending.shinatoDamage=Number(defenderCard.atk)||0;
-  if(attacker.cardId===72989439&&atk>defense&&attacker.effectUsedTurn!==s.turn&&(attacker.attacksThisTurn?.count??0)===1)(s.pendingTriggers??=[]).push({sourceId:pending.attackerId,controller:seat,effectId:'BLS_EXTRA_ATTACK',mandatory:false});
+ if(attacker.cardId===72989439&&atk>defense&&attacker.effectUsedTurn!==s.turn&&(attacker.attacksThisTurn?.count??0)===1)(s.pendingTriggers??=[]).push({sourceId:pending.attackerId,controller:seat,effectId:'BLS_EXTRA_ATTACK',mandatory:false});
   log(s,'BATTLE',`${attackerCard.name} attacked ${defenderCard.name} (${atk} vs ${defense} ${wasDefense?'DEF':'ATK'}).`,seat);
  }
+ for(const c of battling)if(c.cardId===88240808&&s.players[other(c.controller)].lp<lpBefore[other(c.controller)])(s.pendingTriggers??=[]).push({sourceId:c.id,controller:c.controller,effectId:'KYCOO_BANISH',mandatory:false,eligibleIds:gyBefore[other(c.controller)]});
 }
+function freeResponses(s:DuelState,ctx:EngineContext,seat:Seat){return [...mstActions(s,ctx,seat),...bookActions(s,ctx,seat),...deckResponseActions(s,ctx,seat)];}
+function openFreeResponse(s:DuelState,ctx:EngineContext){if(s.pendingDraw||s.winner!==null||s.drawnGame)return;const ready=([s.current,other(s.current)] as Seat[]).find(seat=>freeResponses(s,ctx,seat).length);if(ready!==undefined)s.freeResponse={priority:ready,passed:[]};}
 function signature(a:DuelAction){return JSON.stringify(a);}
 export function dispatchDuel(original:DuelState,action:DuelAction,ctx:EngineContext):DuelState{
  // RESOLVE_CHAIN is a convenience action after the first pass: it counts as the second pass.
  if(!legalActions(original,ctx,action.seat).some(x=>signature(Object.fromEntries(Object.entries(x).filter(([k])=>k!=='description')) as DuelAction)===signature(Object.fromEntries(Object.entries(action).filter(([k])=>k!=='description')) as DuelAction)))throw new DuelEngineError('ILLEGAL_ACTION',`Illegal ${action.type} during ${original.phase}; unsupported effects are never silently allowed.`);
  const s=structuredClone(original);const seat=action.seat;const p=s.players[seat];
  switch(action.type){
- case 'ACTIVATE_DECK_EFFECT':case 'SPECIAL_SUMMON_CHAOS':case 'PASS_SUMMON_RESPONSE':case 'COMPLETE_ZORC':case 'COMPLETE_DIE_ROLL':case 'CHOOSE_RANDOM_DISCARD':dispatchDeckEffect(s,action,ctx);if((action.type==='COMPLETE_ZORC'||action.type==='COMPLETE_DIE_ROLL'||action.type==='CHOOSE_RANDOM_DISCARD')&&!s.pendingDiscard&&!s.pendingDeckChoice)resolveChain(s,ctx);break;
+ case 'PASS_FREE_RESPONSE':{const window=s.freeResponse!,next=other(seat);window.passed.push(seat);if(!window.passed.includes(next)&&freeResponses(s,ctx,next).length)window.priority=next;else s.freeResponse=undefined;log(s,'PASS_RESPONSE','Passed the free-chain response opportunity.',seat);break;}
+ case 'COMPLETE_DUSTSHOOT':case 'ACTIVATE_DECK_EFFECT':case 'SPECIAL_SUMMON_CHAOS':case 'PASS_SUMMON_RESPONSE':case 'COMPLETE_ZORC':case 'COMPLETE_DIE_ROLL':case 'CHOOSE_RANDOM_DISCARD':dispatchDeckEffect(s,action,ctx);if((action.type==='COMPLETE_DUSTSHOOT'||action.type==='COMPLETE_ZORC'||action.type==='COMPLETE_DIE_ROLL'||action.type==='CHOOSE_RANDOM_DISCARD')&&!s.pendingDiscard&&!s.pendingDeckChoice)resolveChain(s,ctx);break;
  case 'DECLARE_ATTACK':{
   s.pendingAttack={attackerId:action.attackerId,targetId:action.targetId,attacker:seat,defender:other(seat),defenderField:s.players[other(seat)].zones.monster.filter((id):id is string=>id!==null)};
   s.priority=other(seat);
@@ -326,7 +337,7 @@ export function dispatchDuel(original:DuelState,action:DuelAction,ctx:EngineCont
  }
  case 'FLIP_SUMMON':{
  const instance=s.cards[action.instanceId];instance.faceDown=false;instance.position='attack';instance.lastPositionTurn=s.turn;enqueueApprenticeSummon(s,action.instanceId,seat);summonDeckTriggers(s,action.instanceId);
- const id=instance.cardId;
+ const id=instance.cardId;chaosFlip(s,action.instanceId);
  if(id===MANJU||id===SENJU)s.pendingSearch={sourceId:action.instanceId,controller:seat,kind:id===MANJU?'RITUAL_ANY':'RITUAL_MONSTER'};
  if(id===MAGICIAN_OF_FAITH||id===DEKOICHI)(s.pendingTriggers??=[]).push({sourceId:action.instanceId,controller:seat,effectId:id===MAGICIAN_OF_FAITH?'MOF_RECOVER':'DEKOICHI_DRAW',mandatory:true});
  log(s,'FLIP_SUMMON',`${getCard(s,action.instanceId,ctx).name} was Flip Summoned.`,seat);break;
@@ -340,12 +351,12 @@ export function dispatchDuel(original:DuelState,action:DuelAction,ctx:EngineCont
  case 'ACTIVATE_TRIGGER':{
  const index=s.pendingTriggers!.findIndex(t=>t.sourceId===action.sourceId&&t.controller===seat);
  const [t]=s.pendingTriggers!.splice(index,1);
- s.chain.push({instanceId:t.sourceId,controller:seat,effectId:t.effectId,targets:action.choiceId?[action.choiceId]:[],spellSpeed:1,monsterZone:action.monsterZone,value:t.value});
+ s.chain.push({instanceId:t.sourceId,controller:seat,effectId:t.effectId,targets:action.choiceId?[action.choiceId]:[],spellSpeed:1,monsterZone:action.monsterZone,value:t.value,declaredType:action.declaredType,searchIds:action.searchIds});
  // All mandatory triggers must join the chain before any response is allowed.
  s.priority=s.pendingTriggers!.length?(s.pendingTriggers!.some(x=>x.controller===s.current)?s.current:other(s.current)):other(seat);
  s.consecutivePasses=0;log(s,'ACTIVATE',`${t.mandatory?'Mandatory':'Optional'} trigger ${t.effectId} placed as Chain Link ${s.chain.length}.`,seat);break;
  }
- case 'DRAW_PHASE':if(s.turn>1)draw(s,seat,1);else log(s,'DRAW_SKIPPED','First player skips the opening draw.',seat);s.pendingDraw=false;break;
+ case 'DRAW_PHASE':if(s.turn>1)draw(s,seat,1);else log(s,'DRAW_SKIPPED','First player skips the opening draw.',seat);s.pendingDraw=false;openFreeResponse(s,ctx);break;
  case 'NORMAL_SUMMON':{const card=getCard(s,action.instanceId,ctx);removeFromHand(p,action.instanceId);placeMonster(s,action.instanceId,seat,action.zone,action.position||'attack',['attack','faceDownDefense']);const instance=s.cards[action.instanceId];p.normalSummoned=true;enqueueApprenticeSummon(s,action.instanceId,seat);summonDeckTriggers(s,action.instanceId,true);if(!instance.faceDown&&(card.id===MANJU||card.id===SENJU)){s.pendingSearch={sourceId:action.instanceId,controller:seat,kind:card.id===MANJU?'RITUAL_ANY':'RITUAL_MONSTER'};}log(s,'NORMAL_SUMMON',`${card.name} ${instance.faceDown?'set':'Normal Summoned'} to zone ${action.zone+1}`,seat);break;}
  case 'DECLINE_TRIGGER':{log(s,'DECLINE','Optional summon search effect was declined.',seat);s.pendingSearch=undefined;break;}
  case 'TRIGGER_SEARCH':{const pending=s.pendingSearch!;s.pendingSearch=undefined;s.chain.push({instanceId:pending.sourceId,controller:seat,effectId:'SEARCH_RITUAL',targets:[],spellSpeed:1,searchIds:[action.searchId]});s.priority=other(seat);s.consecutivePasses=0;log(s,'ACTIVATE',`Triggered search of ${getCard(s,action.searchId,ctx).name}.`,seat);break;}
@@ -357,7 +368,7 @@ export function dispatchDuel(original:DuelState,action:DuelAction,ctx:EngineCont
  case 'SET_SPELL_TRAP':{const card=getCard(s,action.instanceId,ctx);removeFromHand(p,action.instanceId);p.zones.spell[action.zone]=action.instanceId;Object.assign(s.cards[action.instanceId],{location:'spell',zone:action.zone,faceDown:true,setTurn:s.turn});log(s,'SET',`${card.name} set to spell/trap zone ${action.zone+1}`,seat);break;}
  case 'CHOOSE_DISCARD':{
   const pending=s.pendingDiscard!;
-  for(const id of action.discardIds){removeFromHand(p,id);toGraveyard(s,id);}
+  for(const id of action.discardIds){removeFromHand(p,id);toGraveyard(s,id,'discard');}
   log(s,'DISCARD',`${getCard(s,pending.sourceId,ctx).name}: discarded ${pending.count} selected card(s).`,seat);
   if(s.cards[pending.sourceId].location==='spell')toGraveyard(s,pending.sourceId);
   s.pendingDiscard=undefined;resolveChain(s,ctx);break;
@@ -380,13 +391,13 @@ export function dispatchDuel(original:DuelState,action:DuelAction,ctx:EngineCont
  case 'ACTIVATE_MST':{const instance=s.cards[action.instanceId];if(instance.location==='hand'){removeFromHand(p,action.instanceId);p.zones.spell[action.zone]=action.instanceId;}instance.location='spell';instance.zone=action.zone;instance.faceDown=false;s.chain.push({instanceId:action.instanceId,controller:seat,effectId:'MST_DESTROY',targets:[action.targetId],spellSpeed:2});s.priority=other(seat);s.consecutivePasses=0;log(s,'ACTIVATE',`Chain Link ${s.chain.length}: MST targets ${getCard(s,action.targetId,ctx).name}.`,seat);break;}
  case 'PASS_CHAIN':{s.consecutivePasses++;log(s,'PASS',`Player ${seat+1} passes chain response.`,seat);if(s.consecutivePasses===2){resolveChain(s,ctx);}else s.priority=other(seat);break;}
  case 'RESOLVE_CHAIN':{log(s,'PASS',`Player ${seat+1} passes chain response.`,seat);resolveChain(s,ctx);break;}
- case 'ADVANCE':{if(s.phase==='END'){for(const id of [...s.players[0].zones.monster,...s.players[1].zones.monster])if(id&&s.cards[id].cardId===TSUKUYOMI&&!s.cards[id].faceDown&&s.cards[id].spiritReturnTurn===s.turn){const c=s.cards[id];returnToHand(s,id);log(s,'SPIRIT_RETURN','Tsukuyomi returned to hand in the End Phase.',c.owner);}}const idx=phases.indexOf(s.phase);if(idx===phases.length-1){s.current=other(seat);s.turn++;s.phase='DRAW';s.pendingDraw=true;s.players[s.current].normalSummoned=false;}else{s.phase=phases[idx+1];}if(s.phase==='STANDBY')for(const equip of Object.values(s.cards))if(equip.location==='spell'&&!equip.faceDown&&equip.cardId===45986603&&equip.linkedTarget&&equip.controller!==s.current){s.players[s.current].lp+=1000;log(s,'LP_GAIN','Snatch Steal: gained 1000 LP.',s.current);}if(s.phase==='STANDBY')for(const id of s.players[s.current].graveyard)if(s.cards[id].cardId===SERPENT)(s.pendingTriggers??=[]).push({sourceId:id,controller:s.current,effectId:'SERPENT_RECOVER',mandatory:false});s.priority=s.current;log(s,'PHASE',`Turn ${s.turn}: Player ${s.current+1} ${s.phase}`,s.current);break;}
+ case 'ADVANCE':{if(s.phase==='END'){for(const id of [...s.players[0].zones.monster,...s.players[1].zones.monster])if(id&&s.cards[id].cardId===TSUKUYOMI&&!s.cards[id].faceDown&&s.cards[id].spiritReturnTurn===s.turn){const c=s.cards[id];returnToHand(s,id);log(s,'SPIRIT_RETURN','Tsukuyomi returned to hand in the End Phase.',c.owner);}}const idx=phases.indexOf(s.phase);if(idx===phases.length-1){s.current=other(seat);s.turn++;s.phase='DRAW';s.pendingDraw=true;s.players[s.current].normalSummoned=false;}else{s.phase=phases[idx+1];}if(s.phase==='STANDBY')for(const equip of Object.values(s.cards))if(equip.location==='spell'&&!equip.faceDown&&equip.cardId===45986603&&equip.linkedTarget&&equip.controller!==s.current){s.players[s.current].lp+=1000;log(s,'LP_GAIN','Snatch Steal: gained 1000 LP.',s.current);}if(s.phase==='STANDBY')for(const id of s.players[s.current].graveyard)if(s.cards[id].cardId===SERPENT)(s.pendingTriggers??=[]).push({sourceId:id,controller:s.current,effectId:'SERPENT_RECOVER',mandatory:false});s.priority=s.current;log(s,'PHASE',`Turn ${s.turn}: Player ${s.current+1} ${s.phase}`,s.current);openFreeResponse(s,ctx);break;}
  default:throw new DuelEngineError('ILLEGAL_ACTION','Unsupported action');
  }
  return s;
 }
 function reshuffleAfterSearch(deck:string[],s:DuelState,seat:Seat){let seed=(s.seed+Math.imul(s.turn,9187)+s.events.length*8719+seat*17)>>>0;const result=[...deck];for(let i=result.length-1;i>0;i--){seed=(Math.imul(seed,1664525)+1013904223)>>>0;const j=Math.floor(seed/4294967296*(i+1));[result[i],result[j]]=[result[j],result[i]];}return result;}
-function resolveChain(s:DuelState,resolveContext:EngineContext){const priorSummon=s.summonResponse?.sourceId;while(s.chain.length&&s.winner===null&&!s.drawnGame){const link=s.chain.pop()!;if(link.effectId==='RITUAL_CHOOSE'){s.pendingRitual={sourceId:link.instanceId,controller:link.controller};s.consecutivePasses=0;s.priority=s.current;return;}else if(resolveDeckEffect(s,link,resolveContext)){if(s.pendingDiscard||s.pendingDeckChoice||s.pendingRoll||s.pendingRandomDiscard)return;}else if(link.effectId==='SANGAN_SEARCH'){
+function resolveChain(s:DuelState,resolveContext:EngineContext){const priorSummon=s.summonResponse?.sourceId;while(s.chain.length&&s.winner===null&&!s.drawnGame){const link=s.chain.pop()!;if(link.effectId==='RITUAL_CHOOSE'){s.pendingRitual={sourceId:link.instanceId,controller:link.controller};s.consecutivePasses=0;s.priority=s.current;return;}else if(resolveDeckEffect(s,link,resolveContext)){if(s.pendingChaos||s.pendingDiscard||s.pendingDeckChoice||s.pendingRoll||s.pendingRandomDiscard)return;}else if(link.effectId==='SANGAN_SEARCH'){
  const id=link.targets[0];const success=Boolean(id)&&addDeckCardToHand(s,link.controller,id,resolveContext,x=>{const c=getCard(s,x,resolveContext);return c.type.includes('Monster')&&typeof c.atk==='number'&&c.atk<=1500;});
  s.players[link.controller].deck=reshuffleAfterSearch(s.players[link.controller].deck,s,link.controller);
  log(s,'RESOLVE',`Sangan search ${success?'succeeded':'found no valid selection'}.`,link.controller);
@@ -438,7 +449,7 @@ function resolveChain(s:DuelState,resolveContext:EngineContext){const priorSummo
  }else if(link.effectId==='SAKURETSU_ARMOR'){
   const id=link.targets[0];if(id&&s.cards[id]?.location==='monster'){toGraveyard(s,id);log(s,'RESOLVE','Sakuretsu Armor destroyed the attacking monster.',link.controller);}
   else log(s,'RESOLVE','Sakuretsu Armor did not destroy a monster.',link.controller);
- }else throw new DuelEngineError('UNSUPPORTED_EFFECT','Unknown effect');if(s.cards[link.instanceId].location==='spell'&&!s.cards[link.instanceId].linkedTarget&&s.cards[link.instanceId].cardId!==97077563)toGraveyard(s,link.instanceId,'rule');}if(s.summonResponse?.sourceId===priorSummon)s.summonResponse=undefined;s.consecutivePasses=0;s.priority=s.current;
+ }else throw new DuelEngineError('UNSUPPORTED_EFFECT','Unknown effect');if(s.cards[link.instanceId].location==='spell'&&!s.cards[link.instanceId].linkedTarget&&s.cards[link.instanceId].cardId!==97077563)toGraveyard(s,link.instanceId,'rule');}s.freeResponse=undefined;if(!s.chain.length&&s.deferredTriggers?.length){(s.pendingTriggers??=[]).push(...s.deferredTriggers);s.deferredTriggers=[];}if(s.summonResponse?.sourceId===priorSummon)s.summonResponse=undefined;s.consecutivePasses=0;s.priority=s.current;
  if(s.pendingAttack && s.pendingAttack.damageStep){
   // A Damage Step trigger chain does not restart attack declaration or damage calculation.
   s.priority=s.pendingAttack.attacker;
@@ -456,4 +467,4 @@ function resolveChain(s:DuelState,resolveContext:EngineContext){const priorSummo
   }else {pending.damageStep='START';log(s,'DAMAGE_STEP','Attack response chain resolved. Damage Step begins.',pending.attacker);}
  }
 }
-export function unsupportedEffects(ctx:EngineContext,ids:number[]):string[]{return [...new Set(ids)].filter(id=>!ritualDeckEffectIds.has(id)&&id!==BOOK_OF_MOON&&id!==MIRROR_FORCE&&id!==SAKURETSU_ARMOR&&id!==GRACEFUL_CHARITY&&id!==POT_OF_GREED&&id!==MYSTICAL_SPACE_TYPHOON&&id!==CONTRACT_WITH_THE_ABYSS&&id!==CONTRACT_WITH_THE_DARK_MASTER&&id!==SHINATOS_ARK&&id!==MANJU&&id!==SENJU&&id!==THUNDER_DRAGON&&id!==SANGAN&&id!==MAGICIAN_OF_FAITH&&id!==DEKOICHI&&id!==MYSTIC_TOMATO&&id!==SHINING_ANGEL&&id!==DD_WARRIOR_LADY&&id!==APPRENTICE_MAGICIAN).map(id=>ctx.cards.get(id)?.name||String(id));}
+export function unsupportedEffects(ctx:EngineContext,ids:number[]):string[]{return [...new Set(ids)].filter(id=>!chaosEffectIds.has(id)&&!ritualDeckEffectIds.has(id)&&id!==BOOK_OF_MOON&&id!==MIRROR_FORCE&&id!==SAKURETSU_ARMOR&&id!==GRACEFUL_CHARITY&&id!==POT_OF_GREED&&id!==MYSTICAL_SPACE_TYPHOON&&id!==CONTRACT_WITH_THE_ABYSS&&id!==CONTRACT_WITH_THE_DARK_MASTER&&id!==SHINATOS_ARK&&id!==MANJU&&id!==SENJU&&id!==THUNDER_DRAGON&&id!==SANGAN&&id!==MAGICIAN_OF_FAITH&&id!==DEKOICHI&&id!==MYSTIC_TOMATO&&id!==SHINING_ANGEL&&id!==DD_WARRIOR_LADY&&id!==APPRENTICE_MAGICIAN).map(id=>ctx.cards.get(id)?.name||String(id));}

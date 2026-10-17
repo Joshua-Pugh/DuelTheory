@@ -43,18 +43,18 @@ describe('draw effect resolution',()=>{
  });
 });
 describe('turn progression and response authority',()=>{
- function service(){const service=new GameService(),id=service.createGoatSession([b,b],catalog,17);service.dispatch(id,{type:'DRAW_PHASE',seat:0});service.advancePhase(id,'MAIN_1');return {service,id};}
+ function service(){const service=new GameService(),id=service.createGoatSession([b,b],catalog,17,0,'fixture');service.dispatch(id,{type:'DRAW_PHASE',seat:0});service.advancePhase(id,'MAIN_1');return {service,id};}
  it('EP completes the turn and assigns the next Draw Phase to the opponent',()=>{const {service:s,id}=service();const n=s.advancePhase(id,'END');expect(n).toMatchObject({turn:2,current:1,phase:'DRAW',pendingDraw:true});expect(s.getLegalActions(id,1).map(a=>a.type)).toEqual(['DRAW_PHASE']);expect(s.verifyReplay(id).matches).toBe(true);});
  it('Next from Main 2 finishes End Phase and does not end two turns',()=>{const {service:s,id}=service();s.advancePhase(id,'MAIN_2');expect(s.advancePhase(id,'NEXT')).toMatchObject({turn:2,current:1,phase:'DRAW'});});
  it('skips opening-turn battle with Next and rejects backward phase shortcuts',()=>{const {service:s,id}=service();expect(s.advancePhase(id,'NEXT').phase).toBe('MAIN_2');expect(()=>s.advancePhase(id,'MAIN_1')).toThrow();expect(()=>s.advancePhase(id,'BATTLE')).toThrow();});
  it('replays and rewinds a paused Graceful resolution exactly',()=>{
-  const d=deck(Array(40).fill(GRACEFUL_CHARITY)),s=new GameService(),id=s.createGoatSession([d,b],catalog,17);s.dispatch(id,{type:'DRAW_PHASE',seat:0});s.advancePhase(id,'MAIN_1');s.dispatch(id,s.getLegalActions(id,0).find(a=>a.type==='ACTIVATE_GRACEFUL_CHARITY')!);
+  const d=deck(Array(40).fill(GRACEFUL_CHARITY)),s=new GameService(),id=s.createGoatSession([d,b],catalog,17,0,'fixture');s.dispatch(id,{type:'DRAW_PHASE',seat:0});s.advancePhase(id,'MAIN_1');s.dispatch(id,s.getLegalActions(id,0).find(a=>a.type==='ACTIVATE_GRACEFUL_CHARITY')!);
   const paused=s.resolveEffect(id),checkpoint=s.getHistory(id).actions.length;expect(paused.pendingDiscard?.count).toBe(2);expect(s.verifyReplay(id)).toMatchObject({matches:true,rulesVerified:true});
   expect(()=>s.dispatchManual(id,{type:'MANUAL_DRAW',seat:0})).toThrow();expect(()=>s.advancePhase(id,'END')).toThrow();
   s.dispatch(id,s.getLegalActions(id,0)[0]);expect(s.verifyReplay(id).matches).toBe(true);expect(s.rewind(id,checkpoint)).toEqual(paused);
  });
  it('does not automatically pass a player with a legal response card',()=>{
-  const spells=deck([...Array(20).fill(POT_OF_GREED),...Array(20).fill(MYSTICAL_SPACE_TYPHOON)]),s=new GameService(),id=s.createGoatSession([spells,spells],catalog,17);
+  const spells=deck([...Array(20).fill(POT_OF_GREED),...Array(20).fill(MYSTICAL_SPACE_TYPHOON)]),s=new GameService(),id=s.createGoatSession([spells,spells],catalog,17,0,'fixture');
   const state=s.getState(id);for(const cardId of [MYSTICAL_SPACE_TYPHOON,POT_OF_GREED]){const card=Object.keys(state.cards).find(x=>state.cards[x].owner===0&&state.cards[x].cardId===cardId)!;if(state.cards[card].location!=='hand')s.dispatchManual(id,{type:'MANUAL_MOVE_CARD',seat:0,instanceId:card,destination:'hand'});}
   s.dispatch(id,{type:'DRAW_PHASE',seat:0});s.advancePhase(id,'MAIN_1');s.dispatch(id,s.getLegalActions(id,0).find(a=>a.type==='ACTIVATE_POT_OF_GREED')!);
   // P2 passes; P1 still has an eligible Quick-Play response from hand, which must not be skipped.
@@ -69,7 +69,7 @@ describe('turn progression and response authority',()=>{
  it('blocks opening-turn attacks and phase changes during pending effects',()=>{let s=main();const id=hand(s,1);s=dispatchDuel(s,{type:'NORMAL_SUMMON',seat:0,instanceId:id,zone:0,position:'attack'},ctx);s.phase='BATTLE';expect(legalActions(s,ctx,0).some(a=>a.type==='DECLARE_ATTACK')).toBe(false);});
  it('uses fresh random seeds by default while explicit seeds remain reproducible',()=>{
   const spy=vi.spyOn(globalThis.crypto,'getRandomValues').mockReturnValueOnce(new Uint32Array([17])).mockReturnValueOnce(new Uint32Array([18]));
-  try{const s=new GameService(),x=s.createGoatSession([b,b],catalog),y=s.createGoatSession([b,b],catalog);expect(s.getState(x).seed).toBe(17);expect(s.getState(y).seed).toBe(18);expect(s.getState(x).players[0].hand).not.toEqual(s.getState(y).players[0].hand);const z=s.createGoatSession([b,b],catalog,17);expect(s.getState(z).players[0].hand).toEqual(s.getState(x).players[0].hand);}finally{spy.mockRestore();}
+  try{const s=new GameService(),x=s.createGoatSession([b,b],catalog,undefined,0,'fixture'),y=s.createGoatSession([b,b],catalog,undefined,0,'fixture');expect(s.getState(x).seed).toBe(17);expect(s.getState(y).seed).toBe(18);expect(s.getState(x).players[0].hand).not.toEqual(s.getState(y).players[0].hand);const z=s.createGoatSession([b,b],catalog,17,0,'fixture');expect(s.getState(z).players[0].hand).toEqual(s.getState(x).players[0].hand);}finally{spy.mockRestore();}
  });
 });
 describe('field presentation',()=>{

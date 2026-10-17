@@ -70,7 +70,7 @@ describe('selection and hidden information',()=>{
 describe('the supplied Ritual deck',()=>{
  it('has executable coverage for every unique Main Deck card',()=>{const sourceContext={cards:new Map(sourceDeck.catalog.map(c=>[c.id,c]))};expect(sourceDeck.deck.main).toHaveLength(40);expect(unsupportedEffects(sourceContext,sourceDeck.deck.main)).toEqual([]);});
  it('replays actual Graceful and Ritual choices with the supplied forty-card deck',()=>{
-  const service=new GameService(),id=service.createGoatSession([sourceDeck.deck,sourceDeck.deck],sourceDeck.catalog,1194,0);
+  const service=new GameService(),id=service.createGoatSession([sourceDeck.deck,sourceDeck.deck],sourceDeck.catalog,1194,0,'fixture');
   service.dispatch(id,{type:'DRAW_PHASE',seat:0});expect(service.getState(id).players[0].hand).toHaveLength(5);service.advancePhase(id,'MAIN_1');
   const choose=(test:(a:LegalAction)=>boolean)=>{const a=service.getLegalActions(id,0).find(test);expect(a).toBeDefined();service.dispatch(id,a!);};
   choose(a=>a.type==='ACTIVATE_GRACEFUL_CHARITY');let s=service.resolveEffect(id);expect(s.pendingDiscard?.drawnIds).toHaveLength(3);

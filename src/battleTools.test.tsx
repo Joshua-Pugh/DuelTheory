@@ -7,7 +7,7 @@ import type {Card,Deck} from './core/types';
 import type {LegalAction} from './engine/model';
 const breaker:Card={id:71413901,name:'Breaker the Magical Warrior',type:'Effect Monster',level:4,atk:1600,def:1000,desc:'Spell Counter.'};
 const deck:Deck={id:'tools',name:'Tools',main:Array(40).fill(breaker.id),side:[],extra:[]};
-function setup(){const svc=new GameService(),id=svc.createGoatSession([deck,deck],[breaker],11);return {svc,id,card:svc.getState(id).players[0].hand[0]};}
+function setup(){const svc=new GameService(),id=svc.createGoatSession([deck,deck],[breaker],11,0,'fixture');return {svc,id,card:svc.getState(id).players[0].hand[0]};}
 describe('tabletop counter and die tools',()=>{
  it('adds/removes visible counters, preserves face-up position changes, clears on leaving, and replays overrides',()=>{
   const {svc,id,card}=setup();

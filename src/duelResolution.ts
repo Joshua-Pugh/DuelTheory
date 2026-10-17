@@ -10,7 +10,7 @@ export function shouldAutoResolve(state:DuelState,actions?:LegalAction[]):boolea
 
 /** Mandatory choices and actual card responses are never silently passed. */
 export function unopposedResponse(actions:LegalAction[]):LegalAction|undefined{
- const passes=['PASS_CHAIN','RESOLVE_CHAIN','PASS_ATTACK_RESPONSE','PASS_SUMMON_RESPONSE'];
+ const passes=['PASS_CHAIN','RESOLVE_CHAIN','PASS_ATTACK_RESPONSE','PASS_SUMMON_RESPONSE','PASS_FREE_RESPONSE'];
  if(!actions.length||actions.some(a=>!passes.includes(a.type)))return;
  return actions.find(a=>a.type!=='RESOLVE_CHAIN')??actions[0];
 }

@@ -1,11 +1,13 @@
+import {chaosResponses,chaosMain,resolveChaos} from './chaosTurboEffects';
 import {getCard,log,removeFromHand,toGraveyard,toBanished,placeMonster,seededShuffle,settleLifePoints,detachFaceDown,type DuelState,type EngineContext,type Seat,type LegalAction,type ChainLink} from './model';
 
 export const TRIBE=33184167,TSUKUYOMI=34853266,CHAOS_SORCERER=9596126,BLS=72989439,BREAKER=71413901,ZORC=97642679,SHINATO=86327225,SERPENT=8131171;
 export const HEAVY_STORM=19613556,NOBLEMAN=71044499,DUO=44763025;
-export type DeckEffect='TRIBE_DESTROY'|'CHAOS_BANISH'|'BREAKER_DESTROY'|'ZORC_ROLL'|'HEAVY_STORM'|'NOBLEMAN'|'DUO'|'RING'|'TORRENTIAL'|'CALL'|'PREMATURE'|'SNATCH';
+export type DeckEffect='CARD_DESTRUCTION'|'RAIGEKI_BREAK'|'DUSTSHOOT'|'TRIBE_DESTROY'|'CHAOS_BANISH'|'BREAKER_DESTROY'|'ZORC_ROLL'|'HEAVY_STORM'|'NOBLEMAN'|'DUO'|'RING'|'TORRENTIAL'|'CALL'|'PREMATURE'|'SNATCH';
 export type DeckEffectAction=
  | {type:'ACTIVATE_DECK_EFFECT';seat:Seat;instanceId:string;effectId:DeckEffect;targetId?:string;costId?:string;declaredType?:string;zone?:number;monsterZone?:number}
  | {type:'SPECIAL_SUMMON_CHAOS';seat:Seat;instanceId:string;materials:string[];monsterZone:number;position:'attack'|'faceUpDefense'}
+ | {type:'COMPLETE_DUSTSHOOT';seat:Seat;targetId?:string}
  | {type:'COMPLETE_DIE_ROLL';seat:Seat}
  | {type:'CHOOSE_RANDOM_DISCARD';seat:Seat;index:number}
  | {type:'PASS_SUMMON_RESPONSE';seat:Seat}
@@ -17,7 +19,7 @@ const spells=(s:DuelState)=>[...s.players[0].zones.spell,...s.players[1].zones.s
 export const faceUpMonsters=(s:DuelState)=>monsters(s).filter(id=>!s.cards[id].faceDown);
 export function battleAttack(s:DuelState,id:string,ctx:EngineContext):number{return Number(getCard(s,id,ctx).atk)+(s.cards[id].cardId===BREAKER?(s.cards[id].spellCounters??0)*300:0);}
 export function summonDeckTriggers(s:DuelState,id:string,normal=false){
- const c=s.cards[id];if(c.faceDown)return;const ready=([c.controller,other(c.controller)] as Seat[]).filter(seat=>s.players[seat].zones.spell.some(x=>x&&s.cards[x].cardId===53582587&&s.cards[x].faceDown&&s.cards[x].setTurn!==s.turn));if(ready.length)s.summonResponse={summoner:c.controller,sourceId:id,priority:ready[0]};
+ const c=s.cards[id];if(c.faceDown)return;const ready=([c.controller,other(c.controller)] as Seat[]).filter(seat=>s.players[seat].zones.spell.some(x=>x&&[53582587,83555666,97077563,4178474,64697231].includes(s.cards[x].cardId)&&s.cards[x].faceDown&&s.cards[x].setTurn!==s.turn));if(ready.length)s.summonResponse={summoner:c.controller,sourceId:id,priority:ready[0]};
  if(c.cardId===TSUKUYOMI){c.spiritReturnTurn=s.turn;(s.pendingTriggers??=[]).push({sourceId:id,controller:c.controller,effectId:'TSUKUYOMI_SET',mandatory:true});}
  if(c.cardId===40737112)(s.pendingTriggers??=[]).push({sourceId:id,controller:c.controller,effectId:'DMOC_RECOVER',mandatory:false});
  if(c.cardId===BREAKER&&normal)(s.pendingTriggers??=[]).push({sourceId:id,controller:c.controller,effectId:'BREAKER_COUNTER',mandatory:true});
@@ -45,10 +47,11 @@ export function deckMainActions(s:DuelState,ctx:EngineContext,seat:Seat):LegalAc
    if(c.cardId===DUO&&p.lp>1000&&s.players[other(seat)].hand.length)add(id,'DUO',{zone});
   }
  }
- return actions;
+ return [...actions,...chaosMain(s,seat)];
 }
 export function dispatchDeckEffect(s:DuelState,a:DeckEffectAction,ctx:EngineContext){
  const p=s.players[a.seat];
+ if(a.type==='COMPLETE_DUSTSHOOT'){const pending=s.pendingChaos!;const opponent=s.players[other(a.seat)];if(a.targetId&&opponent.hand.includes(a.targetId)){removeFromHand(opponent,a.targetId);opponent.deck.push(a.targetId);s.cards[a.targetId].location='deck';opponent.deck=seededShuffle(opponent.deck,s.seed+s.events.length*7919);}s.pendingChaos=undefined;if(s.cards[pending.sourceId].location==='spell')toGraveyard(s,pending.sourceId,'rule');log(s,'RESOLVE','Trap Dustshoot hand inspection completed; returned monster shuffled into Deck.',a.seat);return;}
  if(a.type==='COMPLETE_DIE_ROLL'){
   const roll=s.pendingRoll!;s.pendingRoll=undefined;const result=roll.result;log(s,'DIE_RESULT',`Dark Master - Zorc rolled ${result}.`,a.seat);
   if(result===6||result<=2){const owner=result===6?a.seat:other(a.seat);for(const id of [...s.players[owner].zones.monster])if(id)toGraveyard(s,id);}
@@ -57,7 +60,7 @@ export function dispatchDeckEffect(s:DuelState,a:DeckEffectAction,ctx:EngineCont
  }
  if(a.type==='CHOOSE_RANDOM_DISCARD'){
   const pending=s.pendingRandomDiscard!,id=pending.order[a.index];s.pendingRandomDiscard=undefined;
-  removeFromHand(p,id);toGraveyard(s,id);log(s,'RANDOM_DISCARD',`Delinquent Duo: ${getCard(s,id,ctx).name} was selected face-down and discarded.`,a.seat);
+  removeFromHand(p,id);toGraveyard(s,id,'discard');log(s,'RANDOM_DISCARD',`Delinquent Duo: ${getCard(s,id,ctx).name} was selected face-down and discarded.`,a.seat);
   if(p.hand.length){s.pendingDiscard={sourceId:pending.sourceId,controller:a.seat,count:1};s.priority=a.seat;s.consecutivePasses=0;}
   else if(s.cards[pending.sourceId].location==='spell')toGraveyard(s,pending.sourceId,'rule');
   return;
@@ -72,11 +75,13 @@ export function dispatchDeckEffect(s:DuelState,a:DeckEffectAction,ctx:EngineCont
  if(a.effectId==='ZORC_ROLL')c.effectUsedTurn=s.turn;
  if(a.effectId==='DUO')p.lp-=1000;if(a.effectId==='PREMATURE')p.lp-=800;
  if(a.zone!==undefined){if(c.location==='hand')removeFromHand(p,a.instanceId);p.zones.spell[a.zone]=a.instanceId;Object.assign(c,{location:'spell',zone:a.zone,faceDown:false});}
- s.chain.push({instanceId:a.instanceId,controller:a.seat,effectId:a.effectId,targets:a.targetId?[a.targetId]:[],spellSpeed:['RING','TORRENTIAL','CALL'].includes(a.effectId)?2:1,declaredType:a.declaredType,monsterZone:a.monsterZone});s.priority=other(a.seat);s.consecutivePasses=0;
+ s.chain.push({instanceId:a.instanceId,controller:a.seat,effectId:a.effectId,targets:a.targetId?[a.targetId]:[],spellSpeed:['RING','TORRENTIAL','CALL','RAIGEKI_BREAK','DUSTSHOOT'].includes(a.effectId)?2:1,declaredType:a.declaredType,monsterZone:a.monsterZone});s.priority=other(a.seat);s.consecutivePasses=0;
  log(s,'ACTIVATE',`${getCard(s,a.instanceId,ctx).name} activated${a.declaredType?`; declared ${a.declaredType}`:''}.`,a.seat);
 }
 /** Returns true only for effects implemented here. Resolver preserves normal chain ordering. */
 export function resolveDeckEffect(s:DuelState,link:ChainLink,ctx:EngineContext):boolean{
+ const before=link.effectId==='SPY_SUMMON'?new Set(s.players[link.controller].zones.monster.filter(Boolean)):undefined;
+ if(resolveChaos(s,link,ctx)){if(before)for(const id of s.players[link.controller].zones.monster)if(id&&!before.has(id))summonDeckTriggers(s,id);return true;}
  const {controller:seat,effectId}=link,p=s.players[seat],target=link.targets[0],c=s.cards[link.instanceId];
  if(effectId==='RING'){
   if(s.cards[target]?.location==='monster'&&!s.cards[target].faceDown){const damage=battleAttack(s,target,ctx);toGraveyard(s,target);for(const player of s.players)player.lp=Math.max(0,player.lp-damage);settleLifePoints(s);}
@@ -128,9 +133,10 @@ export function deckResponseActions(s:DuelState,ctx:EngineContext,seat:Seat):Leg
   if(c.cardId===53582587&&s.summonResponse)add('TORRENTIAL');
   if(c.cardId===97077563)for(const target of p.graveyard.filter(id=>canRevive(s,id,ctx)))for(let zone=0;zone<5;zone++)if(p.zones.monster[zone]===null)add('CALL',target,zone);
  }
- return actions;
+ return [...actions,...chaosResponses(s,ctx,seat)];
 }
 export const historicalDeckText:Readonly<Record<number,string>>={
+ 16226786:'GOAT effect: FLIP: Destroy 1 monster your opponent controls. When this card is sent directly from the hand to the Graveyard, return 1 Flip Effect Monster from your Graveyard to your hand, except this card. Another copy of Night Assailant is a legal target.',
  26202165:'GOAT effect: When sent from the field to the Graveyard, add a monster with 1500 or less ATK from your Deck to your hand, then shuffle.',
  [SERPENT]:'GOAT effect: During your Standby Phase, you may return this card from your Graveyard to your hand.',
  40737112:'GOAT effect: When Normal or Special Summoned, you may recover a Spell from your Graveyard. Monsters destroyed by this card in battle are banished. If this face-up card leaves the field, banish it.',

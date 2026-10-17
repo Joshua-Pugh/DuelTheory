@@ -41,18 +41,18 @@ describe('card-led duel interactions',()=>{
 });
 describe('recorded tabletop operations',()=>{
  it('searches selected copies, shuffles remaining cards, and replays and rewinds exactly',()=>{
-  const service=new GameService(),id=service.createGoatSession([deck,deck],catalog,17),before=service.getState(id),chosen=before.players[0].deck.slice(4,6);
+  const service=new GameService(),id=service.createGoatSession([deck,deck],catalog,17,0,'fixture'),before=service.getState(id),chosen=before.players[0].deck.slice(4,6);
   const next=service.dispatchManual(id,{type:'MANUAL_SEARCH',seat:0,instanceIds:chosen});
   expect(next.players[0].hand).toEqual([...before.players[0].hand,...chosen]);expect(next.players[0].deck).toHaveLength(before.players[0].deck.length-2);expect(next.players[0].deck).not.toEqual(before.players[0].deck.filter(x=>!chosen.includes(x)));
   expect(service.verifyReplay(id)).toMatchObject({matches:true,rulesVerified:false});expect(service.rewind(id,0)).toEqual(before);
  });
  it('rejects foreign or repeated search choices without mutating the session',()=>{
-  const service=new GameService(),id=service.createGoatSession([deck,deck],catalog),before=service.getState(id),own=before.players[0].deck[0];
+  const service=new GameService(),id=service.createGoatSession([deck,deck],catalog,undefined,0,'fixture'),before=service.getState(id),own=before.players[0].deck[0];
   for(const ids of [[own,own],[before.players[1].deck[0]]])expect(()=>service.dispatchManual(id,{type:'MANUAL_SEARCH',seat:0,instanceIds:ids})).toThrow();
   expect(service.getState(id)).toEqual(before);
  });
  it('can activate a previously Set spell without losing its zone or duplicating cards',()=>{
-  const service=new GameService(),id=service.createGoatSession([deck,deck],catalog),state=service.getState(id),card=state.players[0].hand[0];
+  const service=new GameService(),id=service.createGoatSession([deck,deck],catalog,undefined,0,'fixture'),state=service.getState(id),card=state.players[0].hand[0];
   service.dispatchManual(id,{type:'MANUAL_MOVE_CARD',seat:0,instanceId:card,destination:'spell',zone:2});
   const next=service.dispatchManual(id,{type:'MANUAL_MOVE_CARD',seat:0,instanceId:card,destination:'spell',zone:2,faceDown:false});
   expect(next.cards[card]).toMatchObject({location:'spell',zone:2,faceDown:false});expect(next.players[0].zones.spell.filter(x=>x===card)).toHaveLength(1);expect(service.verifyReplay(id).matches).toBe(true);

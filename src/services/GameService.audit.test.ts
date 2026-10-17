@@ -4,7 +4,7 @@ import {auditDuelState} from './duelAudit';
 import type {Card,Deck} from '../core/types';
 const card:Card={id:100,name:'Test Warrior',type:'Normal Monster',desc:'',level:4,atk:1200,def:1000};
 const deck=(id:string):Deck=>({id,name:id,main:Array(20).fill(100),side:[],extra:[]});
-const create=()=>{const svc=new GameService();const id=svc.createGoatSession([deck('a'),deck('b')],[card],11);return {svc,id};};
+const create=()=>{const svc=new GameService();const id=svc.createGoatSession([deck('a'),deck('b')],[card],11,0,'fixture');return {svc,id};};
 describe('game-service integrity, replay, and manual branch',()=>{
  it('replays legal action history deterministically and allows rewind',()=>{
   const {svc,id}=create();svc.dispatch(id,{type:'DRAW_PHASE',seat:0});
