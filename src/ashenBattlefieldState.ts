@@ -1,8 +1,9 @@
+import type {EffectContinuation} from './framework';
 import {ASHEN_TABLETOP,createTabletop,tabletopDispatch,type TabletopAction,type TabletopState,type TabletopInput} from './services/CreatorTabletop';
 import {ashenCardMap,starterDeck} from './ashenDecks';
 import {RESOURCES,type Resource} from './ashenPresentation';
 export type Basin=Record<Resource,number>;
-export type AshenRulesState={turn:number;fontPlayed:[boolean,boolean];damage:Record<string,number>;modifiers:{id:string;stats:Record<string,number>;keywords:string[];duration:'turn'|'permanent'}[];serial:number;triggerUses?:Record<string,number>;counters?:Record<string,Record<string,number>>};
+export type AshenRulesState={attachments?:Record<string,string>;pending?:{flow:EffectContinuation;label:string};shuffleSeed?:number;turn:number;fontPlayed:[boolean,boolean];damage:Record<string,number>;modifiers:{id:string;stats:Record<string,number>;keywords:string[];duration:'turn'|'permanent'}[];serial:number;triggerUses?:Record<string,number>;counters?:Record<string,Record<string,number>>};
 export const emptyAshenRules=():AshenRulesState=>({turn:1,fontPlayed:[false,false],damage:{},modifiers:[],serial:0});
 export type Battlefield={version:1;table:TabletopState;basins:[Basin,Basin];preview:boolean;rules?:AshenRulesState};
 export const BATTLEFIELD_KEY='dueltheory-ashen-battlefield-v1';
@@ -29,12 +30,17 @@ export function newBattlefield(preview=false,random:()=>number=Math.random):Batt
   }
  }
  table.events=[preview?'Populated layout preview. Cards placed for demonstration; effects and costs are not resolved.':'Manual Ashen Throne playtest started. Resolve card effects and costs yourself.'];
- return {version:1,table,basins:[emptyBasin(),emptyBasin()],preview,rules:emptyAshenRules()};
+ return {version:1,table,basins:[emptyBasin(),emptyBasin()],preview,rules:{...emptyAshenRules(),shuffleSeed:Math.floor(random()*4294967296)>>>0}};
 }
-export type BattlefieldAction=TabletopAction|{type:'BURN';instanceId:string}|{type:'ESSENCE';seat:0|1;resource:Resource;delta:number}|{type:'END_TURN'};
+export type BattlefieldAction=TabletopAction|{type:'BURN';instanceId:string}|{type:'ESSENCE';seat:0|1;resource:Resource;delta:number}|{type:'END_TURN'}|{type:'NAMED_COUNTER';instanceId:string;counter:string;delta:number};
 export function battlefieldDispatch(state:Battlefield,action:BattlefieldAction):Battlefield{
+ if(state.rules?.pending)throw Error('Finish the pending effect choice before taking another action.');
  const next=structuredClone(state);
- if(action.type==='BURN'){
+ if(action.type==='NAMED_COUNTER'){
+  if(!next.table.cards[action.instanceId]||!['momentum','fury'].includes(action.counter)||!Number.isInteger(action.delta)||Math.abs(action.delta)>99)throw Error('Invalid named counter adjustment.');
+  next.rules??=emptyAshenRules();next.rules.counters??={};next.rules.counters[action.instanceId]??={};const counters=next.rules.counters[action.instanceId],count=(counters[action.counter]||0)+action.delta;
+  if(count<0||count>999)throw Error('Invalid counter balance.');counters[action.counter]=count;next.table.events.push(`Manual: ${next.table.cards[action.instanceId].name} ${action.delta>0?'+':''}${action.delta} ${action.counter} counter.`);
+ }else if(action.type==='BURN'){
   const card=next.table.cards[action.instanceId];
   if(!card||card.zone!=='ley'||card.type!=='Ley Font')throw Error('Select a Ley Font on the battlefield.');
   if(card.faceDown||card.rotated)throw Error('This font is already spent. Ready it before burning.');

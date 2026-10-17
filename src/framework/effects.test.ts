@@ -1,5 +1,5 @@
 import {describe,it,expect} from 'vitest';
-import {executeProgram,payment,resolveTop,matchingTriggers,type EffectAdapter,type EffectProgram,type Entity} from './effects';
+import {continueProgram,executeProgram,payment,resolveTop,matchingTriggers,type EffectAdapter,type EffectProgram,type Entity} from './effects';
 import {parseEffectProgram,validateEffectProgram} from './schema';
 type Game={entities:Entity[];pool:Record<string,number>;drawn:number;removed:string[];counters:Record<string,number>};
 const fixture=():Game=>({entities:[{id:'pilot',controller:'alpha',zone:'hangar',type:'Ship',tags:['Fleet'],exhausted:false},{id:'enemy',controller:'gamma',zone:'orbit',type:'Ship',tags:[],exhausted:false}],pool:{solar:1,plasma:2},drawn:0,removed:[],counters:{}});
@@ -42,4 +42,14 @@ describe('portable effects kernel',()=>{
   const matches=matchingTriggers(state,adapter,{kind:'destroyed',source:'enemy',player:'gamma',entity:{...state.entities[1],controller:'alpha'}},[{source:'pilot',trigger:{id:'fleet-loss',event:'destroyed',sourceZones:['hangar'],subject:{types:['Ship'],controller:'self'},program}}]);
   expect(matches).toHaveLength(1);expect(matches[0].context.player).toBe('alpha');
  });
+});
+
+
+it('pauses a portable effect after draw and resumes without paying or drawing twice',()=>{
+ const original=fixture(),program:EffectProgram={version:1,id:'salvage',label:'Salvage a ship',cost:{resources:{plasma:1}},steps:[{op:'draw',count:1},{op:'choose',selection:{filter:{zones:['orbit'],controller:'other'},count:1,label:'Choose a ship'},destination:'scrapyard'},{op:'draw',count:2}]};
+ const started=executeProgram(original,adapter,program,{source:'pilot',player:'alpha'});
+ expect(started.state.drawn).toBe(1);expect(started.state.pool.plasma).toBe(1);expect(original.drawn).toBe(0);
+ const saved=JSON.parse(JSON.stringify(started)),before=JSON.stringify(saved.state);
+ expect(()=>continueProgram(saved.state,adapter,saved.pending,['pilot'])).toThrow('legal');expect(JSON.stringify(saved.state)).toBe(before);
+ const done=continueProgram(saved.state,adapter,saved.pending,['enemy']);expect(done.pending).toBeUndefined();expect(done.state.drawn).toBe(3);expect(done.state.pool.plasma).toBe(1);expect(done.state.entities[1].zone).toBe('scrapyard');
 });

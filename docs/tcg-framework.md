@@ -31,7 +31,7 @@ Costs and target selections are validated before payment. Generic resource payme
 
 Open **Ashen Throne → Battlefield → Brute effects: ON**. Select a supported card in your hand and choose **Deploy with effects**. Required choices advance when the requested number of distinct cards has been selected; clicking a selected card deselects it. Printed essence costs and additional sacrifice costs are paid atomically; cancellation or invalid targets do not spend resources or move cards. Units enter fatigued unless the implemented definition gives Charge. Fonts are limited to one deployment per turn and Fury Pit enters spent.
 
-This is a first-batch effects sandbox, **not** a fully supported Brute deck. The registry now includes sacrifice abilities, continuous Overseer/Banner/Warband buffs, named Fury counters, surviving death observers, Rites of Ragefire and Skullsplitter’s Roar. Definitions marked partial retain specific missing interactions. Keyword labels alone do not implement their combat semantics. Noble cards and remaining Brute cards still use manual controls. Manual moves bypass effect automation, as clearly labeled in the UI.
+This is a first-batch effects sandbox, **not** a fully supported Brute deck. The registry now includes sacrifice abilities, continuous Overseer/Banner/Warband buffs, named Fury counters, death observers, Rites of Ragefire and Skullsplitter’s Roar. Definitions marked partial retain specific missing interactions. Keyword labels alone do not implement their combat semantics. Noble cards and remaining Brute cards still use manual controls. Manual moves bypass effect automation, as clearly labeled in the UI.
 
 - Token entry effects: Bloodpit Initiate, Bloodfang Raider (entry only), Ashclaw Skyreaver (entry only), Bloodforge Hollow.
 - Activated abilities: Feral Axebreaker creates a token after exhaust + Fury payment; Ring of the Ley exhausts for 2 Untuned.
@@ -68,15 +68,31 @@ Added:
 - Blood Cauldron’s two distinct sacrifices and 4/4 Charge Berserker.
 - Warband Overseer’s other-friendly-Brute +1/+1 and Charge aura; Banner of the Broken Fist’s Charge aura.
 - Warband of Bloodfire’s printed frontline Brute count bonus, Fury entry counters and three-counter rally. Its count includes both frontlines, as printed; its rally grants both players’ Brutes Charge/Pierce, as printed.
-- Warchanter Savage and Bonecrusher Catapult death bonuses; surviving Savage Warcaller’s draw/attack trigger. Last-known subscriptions when the observer itself dies still need implementation.
+- Warchanter Savage and Bonecrusher Catapult death bonuses; Savage Warcaller’s draw/attack trigger, including its own death through last-known subscriptions.
 - Skullsplitter’s Roar and complete Rites of Ragefire destruction/controller damage.
 - Sacrifice abilities now emit the death notifications used by Keep and other surviving observers.
 - Tokens retain their granted keywords. Charge from token definitions or current auras removes deployment fatigue at creation.
 - The shared kernel supports named-counter costs and selectors scoped to the original target’s controller. Target-controller identities are derived from validated targets, not trusted caller input.
 - The effect chooser supports multi-card selections, and named counters appear on field cards.
 
-Current boundaries: this remains an effects sandbox. There is no automatic competitive combat or Clash. Losing a continuous defense bonus does not yet perform a state-based lethal-damage sweep. Combat keywords are displayed, not enforced. Manual movement bypasses automation. Do not label the entire Brute deck fully supported yet.
+Current boundaries: this remains an effects sandbox. There is no automatic competitive combat or Clash. Assisted resolutions now perform a state-based lethal-damage sweep after continuous bonuses change. Combat keywords are displayed, not enforced. Manual movement bypasses automation. Do not label the entire Brute deck fully supported yet.
 
-Brute work still queued before Noble: phase/Clash and combat; full last-known death subscriptions and targeted death choices; Bloodfang Raider/Bloodrush Gambit draw-discard; Fury Offering/random discards; Drum search/shuffle; Flamebelcher Outfit/attachments; Pit of the Frenzied/Maw start effects; Korgath’s Call; attack triggers and remaining keyword semantics. Keep per-card partial status explicit while these are completed.
+Brute work still queued before Noble: phase/Clash and combat; full last-known death subscriptions and targeted death choices; Drum attack-triggered Momentum; Pit of the Frenzied/Maw start effects; Korgath’s Call; attack triggers and remaining keyword semantics. Keep per-card partial status explicit while these are completed.
 
 Validation: 243 tests pass across 46 files, including new integration scenarios for distinct sacrifices, counter payment rollback, deployment Charge from auras, live aura removal, sacrifice death observers and Rune-controller damage. GitHub Pages build passes (existing bundle-size advisory remains).
+
+
+## Brute continuation: choices, searches and attachments
+
+- Shared data-only programs can pause at `choose`, persist an `EffectContinuation`, and resume with `continueProgram`. Costs are not paid again. The continuation retains selected-card snapshots, stat values, prior events, conditional results and the execution budget. Store and authorize engine-produced continuations in the game/session service; they are not untrusted rule-import payloads.
+- Required choices use as many legal cards as remain available; an empty choice continues without selecting. Optional searches may fail to find. A search still shuffles when no card is selected.
+- Added portable attachment and random-movement operations. Randomness comes from the adapter’s persisted seed, so identical saved states produce identical random discards.
+- Bloodfang Raider draws first and then chooses a discard from the updated hand. Bloodrush Gambit discards first, draws two, and checks the discarded card snapshot for its Fury bonus. Fury Offering remembers the sacrificed Brute’s current Attack, deals/draws that amount and discards up to two random hand cards.
+- Drum of the Pit spends three Momentum, searches eligible Brutes in current deck order, reveals the selected card and shuffles. Attack-generated Momentum still awaits combat; explicit manual named-counter controls allow sandbox testing.
+- Flamebelcher Rig’s Outfit payment attaches it to a friendly Unit. The Unit receives Ranged and the exhaust/sacrifice damage ability. Reattachment transfers the grants; automated movement/destruction clears links when either card leaves play. Manual moves still bypass adapter cleanup.
+- Death events carry pre-destruction observer snapshots. Warcaller sees its own death and simultaneous deaths. After automated resolutions, Units with lethal marked damage following aura loss are destroyed before processing further observer effects.
+- The UI displays card choices and identifies newly drawn cards, blocks other actions during pending choices, and can undo the entire effect in this manual sandbox. Pending choices survive browser reloads. This is not competitive hidden-information enforcement: the existing tabletop can switch seats and use manual controls.
+
+Remaining before a supported Brute deck: real phase/Clash and combat processing; attack triggers; targeted death abilities and Relentless; Pit/Maw start effects; Korgath’s Call; full timing/replacement/visibility rules. Noble work remains deferred.
+
+Validation for this continuation: 252 tests across 46 files; Pages build succeeds with the pre-existing bundle-size advisory. Raider’s draw/discard chooser was exercised in the browser and captured in the parent workspace as `ashen-brute-draw-discard-20261017.png`.

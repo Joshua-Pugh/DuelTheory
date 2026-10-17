@@ -1,6 +1,6 @@
 import {describe,it,expect} from 'vitest';
 import {newBattlefield,battlefieldDispatch,type Battlefield} from '../../ashenBattlefieldState';
-import {playProgram,resolveAshenEffect,ashenStats,resolveBurnEffect} from './adapter';
+import {playProgram,resolveAshenEffect,ashenStats,resolveBurnEffect,availableAshenAbilities,resumeAshenEffect,pendingAshenChoices} from './adapter';
 import {validateEffectProgram} from '../../framework';
 import {bruteEffects} from './bruteEffects';
 const idOf=(s:Battlefield,slug:string)=>Object.values(s.table.cards).find(c=>c.cardId===`ashen-brute-${slug}`)!.instanceId;
@@ -102,4 +102,73 @@ it('Rites damages only the destroyed Rune controller, and not for a Relic',()=>{
   const start=hand(s,'rites-of-ragefire');s=deploy(start.s,start.id,[target.instanceId]);
   expect(s.table.cards[target.instanceId].zone).toBe('graveyard');expect(s.table.health).toEqual([20,type==='Rune'?18:20]);
  }
+});
+
+
+describe('Brute effect continuations',()=>{
+ it('draws before Raider discard, keeps costs paid once, and resumes from a saved state',()=>{
+  let start=hand(newBattlefield(false,()=>.4),'bloodfang-raider'),s=deploy(start.s,start.id);
+  s=battlefieldDispatch(s,{type:'ROTATE',instanceId:start.id});const deck=s.table.piles['0:deck'].length,drawn=s.table.piles['0:deck'][0];
+  const p=bruteEffects[s.table.cards[start.id].cardId].activated![0];s=resolveAshenEffect(s,p,{source:start.id,player:'0'});
+  expect(s.table.cards[drawn].zone).toBe('hand');expect(s.table.piles['0:deck']).toHaveLength(deck-1);expect(s.table.cards[start.id].rotated).toBe(true);
+  expect(pendingAshenChoices(s)?.entities.some(e=>e.id===drawn)).toBe(true);
+  expect(()=>battlefieldDispatch(s,{type:'END_TURN'})).toThrow('pending');
+  const before=JSON.stringify(s);expect(()=>resumeAshenEffect(s,[start.id])).toThrow('legal');expect(JSON.stringify(s)).toBe(before);
+  s=resumeAshenEffect(JSON.parse(before),[drawn]);expect(s.rules?.pending).toBeUndefined();expect(s.table.cards[drawn].zone).toBe('graveyard');expect(s.table.piles['0:deck']).toHaveLength(deck-1);
+ });
+ it('Bloodrush discards before drawing and gives Fury only for a Brute Unit',()=>{
+  for(const slug of ['frenzied-grunt','fury-font']){
+   let start=hand(newBattlefield(false,()=>.4),'bloodrush-gambit'),s=start.s;
+   const discard=hand(s,slug);s=discard.s;const deck=s.table.piles['0:deck'].length;
+   s=deploy(s,start.id);const fury=s.basins[0].fury;
+   expect(s.table.piles['0:deck']).toHaveLength(deck);expect(s.table.cards[start.id].zone).toBe('graveyard');
+   s=resumeAshenEffect(s,[discard.id]);expect(s.table.piles['0:deck']).toHaveLength(deck-2);expect(s.basins[0].fury).toBe(fury+(slug==='frenzied-grunt'?1:0));
+  }
+ });
+ it('Drum searches in deck order, rejects wrong card types, reveals and shuffles once',()=>{
+  let s=newBattlefield(false,()=>.4);const drum=idOf(s,'drum-of-the-pit');s=battlefieldDispatch(s,{type:'MOVE',instanceId:drum,seat:0,zone:'support'});s.rules!.counters={[drum]:{momentum:3}};
+  const deck=[...s.table.piles['0:deck']],p=bruteEffects[s.table.cards[drum].cardId].activated![0];s=resolveAshenEffect(s,p,{player:'0',source:drum});
+  const choices=pendingAshenChoices(s)!,expected=deck.filter(id=>s.table.cards[id].type==='Unit');expect(choices.entities.map(e=>e.id)).toEqual(expected);
+  const wrong=deck.find(id=>s.table.cards[id].type==='Ley Font')!;expect(()=>resumeAshenEffect(s,[wrong])).toThrow('legal');
+  const target=choices.entities[0].id;s=resumeAshenEffect(s,[target]);expect(s.table.cards[target].zone).toBe('hand');expect(s.table.piles['0:deck']).not.toEqual(deck.filter(id=>id!==target));expect(s.rules?.counters?.[drum]?.momentum).toBe(0);
+  expect(s.table.events.some(e=>e.includes('Revealed:'))).toBe(true);
+ });
+ it('allows a failed Drum search but still spends counters and shuffles',()=>{
+  let s=newBattlefield(false,()=>.4);const drum=idOf(s,'drum-of-the-pit');s=battlefieldDispatch(s,{type:'MOVE',instanceId:drum,seat:0,zone:'support'});s.rules!.counters={[drum]:{momentum:3}};
+  const p=bruteEffects[s.table.cards[drum].cardId].activated![0],deck=[...s.table.piles['0:deck']];s=resolveAshenEffect(s,p,{player:'0',source:drum});s=resumeAshenEffect(s,[]);
+  expect(s.table.piles['0:deck']).toHaveLength(deck.length);expect(s.table.piles['0:deck']).not.toEqual(deck);expect(s.rules?.counters?.[drum]?.momentum).toBe(0);
+ });
+ it('Fury Offering remembers the sacrificed Attack and uses reproducible random discards',()=>{
+  let start=hand(newBattlefield(false,()=>.4),'fury-offering'),s=start.s;const victim=idOf(s,'frenzied-grunt');s=battlefieldDispatch(s,{type:'MOVE',instanceId:victim,seat:0,zone:'unit'});
+  s=battlefieldDispatch(s,{type:'COUNTER',instanceId:victim,delta:2});const attack=ashenStats(s,victim).attack,station=s.table.piles['1:command'][0],deck=s.table.piles['0:deck'].length;
+  s=deploy(s,start.id,[station]);const before=JSON.stringify(s),a=resumeAshenEffect(s,[victim]),b=resumeAshenEffect(JSON.parse(before),[victim]);
+  expect(a).toEqual(b);expect(a.table.health[1]).toBe(20-attack);expect(a.table.piles['0:deck']).toHaveLength(deck-attack);expect(a.table.cards[victim].zone).toBe('graveyard');
+  expect(a.rules?.pending).toBeUndefined();expect(a.table.piles['0:graveyard'].length).toBe(4);
+ });
+});
+
+
+it('Warcaller observes its own death and simultaneous Brute deaths from last-known state',()=>{
+ let s=newBattlefield(false,()=>.4);const warcaller=idOf(s,'savage-warcaller'),grunt=idOf(s,'frenzied-grunt');
+ for(const id of [warcaller,grunt])s=battlefieldDispatch(s,{type:'MOVE',instanceId:id,seat:0,zone:'unit'});
+ const start=hand(s,'bloodfire-collapse'),deck=start.s.table.piles['0:deck'].length;s=deploy(start.s,start.id);
+ expect(s.table.cards[warcaller].zone).toBe('graveyard');expect(s.table.piles['0:deck']).toHaveLength(deck-2);
+});
+it('removes lethally damaged Units after their Overseer defense bonus disappears',()=>{
+ let s=newBattlefield(false,()=>.4);const overseer=idOf(s,'warband-overseer'),grunt=idOf(s,'frenzied-grunt');
+ for(const id of [overseer,grunt])s=battlefieldDispatch(s,{type:'MOVE',instanceId:id,seat:0,zone:'unit'});
+ s.rules!.damage[grunt]=ashenStats(s,grunt).defense-1;
+ const start=hand(s,'ashen-strike');s=deploy(start.s,start.id,[overseer]);
+ expect(s.table.cards[overseer].zone).toBe('graveyard');expect(s.table.cards[grunt].zone).toBe('graveyard');
+});
+
+
+it('Outfit grants its ability to the Unit, supports reattachment, and disappears with the Rig',()=>{
+ let s=newBattlefield(false,()=>.4);const rig=idOf(s,'flamebelcher-rig'),a=idOf(s,'raging-mauler'),b=idOf(s,'bloodpit-initiate');
+ s=battlefieldDispatch(s,{type:'MOVE',instanceId:rig,seat:0,zone:'support'});for(const id of [a,b])s=battlefieldDispatch(s,{type:'MOVE',instanceId:id,seat:0,zone:'unit'});s.basins[0].untuned=3;
+ const outfit=bruteEffects[s.table.cards[rig].cardId].activated![0];s=resolveAshenEffect(s,outfit,{player:'0',source:rig,targets:[a]});
+ expect(ashenStats(s,a).keywords).toContain('Ranged');expect(availableAshenAbilities(s,a).some(p=>p.id==='rig-shot')).toBe(true);
+ s=resolveAshenEffect(s,outfit,{player:'0',source:rig,targets:[b]});expect(ashenStats(s,a).keywords).not.toContain('Ranged');expect(availableAshenAbilities(s,a)).toEqual([]);
+ const target=s.table.piles['1:command'][0],shot=availableAshenAbilities(s,b).find(p=>p.id==='rig-shot')!;s=resolveAshenEffect(s,shot,{player:'0',source:b,costCards:[a],targets:[target]});expect(s.table.health[1]).toBe(18);expect(s.table.cards[b].rotated).toBe(true);
+ const start=hand(s,'rites-of-ragefire');s=deploy(start.s,start.id,[rig]);expect(s.rules?.attachments?.[rig]).toBeUndefined();expect(ashenStats(s,b).keywords).not.toContain('Ranged');expect(availableAshenAbilities(s,b).some(p=>p.id==='rig-shot')).toBe(false);
 });
