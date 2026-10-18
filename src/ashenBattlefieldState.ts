@@ -1,11 +1,11 @@
 import type {AshenDuel} from './games/ashen/duel';
 import type {EffectContinuation,EffectEvent,EffectStackEntry} from './framework';
 import {ASHEN_TABLETOP,createTabletop,tabletopDispatch,type TabletopAction,type TabletopState,type TabletopInput} from './services/CreatorTabletop';
-import {ashenCardMap,starterDeck} from './ashenDecks';
+import {ashenCardMap,starterDeck,type AshenFaction} from './ashenDecks';
 import {RESOURCES,type Resource} from './ashenPresentation';
 export type Basin=Record<Resource,number>;
 export type AshenWork={events:EffectEvent[];triggers:EffectStackEntry[];budget:number};
-export type AshenRulesState={duel?:AshenDuel;attachments?:Record<string,string>;pending?:{flow:EffectContinuation;label:string;work?:AshenWork};shuffleSeed?:number;turn:number;fontPlayed:[boolean,boolean];damage:Record<string,number>;modifiers:{id:string;stats:Record<string,number>;keywords:string[];duration:'turn'|'permanent'}[];serial:number;triggerUses?:Record<string,number>;counters?:Record<string,Record<string,number>>};
+export type AshenRulesState={nobleMarks?:Record<number,Record<string,number>>;lastNobleMarks?:Record<number,Record<string,number>>;abilityUses?:Record<string,number>;nextPlanFortify?:Record<number,number>;duel?:AshenDuel;attachments?:Record<string,string>;pending?:{flow:EffectContinuation;label:string;work?:AshenWork};shuffleSeed?:number;turn:number;fontPlayed:[boolean,boolean];damage:Record<string,number>;modifiers:{id:string;stats:Record<string,number>;keywords:string[];duration:'turn'|'permanent'}[];serial:number;triggerUses?:Record<string,number>;counters?:Record<string,Record<string,number>>};
 export const emptyAshenRules=():AshenRulesState=>({turn:1,fontPlayed:[false,false],damage:{},modifiers:[],serial:0});
 export type Battlefield={version:1;table:TabletopState;basins:[Basin,Basin];preview:boolean;rules?:AshenRulesState};
 export const BATTLEFIELD_KEY='dueltheory-ashen-battlefield-v1';
@@ -14,14 +14,14 @@ export function fontEssence(cardId:string):Resource{
  const type=(ashenCardMap.get(cardId)?.subtype||'').toLowerCase();
  return RESOURCES.find(r=>type.includes(r))||'untuned';
 }
-function deckFor(seat:0|1,random:()=>number,mirror=false):TabletopInput[]{
- const deck=starterDeck(seat===0||mirror?'Brute':'Noble');
+function deckFor(seat:0|1,random:()=>number,mirror:boolean|[AshenFaction,AshenFaction]=false):TabletopInput[]{
+ const deck=starterDeck(Array.isArray(mirror)?mirror[seat]:seat===0||mirror?'Brute':'Noble');
  const ids=deck.entries.flatMap(e=>Array.from({length:e.count},()=>e.cardId));
  for(let i=ids.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[ids[i],ids[j]]=[ids[j],ids[i]];}
  ids.push(deck.commandStationId);
  return ids.map(id=>{const c=ashenCardMap.get(id);if(!c)throw Error(`Missing Ashen card ${id}`);return {cardId:id,name:c.name,type:c.type};});
 }
-export function newBattlefield(preview=false,random:()=>number=Math.random,mirror=false):Battlefield{
+export function newBattlefield(preview=false,random:()=>number=Math.random,mirror:boolean|[AshenFaction,AshenFaction]=false):Battlefield{
  // Zero slots means unlimited in this definition; creator saves are separate.
  const definition={...ASHEN_TABLETOP,zones:ASHEN_TABLETOP.zones.map(z=>({...z,slots:z.id==='command'?1:0}))};
  let table=createTabletop(definition,[deckFor(0,random,mirror),deckFor(1,random,mirror)]);

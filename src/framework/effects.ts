@@ -1,13 +1,20 @@
 /** Portable effects kernel. No game names, card catalogs, UI or player-count assumptions. */
 import {validateEffectProgram} from './schema';
 export type Entity={id:string;controller:string;zone:string;type:string;tags:string[];exhausted:boolean;stats?:Record<string,number>};
-export type Selector={zones?:string[];types?:string[];tags?:string[];excludeTags?:string[];controller?:'self'|'other'|'any'|'target';excludeSource?:boolean;onlySource?:boolean};
-export type Selection={filter:Selector;count:number;optional?:boolean;label:string};
+export type Selector={zones?:string[];types?:string[];tags?:string[];excludeTags?:string[];controller?:'self'|'other'|'any'|'target';excludeSource?:boolean;onlySource?:boolean;stats?:Record<string,{min?:number;max?:number}>};
+export type Selection={filter:Selector;count:number;optional?:boolean;min?:number;label:string};
 export type Targets='source'|'targets'|Selector;
 export type Amount=number|{count:Selector;multiplier?:number}|{result:'destroyed'}|{stat:string;of:'source'|'costCard'|'chosen'};
 export type TokenDefinition={name:string;type:string;tags:string[];stats:Record<string,number>;zone:string;keywords?:string[]};
+export type Condition={kind:'destroyed';filter?:Selector}|{kind:'costCard'|'chosen';filter:Selector}|{kind:'count';filter:Selector;atLeast:number}|{kind:'flag';flag:string};
 export type EffectStep=
  |{op:'choose';selection:Selection;destination:string;reveal?:boolean;shuffle?:string;event?:string}
+ |{op:'plan';count:number}
+ |{op:'refine';count:number}
+ |{op:'mode';options:{id:string;label:string;steps:EffectStep[];when?:Condition}[];min:number;max:number;allIf?:Condition}
+ |{op:'fortify';targets:Targets;amount:number}
+ |{op:'nullify';targets:Targets}
+ |{op:'signal';name:string}
  |{op:'select';selection:Selection}
  |{op:'heal';targets:Targets;amount:Amount}
  |{op:'attach';targets:Targets}
@@ -20,11 +27,17 @@ export type EffectStep=
  |{op:'counter';targets:Targets;counter:string;amount:number}
  |{op:'modify';targets:Targets;stats:Record<string,Amount>;keywords?:string[];duration:'turn'|'permanent'}
  |{op:'token';token:TokenDefinition;count:Amount}
- |{op:'if';condition:{kind:'destroyed';filter?:Selector}|{kind:'costCard'|'chosen';filter:Selector}|{kind:'count';filter:Selector;atLeast:number};then:EffectStep[];otherwise?:EffectStep[]};
-export type EffectProgram={version:1;id:string;label:string;targets?:Selection;cost?:{resources?:Record<string,number>;generic?:number;exhaust?:boolean;counters?:Record<string,number>;cards?:Selection;cardDestination?:string};steps:EffectStep[]};
+ |{op:'if';condition:Condition;then:EffectStep[];otherwise?:EffectStep[]};
+export type EffectProgram={version:1;id:string;label:string;oncePerTurn?:boolean;targets?:Selection;cost?:{resources?:Record<string,number>;generic?:number;exhaust?:boolean;counters?:Record<string,number>;cards?:Selection;cardDestination?:string};steps:EffectStep[]};
 export type EffectContext={player:string;source:string;targets?:string[];costCards?:string[];targetControllers?:string[];sourceStats?:Record<string,number>};
-export type EffectEvent={kind:string;source:string;player:string;entity?:Entity;amount?:number;resource?:string;observers?:Entity[]};
+export type EffectEvent={kind:string;source:string;player:string;entity?:Entity;amount?:number;resource?:string;observers?:Entity[];target?:Entity};
 export type EffectAdapter<S>={
+ canTarget?:(state:S,entity:Entity,context:EffectContext)=>boolean;
+ flag?:(state:S,player:string,name:string)=>boolean;
+ top?:(state:S,player:string,count:number)=>string[];
+ order?:(state:S,player:string,top:string[],bottom:string[])=>void;
+ fortify?:(state:S,id:string,count:number)=>void;
+ nullify?:(state:S,id:string)=>void;
  entities:(state:S)=>Entity[];
  attach?:(state:S,source:string,target:string)=>void;
  stats?:(state:S,id:string)=>Record<string,number>;
@@ -44,8 +57,8 @@ export type EffectAdapter<S>={
  token:(state:S,player:string,definition:TokenDefinition)=>string;
 };
 export class EffectError extends Error{constructor(message:string){super(message);this.name='EffectError';}}
-export function matches(entity:Entity,filter:Selector,context:EffectContext){return (!filter.zones||filter.zones.includes(entity.zone))&&(!filter.types||filter.types.includes(entity.type))&&(!filter.tags||filter.tags.every(t=>entity.tags.includes(t)))&&(!filter.excludeTags||filter.excludeTags.every(t=>!entity.tags.includes(t)))&&(!filter.excludeSource||entity.id!==context.source)&&(!filter.onlySource||entity.id===context.source)&&(!filter.controller||filter.controller==='any'||(filter.controller==='target'?!!context.targetControllers?.includes(entity.controller):filter.controller==='self'?entity.controller===context.player:entity.controller!==context.player));}
-export function candidates<S>(state:S,adapter:EffectAdapter<S>,selection:Selection,context:EffectContext){return adapter.entities(state).filter(e=>matches(e,selection.filter,context));}
+export function matches(entity:Entity,filter:Selector,context:EffectContext){return (!filter.stats||Object.entries(filter.stats).every(([key,range])=>(range.min===undefined||(entity.stats?.[key]||0)>=range.min)&&(range.max===undefined||(entity.stats?.[key]||0)<=range.max)))&&(!filter.zones||filter.zones.includes(entity.zone))&&(!filter.types||filter.types.includes(entity.type))&&(!filter.tags||filter.tags.every(t=>entity.tags.includes(t)))&&(!filter.excludeTags||filter.excludeTags.every(t=>!entity.tags.includes(t)))&&(!filter.excludeSource||entity.id!==context.source)&&(!filter.onlySource||entity.id===context.source)&&(!filter.controller||filter.controller==='any'||(filter.controller==='target'?!!context.targetControllers?.includes(entity.controller):filter.controller==='self'?entity.controller===context.player:entity.controller!==context.player));}
+export function candidates<S>(state:S,adapter:EffectAdapter<S>,selection:Selection,context:EffectContext){return adapter.entities(state).filter(e=>matches(e,selection.filter,context)&&(!adapter.canTarget||adapter.canTarget(state,e,context)));}
 export function payment(pool:Record<string,number>,specific:Record<string,number>={},generic=0):Record<string,number>{
  if(Object.values(pool).some(n=>!Number.isInteger(n)||n<0))throw new EffectError('Invalid resource pool.');
  const remaining={...pool},spent:Record<string,number>={};
@@ -62,11 +75,11 @@ export function payment(pool:Record<string,number>,specific:Record<string,number
 }
 function verifySelection<S>(state:S,adapter:EffectAdapter<S>,selection:Selection|undefined,ids:string[],context:EffectContext){
  if(!selection){if(ids.length)throw new EffectError('This program does not accept that selection.');return;}
- if(!Number.isInteger(selection.count)||selection.count<1||selection.count>999||(ids.length!==selection.count&&!(selection.optional&&ids.length===0))||new Set(ids).size!==ids.length)throw new EffectError(selection.label);
+ if(!Number.isInteger(selection.count)||selection.count<1||selection.count>999||((ids.length<(selection.min??(selection.optional?0:selection.count)))||ids.length>selection.count)||new Set(ids).size!==ids.length)throw new EffectError(selection.label);
  const valid=new Set(candidates(state,adapter,selection,context).map(e=>e.id));
  if(ids.some(id=>!valid.has(id)))throw new EffectError('Selection is no longer legal.');
 }
-export type EffectContinuation={context:EffectContext;steps:EffectStep[];events:EffectEvent[];destroyed:Entity[];discarded:Entity[];chosen:Entity[];values:Record<string,Record<string,number>>;budget:number};
+export type EffectContinuation={context:EffectContext;steps:EffectStep[];events:EffectEvent[];destroyed:Entity[];discarded:Entity[];chosen:Entity[];values:Record<string,Record<string,number>>;budget:number;planIds?:string[]};
 export type EffectResult<S>={state:S;events:EffectEvent[];pending?:EffectContinuation};
 /** Atomic: every cost and target is checked before cloning or paying anything. */
 export function executeProgram<S>(original:S,adapter:EffectAdapter<S>,program:EffectProgram,context:EffectContext):EffectResult<S>{
@@ -97,23 +110,32 @@ export function continueProgram<S>(original:S,adapter:EffectAdapter<S>,continuat
  let targets=context.targets||[];const destroyedEntities=flow.destroyed,discarded=flow.discarded;
  const emit=(kind:string,entity?:Entity,amount?:number,resource?:string)=>events.push({kind,source:context.source,player:context.player,entity,amount,resource});
  if(choice){
-  const step=flow.steps.shift();if(step?.op!=='choose'&&step?.op!=='select')throw new EffectError('No effect choice is pending.');
+  const step=flow.steps.shift();if(step?.op==='mode'){const options=step.options.filter(o=>choice.includes(o.id));if(new Set(choice).size!==choice.length||options.length!==choice.length||choice.length<step.min||choice.length>step.max)throw new EffectError('Choose the allowed number of modes.');flow.steps.unshift(...options.flatMap(o=>o.steps));}
+  else if(step?.op==='plan'){const ids=flow.planIds||[];const selected=choice.map(x=>x.slice(2));if(choice.some(x=>!x.startsWith('t:')&&!x.startsWith('b:'))||selected.length!==ids.length||new Set(selected).size!==ids.length||selected.some(id=>!ids.includes(id)))throw new EffectError('Order each viewed card once.');if(!adapter.order)throw new EffectError('Game does not support deck ordering.');const top=choice.filter(x=>x.startsWith('t:')).map(x=>x.slice(2)),bottom=choice.filter(x=>x.startsWith('b:')).map(x=>x.slice(2));const snapshots=adapter.entities(state);adapter.order(state,context.player,top,bottom);for(const id of bottom)emit('bottomed',snapshots.find(e=>e.id===id));emit('planned',snapshots.find(e=>e.id===context.source),step.count);delete flow.planIds;}
+  else {if(step?.op!=='choose'&&step?.op!=='select')throw new EffectError('No effect choice is pending.');
   verifySelection(state,adapter,step.selection,choice,context);
   flow.chosen=choice.map(id=>structuredClone(adapter.entities(state).find(e=>e.id===id)!));flow.values.chosen=choice.length?(adapter.stats?.(state,choice[0])||{}):{};
   if(step.op==='select'){context.targets=[...choice];targets=[...choice];context.targetControllers=flow.chosen.map(e=>e.controller);}
   const observers=structuredClone(adapter.entities(state));if(step.op==='choose')for(const e of flow.chosen){if(step.reveal)emit('revealed',e);adapter.move(state,e.id,step.destination);emit(step.event||'moved',e);events[events.length-1].observers=observers;}
   if(step.op==='choose'&&step.shuffle){if(!adapter.shuffle)throw new EffectError('Game adapter does not support shuffling.');adapter.shuffle(state,context.player,step.shuffle);emit('shuffled');}
- }
+ }}
  const amount=(value:Amount)=>{
   const n=typeof value==='number'?value:'count'in value?adapter.entities(state).filter(e=>matches(e,value.count,context)).length*(value.multiplier??1):'stat'in value?(flow.values[value.of]?.[value.stat]||0):destroyedEntities.length;
   if(!Number.isFinite(n)||!Number.isInteger(n)||n<0||n>999)throw new EffectError('Invalid effect quantity.');return n;
  };
  const entities=(ref:Targets)=>structuredClone(adapter.entities(state)).filter(e=>ref==='source'?e.id===context.source:ref==='targets'?targets.includes(e.id):matches(e,ref,context));
+ const condition=(c:Condition):boolean=>c.kind==='flag'?!!adapter.flag?.(state,context.player,c.flag):c.kind==='destroyed'?destroyedEntities.some(e=>!c.filter||matches(e,c.filter,context)):c.kind==='count'?adapter.entities(state).filter(e=>matches(e,c.filter,context)).length>=c.atLeast:(c.kind==='chosen'?flow.chosen:discarded).some(e=>matches(e,c.filter,context));
  while(flow.steps.length){const step=flow.steps.shift()!;if(--flow.budget<0)throw new EffectError('Effect execution budget exceeded.');
-  if(step.op==='choose'||step.op==='select'){
+  if(step.op==='mode'){if(step.allIf&&condition(step.allIf)){flow.steps.unshift(...step.options.flatMap(o=>o.steps));continue;}flow.steps.unshift({...step,options:step.options.filter(o=>!o.when||condition(o.when))});return {state,events,pending:flow};}
+  else if(step.op==='plan'){if(!adapter.top)throw new EffectError('Game does not support Plan.');flow.planIds=adapter.top(state,context.player,step.count);if(!flow.planIds.length){emit('planned',adapter.entities(state).find(e=>e.id===context.source),step.count);continue;}flow.steps.unshift(step);return {state,events,pending:flow};}
+  else if(step.op==='refine'){const before=new Map(adapter.entities(state).map(e=>[e.id,e.zone]));adapter.draw(state,context.player,step.count);for(const e of adapter.entities(state))if(before.get(e.id)!==e.zone)emit('drawn',e);emit('refined',adapter.entities(state).find(e=>e.id===context.source),step.count);flow.steps.unshift({op:'choose',selection:{filter:{zones:['hand'],controller:'self'},count:step.count,label:`Refine: place ${step.count} on the bottom of your deck`},destination:'deck-bottom',event:'bottomed'});}
+  else if(step.op==='fortify'){if(!adapter.fortify)throw new EffectError('Game does not support Fortify.');for(const e of entities(step.targets)){adapter.fortify(state,e.id,step.amount);emit('fortified',e,step.amount);}}
+  else if(step.op==='signal'){emit(step.name,adapter.entities(state).find(e=>e.id===context.source));}
+  else if(step.op==='nullify'){if(!adapter.nullify)throw new EffectError('Game does not support Nullify.');for(const e of entities(step.targets)){adapter.nullify(state,e.id);emit('nullified',e);}}
+  else if(step.op==='choose'||step.op==='select'){
    const available=candidates(state,adapter,step.selection,context);
-   if(!available.length){flow.chosen=[];flow.values.chosen={};if(step.op==='choose'&&step.shuffle){if(!adapter.shuffle)throw new EffectError('Game adapter does not support shuffling.');adapter.shuffle(state,context.player,step.shuffle);emit('shuffled');}continue;}
-   flow.steps.unshift({...step,selection:{...step.selection,count:Math.min(step.selection.count,available.length)}});return {state,events,pending:flow};
+   if(!available.length){flow.chosen=[];flow.values.chosen={};if(step.op==='select'){context.targets=[];context.targetControllers=[];targets=[];}if(step.op==='choose'&&step.shuffle){if(!adapter.shuffle)throw new EffectError('Game adapter does not support shuffling.');adapter.shuffle(state,context.player,step.shuffle);emit('shuffled');}continue;}
+   flow.steps.unshift({...step,selection:{...step.selection,count:Math.min(step.selection.count,available.length),min:Math.min(step.selection.min??(step.selection.optional?0:step.selection.count),available.length)}});return {state,events,pending:flow};
   }
   else if(step.op==='heal'){if(!adapter.heal)throw new EffectError('Game does not support healing.');for(const e of entities(step.targets)){adapter.heal(state,e.id,amount(step.amount));emit('healed',e);}}
   else if(step.op==='attach'){if(!adapter.attach)throw new EffectError('Game adapter does not support attachments.');for(const e of entities(step.targets)){adapter.attach(state,context.source,e.id);emit('attached',e);}}
@@ -127,9 +149,9 @@ export function continueProgram<S>(original:S,adapter:EffectAdapter<S>,continuat
   else if(step.op==='move'){for(const e of entities(step.targets)){adapter.move(state,e.id,step.zone);emit('moved',e);}}
   else if(step.op==='counter'){for(const e of entities(step.targets)){adapter.counter(state,e.id,step.counter,step.amount);emit('counter',e,step.amount,step.counter);}}
   else if(step.op==='token'){for(let i=0,n=amount(step.count);i<n;i++){if(--flow.budget<0)throw new EffectError('Effect execution budget exceeded.');const id=adapter.token(state,context.player,step.token);emit('entered',adapter.entities(state).find(e=>e.id===id));}}
-  else if(step.op==='if'){const condition=step.condition;const matching=condition.kind==='destroyed'?destroyedEntities.some(e=>!condition.filter||matches(e,condition.filter,context)):condition.kind==='count'?adapter.entities(state).filter(e=>matches(e,condition.filter,context)).length>=condition.atLeast:(condition.kind==='chosen'?flow.chosen:discarded).some(e=>matches(e,condition.filter,context));flow.steps.unshift(...(matching?step.then:step.otherwise||[]));}
+  else if(step.op==='if'){flow.steps.unshift(...(condition(step.condition)?step.then:step.otherwise||[]));}
   else if(step.op==='modify'){for(const e of entities(step.targets)){adapter.modify(state,e.id,Object.fromEntries(Object.entries(step.stats).map(([key,value])=>[key,typeof value==='number'?value:amount(value)])),step.keywords||[],step.duration);emit('modified',e);}}
-  else if(step.op==='damage'||step.op==='destroy'){const n=step.op==='damage'?amount(step.amount):0,observers=structuredClone(adapter.entities(state));for(const e of entities(step.targets)){if(--flow.budget<0)throw new EffectError('Effect execution budget exceeded.');const died=step.op==='damage'?adapter.damage(state,e.id,n):adapter.destroy(state,e.id);emit(step.op,e,n);if(died){destroyedEntities.push(e);emit('destroyed',e);events[events.length-1].observers=observers;}}}
+  else if(step.op==='damage'||step.op==='destroy'){const n=step.op==='damage'?amount(step.amount):0,observers=structuredClone(adapter.entities(state));for(const e of entities(step.targets)){if(--flow.budget<0)throw new EffectError('Effect execution budget exceeded.');const died=step.op==='damage'?adapter.damage(state,e.id,n):adapter.destroy(state,e.id);emit(step.op,e,n);events[events.length-1].observers=observers;if(died){destroyedEntities.push(e);emit('destroyed',e);events[events.length-1].observers=observers;}}}
   else throw new EffectError('Unknown effect operation.');
  }
  emit('resolved');return {state,events};
@@ -141,9 +163,9 @@ export function resolveTop<S>(state:S,adapter:EffectAdapter<S>,stack:readonly Ef
  if(!stack.length)throw new EffectError('Effect stack is empty.');
  const top=stack[stack.length-1];return {...executeProgram(state,adapter,top.program,top.context),stack:stack.slice(0,-1)};
 }
-export type TriggerDefinition={id:string;event:string;sourceZones:string[];subject?:Selector;limitPerTurn?:number;program:EffectProgram};
+export type TriggerDefinition={id:string;event:string;sourceZones:string[];subject?:Selector;actor?:'self'|'other';target?:Selector;limitPerTurn?:number;requiresCounter?:string;program:EffectProgram};
 /** Matching only; game plugins choose simultaneous-trigger order and priority. */
 export function matchingTriggers<S>(state:S,adapter:EffectAdapter<S>,event:EffectEvent,subscriptions:{source:string;trigger:TriggerDefinition}[]){
  const entities=adapter.entities(state);
- return subscriptions.flatMap(({source,trigger})=>{const card=(event.kind==='destroyed'&&event.observers?event.observers.find(e=>e.id===source):entities.find(e=>e.id===source)),context={source,player:card?.controller||'',sourceStats:card?.stats};return card&&trigger.event===event.kind&&trigger.sourceZones.includes(card.zone)&&(!trigger.subject||(event.entity&&matches(event.entity,trigger.subject,context)))?[{program:trigger.program,context,triggerId:trigger.id,limit:trigger.limitPerTurn}]:[];});
+ return subscriptions.flatMap(({source,trigger})=>{const card=(event.kind==='destroyed'&&event.observers?event.observers.find(e=>e.id===source):entities.find(e=>e.id===source)),context={source,player:card?.controller||'',sourceStats:card?.stats};return card&&trigger.event===event.kind&&(!trigger.actor||(trigger.actor==='self'?event.player===card.controller:event.player!==card.controller))&&(!trigger.target||(event.target&&matches(event.target,trigger.target,context)))&&trigger.sourceZones.includes(card.zone)&&(!trigger.requiresCounter||(adapter.counters?.(state,source)[trigger.requiresCounter]||0)>0)&&(!trigger.subject||(event.entity&&matches(event.entity,trigger.subject,context)))?[{program:trigger.program,context,triggerId:trigger.id,limit:trigger.limitPerTurn}]:[];});
 }
