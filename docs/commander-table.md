@@ -8,6 +8,7 @@ DT's Commander Table is a manual multiplayer game companion. The host creates a 
 - Shared table overview, life gain/loss, poison, custom counters, concessions and recent history.
 - Commander combat damage received, tracked by individual commander identity rather than by player or card name. Partners and identical commander names remain separate.
 - Optional linked life adjustment when recording/correcting commander damage. Disable it if life was already adjusted or damage has a different result (for example infect); enter poison separately.
+- Commander hit shortcuts are labeled −1 and −5 for the life lost. They increase damage received from the selected commander. The manual field requires a signed amount: −7 records a seven-damage hit, while +3 removes three recorded damage as a correction. With linked life adjustment enabled, corrections restore the corresponding life. Corrections cannot reduce received commander damage below zero.
 - Common threshold notices at life <= 0, poison >= 10 or 21 combat damage from one commander. These never automatically eliminate anyone: actual card effects remain the table's responsibility.
 - Host can lock seats when play begins and reset all players for the next game.
 - Browser-local seat credentials allow refresh/reconnect. Disconnect retains a room-specific credential on that device, so joining the same code can recover the seat. Clearing browser storage loses that credential.
