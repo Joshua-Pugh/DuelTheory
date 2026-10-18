@@ -41,3 +41,9 @@ Backend checks: generate types, run the root TypeScript binary against `services
 All selected seats must be filled before the host locks seats and opens a server-generated six-sided die roll. Each seat rolls once per round; only players tied for the highest result reroll. The winner starts turn 1. Turn order follows join/seat order around the table, rotated to begin with the winner. Join in physical seating order.
 
 The current player or host can advance turns. Conceded and eliminated players are skipped. An eliminated current player automatically passes to the next active seat. Turns stop when fewer than two players remain. Correcting totals below all loss thresholds restores the seat; New game resets everyone. Life, poison, commander damage, custom counters, and concessions are locked on the server until all seats are filled and a first-player roll winner is established. New game clears rolls and turns and locks controls again. Existing rooms can start rolling through the host control. Request retries and stale turn/roll submissions cannot advance twice.
+
+## Keep screen awake
+
+Joined rooms request a screen wake lock by default, with an on/off switch and confirmed status. Hiding the page or leaving Commander Table releases the lock; returning to the tab requests it again. Unsupported browsers or system refusal show Unavailable and allow retry. The operating system can release locks (including for power-saving settings); the app cannot prevent an explicit phone lock or keep a hidden tab awake. Uses the standard Screen Wake Lock API over HTTPS; no backend change is needed.
+
+Manual commander damage accepts plain or negative numbers as damage received (`7` or `−7` records seven damage). An explicit plus is a correction (`+3` removes three recorded damage). Choose the source commander first; the form explains why Apply is disabled when no source is selected. Linked life adjustments retain the same hit/correction direction.
