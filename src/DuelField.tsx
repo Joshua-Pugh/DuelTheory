@@ -16,7 +16,7 @@ import type {ManualMove,TabletopAction} from './services/GameService';
 import {actionSource,cardActionGroups,nextChoice,narrowChoice,choiceCardOrder,type ChoiceField,type ChoiceStep} from './duelInteraction';
 import DrawAnimations from './DrawAnimations';
 import './duelField.css';
-type Props={fixedSeat?:Seat;state:DuelState;catalog:readonly Card[];actions:LegalAction[];onAction:(a:LegalAction)=>void;onManual:(a:TabletopAction)=>void;manualMode:boolean;onAttackAll?:()=>void;attackAllRunning?:boolean;onStopAttacks?:()=>void;onSkipPhase:(p:Phase)=>void;onNextPhase?:()=>void;onResolve?:()=>void;onUndo:()=>void;onVerify:()=>void;onExit:()=>void;notice:string};
+type Props={onChoosing?:(value:boolean)=>void;fixedSeat?:Seat;state:DuelState;catalog:readonly Card[];actions:LegalAction[];onAction:(a:LegalAction)=>void;onManual:(a:TabletopAction)=>void;manualMode:boolean;onAttackAll?:()=>void;attackAllRunning?:boolean;onStopAttacks?:()=>void;onSkipPhase:(p:Phase)=>void;onNextPhase?:()=>void;onResolve?:()=>void;onUndo:()=>void;onVerify:()=>void;onExit:()=>void;notice:string};
 const PHASES:Phase[]=['DRAW','STANDBY','MAIN_1','BATTLE','MAIN_2','END'],LABELS=['DP','SP','M1','BP','M2','EP'];
 const other=(s:Seat):Seat=>s===0?1:0;
 type Flow={label:string;options:LegalAction[];done:ChoiceField[];step:ChoiceStep};
@@ -39,7 +39,7 @@ export function RandomDiscardPicker({count,player,onPick}:{count:number;player:n
  useEffect(()=>{const timer=window.setTimeout(()=>setReady(true),window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:650);return()=>window.clearTimeout(timer);},[]);
  return <Dialog title={`Player ${player} · Delinquent Duo random discard`} canClose={false} onClose={()=>{}}><p className="dt-pile-description" role="status">{ready?'Your hand has been shuffled face-down. Pick one unknown card to discard.':'Shuffling your hand face-down…'}</p><div className="dt-random-hand">{Array.from({length:count},(_,index)=><button key={index} disabled={!ready||picked} aria-label={`Choose face-down card ${index+1}`} onClick={()=>{setPicked(true);onPick(index);}}><CardBack/></button>)}</div><p className="dt-pile-description">If any cards remain, you will then choose one more card to discard from your hand.</p></Dialog>;
 }
-export default function DuelField({fixedSeat,state,catalog,actions,onAction,onManual,manualMode,onAttackAll,attackAllRunning,onStopAttacks,onSkipPhase,onNextPhase,onResolve,onUndo,onVerify,onExit,notice}:Props){
+export default function DuelField({onChoosing,fixedSeat,state,catalog,actions,onAction,onManual,manualMode,onAttackAll,attackAllRunning,onStopAttacks,onSkipPhase,onNextPhase,onResolve,onUndo,onVerify,onExit,notice}:Props){
  const [localSeat,setLocalSeat]=useState<Seat>(0),[selectedId,setSelectedId]=useState<string|null>(null),[tab,setTab]=useState<'card'|'history'>('card');
  const seat=fixedSeat??localSeat,setSeat=(next:Seat)=>{if(fixedSeat===undefined)setLocalSeat(next);};
  const [lpDelta,setLpDelta]=useState(-1000);
@@ -51,6 +51,7 @@ export default function DuelField({fixedSeat,state,catalog,actions,onAction,onMa
  const [responseDeferred,setResponseDeferred]=useState(false);
  const [effectAsk,setEffectAsk]=useState<{options:LegalAction[];label:string}|null>(null);
  const [menu,setMenu]=useState<{id:string;x:number;y:number}|null>(null),[flow,setFlow]=useState<Flow|null>(null),[manual,setManual]=useState(manualMode),[manualMove,setManualMove]=useState<ManualMove|null>(null),[pileView,setPileView]=useState<{owner:Seat;kind:'deck'|'graveyard'|'banished'|'extra'}|null>(null);
+ useEffect(()=>{onChoosing?.(Boolean(flow||manualMove));},[Boolean(flow||manualMove),onChoosing]);
  const cards=useMemo(()=>new Map(catalog.map(c=>[c.id,withGoatHistoricalText(c)])),[catalog]),lookup=(id:string)=>state.cards[id]?.token?SHEEP_TOKEN_CARD:cards.get(state.cards[id]?.cardId);
  useEffect(()=>{setMenu(null);setFlow(null);setManualMove(null);setPileView(null);setEffectAsk(null);setResponseDeferred(false);},[state]);
  const canInspect=(id:string)=>{const c=state.cards[id];return c&&(!c.equippedHidden||c.owner===seat)&&(c.location==='hand'?c.controller===seat:c.location==='deck'?false:!c.faceDown||c.controller===seat);};

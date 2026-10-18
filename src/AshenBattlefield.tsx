@@ -17,7 +17,7 @@ import type {EffectProgram,EffectContext} from './framework';
 
 const NAMES:Record<Resource,string>={untuned:'Untuned',oath:'Oath',fury:'Fury',ash:'Ash',veil:'Veil'};
 type Flight={id:number;x:number;y:number;dx:number;dy:number;resource:Resource};
-export default function AshenBattlefield({remote,initialState,onAgain,onExit,learning=true}:{remote?:{state:Battlefield;seat:0|1;send:(c:AshenCommand)=>void};learning?:boolean;initialState?:Battlefield;onAgain?:()=>void;onExit?:()=>void}={}){
+export default function AshenBattlefield({remote,initialState,onAgain,onExit,learning=true}:{remote?:{choosing?:(value:boolean)=>void;state:Battlefield;seat:0|1;send:(c:AshenCommand)=>void};learning?:boolean;initialState?:Battlefield;onAgain?:()=>void;onExit?:()=>void}={}){
  const [localState,setState]=useState<Battlefield>(()=>initialState||readBattlefield()||newBattlefield(true));
  const state=remote?.state??localState;
  const [localSeat,setLocalSeat]=useState<0|1>(initialState?.table.active||0),[selected,setSelected]=useState<string|null>(null);
@@ -31,6 +31,7 @@ export default function AshenBattlefield({remote,initialState,onAgain,onExit,lea
  const [fades,setFades]=useState<{seat:0|1;resources:Resource[]}[]>([]);
  const [assisted,setAssisted]=useState(!!state.rules?.duel);
  const [effectFlow,setEffectFlow]=useState<{program:EffectProgram;context:EffectContext;deploy:boolean;step:number}|null>(null);
+ useEffect(()=>{remote?.choosing?.(!!effectFlow);},[Boolean(effectFlow),remote?.choosing]);
  const board=useRef<HTMLDivElement>(null),flightId=useRef(0);
  const [learningMode,setLearningMode]=useState(learning);
  const guided=state.rules?.duel;
