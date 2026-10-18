@@ -2,3 +2,4 @@
 
 .ct-commander-adjust form{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;margin-top:16px}.ct-commander-adjust form label{flex:1;min-width:150px;margin:0}.ct-commander-adjust .ct-actions output{font-size:14px;padding:0 4px;color:#b9ccd7}
 .ct-turns{margin-bottom:22px}.ct-roll-results{display:flex;flex-wrap:wrap;gap:14px;margin:18px 0}.ct-roll-results>div{display:grid;justify-items:center;gap:5px;min-width:100px;flex:1;padding:12px;background:#101c25;border-radius:10px}.ct-roll-results strong{overflow-wrap:anywhere}.ct-roll-results small{color:#aabecb}.ct-die{font-size:54px;line-height:1.1;color:#e2c98d}.ct-turn-order{display:flex;flex-wrap:wrap;gap:12px 30px;padding-left:22px;margin:20px 0}.ct-turn-order li{padding:8px;color:#acbfca}.ct-turn-order .ct-current-turn{color:#f1d58d;font-weight:700;background:#293e44;border-radius:7px}
+.ct-turn-order .ct-out-turn{opacity:.55;text-decoration:line-through}
