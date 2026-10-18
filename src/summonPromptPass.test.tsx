@@ -26,3 +26,14 @@ describe('optional effects and quieter fast responses',()=>{
  it('does not open repeated phase prompts for Book of Moon, and keeps its opponent menu action legal',()=>{let s=setup();const book=move(s,14087893,1,'spell',0,true);move(s,88240808,0,'monster');s=act(s,'ADVANCE');expect(s.phase).toBe('BATTLE');expect(s.freeResponse).toBeUndefined();expect(legalActions(s,ctx,1).some(a=>a.type==='ACTIVATE_BOOK_OF_MOON'&&a.instanceId===book)).toBe(true);expect(html(s)).not.toContain('Respond to the response window');s=act(s,'ADVANCE');expect(s.freeResponse).toBeUndefined();});
  it('presents ordinary chain responses as a compact region, with a clear pass',()=>{const view=renderToStaticMarkup(<EffectDecision player={0} viewer={0} name="Pot of Greed" responses={[]} onUse={()=>{}} onPass={()=>{}} onRespond={()=>{}} onView={()=>{}}/>);expect(view).toContain('dt-response-strip');expect(view).toContain('role="region"');expect(view).toContain('No response · continue');expect(view).not.toContain('Not yet');});
 });
+
+describe('private-room response ownership',()=>{
+ it('shows response controls only to the player with chain priority',()=>{
+  const s=setup(),source=move(s,55144522,0,'spell');s.chain=[{instanceId:source,controller:0,effectId:'DRAW_2',targets:[],spellSpeed:1}];s.priority=1;
+  const render=(seat:Seat)=>renderToStaticMarkup(<DuelField fixedSeat={seat} state={s} catalog={catalog} actions={legalActions(s,ctx,seat)} onAction={()=>{}} onManual={()=>{}} manualMode={false} onSkipPhase={()=>{}} onUndo={()=>{}} onVerify={()=>{}} onExit={()=>{}} notice=""/>);
+  const waiting=render(0);expect(waiting).not.toContain('View your response cards');expect(waiting).not.toContain('No response · continue');expect(waiting).toContain('Waiting for Player 2');
+  // Supply a legal response so the owner's prompt stays open instead of auto-passing.
+  move(s,14087893,1,'spell',1,true);move(s,88240808,0,'monster');
+  expect(render(1)).toContain('No response · continue');
+ });
+});
