@@ -1,5 +1,5 @@
 import {lightMainActions,lightChoiceActions,dispatchLight,resolveLight,lightEffectIds,canRecruit,canSummon,ASURA,PARSHATH,ZABORG} from './lightDeckEffects';
-import {chaosFlip,chaosEffectIds} from './chaosTurboEffects';
+import {chaosFlip,chaosEffectIds,MERCHANT} from './chaosTurboEffects';
 import {deckMainActions,dispatchDeckEffect,resolveDeckEffect,summonDeckTriggers,faceUpMonsters,battleAttack,deckResponseActions,ritualDeckEffectIds,TSUKUYOMI,SERPENT,SHINATO} from './ritualDeckEffects';
 import {addDeckCardToHand,recoverGraveCard,drawEffect} from './operations';
 import {ritualDefinitions,CONTRACT_WITH_THE_DARK_MASTER,SHINATOS_ARK} from './rituals';
@@ -219,7 +219,7 @@ function advanceDamageStep(s:DuelState,ctx:EngineContext){
     const target=s.cards[pending.targetId];
     if(target?.location==='monster' && target.faceDown){
      target.faceDown=false;target.position='faceUpDefense';if(target.cardId===TSUKUYOMI||target.cardId===ASURA)target.spiritReturnTurn=s.turn;
-     if(target.cardId===MAGICIAN_OF_FAITH||target.cardId===DEKOICHI||target.cardId===TSUKUYOMI||target.cardId===24317029||target.cardId===16226786)pending.revealedFlip=target.instanceId;
+     if(target.cardId===MAGICIAN_OF_FAITH||target.cardId===DEKOICHI||target.cardId===TSUKUYOMI||target.cardId===24317029||target.cardId===16226786||target.cardId===MERCHANT)pending.revealedFlip=target.instanceId;
      log(s,'BATTLE_FLIP',`${getCard(s,target.instanceId,ctx).name} flipped face-up by battle.`,pending.defender);
     }
    }
@@ -237,7 +237,7 @@ function advanceDamageStep(s:DuelState,ctx:EngineContext){
    const flip=pending.revealedFlip;
    if(flip){
     const c=s.cards[flip];
-    (s.pendingTriggers??=[]).push({sourceId:flip,controller:c.owner,effectId:c.cardId===24317029?'SPY_SUMMON':c.cardId===16226786?'NIGHT_DESTROY':c.cardId===TSUKUYOMI?'TSUKUYOMI_SET':c.cardId===MAGICIAN_OF_FAITH?'MOF_RECOVER':'DEKOICHI_DRAW',mandatory:true});
+    (s.pendingTriggers??=[]).push({sourceId:flip,controller:c.owner,effectId:c.cardId===MERCHANT?'MERCHANT_EXCAVATE':c.cardId===24317029?'SPY_SUMMON':c.cardId===16226786?'NIGHT_DESTROY':c.cardId===TSUKUYOMI?'TSUKUYOMI_SET':c.cardId===MAGICIAN_OF_FAITH?'MOF_RECOVER':'DEKOICHI_DRAW',mandatory:true});
     log(s,'TRIGGER_QUEUED',`${getCard(s,flip,ctx).name} Flip Effect queued after damage, including if destroyed.`,c.owner);
    }
    if(pending.shinatoDamage)(s.pendingTriggers??=[]).push({sourceId:pending.attackerId,controller:pending.attacker,effectId:'SHINATO_DAMAGE',mandatory:true,value:pending.shinatoDamage});

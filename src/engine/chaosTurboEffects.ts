@@ -1,6 +1,7 @@
 import {draw,getCard,log,placeMonster,removeFromHand,seededShuffle,toBanished,toGraveyard,type DuelState,type EngineContext,type ChainLink,type LegalAction,type Seat} from './model';
+export const MERCHANT=32362575;
 export const SPY=24317029,NIGHT=16226786,KYCOO=88240808,CARD_DESTRUCTION=72892473,RAIGEKI_BREAK=4178474,DUSTSHOOT=64697231;
-export const chaosEffectIds=new Set([SPY,NIGHT,KYCOO,CARD_DESTRUCTION,RAIGEKI_BREAK,DUSTSHOOT,83011278]);
+export const chaosEffectIds=new Set([MERCHANT,SPY,NIGHT,KYCOO,CARD_DESTRUCTION,RAIGEKI_BREAK,DUSTSHOOT,83011278]);
 const other=(s:Seat):Seat=>s===0?1:0;
 export function chaosResponses(s:DuelState,_ctx:EngineContext,seat:Seat):LegalAction[]{
  const p=s.players[seat],actions:LegalAction[]=[];
@@ -10,10 +11,17 @@ export function chaosResponses(s:DuelState,_ctx:EngineContext,seat:Seat):LegalAc
  }return actions;
 }
 export function chaosMain(s:DuelState,seat:Seat):LegalAction[]{const p=s.players[seat];return [...p.hand,...p.zones.spell.filter((x):x is string=>Boolean(x)&&Boolean(s.cards[x!].faceDown))].flatMap(id=>s.cards[id].cardId!==CARD_DESTRUCTION?[]:(s.cards[id].location==='spell'?[s.cards[id].zone!]:p.zones.spell.flatMap((v,i)=>v===null?[i]:[])).map(zone=>({type:'ACTIVATE_DECK_EFFECT' as const,seat,instanceId:id,effectId:'CARD_DESTRUCTION' as const,zone,description:'Card Destruction · both players discard, then draw'})));}
-export function chaosFlip(s:DuelState,id:string){const c=s.cards[id];if(c.cardId===SPY||c.cardId===NIGHT)(s.pendingTriggers??=[]).push({sourceId:id,controller:c.controller,effectId:c.cardId===SPY?'SPY_SUMMON':'NIGHT_DESTROY',mandatory:true});}
+export function chaosFlip(s:DuelState,id:string){const c=s.cards[id];if(c.cardId===SPY||c.cardId===NIGHT||c.cardId===MERCHANT)(s.pendingTriggers??=[]).push({sourceId:id,controller:c.controller,effectId:c.cardId===MERCHANT?'MERCHANT_EXCAVATE':c.cardId===SPY?'SPY_SUMMON':'NIGHT_DESTROY',mandatory:true});}
 export function resolveChaos(s:DuelState,link:ChainLink,ctx:EngineContext):boolean{
  const seat=link.controller,p=s.players[seat],target=link.targets[0];
- if(link.effectId==='SPY_SUMMON'){
+ if(link.effectId==='MERCHANT_EXCAVATE'){
+  const revealed:string[]=[];let added:string|undefined;
+  while(p.deck.length){const id=p.deck.shift()!;revealed.push(getCard(s,id,ctx).name);
+   if(/Spell|Trap/.test(getCard(s,id,ctx).type)){p.hand.push(id);s.cards[id].location='hand';s.cards[id].zone=undefined;added=id;break;}
+   toGraveyard(s,id,'effect');
+  }
+  log(s,'EXCAVATE',`Magical Merchant revealed: ${revealed.join(', ')||'no cards'}. ${added?`Added ${getCard(s,added,ctx).name} to hand; sent the other revealed cards to the Graveyard.`:'No Spell or Trap found; sent the revealed cards to the Graveyard.'}`,seat);
+ }else if(link.effectId==='SPY_SUMMON'){
   const card=target?getCard(s,target,ctx):undefined;
   if(target&&p.deck.includes(target)&&card?.name.startsWith("Gravekeeper's")&&Number(card.atk)<=1500&&link.monsterZone!==undefined&&p.zones.monster[link.monsterZone]===null){p.deck.splice(p.deck.indexOf(target),1);placeMonster(s,target,seat,link.monsterZone,link.declaredType==='attack'?'attack':'faceUpDefense',['attack','faceUpDefense']);}
   p.deck=seededShuffle(p.deck,s.seed+s.events.length*7919);
