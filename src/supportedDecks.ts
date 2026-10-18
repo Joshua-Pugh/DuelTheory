@@ -27,3 +27,6 @@ export function assessDeck(deck:Deck,catalog:readonly Card[]){
  const reasons=[...new Set([...unsupported,...missing.map(String),...extra,...legality])];
  return {supported:deck.main.length>=40&&deck.main.length<=60&&reasons.length===0,unsupported:reasons,missing};
 }
+
+export const CHAOS_SIDE_SOURCE='https://www.goatformat.com/uploads/1/1/9/9/119901143/01-riclar91-chaosturbo_orig.png';
+export const GOAT_CONTROL_SIDE_SOURCE='https://www.goatformat.com/uploads/1/1/9/9/119901143/07-lolmarcus-goatcontrol_orig.png';

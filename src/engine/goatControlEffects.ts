@@ -43,7 +43,7 @@ export function metamorphosisChoices(s:DuelState,ctx:EngineContext,seat:Seat):Le
  return options.length?options:[{type:'FINISH_LIGHT_CHOICE',seat,sourceId:pending.sourceId,description:'No legal Fusion Summon remains · finish effect'}];
 }
 export function completeMetamorphosis(s:DuelState,a:Extract<DuelAction,{type:'COMPLETE_LIGHT_CHOICE'}>){
- const p=s.players[a.seat],id=a.choiceId!;p.extra=p.extra?.filter(x=>x!==id);placeMonster(s,id,a.seat,a.monsterZone!,a.declaredType!,['attack','faceUpDefense']);s.cards[id].properlySummoned=false;s.pendingLightChoice=undefined;log(s,'SPECIAL_SUMMON','Metamorphosis Special Summoned a Fusion Monster (not a proper Fusion Summon).',a.seat);
+ const p=s.players[a.seat],id=a.choiceId!;p.extra=p.extra?.filter(x=>x!==id);placeMonster(s,id,a.seat,a.monsterZone!,a.declaredType as 'attack'|'faceUpDefense',['attack','faceUpDefense']);s.cards[id].properlySummoned=false;s.pendingLightChoice=undefined;log(s,'SPECIAL_SUMMON','Metamorphosis Special Summoned a Fusion Monster (not a proper Fusion Summon).',a.seat);
 }
 export function resolveGoatControl(s:DuelState,link:ChainLink,ctx:EngineContext):boolean{
  const seat=link.controller,p=s.players[seat],source=s.cards[link.instanceId];

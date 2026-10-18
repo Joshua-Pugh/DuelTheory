@@ -21,7 +21,7 @@ function resolve(s:DuelState){for(let n=0;n<30&&s.chain.length&&!s.pendingLightC
 function absorb(s:DuelState,id:string,target:string){return resolve(act(s,'ACTIVATE_LIGHT_EFFECT',a=>a.type==='ACTIVATE_LIGHT_EFFECT'&&a.instanceId===id&&a.targetId===target));}
 describe('Goat Control tournament baseline',()=>{
  it('exports the forty-card Main Deck and eight verified prototype Fusions with guided coverage',()=>{
-  expect(GOAT_CONTROL.main).toHaveLength(40);expect(GOAT_CONTROL.extra).toHaveLength(8);expect(parseYdk(ydk)).toEqual({main:GOAT_CONTROL.main,extra:GOAT_CONTROL.extra,side:[]});expect(assessDeck(GOAT_CONTROL,catalog)).toMatchObject({supported:true,unsupported:[]});
+  expect(GOAT_CONTROL.main).toHaveLength(40);expect(GOAT_CONTROL.extra).toHaveLength(8);expect(parseYdk(ydk)).toEqual({main:GOAT_CONTROL.main,extra:GOAT_CONTROL.extra,side:GOAT_CONTROL.side});expect(assessDeck(GOAT_CONTROL,catalog)).toMatchObject({supported:true,unsupported:[]});
   expect(assessDeck({...GOAT_CONTROL,extra:[...GOAT_CONTROL.extra,78193831]},catalog).supported).toBe(false);
   const service=new GameService(),id=service.createGoatSession([GOAT_CONTROL,CHAOS_TURBO],catalog,42);expect(service.verifyReplay(id)).toMatchObject({matches:true,rulesVerified:true});
  });
