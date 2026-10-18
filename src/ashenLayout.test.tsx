@@ -3,8 +3,15 @@ import {renderToStaticMarkup} from 'react-dom/server';
 import AshenCardFrame from './AshenCardFrame';
 import {AshenRules} from './RulesText';
 import catalog from './ashenCatalog.json';
+import AshenBattlefield from './AshenBattlefield';
+import {newBattlefield} from './ashenBattlefieldState';
 
 describe('shared AT rules layout',()=>{
+ it('marks a fatigued frontline Unit with an F counter',()=>{
+  const state=newBattlefield(true,()=>.2),id=state.table.piles['0:unit'][0];state.table.cards[id].rotated=true;
+  const html=renderToStaticMarkup(<AshenBattlefield initialState={state}/>);
+  expect(html).toContain('aria-label="1 Fatigue counter">F</span>');
+ });
  it('uses the expanded art and rules geometry for every catalog card',()=>{
   for(const card of catalog.cards){const html=renderToStaticMarkup(<AshenCardFrame card={card}/>);expect(html).toContain('rules-expanded');expect(html).toContain('viewBox="0 220 1060 580"');}
  });

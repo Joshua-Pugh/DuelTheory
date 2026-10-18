@@ -23,7 +23,7 @@ export const ASHEN_KEYWORDS=[
  ['Deployment fatigue','Units enter fatigued unless Charge applies. Fatigued Units cannot attack or pay an Exhaust cost.'],
  ['Duelist’s Edge','Deals combat damage in the first damage wave, before Units without Duelist’s Edge. A Unit destroyed in that wave does not strike in the later wave.'],
  ['Evade','The Unit cannot be blocked while Evade applies.'],
- ['Exhaust / Fatigue','Rotate the card to mark it used. An Exhaust cost requires a Ready source. Attacking also fatigues a Unit; readying reverses this.'],
+ ['Exhaust / Fatigue','Keep Units upright and mark fatigue with an F counter. An Exhaust cost requires a Ready source. Attacking also fatigues a Unit; readying reverses this.'],
  ['Fortify N','Put N persistent +1 Attack / +1 Defense counters on the chosen Unit. Fortify 1 adds one counter. Fortified means the Unit has a Fortify counter.'],
  ['Nullify','Remove the chosen Action, ability, or trigger from the Clash without resolving it. An Action card goes to the Ossuary. Costs already paid remain spent.'],
  ['Outfit','Pay the indicated cost to attach the Relic to a legal friendly Unit. It grants its printed bonuses or abilities while attached and in play. Outfit cannot be used as a Clash response in the current prototype.'],

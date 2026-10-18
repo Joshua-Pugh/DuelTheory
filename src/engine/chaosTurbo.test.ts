@@ -16,6 +16,14 @@ function move(s:DuelState,id:string,location:'hand'|'monster'|'spell'|'graveyard
 function act(s:DuelState,type:LegalAction['type'],test:(a:LegalAction)=>boolean=()=>true){const a=([...legalActions(s,ctx,0),...legalActions(s,ctx,1)]).find(a=>a.type===type&&test(a));expect(a,`Missing ${type}`).toBeDefined();return dispatchDuel(s,a!,ctx);}
 function resolve(s:DuelState){for(let i=0;i<20&&s.chain.length;i++){if(s.pendingChaos||s.pendingDiscard)return s;s=act(s,'PASS_CHAIN');}return s;}
 describe('Chaos Turbo championship main deck',()=>{
+ it.each([0,1] as const)('Special Summons BLS for seat %i using real Chaos Turbo LIGHT and DARK materials',seat=>{
+  let s=setup();s.current=seat;s.priority=seat;
+  const bls=locate(s,72989439,seat),light=locate(s,31786629,seat),dark=locate(s,SPY,seat);
+  move(s,bls,'hand');move(s,light,'graveyard');move(s,dark,'graveyard');s.players[seat].normalSummoned=true;
+  const summon=legalActions(s,ctx,seat).find(a=>a.type==='SPECIAL_SUMMON_CHAOS'&&a.instanceId===bls&&a.materials.includes(light)&&a.materials.includes(dark)&&a.position==='attack');
+  expect(summon).toBeDefined();s=dispatchDuel(s,summon!,ctx);
+  expect(s.cards[bls]).toMatchObject({location:'monster',controller:seat,properlySummoned:true});expect(s.players[seat].banished).toEqual(expect.arrayContaining([light,dark]));
+ });
  it('exports exactly the researched forty and every active card has coverage',()=>{expect(CHAOS_TURBO.main).toHaveLength(40);expect(assessDeck(CHAOS_TURBO,catalog).supported).toBe(true);expect(unsupportedEffects(ctx,CHAOS_TURBO.main)).toEqual([]);const ydk=parseYdk(ydkText);expect(ydk).toEqual({main:CHAOS_TURBO.main,side:[],extra:[]});});
  it('runs real-ID Mystic Tomato battle recruitment',()=>{const s=setup(),id=locate(s,83011278);move(s,id,'monster');toGraveyard(s,id,'battle');expect(s.pendingTriggers?.[0].effectId).toBe('TOMATO_SUMMON');});
  it('Spy Flip Summons a valid Gravekeeper and shuffles, with a position choice',()=>{let s=setup();const id=locate(s,SPY),target=locate(s,SPY,0,1);move(s,id,'monster',0,true);move(s,target,'hand');move(s,target,'graveyard');s.players[0].graveyard=s.players[0].graveyard.filter(x=>x!==target);s.cards[target].location='deck';s.players[0].deck.push(target);s=act(s,'FLIP_SUMMON',a=>'instanceId'in a&&a.instanceId===id);s=act(s,'ACTIVATE_TRIGGER',a=>a.type==='ACTIVATE_TRIGGER'&&a.choiceId===target&&a.declaredType==='faceUpDefense');s=resolve(s);expect(s.cards[target].location).toBe('monster');expect(s.cards[target].position).toBe('faceUpDefense');});
