@@ -85,6 +85,8 @@ export class GameService {
   this.sessions.set(id,{manualOnly,state,context:ctx,initial:structuredClone(state),snapshots:[structuredClone(state)],actions:[],rulesVerified:!manualOnly});
   return id;
  }
+ /** Restore persisted authority state; never called with client-supplied snapshots. */
+ restoreOnline(state:DuelState,catalog:readonly Card[],manualOnly:boolean):string{const id=`online-${this.nextId++}`;this.sessions.set(id,{manualOnly,state:structuredClone(state),context:{cards:new Map(catalog.map(c=>[c.id,c]))},snapshots:[],actions:[],initial:structuredClone(state),rulesVerified:!manualOnly});return id;}
  private session(id:string){const session=this.sessions.get(id);if(!session)throw new DuelEngineError('ILLEGAL_ACTION',`Unknown game session ${id}`);return session;}
  isManual(id:string){return this.session(id).manualOnly;}
  getState(id:string):DuelState{return structuredClone(this.session(id).state);}

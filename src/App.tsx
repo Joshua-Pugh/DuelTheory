@@ -1,3 +1,4 @@
+import PrivateMatchRoom from './PrivateMatchRoom';
 import PlatformNavigation from './PlatformNavigation';
 import {PAGE_LABELS,pageHash,pageFromLocation,type Page} from './platformRoutes';
 import {PlatformSection,SavedDecks} from './PlatformSections';
@@ -37,8 +38,9 @@ export default function App(){
  const [preferencesWarning,setPreferencesWarning]=useState(false);
  const changePreferences=(next:DuelPreferences)=>{setPreferences(next);setPreferencesWarning(!persistPreferences(next));};
  const [searchOpen,setSearchOpen]=useState(true);const [builderCategory,setBuilderCategory]=useState('All Cards');const [legalOnly,setLegalOnly]=useState(false);const [inspected,setInspected]=useState<Card|null>(null);const [builderPreview,setBuilderPreview]=useState<Card|null>(null);const [hovered,setHovered]=useState<Card|null>(null);const [message,setMessage]=useState('');const [page,setPageState]=useState<Page>(()=>pageFromLocation(location.hash,location.search));const [catalog,setCatalog]=useState<Card[]>([]);const [query,setQuery]=useState('');const [category,setCategory]=useState('All Cards');const [selected,setSelected]=useState<Card|null>(null);
+ const [route,setRoute]=useState(location.hash);
  const setPage=useCallback((next:Page)=>{setPageState(next);if(location.hash!==pageHash(next))location.hash=pageHash(next);},[]);
- useEffect(()=>{const change=()=>setPageState(pageFromLocation(location.hash,location.search));window.addEventListener('hashchange',change);return()=>window.removeEventListener('hashchange',change);},[]);
+ useEffect(()=>{const change=()=>{setRoute(location.hash);setPageState(pageFromLocation(location.hash,location.search));};window.addEventListener('hashchange',change);return()=>window.removeEventListener('hashchange',change);},[]);
  const openGame=(game:'goat'|'ashen')=>{setArenaGame(game);setPage('duel');};
  const [deck,setDeck]=useState<Deck>(initialDeck);const [savedDecks,setSavedDecks]=useState<Deck[]>(readDeckLibrary);const [trialCount,setTrialCount]=useState(10000);const [sampleSeed,setSampleSeed]=useState(20261014);const [sample,setSample]=useState<HandReport|null>(null);const [marker,setMarker]=useState<number[]>([]);const [secondGroup,setSecondGroup]=useState<number[]>([]);const [useSecondGroup,setUseSecondGroup]=useState(false);
  useEffect(()=>{fetch('/catalog.json').then(r=>r.json()).then((raw:Card[])=>{const cards=raw.map(withGoatHistoricalText);setCatalog(cards);if(cards.length)setSelected(cards[0]);}).catch(()=>{});},[]);
@@ -80,6 +82,7 @@ export default function App(){
  const deckExport=()=>{const payload=JSON.stringify({formatId:FORMAT.id,deck},null,2);const blob=new Blob([payload],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=goatDeckFilename(deck.name,'json');a.click();URL.revokeObjectURL(url);};
  const syncInstructions=<div className="empty"><BookOpen size={36}/><h3>Your local card catalog is empty</h3><p>Run <code>npm run sync:cards</code> in the project folder to download the GOAT-era candidate catalog and cache starter artwork locally. Restart or refresh the app afterward.</p><p>Card metadata and image files come from YGOPRODeck. No live image hotlinking is used.</p></div>;
  return <div className="shell"><header className="global-header"><button className="brand brand-image-lockup dt-brand-home" aria-label="DuelTheory Home" onClick={()=>setPage('home')}><img className="brand-crest-image" src="/branding/dueltheory-crest.png" alt=""/><img className="brand-wordmark-image" src="/branding/dueltheory-wordmark.png" alt="DuelTheory — Build. Simulate. Master."/></button><PlatformNavigation page={page} navigate={setPage}/></header><main className="main"><header className="top"><span><span className="dim">DUELTHEORY</span> / {PAGE_LABELS[page].toUpperCase()}</span><span>v3.9.3 · DUELTHEORY PLATFORM PROTOTYPE</span></header>
+ {page==='private'&&<PrivateMatchRoom key={route} deck={deck} catalog={catalog}/>}
  {page==='home'&&<PlatformHome navigate={setPage} onGame={openGame}/>}
  {(['play','build','test','table','create','more','games','help','about'] as Page[]).includes(page)&&<PlatformSection page={page} navigate={setPage} onGame={openGame}/>}
  {page==='saved'&&<SavedDecks decks={savedDecks} current={deck} onLoad={id=>{loadSavedDeck(id);setPage('decks');}} onBuild={()=>setPage('decks')}/>}
