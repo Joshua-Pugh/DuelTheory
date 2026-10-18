@@ -24,7 +24,7 @@ function applyManualMove(before:DuelState,action:ManualMove):DuelState{
  if(c.location==='monster'||c.location==='spell'){
   if(c.zone!==undefined&&prior.zones[c.location][c.zone]===action.instanceId)prior.zones[c.location][c.zone]=null;
  }else{
-  const arr=s.players[c.location==='deck'||c.location==='graveyard'||c.location==='banished'?c.owner:c.controller][c.location];
+  const arr=s.players[c.location==='deck'||c.location==='graveyard'||c.location==='banished'?c.owner:c.controller][c.location]||[];
   const idx=arr.indexOf(action.instanceId);if(idx<0)throw new DuelEngineError('ILLEGAL_ACTION','Card missing from source location');arr.splice(idx,1);
  }
  const counters=c.location===action.destination&&c.controller===action.seat&&!c.faceDown&&action.position!=='faceDownDefense'&&action.faceDown!==true?c.spellCounters:0;

@@ -1,3 +1,4 @@
+import {restrictStat} from './goatControlEffects';
 import {lightResponses,HOSHI,SOUL} from './lightDeckEffects';
 import {chaosResponses,chaosMain,resolveChaos} from './chaosTurboEffects';
 import {getCard,log,removeFromHand,toGraveyard,toBanished,placeMonster,seededShuffle,settleLifePoints,detachFaceDown,type DuelState,type EngineContext,type Seat,type LegalAction,type ChainLink} from './model';
@@ -18,7 +19,7 @@ const other=(seat:Seat):Seat=>seat===0?1:0;
 const monsters=(s:DuelState)=>[...s.players[0].zones.monster,...s.players[1].zones.monster].filter((id):id is string=>id!==null);
 const spells=(s:DuelState)=>[...s.players[0].zones.spell,...s.players[1].zones.spell].filter((id):id is string=>id!==null);
 export const faceUpMonsters=(s:DuelState)=>monsters(s).filter(id=>!s.cards[id].faceDown);
-export function battleAttack(s:DuelState,id:string,ctx:EngineContext):number{const c=s.cards[id],card=getCard(s,id,ctx);let value=Number(card.atk)+(c.cardId===BREAKER?(c.spellCounters??0)*300:0);for(const source of Object.values(s.cards).filter(x=>x.location==='monster'&&!x.faceDown)){if(source.cardId===HOSHI)value+=card.attribute==='LIGHT'?500:card.attribute==='DARK'?-400:0;if(source.cardId===SOUL&&source.controller!==c.controller&&s.current===c.controller&&s.phase==='BATTLE')value-=300;}return Math.max(0,value);}
+export function battleAttack(s:DuelState,id:string,ctx:EngineContext):number{const c=s.cards[id],card=getCard(s,id,ctx);let value=(restrictStat(s,id,'atk',ctx)??Number(card.atk))+(c.cardId===BREAKER?(c.spellCounters??0)*300:0);for(const source of Object.values(s.cards).filter(x=>x.location==='monster'&&!x.faceDown)){if(source.cardId===HOSHI)value+=card.attribute==='LIGHT'?500:card.attribute==='DARK'?-400:0;if(source.cardId===SOUL&&source.controller!==c.controller&&s.current===c.controller&&s.phase==='BATTLE')value-=300;}return Math.max(0,value);}
 export function summonDeckTriggers(s:DuelState,id:string,normal=false){
  const c=s.cards[id];if(c.faceDown)return;const ready=([c.controller,other(c.controller)] as Seat[]).filter(seat=>s.players[seat].zones.spell.some(x=>x&&[53582587,83555666,97077563,4178474,64697231].includes(s.cards[x].cardId)&&s.cards[x].faceDown&&s.cards[x].setTurn!==s.turn));if(ready.length)s.summonResponse={summoner:c.controller,sourceId:id,priority:ready[0]};
  if(c.cardId===2134346)c.spiritReturnTurn=s.turn;
@@ -126,7 +127,7 @@ export function resolveDeckEffect(s:DuelState,link:ChainLink,ctx:EngineContext):
  log(s,'RESOLVE',`${getCard(s,link.instanceId,ctx).name} effect resolved.`,seat);return true;
 }
 
-function canRevive(s:DuelState,id:string,ctx:EngineContext){const card=getCard(s,id,ctx);return card.type.includes('Monster')&&!card.type.includes('Spirit')&&(!card.type.includes('Ritual')&&![CHAOS_SORCERER,BLS,77527210].includes(card.id)||Boolean(s.cards[id].properlySummoned));}
+function canRevive(s:DuelState,id:string,ctx:EngineContext){const card=getCard(s,id,ctx);return card.type.includes('Monster')&&!card.type.includes('Spirit')&&(!card.type.includes('Ritual')&&!card.type.includes('Fusion')&&![CHAOS_SORCERER,BLS,77527210].includes(card.id)||Boolean(s.cards[id].properlySummoned));}
 export function deckResponseActions(s:DuelState,ctx:EngineContext,seat:Seat):LegalAction[]{
  const p=s.players[seat],actions:LegalAction[]=[];
  for(const id of p.zones.spell){if(!id||!s.cards[id].faceDown||s.cards[id].setTurn===s.turn)continue;const c=s.cards[id];

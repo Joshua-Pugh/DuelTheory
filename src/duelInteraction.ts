@@ -10,7 +10,7 @@ export function actionLabel(a:LegalAction):string {
   case 'CHANGE_POSITION':return a.position==='attack'?'Change to Attack':'Change to Defense';
   case 'DECLARE_ATTACK':return a.targetId?'Attack…':'Direct attack';
   case 'ACTIVATE_DECK_EFFECT':return a.effectId==='ZORC_ROLL'?'Activate · roll a die':'Activate effect…';
-  case 'ACTIVATE_LIGHT_EFFECT':return a.effectId==='VENUS'?'Pay 500 LP · summon Mystical Shine Ball':a.effectId==='CANNON'?'Tribute 1 monster · inflict 500 damage':a.effectId==='ARCHER'?'Tribute 2 monsters · inflict 1200 damage':'Activate effect…';
+  case 'ACTIVATE_LIGHT_EFFECT':return a.effectId==='METAMORPHOSIS'?'Activate · tribute for Fusion Summon':a.effectId==='TER_ABSORB'?'Equip an opponent monster…':a.effectId==='VENUS'?'Pay 500 LP · summon Mystical Shine Ball':a.effectId==='CANNON'?'Tribute 1 monster · inflict 500 damage':a.effectId==='ARCHER'?'Tribute 2 monsters · inflict 1200 damage':'Activate effect…';
   case 'SPECIAL_SUMMON_SOUL':return `Special Summon · ${a.declaredType==='attack'?'ATK':'DEF'}`;
   case 'SPECIAL_SUMMON_CHAOS':return `Special Summon · ${a.position==='attack'?'ATK':'DEF'}`;
   case 'BEGIN_RITUAL':return 'Activate · Ritual Summon';

@@ -1,3 +1,4 @@
+import {MIMIC} from './goatControlEffects';
 import {draw,getCard,log,placeMonster,removeFromHand,seededShuffle,toBanished,toGraveyard,type DuelState,type EngineContext,type ChainLink,type LegalAction,type Seat} from './model';
 export const MERCHANT=32362575;
 export const SPY=24317029,NIGHT=16226786,KYCOO=88240808,CARD_DESTRUCTION=72892473,RAIGEKI_BREAK=4178474,DUSTSHOOT=64697231;
@@ -11,7 +12,7 @@ export function chaosResponses(s:DuelState,_ctx:EngineContext,seat:Seat):LegalAc
  }return actions;
 }
 export function chaosMain(s:DuelState,seat:Seat):LegalAction[]{const p=s.players[seat];return [...p.hand,...p.zones.spell.filter((x):x is string=>Boolean(x)&&Boolean(s.cards[x!].faceDown))].flatMap(id=>s.cards[id].cardId!==CARD_DESTRUCTION?[]:(s.cards[id].location==='spell'?[s.cards[id].zone!]:p.zones.spell.flatMap((v,i)=>v===null?[i]:[])).map(zone=>({type:'ACTIVATE_DECK_EFFECT' as const,seat,instanceId:id,effectId:'CARD_DESTRUCTION' as const,zone,description:'Card Destruction · both players discard, then draw'})));}
-export function chaosFlip(s:DuelState,id:string){const c=s.cards[id];if(c.cardId===SPY||c.cardId===NIGHT||c.cardId===MERCHANT)(s.pendingTriggers??=[]).push({sourceId:id,controller:c.controller,effectId:c.cardId===MERCHANT?'MERCHANT_EXCAVATE':c.cardId===SPY?'SPY_SUMMON':'NIGHT_DESTROY',mandatory:true});}
+export function chaosFlip(s:DuelState,id:string){const c=s.cards[id];if(c.cardId===SPY||c.cardId===NIGHT||c.cardId===MERCHANT||c.cardId===MIMIC)(s.pendingTriggers??=[]).push({sourceId:id,controller:c.controller,effectId:c.cardId===MIMIC?'MIMIC_DRAW':c.cardId===MERCHANT?'MERCHANT_EXCAVATE':c.cardId===SPY?'SPY_SUMMON':'NIGHT_DESTROY',mandatory:true});}
 export function resolveChaos(s:DuelState,link:ChainLink,ctx:EngineContext):boolean{
  const seat=link.controller,p=s.players[seat],target=link.targets[0];
  if(link.effectId==='MERCHANT_EXCAVATE'){

@@ -1,3 +1,4 @@
+import {restricts,restrictStat,replaceRestrictBattleDestruction,goatControlIds,MIMIC} from './goatControlEffects';
 import {lightMainActions,lightChoiceActions,dispatchLight,resolveLight,lightEffectIds,canRecruit,canSummon,ASURA,PARSHATH,ZABORG} from './lightDeckEffects';
 import {chaosFlip,chaosEffectIds,MERCHANT} from './chaosTurboEffects';
 import {deckMainActions,dispatchDeckEffect,resolveDeckEffect,summonDeckTriggers,faceUpMonsters,battleAttack,deckResponseActions,ritualDeckEffectIds,TSUKUYOMI,SERPENT,SHINATO} from './ritualDeckEffects';
@@ -168,7 +169,7 @@ function rawLegalActions(s:DuelState,ctx:EngineContext,seat:Seat):LegalAction[]{
   for(const attackerId of s.players[seat].zones.monster){
    if(!attackerId)continue;
    const instance=s.cards[attackerId];
-   if(instance.position!=='attack'||instance.faceDown||(instance.cardId!==ASURA&&instance.attackedTurn===s.turn&&!(instance.extraAttackTurn===s.turn&&instance.attacksThisTurn?.turn===s.turn&&instance.attacksThisTurn.count===1))||instance.cannotAttackTurn===s.turn||!Number.isFinite(getCard(s,attackerId,ctx).atk))continue;
+   if(restricts(s,attackerId)||instance.position!=='attack'||instance.faceDown||(instance.cardId!==ASURA&&instance.attackedTurn===s.turn&&!(instance.extraAttackTurn===s.turn&&instance.attacksThisTurn?.turn===s.turn&&instance.attacksThisTurn.count===1))||instance.cannotAttackTurn===s.turn||!Number.isFinite(getCard(s,attackerId,ctx).atk))continue;
    if(instance.cardId===ASURA&&instance.asuraAttacks?.turn===s.turn&&instance.asuraAttacks.direct)continue;
   if(defenders.length){for(const targetId of defenders){if(instance.cardId===ASURA&&instance.asuraAttacks?.turn===s.turn&&instance.asuraAttacks.targets.includes(targetId))continue;const target=s.cards[targetId];if(!Number.isFinite(target.position==='attack'?getCard(s,targetId,ctx).atk:getCard(s,targetId,ctx).def))continue;actions.push({type:'DECLARE_ATTACK',seat,attackerId,targetId,description:`Attack ${target.faceDown?'face-down monster in zone '+(target.zone!+1):getCard(s,targetId,ctx).name} with ${getCard(s,attackerId,ctx).name}`});}}
    else if(instance.cardId!==ASURA||instance.asuraAttacks?.turn!==s.turn)actions.push({type:'DECLARE_ATTACK',seat,attackerId,description:`Direct attack with ${getCard(s,attackerId,ctx).name}`});
@@ -176,12 +177,12 @@ function rawLegalActions(s:DuelState,ctx:EngineContext,seat:Seat):LegalAction[]{
  }
  if(mainPhase(s)){const p=s.players[seat];
  for(const id of p.zones.monster){if(!id)continue;const instance=s.cards[id];
- if(!instance.faceDown&&instance.summonedTurn!==s.turn&&instance.lastPositionTurn!==s.turn&&instance.attackedTurn!==s.turn){
+ if(!restricts(s,id)&&!instance.faceDown&&instance.summonedTurn!==s.turn&&instance.lastPositionTurn!==s.turn&&instance.attackedTurn!==s.turn){
   if(instance.position==='attack')actions.push({type:'CHANGE_POSITION',seat,instanceId:id,position:'faceUpDefense',description:`Change ${getCard(s,id,ctx).name} to face-up Defense Position`});
   else if(instance.position==='faceUpDefense')actions.push({type:'CHANGE_POSITION',seat,instanceId:id,position:'attack',description:`Change ${getCard(s,id,ctx).name} to Attack Position`});
  }
  }
- for(const id of p.zones.monster){if(!id)continue;const instance=s.cards[id];if(instance.faceDown&&instance.summonedTurn!==s.turn&&instance.lastPositionTurn!==s.turn)actions.push({type:'FLIP_SUMMON',seat,instanceId:id,description:`Flip Summon ${getCard(s,id,ctx).name}`});}for(const id of p.hand){const card=getCard(s,id,ctx);if(isNormalSummonable(card)&&!p.normalSummoned){for(let zone=0;zone<5;zone++)if(p.zones.monster[zone]===null){actions.push({type:'NORMAL_SUMMON',seat,instanceId:id,zone,position:'attack',description:`Normal Summon ${card.name} in zone ${zone+1}`});actions.push({type:'NORMAL_SUMMON',seat,instanceId:id,zone,position:'faceDownDefense',description:`Set ${card.name} in monster zone ${zone+1}`});}}
+ for(const id of p.zones.monster){if(!id)continue;const instance=s.cards[id];if(!restricts(s,id)&&instance.faceDown&&instance.summonedTurn!==s.turn&&instance.lastPositionTurn!==s.turn)actions.push({type:'FLIP_SUMMON',seat,instanceId:id,description:`Flip Summon ${getCard(s,id,ctx).name}`});}for(const id of p.hand){const card=getCard(s,id,ctx);if(isNormalSummonable(card)&&!p.normalSummoned){for(let zone=0;zone<5;zone++)if(p.zones.monster[zone]===null){actions.push({type:'NORMAL_SUMMON',seat,instanceId:id,zone,position:'attack',description:`Normal Summon ${card.name} in zone ${zone+1}`});actions.push({type:'NORMAL_SUMMON',seat,instanceId:id,zone,position:'faceDownDefense',description:`Set ${card.name} in monster zone ${zone+1}`});}}
  if(isSpellTrap(card)){for(let zone=0;zone<5;zone++)if(p.zones.spell[zone]===null){actions.push({type:'SET_SPELL_TRAP',seat,instanceId:id,zone,description:`Set ${card.name} in spell/trap zone ${zone+1}`});if(card.id===GRACEFUL_CHARITY)actions.push({type:'ACTIVATE_GRACEFUL_CHARITY',seat,instanceId:id,zone,description:'Activate Graceful Charity: draw 3, then discard 2'});if(card.id===POT_OF_GREED)actions.push({type:'ACTIVATE_POT_OF_GREED',seat,instanceId:id,zone,description:'Activate Pot of Greed: draw two cards'});}}}
  // Normal Spells previously Set may activate during either Main Phase, even on the Set turn.
  for(const id of p.zones.spell){if(!id||!s.cards[id].faceDown)continue;const c=s.cards[id];
@@ -219,7 +220,7 @@ function advanceDamageStep(s:DuelState,ctx:EngineContext){
     const target=s.cards[pending.targetId];
     if(target?.location==='monster' && target.faceDown){
      target.faceDown=false;target.position='faceUpDefense';if(target.cardId===TSUKUYOMI||target.cardId===ASURA)target.spiritReturnTurn=s.turn;
-     if(target.cardId===MAGICIAN_OF_FAITH||target.cardId===DEKOICHI||target.cardId===TSUKUYOMI||target.cardId===24317029||target.cardId===16226786||target.cardId===MERCHANT)pending.revealedFlip=target.instanceId;
+     if(target.cardId===MAGICIAN_OF_FAITH||target.cardId===DEKOICHI||target.cardId===TSUKUYOMI||target.cardId===24317029||target.cardId===16226786||target.cardId===MERCHANT||target.cardId===MIMIC)pending.revealedFlip=target.instanceId;
      log(s,'BATTLE_FLIP',`${getCard(s,target.instanceId,ctx).name} flipped face-up by battle.`,pending.defender);
     }
    }
@@ -233,11 +234,11 @@ function advanceDamageStep(s:DuelState,ctx:EngineContext){
   case 'AFTER_CALCULATE':
    throw new DuelEngineError('ILLEGAL_ACTION','Resolve or decline D.D. Warrior Lady before advancing');
   case 'END':{
-   for(const id of pending.battleDestruction??[]){if(s.cards[id]?.location==='monster')toGraveyard(s,id,'battle');}
+   for(const id of pending.battleDestruction??[]){if(s.cards[id]?.location==='monster'&&!replaceRestrictBattleDestruction(s,id))toGraveyard(s,id,'battle');}
    const flip=pending.revealedFlip;
    if(flip){
     const c=s.cards[flip];
-    (s.pendingTriggers??=[]).push({sourceId:flip,controller:c.owner,effectId:c.cardId===MERCHANT?'MERCHANT_EXCAVATE':c.cardId===24317029?'SPY_SUMMON':c.cardId===16226786?'NIGHT_DESTROY':c.cardId===TSUKUYOMI?'TSUKUYOMI_SET':c.cardId===MAGICIAN_OF_FAITH?'MOF_RECOVER':'DEKOICHI_DRAW',mandatory:true});
+    (s.pendingTriggers??=[]).push({sourceId:flip,controller:c.owner,effectId:c.cardId===MIMIC?'MIMIC_DRAW':c.cardId===MERCHANT?'MERCHANT_EXCAVATE':c.cardId===24317029?'SPY_SUMMON':c.cardId===16226786?'NIGHT_DESTROY':c.cardId===TSUKUYOMI?'TSUKUYOMI_SET':c.cardId===MAGICIAN_OF_FAITH?'MOF_RECOVER':'DEKOICHI_DRAW',mandatory:true});
     log(s,'TRIGGER_QUEUED',`${getCard(s,flip,ctx).name} Flip Effect queued after damage, including if destroyed.`,c.owner);
    }
    if(pending.shinatoDamage)(s.pendingTriggers??=[]).push({sourceId:pending.attackerId,controller:pending.attacker,effectId:'SHINATO_DAMAGE',mandatory:true,value:pending.shinatoDamage});
@@ -266,15 +267,15 @@ function calculateBasicDamage(s:DuelState,ctx:EngineContext){
  }else{
   const target=s.cards[pending.targetId];const defenderCard=getCard(s,pending.targetId,ctx);
   const wasDefense=target.position!=='attack';
-  const defense=Number(wasDefense?defenderCard.def:battleAttack(s,pending.targetId,ctx));
+  const defense=Number(wasDefense?(restrictStat(s,pending.targetId,'def',ctx)??defenderCard.def):battleAttack(s,pending.targetId,ctx));
   if(!Number.isFinite(defense)||defense<0)throw new DuelEngineError('UNSUPPORTED_EFFECT','Defender stat unavailable');
   if(atk>defense){
-   if(!protect(opponent)){if(pending.targetId && (target.cardId===DD_WARRIOR_LADY||attacker.cardId===DD_WARRIOR_LADY))(pending.battleDestruction??=[]).push(pending.targetId);else if(attacker.cardId===40737112)toBanished(s,pending.targetId,true);else toGraveyard(s,pending.targetId,'battle');}
+   if(!protect(opponent)){if(pending.targetId && (target.cardId===DD_WARRIOR_LADY||attacker.cardId===DD_WARRIOR_LADY))(pending.battleDestruction??=[]).push(pending.targetId);else if(attacker.cardId===40737112)toBanished(s,pending.targetId,true);else if(!replaceRestrictBattleDestruction(s,pending.targetId))toGraveyard(s,pending.targetId,'battle');}
    if(!wasDefense||attacker.cardId===PARSHATH)damage(opponent,atk-defense);
   }else if(atk<defense){
-   if(!wasDefense){if(!protect(seat)){if(target.cardId===DD_WARRIOR_LADY||attacker.cardId===DD_WARRIOR_LADY)(pending.battleDestruction??=[]).push(pending.attackerId);else toGraveyard(s,pending.attackerId,'battle');}damage(seat,defense-atk);}
+   if(!wasDefense){if(!protect(seat)){if(target.cardId===DD_WARRIOR_LADY||attacker.cardId===DD_WARRIOR_LADY)(pending.battleDestruction??=[]).push(pending.attackerId);else if(!replaceRestrictBattleDestruction(s,pending.attackerId))toGraveyard(s,pending.attackerId,'battle');}damage(seat,defense-atk);}
    else damage(seat,defense-atk);
-  }else if(!wasDefense&&atk>0){for(const id of [pending.attackerId,pending.targetId])if(!protect(s.cards[id].controller)){if(target.cardId===DD_WARRIOR_LADY||attacker.cardId===DD_WARRIOR_LADY)(pending.battleDestruction??=[]).push(id);else toGraveyard(s,id,'battle');}}
+  }else if(!wasDefense&&atk>0){for(const id of [pending.attackerId,pending.targetId])if(!protect(s.cards[id].controller)){if(target.cardId===DD_WARRIOR_LADY||attacker.cardId===DD_WARRIOR_LADY)(pending.battleDestruction??=[]).push(id);else if(!replaceRestrictBattleDestruction(s,id))toGraveyard(s,id,'battle');}}
   if(attacker.cardId===SHINATO&&wasDefense&&target.location==='graveyard')pending.shinatoDamage=Number(defenderCard.atk)||0;
  if(attacker.cardId===72989439&&atk>defense&&attacker.effectUsedTurn!==s.turn&&(attacker.attacksThisTurn?.count??0)===1)(s.pendingTriggers??=[]).push({sourceId:pending.attackerId,controller:seat,effectId:'BLS_EXTRA_ATTACK',mandatory:false});
   log(s,'BATTLE',`${attackerCard.name} attacked ${defenderCard.name} (${atk} vs ${defense} ${wasDefense?'DEF':'ATK'}).`,seat);
@@ -475,4 +476,4 @@ function resolveChain(s:DuelState,resolveContext:EngineContext){const priorSummo
   }else {pending.damageStep='START';log(s,'DAMAGE_STEP','Attack response chain resolved. Damage Step begins.',pending.attacker);}
  }
 }
-export function unsupportedEffects(ctx:EngineContext,ids:number[]):string[]{return [...new Set(ids)].filter(id=>!lightEffectIds.has(id)&&!chaosEffectIds.has(id)&&!ritualDeckEffectIds.has(id)&&id!==BOOK_OF_MOON&&id!==MIRROR_FORCE&&id!==SAKURETSU_ARMOR&&id!==GRACEFUL_CHARITY&&id!==POT_OF_GREED&&id!==MYSTICAL_SPACE_TYPHOON&&id!==CONTRACT_WITH_THE_ABYSS&&id!==CONTRACT_WITH_THE_DARK_MASTER&&id!==SHINATOS_ARK&&id!==MANJU&&id!==SENJU&&id!==THUNDER_DRAGON&&id!==SANGAN&&id!==MAGICIAN_OF_FAITH&&id!==DEKOICHI&&id!==MYSTIC_TOMATO&&id!==SHINING_ANGEL&&id!==DD_WARRIOR_LADY&&id!==APPRENTICE_MAGICIAN).map(id=>ctx.cards.get(id)?.name||String(id));}
+export function unsupportedEffects(ctx:EngineContext,ids:number[]):string[]{return [...new Set(ids)].filter(id=>!goatControlIds.has(id)&&!lightEffectIds.has(id)&&!chaosEffectIds.has(id)&&!ritualDeckEffectIds.has(id)&&id!==BOOK_OF_MOON&&id!==MIRROR_FORCE&&id!==SAKURETSU_ARMOR&&id!==GRACEFUL_CHARITY&&id!==POT_OF_GREED&&id!==MYSTICAL_SPACE_TYPHOON&&id!==CONTRACT_WITH_THE_ABYSS&&id!==CONTRACT_WITH_THE_DARK_MASTER&&id!==SHINATOS_ARK&&id!==MANJU&&id!==SENJU&&id!==THUNDER_DRAGON&&id!==SANGAN&&id!==MAGICIAN_OF_FAITH&&id!==DEKOICHI&&id!==MYSTIC_TOMATO&&id!==SHINING_ANGEL&&id!==DD_WARRIOR_LADY&&id!==APPRENTICE_MAGICIAN).map(id=>ctx.cards.get(id)?.name||String(id));}
