@@ -78,3 +78,4 @@
 @media(max-width:600px){.dt-room-header>strong small{display:inline;font-size:8px}}
 
 @media(max-width:1100px),(max-height:650px),(any-pointer:coarse){.dt-room-content{display:block;overflow:auto}.dt-duel-board{height:100%;min-height:560px}.dt-board-half{height:auto;flex:1;min-height:120px}.dt-zone-pair{grid-template-rows:repeat(2,minmax(0,1fr))}.dt-field-hand{height:48px;min-height:48px}.dt-field-side{grid-template-rows:minmax(45px,1.3fr) repeat(2,minmax(26px,1fr))}}
+.dt-sheep-token{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px;height:100%;padding:3px;border:2px solid #a3ba8c;border-radius:4px;background:radial-gradient(ellipse,#d4d8ac,#344d38);color:#14251c;text-align:center;font-size:8px}.dt-sheep-token>span{font-size:clamp(12px,2vw,28px)}.dt-sheep-token>b{font-size:7px}.dt-sheep-token>small{font-size:5px}.dt-sheep-token>strong{font-size:9px}.dt-opponent-half .dt-sheep-token{transform:rotate(180deg)}

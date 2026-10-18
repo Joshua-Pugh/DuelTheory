@@ -4,7 +4,7 @@ import type {DuelState,LegalAction} from './engine/model';
 export function shouldAutoResolve(state:DuelState,actions?:LegalAction[]):boolean{
  if(actions)return Boolean(state.chain.length)&&Boolean(unopposedResponse(actions));
  const resolving=new Set(state.chain.map(link=>link.instanceId));
- return Boolean(state.chain.length)&&!state.pendingDiscard&&!state.pendingRandomDiscard&&!state.pendingRoll&&!state.pendingDeckChoice&&!state.pendingTriggers?.length&&!state.pendingSearch&&
+ return Boolean(state.chain.length)&&!state.pendingLightChoice&&!state.pendingDiscard&&!state.pendingRandomDiscard&&!state.pendingRoll&&!state.pendingDeckChoice&&!state.pendingTriggers?.length&&!state.pendingSearch&&
   state.players.every(player=>player.zones.spell.every(id=>id===null||resolving.has(id)));
 }
 

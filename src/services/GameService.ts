@@ -15,7 +15,7 @@ function applyManualMove(before:DuelState,action:ManualMove):DuelState{
  const s=structuredClone(before), c=s.cards[action.instanceId];
  if(!c)throw new DuelEngineError('UNKNOWN_CARD','Manual card instance does not exist');
  if(c.owner!==action.seat && c.controller!==action.seat)throw new DuelEngineError('ILLEGAL_ACTION','Manual action requires card owner or controller');
- if(s.freeResponse||s.pendingChaos||s.pendingRitual||s.chain.length||s.pendingAttack||s.pendingTriggers?.length||s.pendingSearch||s.pendingDiscard||s.pendingDeckChoice||s.pendingRoll||s.pendingRandomDiscard||s.summonResponse)throw new DuelEngineError('ILLEGAL_ACTION','Resolve pending effects before manual movement');
+ if(s.pendingLightChoice||s.freeResponse||s.pendingChaos||s.pendingRitual||s.chain.length||s.pendingAttack||s.pendingTriggers?.length||s.pendingSearch||s.pendingDiscard||s.pendingDeckChoice||s.pendingRoll||s.pendingRandomDiscard||s.summonResponse)throw new DuelEngineError('ILLEGAL_ACTION','Resolve pending effects before manual movement');
  const p=s.players[action.seat];
  if(action.destination==='monster'||action.destination==='spell'){
   if(!Number.isInteger(action.zone)||action.zone!<0||action.zone!>4||(p.zones[action.destination][action.zone!]!==null&&p.zones[action.destination][action.zone!]!==action.instanceId))throw new DuelEngineError('ILLEGAL_ACTION','Choose an empty zone (0–4)');
@@ -42,7 +42,7 @@ function applyManualMove(before:DuelState,action:ManualMove):DuelState{
 function applyTabletop(before:DuelState,action:TabletopAction):DuelState{
  if(before.winner!==null||before.drawnGame)throw new DuelEngineError('ILLEGAL_ACTION','The duel has ended');
  if(action.type==='MANUAL_MOVE_CARD')return applyManualMove(before,action);
- if(before.freeResponse||before.pendingChaos||before.pendingRitual||before.chain.length||before.pendingAttack||before.pendingSearch||before.pendingTriggers?.length||before.pendingDiscard||before.pendingDeckChoice||before.pendingRoll||before.pendingRandomDiscard||before.summonResponse)throw new DuelEngineError('ILLEGAL_ACTION','Resolve pending effects before tabletop actions');
+ if(before.pendingLightChoice||before.freeResponse||before.pendingChaos||before.pendingRitual||before.chain.length||before.pendingAttack||before.pendingSearch||before.pendingTriggers?.length||before.pendingDiscard||before.pendingDeckChoice||before.pendingRoll||before.pendingRandomDiscard||before.summonResponse)throw new DuelEngineError('ILLEGAL_ACTION','Resolve pending effects before tabletop actions');
  const s=structuredClone(before),p=s.players[action.seat];
  if(action.type==='MANUAL_LP'){if(!Number.isFinite(action.delta)||!Number.isInteger(action.delta)||Math.abs(action.delta)>100000)throw new DuelEngineError('ILLEGAL_ACTION','Enter a whole LP change between -100000 and 100000');p.lp=Math.max(0,p.lp+action.delta);settleLifePoints(s);log(s,'MANUAL_OVERRIDE',`Manual LP adjustment: Player ${action.seat+1} ${action.delta>0?'+':''}${action.delta}. Legality not verified.`,action.seat);return s;}
  if(action.type==='MANUAL_PHASE'){if(action.seat!==s.current)throw new DuelEngineError('ILLEGAL_ACTION','Only the active player advances phases');const phases:Phase[]=['DRAW','STANDBY','MAIN_1','BATTLE','MAIN_2','END'];const index=phases.indexOf(s.phase);if(action.destination!=='NEXT'&&phases.indexOf(action.destination)<=index&&action.destination!=='END')throw new DuelEngineError('ILLEGAL_ACTION','Cannot move backwards');if(action.destination==='END'||s.phase==='END'||action.destination==='NEXT'&&s.phase==='MAIN_2'){s.current=s.current===0?1:0;s.turn++;s.phase='DRAW';s.players[s.current].normalSummoned=false;}else s.phase=action.destination==='NEXT'?phases[index+1]:action.destination;s.pendingDraw=false;s.priority=s.current;log(s,'MANUAL_OVERRIDE',`Manual phase: Player ${s.current+1} ${s.phase}. Draw and resolve effects yourself.`,action.seat);return s;}
@@ -152,11 +152,11 @@ export class GameService {
  /** Pass this player's response. Auto-finish only when the next player has no card response. */
  resolveEffect(id:string):DuelState{
   let state=this.getState(id);
-  if(!state.chain.length||state.pendingDiscard)throw new DuelEngineError('ILLEGAL_ACTION','No chain waiting for responses');
+  if(!state.chain.length||state.pendingLightChoice||state.pendingDiscard)throw new DuelEngineError('ILLEGAL_ACTION','No chain waiting for responses');
   const pass=this.getLegalActions(id,state.priority).find(a=>a.type==='PASS_CHAIN');
   if(!pass)throw new DuelEngineError('ILLEGAL_ACTION','Resolve required choices first');
   state=this.dispatch(id,pass);
-  if(state.chain.length&&!state.pendingDiscard){
+  if(state.chain.length&&!state.pendingLightChoice&&!state.pendingDiscard){
    const options=this.getLegalActions(id,state.priority);
    if(options.every(a=>a.type==='PASS_CHAIN'||a.type==='RESOLVE_CHAIN')){
     const next=options.find(a=>a.type==='PASS_CHAIN');if(next)state=this.dispatch(id,next);

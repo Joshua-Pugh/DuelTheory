@@ -20,5 +20,5 @@ export function parseYdk(text:string):Pick<Deck,'main'|'extra'|'side'> {
   return result;
 }
 export function exportYdk(deck:Deck):string {
-  return ['#created by YGO Sandbox','#main',...deck.main.map(String),'#extra',...deck.extra.map(String),'!side',...deck.side.map(String),''].join('\n');
+  return ['#created by DuelTheory · GOAT 2005',`#name ${deck.name.replace(/[\r\n]/g,' ')}`,'#main',...deck.main.map(String),'#extra',...deck.extra.map(String),'!side',...deck.side.map(String),''].join('\n');
 }

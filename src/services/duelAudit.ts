@@ -22,6 +22,6 @@ export function auditDuelState(s:DuelState):string[]{
   }
   if(!Number.isFinite(p.lp)||p.lp<0)errors.push(`P${seat+1} has invalid LP ${p.lp}`);
  }
- for(const id of Object.keys(s.cards))if(!located.has(id))errors.push(`${id} is missing from all locations`);
+ for(const id of Object.keys(s.cards))if(!located.has(id)&&!s.cards[id].tokenGone)errors.push(`${id} is missing from all locations`);
  return errors;
 }

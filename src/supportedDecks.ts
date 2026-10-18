@@ -1,6 +1,8 @@
 import {validateDeck} from './core/decks';
 import type {Card,Deck} from './core/types';
 import chaos from './data/chaosTurbo.json';
+import venus from './data/venusLight.json';
+export const VENUS_LIGHT:Deck=venus;
 import {unsupportedEffects} from './engine/rules';
 export const CHAOS_TURBO:Deck=chaos;
 export const CHAOS_SOURCE='https://www.goatformat.com/chaos-turbo.html';
