@@ -1,0 +1,27 @@
+import type {SoundCue,SoundEvent} from './soundEvents';
+export type AudioSettings={enabled:boolean;volume:number;pack:'classic'|'cinematic'|'minimal'};
+const KEY='dueltheory.audio.v1';
+const defaults:AudioSettings={enabled:true,volume:0.65,pack:'classic'};
+export function normalizeAudio(value:unknown):AudioSettings{const v=value as Partial<AudioSettings>|null;return {enabled:typeof v?.enabled==='boolean'?v.enabled:defaults.enabled,volume:typeof v?.volume==='number'&&Number.isFinite(v.volume)?Math.max(0,Math.min(1,v.volume)):defaults.volume,pack:v?.pack==='cinematic'||v?.pack==='minimal'?v.pack:'classic'};}
+function load():AudioSettings{try{return normalizeAudio(JSON.parse(localStorage.getItem(KEY)||'null'));}catch{return {...defaults};}}
+/** One context for the app. No network assets, queued autoplay, or rules-engine dependencies. */
+class SoundManager{
+ settings=load();private context:AudioContext|null=null;private master:GainNode|null=null;private voices=new Set<AudioScheduledSourceNode>();private listeners=new Set<()=>void>();private last=0;
+ subscribe=(f:()=>void)=>{this.listeners.add(f);return()=>{this.listeners.delete(f);};};
+ snapshot=()=>this.settings;
+ update=(patch:Partial<AudioSettings>)=>{this.settings=normalizeAudio({...this.settings,...patch});try{localStorage.setItem(KEY,JSON.stringify(this.settings));}catch{/* Session settings remain usable. */}if(this.master&&this.context)this.master.gain.setTargetAtTime(this.settings.enabled?this.settings.volume*0.18:0,this.context.currentTime,0.015);for(const f of this.listeners)f();};
+ unlock=async()=>{if(typeof window==='undefined')return;try{const Constructor=window.AudioContext??(window as unknown as {webkitAudioContext?:typeof AudioContext}).webkitAudioContext;if(!Constructor)return;this.context??=new Constructor();if(!this.master){this.master=this.context.createGain();this.master.gain.value=this.settings.enabled?this.settings.volume*0.18:0;this.master.connect(this.context.destination);}if(this.context.state==='suspended')await this.context.resume().catch(()=>{});}catch{/* Unsupported audio never interrupts play. */}};
+ stop=()=>{for(const voice of this.voices){try{voice.stop();}catch{/* Already ended. */}}this.voices.clear();this.last=0;};
+ play(cues:SoundCue[]){const ctx=this.context;if(!ctx||ctx.state!=='running'||!this.settings.enabled||typeof document!=='undefined'&&document.hidden)return;
+  // A poll may include several actions. Cap the burst and never build a stale queue.
+  const chosen=cues.slice(-5);let start=Math.max(ctx.currentTime+0.01,this.last);if(start>ctx.currentTime+0.5)start=ctx.currentTime+0.01;
+  for(const cue of chosen){this.effect(cue.event,start,cue.intensity??1);start+=0.065;}this.last=start;
+ }
+ private effect(event:SoundEvent,time:number,intensity:number){const ctx=this.context!,pack=this.settings.pack,scale=pack==='cinematic'?0.72:pack==='minimal'?1.15:1;
+  const tone=(frequency:number,duration:number,delay=0,type:OscillatorType='sine',end=frequency,gain=0.6)=>{const osc=ctx.createOscillator(),envelope=ctx.createGain(),t=time+delay;osc.type=type;osc.frequency.setValueAtTime(frequency*scale,t);osc.frequency.exponentialRampToValueAtTime(Math.max(20,end*scale),t+duration);envelope.gain.setValueAtTime(0,t);envelope.gain.linearRampToValueAtTime(gain*Math.min(2,intensity),t+0.008);envelope.gain.exponentialRampToValueAtTime(0.001,t+duration);osc.connect(envelope);envelope.connect(this.master!);this.voices.add(osc);osc.onended=()=>{this.voices.delete(osc);osc.disconnect();envelope.disconnect();};osc.start(t);osc.stop(t+duration+0.01);};
+  const noise=(duration:number,frequency:number)=>{const buffer=ctx.createBuffer(1,Math.ceil(ctx.sampleRate*duration),ctx.sampleRate),data=buffer.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=(Math.random()*2-1)*(1-i/data.length);const source=ctx.createBufferSource(),filter=ctx.createBiquadFilter(),gain=ctx.createGain();source.buffer=buffer;filter.type='bandpass';filter.frequency.value=frequency;gain.gain.value=pack==='minimal'?0.12:0.4;source.connect(filter);filter.connect(gain);gain.connect(this.master!);this.voices.add(source);source.onended=()=>{this.voices.delete(source);source.disconnect();filter.disconnect();gain.disconnect();};source.start(time);};
+  if(pack==='minimal'){tone(event==='damage'||event==='defeat'?180:event==='victory'?660:440,0.09);return;}
+  switch(event){case 'draw':noise(0.13,2400);break;case 'place':noise(0.08,600);tone(170,0.13,0,'sine',70);break;case 'set':noise(0.08,1500);break;case 'flip':noise(0.09,3500);tone(1000,0.1,0,'sine',600,0.25);break;case 'special':[330,495,660].forEach((f,i)=>tone(f,0.35,i*0.07,'sine',f*1.5,0.3));break;case 'spell':tone(620,0.25,0,'sine',1240,0.3);tone(930,0.2,0.06,'sine',1500,0.2);break;case 'trap':noise(0.12,2800);tone(240,0.2,0,'triangle',90);break;case 'attack':noise(0.23,1800);tone(400,0.15,0,'triangle',90,0.3);break;case 'destroy':noise(0.32,3000);tone(100,0.25,0,'triangle',30);break;case 'damage':tone(115,0.28,0,'sine',35);noise(0.15,450);break;case 'turn':tone(440,0.13);tone(660,0.16,0.1);break;case 'chain':tone(500+intensity*100,0.14,0,'triangle',700+intensity*120,0.2);break;case 'resolve':tone(900,0.22,0,'sine',280,0.25);break;case 'victory':[523,659,784,1047].forEach((f,i)=>tone(f,0.4,i*0.12,'triangle',f,0.3));break;case 'defeat':[392,330,262,196].forEach((f,i)=>tone(f,0.4,i*0.12,'sine',f,0.35));break;}
+ }
+}
+export const soundManager=new SoundManager();

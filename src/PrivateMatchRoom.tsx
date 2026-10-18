@@ -1,3 +1,4 @@
+import {useDuelAudio,useMatchResultAudio} from './audio/useDuelAudio';
 import {pollDelay,automaticActionKey,AutomaticActionGate} from './matches/requestPolicy';
 import {incomingChat} from './matches/chatAlerts';
 import {useCallback,useEffect,useRef,useState} from 'react';
@@ -19,6 +20,8 @@ export default function PrivateMatchRoom({deck,catalog}:{deck:Deck;catalog:Card[
  const [mode,setMode]=useState<'single'|'best3'>('single');
  const [code,setCode]=useState(inviteCode),[game,setGame]=useState<Game>('goat'),[name,setName]=useState(''),[choice,setChoice]=useState('0'),[faction,setFaction]=useState<'Brute'|'Noble'>('Brute');
  const [credential,setCredential]=useState<Credential|null>(null),[room,setRoom]=useState<MatchView|null>(null),[info,setInfo]=useState<RoomInfo|null>(null),[error,setError]=useState(''),[busy,setBusy]=useState(false),[chatOpen,setChatOpen]=useState(false),[text,setText]=useState(''),[copied,setCopied]=useState(false);
+ useDuelAudio(room?.goat,room?.seat,catalog);
+ useMatchResultAudio(room?.code,room?.series?.results,room?.seat);
  const disconnected=useRef(false),activeCode=useRef<string|null>(null),leaveDestination=useRef<string|null>(null);
  const [leaveConfirm,setLeaveConfirm]=useState(false);
  useEffect(()=>{disconnected.current=false;return()=>{disconnected.current=true;current.current=null;};},[]);

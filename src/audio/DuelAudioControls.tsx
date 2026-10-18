@@ -1,0 +1,8 @@
+import {useEffect,useSyncExternalStore} from 'react';
+import {soundManager,type AudioSettings} from './SoundManager';
+import './audio.css';
+export default function DuelAudioControls(){
+ const settings=useSyncExternalStore(soundManager.subscribe,soundManager.snapshot,soundManager.snapshot);
+ useEffect(()=>{const unlock=()=>soundManager.unlock();const visibility=()=>{if(document.hidden)soundManager.stop();};window.addEventListener('pointerdown',unlock);window.addEventListener('keydown',unlock);document.addEventListener('visibilitychange',visibility);return()=>{window.removeEventListener('pointerdown',unlock);window.removeEventListener('keydown',unlock);document.removeEventListener('visibilitychange',visibility);};},[]);
+ return <details className="dt-audio"><summary>Audio · {settings.enabled?'On':'Muted'}</summary><div className="dt-audio-panel"><label><input type="checkbox" checked={settings.enabled} onChange={e=>soundManager.update({enabled:e.target.checked})}/>Sound effects</label><label>Master volume · {Math.round(settings.volume*100)}%<input aria-label="Duel audio volume" type="range" min="0" max="100" value={Math.round(settings.volume*100)} onChange={e=>soundManager.update({volume:Number(e.target.value)/100})}/></label><label>Sound pack<select value={settings.pack} onChange={e=>soundManager.update({pack:e.target.value as AudioSettings['pack']})}><option value="classic">Classic TCG</option><option value="cinematic">Cinematic</option><option value="minimal">Minimal tabletop</option></select></label><button className="secondary" type="button" onClick={async()=>{await soundManager.unlock();soundManager.play([{event:'special'}]);}}>Preview sound</button><small>Saved on this device. Audio starts after a tap or key press.</small></div></details>;
+}

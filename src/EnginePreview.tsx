@@ -1,3 +1,4 @@
+import {useDuelAudio} from './audio/useDuelAudio';
 import SupportedDeckSetup from './SupportedDeckSetup';
 import {CHAOS_TURBO,GOAT_CONTROL,assessDeck} from './supportedDecks';
 import {DIE_ROLL_DURATION} from './DuelEffectAnimations';
@@ -25,6 +26,7 @@ export default function EnginePreview({deck,catalog,preferences,onOpenPreference
  const [coinSeed,setCoinSeed]=useState<number|null>(null);
  const [fixedSeed,setFixedSeed]=useState(false),[seed,setSeed]=useState(20261014);
  const [error,setError]=useState(''),[notice,setNotice]=useState(''),[dialog,setDialog]=useState<LegalAction|null>(null),[showDuel,setShowDuel]=useState(false);
+ useDuelAudio(showDuel?duel:null,undefined,catalog);
  useEffect(()=>{if(!showDuel&&coinSeed===null)return;const prior=document.body.style.overflow;document.body.style.overflow='hidden';return()=>{document.body.style.overflow=prior;};},[showDuel,coinSeed]);
  const sessionActions=(sessionId:string)=>[...service.getLegalActions(sessionId,0),...service.getLegalActions(sessionId,1)];
  const actions=id&&duel?sessionActions(id):[];
