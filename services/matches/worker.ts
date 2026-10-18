@@ -12,8 +12,8 @@ export class PrivateMatch extends DurableObject<Env>{
  async alarm(){const r=this.load();if(r&&r.expires>Date.now())await this.ctx.storage.setAlarm(r.expires);else await this.ctx.storage.deleteAll();}
  operate(code:string,hash:string,method:string,id:string,input:Record<string,unknown>){try{
   let r=this.load();if(r&&r.expires<Date.now())r=null;if(r&&releaseExpiredReveal(r.state))this.save(r);
-  if(method==='info'){if(!r)throw Error('Room not found or expired.');return {status:200,body:{game:r.state.game,full:!!r.state.members[1],phase:r.state.phase}};}
-  if(method==='create'&&!r){if(!['goat','ashen'].includes(String(input.game)))throw Error('Choose a game.');const game=input.game as Game;r={state:{code,game,revision:0,members:[member(input.name,validPick(game,input.pick,catalog)),null],phase:'lobby',chat:[]},tokens:[hash,null],expires:Date.now()+lifetime,requests:{},lastChat:[0,0]};this.save(r);}
+  if(method==='info'){if(!r)throw Error('Room not found or expired.');return {status:200,body:{game:r.state.game,full:!!r.state.members[1],phase:r.state.phase,mode:r.state.series?.mode??'single'}};}
+  if(method==='create'&&!r){if(!['goat','ashen'].includes(String(input.game)))throw Error('Choose a game.');const game=input.game as Game;r={state:{code,game,revision:0,members:[member(input.name,validPick(game,input.pick,catalog)),null],phase:'lobby',series:{mode:input.mode==='best3'?'best3':'single',wins:[0,0],results:[],ready:[false,false]},chat:[]},tokens:[hash,null],expires:Date.now()+lifetime,requests:{},lastChat:[0,0]};this.save(r);}
   if(!r)throw Error('Room not found or expired.');
   let seat=r.tokens.indexOf(hash);
   if(method==='join'&&seat<0){if(r.state.phase!=='lobby'||r.state.members[1])throw Error('This room already has two players.');r.state.members[1]=member(input.name,validPick(r.state.game,input.pick,catalog));r.tokens[1]=hash;r.state.revision++;seat=1;this.save(r);}

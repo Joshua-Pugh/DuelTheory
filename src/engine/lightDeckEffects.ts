@@ -1,8 +1,9 @@
+import {monarchActions,resolveMonarch} from './monarchEffects';
 import {goatControlMain,dispatchGoatControl,resolveGoatControl,metamorphosisChoices,completeMetamorphosis} from './goatControlEffects';
 import {draw,getCard,log,placeMonster,removeFromHand,returnToHand,seededShuffle,settleLifePoints,toBanished,toGraveyard,type DuelState,type EngineContext,type ChainLink,type Seat,type LegalAction} from './model';
 export const SOUL=77527210,ZABORG=51945556,PARSHATH=18036057,ASURA=2134346,CANNON=11384280,ARCHER=91869203,VENUS=64734921,SHINE_BALL=39552864,HOSHI=67629977,EXILED=74131780,SWAP=31036355,ROTA=32807846,TRUNADE=42703248,SOLAR=44472639,WABOKU=12607053,SCAPEGOAT=73915051,LAST_WILL=85602018,DUST=60082869;
 export const lightEffectIds=new Set([SOUL,ZABORG,PARSHATH,ASURA,CANNON,ARCHER,VENUS,HOSHI,EXILED,SWAP,ROTA,TRUNADE,SOLAR,WABOKU,SCAPEGOAT,LAST_WILL,DUST]);
-export type LightEffect='METAMORPHOSIS'|'TER_ABSORB'|'VENUS'|'CANNON'|'ARCHER'|'EXILED'|'SWAP'|'ROTA'|'TRUNADE'|'SOLAR'|'WABOKU'|'SCAPEGOAT'|'LAST_WILL'|'DUST';
+export type LightEffect='BRAIN'|'THANKSGIVING'|'SMASHING'|'ENEMY_POSITION'|'ENEMY_CONTROL'|'BOTTOMLESS'|'CYLINDER'|'SOLEMN_CHAIN'|'SOLEMN_SUMMON'|'METAMORPHOSIS'|'TER_ABSORB'|'VENUS'|'CANNON'|'ARCHER'|'EXILED'|'SWAP'|'ROTA'|'TRUNADE'|'SOLAR'|'WABOKU'|'SCAPEGOAT'|'LAST_WILL'|'DUST';
 export type LightChoice={level?:number;kind:'METAMORPHOSIS'|'VENUS'|'ROTA'|'SWAP_FIRST'|'SWAP_SECOND'|'DUST_SET';sourceId:string;controller:Seat;firstId?:string};
 export type LightAction={type:'ACTIVATE_LIGHT_EFFECT';seat:Seat;instanceId:string;effectId:LightEffect;zone?:number;targetId?:string;materials?:string[]}|{type:'SPECIAL_SUMMON_SOUL';seat:Seat;instanceId:string;materials:string[];monsterZone:number;declaredType:'attack'|'faceUpDefense'}|{type:'COMPLETE_LIGHT_CHOICE';seat:Seat;sourceId:string;choiceId?:string;monsterZone?:number;zone?:number;declaredType?:'attack'|'faceUpDefense'}|{type:'FINISH_LIGHT_CHOICE';seat:Seat;sourceId:string};
 const other=(seat:Seat):Seat=>seat===0?1:0;
@@ -31,7 +32,7 @@ export function lightMainActions(s:DuelState,ctx:EngineContext,seat:Seat):LegalA
    if(c.cardId===LAST_WILL)add(id,'LAST_WILL',{zone});
   }
  }
- return [...result,...goatControlMain(s,ctx,seat),...lightResponses(s,ctx,seat)];
+ return [...result,...monarchActions(s,ctx,seat),...goatControlMain(s,ctx,seat),...lightResponses(s,ctx,seat)];
 }
 export function lightResponses(s:DuelState,ctx:EngineContext,seat:Seat):LegalAction[]{
  const p=s.players[seat],actions:LegalAction[]=[];
@@ -45,7 +46,7 @@ export function lightResponses(s:DuelState,ctx:EngineContext,seat:Seat):LegalAct
   if(!fromHand&&c.cardId===DUST)for(const target of s.players[other(seat)].zones.spell)if(target)add('DUST',target);
   if(c.cardId===SCAPEGOAT&&canSummon(s,seat)&&s.summonedThisTurn?.[seat]!==s.turn&&empty(s,seat).length>=4)add('SCAPEGOAT');
  }
- return actions;
+ return [...actions,...monarchActions(s,ctx,seat,true)];
 }
 export function lightChoiceActions(s:DuelState,ctx:EngineContext,seat:Seat):LegalAction[]{
  if(s.pendingLightChoice?.kind==='METAMORPHOSIS')return metamorphosisChoices(s,ctx,seat);
@@ -75,13 +76,14 @@ export function dispatchLight(s:DuelState,a:LightAction,ctx:EngineContext){
  }
  const c=s.cards[a.instanceId];
  for(const id of a.materials??[])toGraveyard(s,id,'cost');
+ if(a.effectId==='BRAIN')p.lp-=800;if(a.effectId.startsWith('SOLEMN'))p.lp=Math.ceil(p.lp/2);
  if(a.effectId==='VENUS')p.lp-=500;
  if(a.effectId==='SCAPEGOAT'){s.summonLockedTurn??=[0,0];s.summonLockedTurn[a.seat]=s.turn;}
  if(a.zone!==undefined){if(c.location==='hand')removeFromHand(p,a.instanceId);p.zones.spell[a.zone]=a.instanceId;Object.assign(c,{location:'spell',zone:a.zone,faceDown:false});}
- s.chain.push({instanceId:a.instanceId,controller:a.seat,effectId:a.effectId,targets:a.targetId?[a.targetId]:[],spellSpeed:['SOLAR','WABOKU','SCAPEGOAT','DUST'].includes(a.effectId)?2:1});s.priority=other(a.seat);s.consecutivePasses=0;log(s,'ACTIVATE',`${getCard(s,a.instanceId,ctx).name} activated.`,a.seat);
+ s.chain.push({instanceId:a.instanceId,controller:a.seat,effectId:a.effectId,targets:a.targetId&&a.effectId!=='SMASHING'?[a.targetId]:[],nonTargetId:a.effectId==='SMASHING'?a.targetId:undefined,spellSpeed:a.effectId.startsWith('SOLEMN')?3:['ENEMY_POSITION','ENEMY_CONTROL','BOTTOMLESS','CYLINDER','SOLAR','WABOKU','SCAPEGOAT','DUST'].includes(a.effectId)?2:1});s.priority=other(a.seat);s.consecutivePasses=0;log(s,'ACTIVATE',`${getCard(s,a.instanceId,ctx).name} activated.`,a.seat);
 }
 export function resolveLight(s:DuelState,link:ChainLink,ctx:EngineContext):boolean{
- if(resolveGoatControl(s,link,ctx))return true;
+ if(resolveMonarch(s,link,ctx)||resolveGoatControl(s,link,ctx))return true;
  const seat=link.controller,p=s.players[seat],target=link.targets[0];
  if(link.effectId==='VENUS'){if(canSummon(s,seat)&&empty(s,seat).length&&[...p.hand,...p.deck].some(id=>s.cards[id].cardId===SHINE_BALL))s.pendingLightChoice={kind:'VENUS',sourceId:link.instanceId,controller:seat};}
  else if(link.effectId==='ROTA'){if(p.deck.some(id=>getCard(s,id,ctx).race==='Warrior'&&Number(getCard(s,id,ctx).level)<=4))s.pendingLightChoice={kind:'ROTA',sourceId:link.instanceId,controller:seat};}

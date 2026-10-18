@@ -8,6 +8,7 @@ export const HEAVY_STORM=19613556,NOBLEMAN=71044499,DUO=44763025;
 export type DeckEffect='CARD_DESTRUCTION'|'RAIGEKI_BREAK'|'DUSTSHOOT'|'TRIBE_DESTROY'|'CHAOS_BANISH'|'BREAKER_DESTROY'|'ZORC_ROLL'|'HEAVY_STORM'|'NOBLEMAN'|'DUO'|'RING'|'TORRENTIAL'|'CALL'|'PREMATURE'|'SNATCH';
 export type DeckEffectAction=
  | {type:'ACTIVATE_DECK_EFFECT';seat:Seat;instanceId:string;effectId:DeckEffect;targetId?:string;costId?:string;declaredType?:string;zone?:number;monsterZone?:number}
+ | {type:'PASS_SUMMON_NEGATION';seat:Seat}
  | {type:'SPECIAL_SUMMON_CHAOS';seat:Seat;instanceId:string;materials:string[];monsterZone:number;position:'attack'|'faceUpDefense'}
  | {type:'COMPLETE_DUSTSHOOT';seat:Seat;targetId?:string}
  | {type:'COMPLETE_DIE_ROLL';seat:Seat}
@@ -21,7 +22,7 @@ const spells=(s:DuelState)=>[...s.players[0].zones.spell,...s.players[1].zones.s
 export const faceUpMonsters=(s:DuelState)=>monsters(s).filter(id=>!s.cards[id].faceDown);
 export function battleAttack(s:DuelState,id:string,ctx:EngineContext):number{const c=s.cards[id],card=getCard(s,id,ctx);let value=(restrictStat(s,id,'atk',ctx)??Number(card.atk))+(c.cardId===BREAKER?(c.spellCounters??0)*300:0);for(const source of Object.values(s.cards).filter(x=>x.location==='monster'&&!x.faceDown)){if(source.cardId===HOSHI)value+=card.attribute==='LIGHT'?500:card.attribute==='DARK'?-400:0;if(source.cardId===SOUL&&source.controller!==c.controller&&s.current===c.controller&&s.phase==='BATTLE')value-=300;}return Math.max(0,value);}
 export function summonDeckTriggers(s:DuelState,id:string,normal=false){
- const c=s.cards[id];if(c.faceDown)return;const ready=([c.controller,other(c.controller)] as Seat[]).filter(seat=>s.players[seat].zones.spell.some(x=>x&&[53582587,83555666,97077563,4178474,64697231].includes(s.cards[x].cardId)&&s.cards[x].faceDown&&s.cards[x].setTurn!==s.turn));if(ready.length)s.summonResponse={summoner:c.controller,sourceId:id,priority:ready[0]};
+ const c=s.cards[id];if(c.faceDown)return;const ready=([c.controller,other(c.controller)] as Seat[]).filter(seat=>s.players[seat].zones.spell.some(x=>x&&[29401950,41420027,53582587,83555666,97077563,4178474,64697231].includes(s.cards[x].cardId)&&s.cards[x].faceDown&&s.cards[x].setTurn!==s.turn));if(ready.length)s.summonResponse={negatable:normal,summoner:c.controller,sourceId:id,priority:ready[0]};
  if(c.cardId===2134346)c.spiritReturnTurn=s.turn;
  if(c.cardId===TSUKUYOMI){c.spiritReturnTurn=s.turn;(s.pendingTriggers??=[]).push({sourceId:id,controller:c.controller,effectId:'TSUKUYOMI_SET',mandatory:true});}
  if(c.cardId===40737112)(s.pendingTriggers??=[]).push({sourceId:id,controller:c.controller,effectId:'DMOC_RECOVER',mandatory:false});
@@ -68,9 +69,10 @@ export function dispatchDeckEffect(s:DuelState,a:DeckEffectAction,ctx:EngineCont
   else if(s.cards[pending.sourceId].location==='spell')toGraveyard(s,pending.sourceId,'rule');
   return;
  }
+ if(a.type==='PASS_SUMMON_NEGATION'){if(s.summonResponse)s.summonResponse.negatable=false;log(s,'SUMMON_ALLOWED','Summon allowed; resolve on-summon effects.',a.seat);return;}
  if(a.type==='PASS_SUMMON_RESPONSE'){const window=s.summonResponse,otherSeat=other(a.seat);if(window&&!window.passed?.includes(otherSeat)&&deckResponseActions(s,ctx,otherSeat).length){window.passed=[...(window.passed??[]),a.seat];window.priority=otherSeat;}else s.summonResponse=undefined;log(s,'SUMMON_RESPONSE','Passed summon response.',a.seat);return;}
  if(a.type==='COMPLETE_ZORC'){toGraveyard(s,a.targetId);s.pendingDeckChoice=undefined;log(s,'RESOLVE',`Zorc destroyed ${getCard(s,a.targetId,ctx).name}.`,a.seat);return;}
- if(a.type==='SPECIAL_SUMMON_CHAOS'){for(const id of a.materials)toBanished(s,id);removeFromHand(p,a.instanceId);placeMonster(s,a.instanceId,a.seat,a.monsterZone,a.position,['attack','faceUpDefense']);s.cards[a.instanceId].properlySummoned=true;summonDeckTriggers(s,a.instanceId);log(s,'SPECIAL_SUMMON',`${getCard(s,a.instanceId,ctx).name} Special Summoned by banishing a LIGHT and a DARK monster.`,a.seat);return;}
+ if(a.type==='SPECIAL_SUMMON_CHAOS'){for(const id of a.materials)toBanished(s,id);removeFromHand(p,a.instanceId);placeMonster(s,a.instanceId,a.seat,a.monsterZone,a.position,['attack','faceUpDefense']);s.cards[a.instanceId].properlySummoned=true;summonDeckTriggers(s,a.instanceId);if(s.summonResponse?.sourceId===a.instanceId)s.summonResponse.negatable=true;log(s,'SPECIAL_SUMMON',`${getCard(s,a.instanceId,ctx).name} Special Summoned by banishing a LIGHT and a DARK monster.`,a.seat);return;}
  const c=s.cards[a.instanceId];
  if(a.costId){removeFromHand(p,a.costId);toGraveyard(s,a.costId,'cost');}
  if(a.effectId==='BREAKER_DESTROY')c.spellCounters=(c.spellCounters??0)-1;

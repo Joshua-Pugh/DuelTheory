@@ -1,3 +1,5 @@
+import matt from './data/mattMonarchs.json';
+export const MATT_MONARCHS:Deck=matt;
 import {supportedFusions} from './engine/goatControlEffects';
 import {validateDeck} from './core/decks';
 import type {Card,Deck} from './core/types';
@@ -12,7 +14,7 @@ export const VENUS_LIGHT:Deck=venus;
 import {unsupportedEffects} from './engine/rules';
 export const CHAOS_TURBO:Deck=chaos;
 export const CHAOS_SOURCE='https://www.goatformat.com/chaos-turbo.html';
-/** Support is checked by card coverage, not deck name or card order. Sideboarding is not enabled. */
+/** Support is checked by card coverage, not deck name or card order. Side Deck coverage is checked separately before each room game. */
 export function assessDeck(deck:Deck,catalog:readonly Card[]){
  const cards=new Map(catalog.map(c=>[c.id,c]));
  const active=[...deck.main,...deck.extra];
