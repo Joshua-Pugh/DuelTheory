@@ -261,3 +261,10 @@ button:disabled{cursor:not-allowed;opacity:.36}
 
 .dt-supported-decks a{color:#e3c787;text-underline-offset:3px}.dt-supported-decks>button{margin-left:12px}.dt-supported-decks h4{margin-top:0}
 .global-nav{flex-wrap:wrap;min-width:0}.global-header{flex-wrap:wrap}.header-end{margin-left:auto}
+
+/* Keep native selects inside the setup card, including their intrinsic option width. */
+.dt-supported-decks{min-width:0;max-width:100%;overflow-wrap:anywhere}
+.dt-supported-decks>div{min-width:0;max-width:100%}
+.dt-supported-decks label{flex:1 1 220px;min-width:0;max-width:100%;grid-template-columns:minmax(0,1fr)}
+.dt-supported-decks select{width:100%;min-width:0;max-width:100%;box-sizing:border-box;text-overflow:ellipsis;font-size:16px}
+.dt-supported-decks>button{margin:10px 0 0;max-width:100%;white-space:normal}
