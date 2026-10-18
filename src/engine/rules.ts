@@ -267,15 +267,17 @@ function calculateBasicDamage(s:DuelState,ctx:EngineContext){
  const atk=battleAttack(s,pending.attackerId,ctx)+kinetic(pending.attackerId,pending.targetId);
  if(!Number.isFinite(atk)||atk<0)throw new DuelEngineError('UNSUPPORTED_EFFECT','Attack value unavailable');
  attacker.attackedTurn=s.turn;attacker.attacksThisTurn={turn:s.turn,count:attacker.attacksThisTurn?.turn===s.turn?attacker.attacksThisTurn.count+1:1};
- const opponent=other(seat);const protect=(who:Seat)=>s.wabokuTurn?.[who]===s.turn;const damage=(who:Seat,n:number)=>{if(!protect(who))s.players[who].lp=Math.max(0,s.players[who].lp-n);};
+ let dealt=0,recipient:Seat=other(seat),defendingValue:number|undefined;
+ const opponent=other(seat);const protect=(who:Seat)=>s.wabokuTurn?.[who]===s.turn;const damage=(who:Seat,n:number)=>{if(!protect(who)){s.players[who].lp=Math.max(0,s.players[who].lp-n);dealt+=n;recipient=who;}};
  if(attacker.cardId===ASURA){if(attacker.asuraAttacks?.turn!==s.turn)attacker.asuraAttacks={turn:s.turn,targets:[],direct:false};if(pending.targetId)attacker.asuraAttacks.targets.push(pending.targetId);else attacker.asuraAttacks.direct=true;}
  if(!pending.targetId){
   damage(opponent,atk);
-  log(s,'BATTLE',`${attackerCard.name} attacked directly for ${atk} damage.`,seat);
+  log(s,'BATTLE',`${attackerCard.name} attacked directly for ${dealt} damage.`,seat);
  }else{
   const target=s.cards[pending.targetId];const defenderCard=getCard(s,pending.targetId,ctx);
   const wasDefense=target.position!=='attack';
   const defense=Number(wasDefense?(restrictStat(s,pending.targetId,'def',ctx)??defenderCard.def):battleAttack(s,pending.targetId,ctx))+kinetic(pending.targetId,pending.attackerId);
+  defendingValue=defense;
   if(!Number.isFinite(defense)||defense<0)throw new DuelEngineError('UNSUPPORTED_EFFECT','Defender stat unavailable');
   if(atk>defense){
    if(!protect(opponent)){if(pending.targetId && (target.cardId===DD_WARRIOR_LADY||attacker.cardId===DD_WARRIOR_LADY))(pending.battleDestruction??=[]).push(pending.targetId);else if(target.cardId!==23205979&&attacker.cardId===40737112)toBanished(s,pending.targetId,true);else if(target.cardId!==23205979&&!replaceRestrictBattleDestruction(s,pending.targetId))toGraveyard(s,pending.targetId,'battle');}
@@ -288,6 +290,7 @@ function calculateBasicDamage(s:DuelState,ctx:EngineContext){
  if(attacker.cardId===72989439&&atk>defense&&target.cardId!==23205979&&(target.location!=='monster'||pending.battleDestruction?.includes(pending.targetId))&&attacker.effectUsedTurn!==s.turn&&(attacker.attacksThisTurn?.count??0)===1)(s.pendingTriggers??=[]).push({sourceId:pending.attackerId,controller:seat,effectId:'BLS_EXTRA_ATTACK',mandatory:false});
   log(s,'BATTLE',`${attackerCard.name} attacked ${defenderCard.name} (${atk} vs ${defense} ${wasDefense?'DEF':'ATK'}).`,seat);
  }
+ s.lastBattle={turn:s.turn,eventIndex:s.events.length,attackerId:pending.attackerId,targetId:pending.targetId,sourceId:recipient===seat&&pending.targetId?pending.targetId:pending.attackerId,damagedSeat:recipient,damage:dealt,attack:atk,defense:defendingValue};
  for(const c of battling)if(s.players[other(c.controller)].lp<lpBefore[other(c.controller)]&&(c.cardId===76922029||c.cardId===23205979&&!pending.targetId))(s.pendingTriggers??=[]).push({sourceId:c.id,controller:c.controller,effectId:c.cardId===76922029?'DON':'REAPER_DISCARD',mandatory:c.cardId===23205979});
  for(const c of battling)if(c.cardId===PARSHATH&&s.players[other(c.controller)].lp<lpBefore[other(c.controller)])(s.pendingTriggers??=[]).push({sourceId:c.id,controller:c.controller,effectId:'PARSHATH_DRAW',mandatory:true});
  for(const c of battling)if(c.cardId===88240808&&s.players[other(c.controller)].lp<lpBefore[other(c.controller)])(s.pendingTriggers??=[]).push({sourceId:c.id,controller:c.controller,effectId:'KYCOO_BANISH',mandatory:false,eligibleIds:gyBefore[other(c.controller)]});

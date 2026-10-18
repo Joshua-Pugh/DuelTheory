@@ -84,3 +84,9 @@
 .dt-card-menu{box-sizing:border-box;max-width:calc(100vw - 16px);max-height:calc(100dvh - 16px);overscroll-behavior:contain}.dt-picker-grid .dt-card-back{display:block;width:100%;height:auto;aspect-ratio:59/86}
 
 .dt-card-menu header{position:sticky;top:-6px;background:#172b28;z-index:1}
+
+.dt-monster-stats{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);z-index:2;background:#101e23ed;border:1px solid #c6ad68;border-radius:4px;padding:1px 5px;color:#f6dfa0;font-size:clamp(9px,.8vw,12px);font-weight:700;white-space:nowrap;pointer-events:none}.dt-battle-summary{color:#f4d88f;background:#233a31;border-left:3px solid #c6ad68;padding:4px 8px;border-radius:4px;margin-right:8px;max-width:100%;overflow-wrap:anywhere}.dt-turn-status:has(.dt-battle-summary){flex-wrap:wrap}.dt-field-zone.monster.occupied .dt-zone-label{opacity:.35}@media(max-height:650px),(max-width:700px){.dt-monster-stats{bottom:1px;font-size:8px;padding:0 3px}.dt-field-zone.monster.occupied .dt-zone-label{display:none}.dt-battle-summary{font-size:10px;padding:2px 5px}}
+
+.dt-field-zone.dt-last-damage-source{border-color:#e9bd66;box-shadow:inset 0 0 14px #e9bd6626}
+
+.dt-picker-grid>button.ineligible:disabled{opacity:1;filter:none;cursor:default;border-color:#52605b;background:#1c2d27;color:#cbd2c7}.dt-picker-grid>button.eligible{border:2px solid #d1b16c;box-shadow:0 0 0 1px #d1b16c22}.dt-picker-grid>button.ineligible img{opacity:1;filter:none}

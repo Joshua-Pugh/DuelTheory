@@ -1,3 +1,4 @@
+import {advanceUncontestedBattle} from './fastBattle';
 import {validateDeck} from '../core/decks';
 import type {Card,Deck} from '../core/types';
 import type {DuelState,LegalAction} from '../engine/model';
@@ -37,6 +38,7 @@ export function applyMatchCommand(original:Match,seat:0|1,c:MatchCommand,catalog
  else{if(s.reveal)throw Error('Wait for your opponent to view the revealed card.');if(s.phase!=='playing')throw Error('Both players must finish the coin flip first.');if(c.type==='goatPhase'&&s.goat){if(s.goat.current!==seat)throw Error('Wait for your turn.');const service=new GameService(),id=service.restoreOnline(s.goat,catalog,!!s.manual);s.goat=service.advancePhase(id,c.destination);}
  else if(c.type==='goat'&&s.goat){if(c.action.type.startsWith('MANUAL_')&&!s.manual)throw Error('Manual overrides are disabled in guided online matches.');if(c.action.seat!==seat)throw Error('That action belongs to the other player.');const service=new GameService(),id=service.restoreOnline(s.goat,catalog,!!s.manual);s.goat=c.action.type.startsWith('MANUAL_')?service.dispatchManual(id,c.action as import('../services/GameService').TabletopAction):service.dispatch(id,c.action as LegalAction);}
  else if(c.type==='ashen'&&s.ashen)s.ashen=applyAshenCommand(s.ashen,seat,c.action);else throw Error('Invalid game action.');}
+ if(!s.manual&&s.goat&&!s.reveal&&(c.type==='goat'||c.type==='ackReveal'))s.goat=advanceUncontestedBattle(s.goat,catalog);
  if(!s.reveal&&original.goat&&s.goat){const flipped=Object.values(s.goat.cards).find(card=>original.goat!.cards[card.instanceId]?.faceDown&&!card.faceDown&&card.location==='monster'&&original.goat!.cards[card.instanceId]?.location==='monster');if(flipped)s.reveal={id:crypto.randomUUID(),controller:flipped.controller,cardId:flipped.cardId,expiresAt:Date.now()+15000};}
  settleMatchResult(s);s.revision++;return s;
 }
@@ -47,7 +49,10 @@ export function matchView(s:Match,seat:0|1,catalog:readonly Card[]):MatchView{
  v.seed=s.seed===undefined?undefined:Array.from({length:128},(_,i)=>Math.imul(i,0x9e3779b9)>>>0).find(n=>openingCoin(n).firstSeat===openingCoin(s.seed!).firstSeat);
  if(s.phase!=='playing'){delete v.goat;delete v.ashen;return v;}
  if(s.goat){const service=new GameService(),id=service.restoreOnline(s.goat,catalog,!!s.manual);v.actions=service.getLegalActions(id,seat);const g=v.goat!;g.seed=0;const exposed=new Set<string>();for(const a of v.actions)for(const value of Object.values(a)){if(typeof value==='string')exposed.add(value);else if(Array.isArray(value))for(const x of value)if(typeof x==='string')exposed.add(x);}
-  const hiddenNames:string[]=[];for(const c of Object.values(g.cards)){const hidden=c.location==='deck'&&!exposed.has(c.instanceId)||c.controller!==seat&&(c.location==='hand'&&g.pendingChaos?.controller!==seat||c.location==='extra'||!!c.faceDown||!!c.equippedHidden);if(hidden){const name=catalog.find(x=>x.id===c.cardId)?.name;if(name)hiddenNames.push(name);c.cardId=0;}}
+  // A legal own-deck search may inspect the whole remaining pool, not just legal picks.
+  // UUID-sorted piles below keep the actual shuffle order private.
+  const searchingOwnDeck=v.actions.some(a=>['searchId','searchIds','choiceId'].some(key=>{const value=(a as unknown as Record<string,unknown>)[key];return (Array.isArray(value)?value:[value]).some(id=>typeof id==='string'&&g.cards[id]?.location==='deck'&&g.cards[id]?.controller===seat);}));
+  const hiddenNames:string[]=[];for(const c of Object.values(g.cards)){const hidden=c.location==='deck'&&!(searchingOwnDeck&&c.controller===seat)&&!exposed.has(c.instanceId)||c.controller!==seat&&(c.location==='hand'&&g.pendingChaos?.controller!==seat||c.location==='extra'||!!c.faceDown||!!c.equippedHidden);if(hidden){const name=catalog.find(x=>x.id===c.cardId)?.name;if(name)hiddenNames.push(name);c.cardId=0;}}
   for(const p of g.players)p.deck.sort();
   v.actions=v.actions.map(a=>{const target='targetId'in a&&typeof a.targetId==='string'?a.targetId:undefined;const name=target&&g.cards[target]?.cardId===0?catalog.find(c=>c.id===s.goat!.cards[target].cardId)?.name:undefined;return name?{...a,description:a.description.split(name).join('a face-down card')}:a;});
   g.events=g.events.map(e=>({...e,message:hiddenNames.reduce((text,name)=>text.split(name).join('a hidden card'),e.message)}));

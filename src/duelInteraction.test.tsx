@@ -1,3 +1,4 @@
+import {CardPicker} from './DuelField';
 import {describe,it,expect} from 'vitest';
 import {renderToStaticMarkup} from 'react-dom/server';
 import DuelField from './DuelField';
@@ -58,3 +59,5 @@ describe('recorded tabletop operations',()=>{
   expect(next.cards[card]).toMatchObject({location:'spell',zone:2,faceDown:false});expect(next.players[0].zones.spell.filter(x=>x===card)).toHaveLength(1);expect(service.verifyReplay(id).matches).toBe(true);
  });
 });
+
+it('shows ineligible search cards with artwork while keeping them unselectable',()=>{const cards:Record<string,Card>={yes:{id:1,name:'Legal monster',type:'Effect Monster',desc:'',image:'/yes.jpg'},no:{id:2,name:'Visible spell',type:'Spell Card',desc:'',image:'/no.jpg'}};const html=renderToStaticMarkup(<CardPicker title="Search your deck" ids={['yes','no']} eligible={['yes']} multiple={false} deck deckOrderKnown={false} lookup={id=>cards[id]} onConfirm={()=>{}} onClose={()=>{}}/>);expect(html).toContain('/no.jpg');expect(html).toMatch(/class="ineligible" disabled/);expect(html).toContain('Display order is not draw order');expect(html).toContain('class="eligible"');});

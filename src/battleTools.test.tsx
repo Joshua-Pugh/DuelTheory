@@ -54,3 +54,5 @@ describe('legal battle shortcuts',()=>{
   state.players[1].zones.monster[0]=null;state.phase='MAIN_2';expect(directAttackQueue(state,actions,0)).toEqual([]);
  });
 });
+
+it('offers Attack with all for the fixed online seat when a callback is supplied',()=>{const {svc,id,card}=setup();svc.dispatchManual(id,{type:'MANUAL_MOVE_CARD',seat:0,instanceId:card,destination:'monster',zone:0,position:'attack'});const state=svc.getState(id);state.turn=3;state.phase='BATTLE';state.pendingDraw=false;const actions:LegalAction[]=[{type:'DECLARE_ATTACK',seat:0,attackerId:card,description:'direct'}];const html=renderToStaticMarkup(<DuelField fixedSeat={0} state={state} catalog={[breaker]} actions={actions} onAttackAll={()=>{}} onAction={()=>{}} onManual={()=>{}} manualMode={false} onSkipPhase={()=>{}} onUndo={()=>{}} onVerify={()=>{}} onExit={()=>{}} notice=""/>);expect(html).toContain('Attack with all');expect(html).toContain('Current ATK 1600, DEF 1000');});
