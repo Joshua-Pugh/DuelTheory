@@ -260,3 +260,4 @@ button:disabled{cursor:not-allowed;opacity:.36}
 .dt-supported-decks{padding:18px;margin:14px 0;border:1px solid #716744;border-radius:10px;background:#192722}.dt-supported-decks p{line-height:1.6}.dt-supported-decks>div{display:flex;gap:18px;flex-wrap:wrap;margin-top:16px}.dt-supported-decks label{display:grid;gap:8px;flex:1;min-width:220px}.dt-supported-decks select{padding:10px;background:#101c20;color:#eee0bc;border:1px solid #776945;border-radius:6px}.dt-manual-lp{font-size:11px}.dt-manual-lp input{width:70px;padding:4px;background:#122023;color:#eed6a2;border:1px solid #766646}
 
 .dt-supported-decks a{color:#e3c787;text-underline-offset:3px}.dt-supported-decks>button{margin-left:12px}.dt-supported-decks h4{margin-top:0}
+.global-nav{flex-wrap:wrap;min-width:0}.global-header{flex-wrap:wrap}.header-end{margin-left:auto}

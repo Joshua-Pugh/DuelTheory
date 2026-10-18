@@ -1,0 +1,52 @@
+/** Manual multiplayer scorekeeping; this does not adjudicate card effects. */
+export type CommanderPlayer={id:string;name:string;commanders:string[];life:number;poison:number;damage:Record<string,number>;counters:Record<string,number>;conceded:boolean};
+export type CommanderRoomState={code:string;title:string;host:string;capacity:number;started:boolean;revision:number;players:CommanderPlayer[];log:{id:string;at:number;player:string;text:string}[]};
+export type RoomCommand=
+ |{type:'join';name:string;commanders:string[]}
+ |{type:'adjust';field:'life'|'poison'|'damage'|'counter';delta:number;key?:string;loseLife?:boolean}
+ |{type:'concede';value:boolean}
+ |{type:'start'}|{type:'reset'};
+export class RoomError extends Error{}
+const label=(value:unknown,max:number)=>{if(typeof value!=='string'||!value.trim()||value.trim().length>max)throw new RoomError(`Enter text between 1 and ${max} characters.`);return value.trim();};
+export function newCommanderRoom(code:string,title:unknown,capacity:unknown,host:string):CommanderRoomState{
+ if(!Number.isInteger(capacity)||Number(capacity)<2||Number(capacity)>6)throw new RoomError('Choose 2–6 players.');
+ return {code,title:label(title,50),host,capacity:Number(capacity),started:false,revision:0,players:[],log:[]};
+}
+export const commanderKey=(playerId:string,index:number)=>`${playerId}:${index}`;
+export function commanderSources(s:CommanderRoomState){return s.players.flatMap(p=>p.commanders.map((name,i)=>({key:commanderKey(p.id,i),name,owner:p.name})));}
+export function commanderWarnings(p:CommanderPlayer){return [...(p.life<=0?['Life is 0 or less']:[]),...(p.poison>=10?['10+ poison counters']:[]),...(Object.values(p.damage).some(n=>n>=21)?['21+ combat damage from one commander']:[])];}
+export function applyRoomCommand(original:CommanderRoomState,actor:string,input:RoomCommand,requestId:string,now=Date.now()):CommanderRoomState{
+ if(!input||typeof input!=='object'||typeof input.type!=='string')throw new RoomError('Invalid action.');
+ const s=structuredClone(original);let text='';let player=s.players.find(p=>p.id===actor);
+ if(input.type==='join'){
+  if(player)return s;
+  if(s.started)throw new RoomError('This game has started; new seats are locked.');
+  if(s.players.length>=s.capacity)throw new RoomError('This room is full.');
+  const name=label(input.name,24);
+  if(s.players.some(p=>p.name.toLowerCase()===name.toLowerCase()))throw new RoomError('That player name is already taken.');
+  if(!Array.isArray(input.commanders)||input.commanders.length<1||input.commanders.length>2)throw new RoomError('Enter one or two commanders.');
+  player={id:actor,name,commanders:input.commanders.map(n=>label(n,80)),life:40,poison:0,damage:{},counters:{},conceded:false};s.players.push(player);text='joined the table';
+ }else{
+  if(!player)throw new RoomError('Join this room before changing values.');
+  if(input.type==='start'){if(actor!==s.host)throw new RoomError('Only the host can start the game.');if(s.players.length<2)throw new RoomError('Wait for at least two players.');s.started=true;text='started the game; seats are locked';}
+  else if(input.type==='reset'){if(actor!==s.host)throw new RoomError('Only the host can reset the game.');for(const p of s.players){p.life=40;p.poison=0;p.damage={};p.counters={};p.conceded=false;}s.started=false;text='reset the table to 40 life; seats are open';}
+  else if(input.type==='concede'){if(typeof input.value!=='boolean')throw new RoomError('Invalid concession.');player.conceded=input.value;text=input.value?'conceded':'returned to the game';}
+  else if(input.type==='adjust'){
+   const n=input.delta;if(!Number.isInteger(n)||n===0||Math.abs(n)>999)throw new RoomError('Use a whole-number change from 1 to 999.');
+   if(input.field==='life'){const next=player.life+n;if(Math.abs(next)>99999)throw new RoomError('Life total is out of range.');player.life=next;text=`${n>0?'+':''}${n} life → ${next}`;}
+   else if(input.field==='poison'){const next=player.poison+n;if(next<0||next>999)throw new RoomError('Poison cannot go below 0 or above 999.');player.poison=next;text=`${n>0?'+':''}${n} poison → ${next}`;}
+   else if(input.field==='damage'){
+    if(input.loseLife!==undefined&&typeof input.loseLife!=='boolean')throw new RoomError('Choose whether life should also be adjusted.');
+    const source=commanderSources(s).find(c=>c.key===input.key);if(!source)throw new RoomError('Choose a commander at this table.');
+    const next=(player.damage[source.key]||0)+n;if(next<0||next>999)throw new RoomError('Commander damage cannot go below 0 or above 999.');player.damage[source.key]=next;
+    if(input.loseLife){if(Math.abs(player.life-n)>99999)throw new RoomError('Life total is out of range.');player.life-=n;}
+    text=`${n>0?'+':''}${n} combat damage from ${source.name} (${source.owner})${input.loseLife?' · life adjusted':''}`;
+   }else if(input.field==='counter'){
+    const key=label(input.key,24);if(['__proto__','constructor','prototype'].includes(key.toLowerCase()))throw new RoomError('Choose a different counter name.');
+    if(!Object.hasOwn(player.counters,key)&&Object.keys(player.counters).length>=8)throw new RoomError('Use up to 8 custom counters.');
+    const next=(Object.hasOwn(player.counters,key)?player.counters[key]:0)+n;if(next<0||next>9999)throw new RoomError('Counter is out of range.');player.counters[key]=next;text=`${n>0?'+':''}${n} ${key} → ${next}`;
+   }else throw new RoomError('Unknown counter.');
+  }else throw new RoomError('Unknown action.');
+ }
+ s.revision++;s.log=[{id:requestId,at:now,player:player!.name,text},...s.log].slice(0,80);return s;
+}

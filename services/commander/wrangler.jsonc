@@ -1,0 +1,11 @@
+{
+ "$schema":"node_modules/wrangler/config-schema.json",
+ "name":"dueltheory-commander",
+ "main":"worker.ts",
+ "compatibility_date":"2026-10-17",
+ "durable_objects":{"bindings":[{"name":"COMMANDER_ROOMS","class_name":"CommanderRoom"}]},
+ "migrations":[{"tag":"v1","new_sqlite_classes":["CommanderRoom"]}],
+ "ratelimits":[{"name":"ROOM_LIMITER","namespace_id":"1001","simple":{"limit":30,"period":60}}],
+ "vars":{"ALLOWED_ORIGINS":"https://joshua-pugh.github.io,http://localhost:5173,http://127.0.0.1:5197"},
+ "observability":{"enabled":true,"traces":{"enabled":true}}
+}
