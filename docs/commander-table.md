@@ -36,3 +36,8 @@ Backend checks: generate types, run the root TypeScript binary against `services
 ## Verified
 
 297 tests across 50 files and the Pages build pass. Backend types and the Wrangler packaging dry run pass. HTTP integration checks passed in the local Workers runtime and against the deployed Cloudflare service. Browser checks covered a live four-seat room, life/poison/commander-damage entry, read-only opponent tiles and reconnect after refresh. Responsive styles are included; a physical iPhone/Android field test is still useful before calling this a finished mobile product.
+# First player and turn tracking
+
+After everyone joins, the host locks seats and opens a server-generated six-sided die roll. Each seat rolls once per round; only players tied for the highest result reroll. The winner starts turn 1. Turn order follows join/seat order around the table, rotated to begin with the winner. Join in physical seating order.
+
+The current player or host can advance turns. Conceded players are skipped; life/poison/damage thresholds remain advisory. New game clears rolls and turns. Existing rooms can start rolling through the host control. Request retries and stale turn/roll submissions cannot advance twice.

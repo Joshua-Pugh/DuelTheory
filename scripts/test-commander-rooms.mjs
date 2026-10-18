@@ -22,6 +22,15 @@ read=await call(a,'read');assert.equal(read.state.players[1].life,29);assert.equ
 const concurrent=await Promise.all(Array.from({length:5},()=>call(b,'action',{type:'adjust',field:'poison',delta:1})));assert.ok(concurrent.every(r=>r.playerId===guest.playerId));
 read=await call(a,'read');assert.equal(read.state.players[1].poison,5);
 await call(a,'action',{type:'start'});await call(randomBytes(32).toString('hex'),'join',{name:'Late',commanders:['Late']},randomUUID(),400);
+for(let i=0;i<100;i++){
+ read=await call(a,'read');if(read.state.firstPlayer.winner)break;
+ const round=read.state.firstPlayer.round;
+ await Promise.all([[a,host.playerId],[b,guest.playerId]].filter(([,id])=>read.state.firstPlayer.eligible.includes(id)).map(([token])=>call(token,'action',{type:'roll',round})));
+}
+read=await call(a,'read');assert.ok(read.state.firstPlayer.winner);assert.equal(read.state.turn,1);assert.equal(read.state.turnOrder[0],read.state.firstPlayer.winner);
+const winnerToken=read.state.firstPlayer.winner===host.playerId?a:b;
+await call(winnerToken,'action',{type:'endTurn',turn:1});await call(winnerToken,'action',{type:'endTurn',turn:1},randomUUID(),400);
+read=await call(b,'read');assert.equal(read.state.turn,2);
 await call(a,'read',{},randomUUID(),403,'https://untrusted.example');
 await call(a,'action',{type:'reset'});read=await call(b,'read');assert.deepEqual(read.state.players.map(p=>p.life),[40,40]);assert.deepEqual(read.state.players.map(p=>p.poison),[0,0]);
 console.log('PASS: two seats synchronize, only own values change, retries are idempotent, concurrent changes persist, host controls and CORS are enforced.');

@@ -2,6 +2,27 @@ import {describe,it,expect} from 'vitest';
 import {applyRoomCommand,newCommanderRoom,commanderKey,commanderWarnings} from './model';
 const game=()=>{let s=newCommanderRoom('ABCDEFGH','Commander night',4,'alice');s=applyRoomCommand(s,'alice',{type:'join',name:'Alice',commanders:['Atraxa','Partner']},'join-a');return applyRoomCommand(s,'bob',{type:'join',name:'Bob',commanders:['Atraxa']},'join-b');};
 describe('manual Commander room rules',()=>{
+ it('resolves repeated high ties, rejects repeat rolls and follows seat order from the winner',()=>{
+  let s=applyRoomCommand(game(),'alice',{type:'start'},'start');
+  const roll=(id:string,n:number)=>{s=applyRoomCommand(s,id,{type:'roll',round:s.firstPlayer!.round},id+String(s.revision),0,()=>n);};
+  roll('alice',6);expect(()=>roll('alice',1)).toThrow('Wait');roll('bob',6);expect(s.firstPlayer?.round).toBe(2);
+  expect(()=>applyRoomCommand(s,'alice',{type:'roll',round:1},'stale')).toThrow('Wait');
+  roll('alice',3);roll('bob',3);roll('alice',2);roll('bob',5);
+  expect(s.turnOrder).toEqual(['bob','alice']);expect(s.turn).toBe(1);expect(s.firstPlayer?.winner).toBe('bob');
+  expect(()=>roll('bob',6)).toThrow('not open');
+  s=applyRoomCommand(s,'bob',{type:'endTurn',turn:1},'next');expect(s.turn).toBe(2);
+  expect(()=>applyRoomCommand(s,'bob',{type:'endTurn',turn:2},'wrong')).toThrow('current player');
+  expect(()=>applyRoomCommand(s,'alice',{type:'endTurn',turn:1},'stale')).toThrow('changed');
+  s=applyRoomCommand(s,'alice',{type:'reset'},'reset');expect(s.firstPlayer).toBeUndefined();expect(s.turnOrder).toBeUndefined();expect(s.turn).toBeUndefined();
+ });
+ it('only rerolls tied highest players and skips conceded seats without using life thresholds',()=>{
+  let s=applyRoomCommand(game(),'c',{type:'join',name:'Charlie',commanders:['C']},'join-c');s=applyRoomCommand(s,'alice',{type:'start'},'start');
+  for(const [id,n] of [['alice',6],['bob',1],['c',6]] as const)s=applyRoomCommand(s,id,{type:'roll',round:1},id,0,()=>n);
+  expect(s.firstPlayer?.eligible).toEqual(['alice','c']);expect(()=>applyRoomCommand(s,'bob',{type:'roll',round:2},'b')).toThrow('Wait');
+  s=applyRoomCommand(s,'alice',{type:'roll',round:2},'a2',0,()=>6);s=applyRoomCommand(s,'c',{type:'roll',round:2},'c2',0,()=>2);
+  s=applyRoomCommand(s,'bob',{type:'concede',value:true},'concede');s=applyRoomCommand(s,'alice',{type:'endTurn',turn:1},'end');expect(s.turn).toBe(3);
+  expect(()=>applyRoomCommand(s,'alice',{type:'start'},'restart')).toThrow('already');
+ });
  it('starts everyone at 40 life and keeps commander identities separate even with the same card name',()=>{const s=game();expect(s.players.map(p=>p.life)).toEqual([40,40]);const next=applyRoomCommand(s,'alice',{type:'adjust',field:'damage',key:commanderKey('bob',0),delta:7,loseLife:true},'hit');expect(next.players[0].life).toBe(33);expect(next.players[0].damage).toEqual({'bob:0':7});expect(next.players[1].life).toBe(40);expect(s.players[0].life).toBe(40);});
  it('never trusts a supplied player ID to edit another player',()=>{const s=game(),next=applyRoomCommand(s,'alice',{type:'adjust',field:'life',delta:-4,playerId:'bob'} as never,'hit');expect(next.players[0].life).toBe(36);expect(next.players[1].life).toBe(40);expect(()=>applyRoomCommand(s,'stranger',{type:'adjust',field:'life',delta:-2},'x')).toThrow('Join');});
  it('keeps poison and commander damage independent from life when requested',()=>{let s=game();s=applyRoomCommand(s,'alice',{type:'adjust',field:'poison',delta:5},'p');s=applyRoomCommand(s,'alice',{type:'adjust',field:'damage',key:'bob:0',delta:5,loseLife:false},'d');expect(s.players[0]).toMatchObject({life:40,poison:5,damage:{'bob:0':5}});});
