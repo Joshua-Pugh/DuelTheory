@@ -1,1 +1,49 @@
-{"$schema":"../../node_modules/wrangler/config-schema.json","name":"dueltheory-matches","main":"worker.ts","compatibility_date":"2026-10-18","durable_objects":{"bindings":[{"name":"PRIVATE_MATCHES","class_name":"PrivateMatch"}]},"migrations":[{"tag":"v1","new_sqlite_classes":["PrivateMatch"]}],"ratelimits":[{"name":"MATCH_LIMITER","namespace_id":"1002","simple":{"limit":180,"period":60}}],"vars":{"ALLOWED_ORIGINS":"https://joshua-pugh.github.io,http://localhost:5173,http://127.0.0.1:5197"},"observability":{"enabled":true,"traces":{"enabled":true}}}
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "dueltheory-matches",
+  "main": "worker.ts",
+  "compatibility_date": "2026-10-18",
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "PRIVATE_MATCHES",
+        "class_name": "PrivateMatch"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": [
+        "PrivateMatch"
+      ]
+    }
+  ],
+  "ratelimits": [
+    {
+      "name": "MATCH_LIMITER",
+      "namespace_id": "1002",
+      "simple": {
+        "limit": 180,
+        "period": 60
+      }
+    },
+    {
+      "name": "MATCH_IP_LIMITER",
+      "namespace_id": "1003",
+      "simple": {
+        "limit": 600,
+        "period": 60
+      }
+    }
+  ],
+  "vars": {
+    "ALLOWED_ORIGINS": "https://joshua-pugh.github.io,http://localhost:5173,http://127.0.0.1:5197"
+  },
+  "observability": {
+    "enabled": true,
+    "traces": {
+      "enabled": true
+    }
+  }
+}

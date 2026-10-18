@@ -2,7 +2,7 @@ import {describe,it,expect} from 'vitest';
 import catalogJson from '../../public/catalog.json';
 import type {Card} from '../core/types';
 import {CHAOS_TURBO} from '../supportedDecks';
-import {applyMatchCommand,matchView,member,validPick,type Match,type Game} from './model';
+import {applyMatchCommand,matchView,member,validPick,releaseExpiredReveal,type Match,type Game} from './model';
 import {openingCoin} from '../duelLifecycle';
 const catalog=catalogJson as Card[];
 function lobby(game:Game='goat'):Match{const pick=game==='goat'?{deck:CHAOS_TURBO}:{faction:'Brute' as const};return {code:'ABCDEFGH',game,revision:0,phase:'lobby',members:[member('Host',pick),null],chat:[]};}
@@ -21,5 +21,8 @@ describe('private match authority',()=>{
  it('publishes only generic selection activity and expires abandoned client pickers',()=>{let s=started();const revision=s.revision;s=applyMatchCommand(s,0,{type:'choosing',value:true},catalog,1);expect(s.revision).toBe(revision);expect(matchView(s,1,catalog).waitingFor).toEqual({seat:0,kind:'selection'});expect(matchView(s,1,catalog)).not.toHaveProperty('choosing');s.choosing!.until=Date.now()-1;expect(matchView(s,1,catalog).waitingFor).not.toEqual({seat:0,kind:'selection'});s=applyMatchCommand(s,0,{type:'choosing',value:false},catalog,1);expect(s.choosing).toBeUndefined();});
 
  it('provides a coin animation seed for both outcomes without sending the shuffle seed',()=>{const s=started();for(const seed of [1,42,1000,123456789,0xffffffff]){s.seed=seed;const v=matchView(s,0,catalog);expect(v.seed).toBeDefined();expect(openingCoin(v.seed!).firstSeat).toBe(openingCoin(seed).firstSeat);}});
+
+ it('releases legacy, expired and non-monster reveal locks without resetting the duel',()=>{const s=started(),g=s.goat!,id=g.players[0].hand[0];s.reveal={id:'legacy',controller:0,cardId:g.cards[id].cardId};const before=JSON.stringify(g),rev=s.revision;expect(releaseExpiredReveal(s)).toBe(true);expect(s.revision).toBe(rev+1);expect(JSON.stringify(s.goat)).toBe(before);Object.assign(g.cards[id],{location:'monster',faceDown:false});s.reveal={id:'timed',controller:0,cardId:g.cards[id].cardId,expiresAt:100};expect(releaseExpiredReveal(s,99)).toBe(false);expect(releaseExpiredReveal(s,100)).toBe(true);s.reveal={id:'spell',controller:0,cardId:g.cards[id].cardId,expiresAt:999};g.cards[id].location='spell';expect(releaseExpiredReveal(s,101)).toBe(true);});
+ it('accepts duplicate or late reveal acknowledgements harmlessly',()=>{let s=started();const rev=s.revision;s=applyMatchCommand(s,1,{type:'ackReveal',id:'expired'},catalog,1);expect(s.revision).toBe(rev);});
 
 });

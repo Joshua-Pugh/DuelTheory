@@ -21,3 +21,19 @@ async function run(game){const room=code(),tokens=[token(),token()],pick=game===
 }
 await run('goat');await run('ashen');
 
+// A reveal timeout must release gameplay even if the viewer disconnects or has an older client.
+async function revealRecovery(){const room=code(),tokens=[token(),token()],pick={deck:{id:'timeout-test',name:'Manual timeout fixture',main:Array(40).fill(89631139),extra:[],side:[]}};
+ for(const [seat,method] of [[0,'create'],[1,'join']]){const r=await req(room,tokens[seat],method,{game:'goat',name:`Timeout ${seat}`,pick});assert.equal(r.status,200);}
+ async function command(seat,command){const v=(await req(room,tokens[seat],'read')).data;return req(room,tokens[seat],'action',{revision:v.revision,command});}
+ for(const seat of [0,1])assert.equal((await command(seat,{type:'ready',value:true})).status,200);
+ for(const seat of [0,1])assert.equal((await command(seat,{type:'begin'})).status,200);
+ let v=(await req(room,tokens[0],'read')).data;const id=v.goat.players[0].hand[0];
+ assert.equal((await command(0,{type:'goat',action:{type:'MANUAL_MOVE_CARD',seat:0,instanceId:id,destination:'monster',zone:0,position:'faceDownDefense'}})).status,200);
+ const flipped=await command(0,{type:'goat',action:{type:'MANUAL_MOVE_CARD',seat:0,instanceId:id,destination:'monster',zone:0,position:'attack'}});assert.equal(flipped.status,200);assert.ok(flipped.data.reveal?.expiresAt>Date.now());
+ assert.equal((await command(0,{type:'goatPhase',destination:'NEXT'})).status,423);
+ console.log('reveal: waiting for the bounded pause to expire');await new Promise(r=>setTimeout(r,Math.max(0,flipped.data.reveal.expiresAt-Date.now())+300));
+ v=(await req(room,tokens[0],'read')).data;assert.equal(v.reveal,undefined);assert.equal(v.goat.cards[id].location,'monster');assert.equal(v.goat.cards[id].faceDown,false);assert.equal(v.goat.players[0].lp,8000);
+ assert.equal((await command(1,{type:'ackReveal',id:flipped.data.reveal.id})).status,200);
+ console.log('reveal: stale pause released automatically without resetting the duel');
+}
+await revealRecovery();
