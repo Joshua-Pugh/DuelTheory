@@ -21,7 +21,7 @@ Combat handles deployment/combat fatigue, Charge, Reckless, Rage, Ranged/Soar/Si
 
 The Keep’s destruction trigger is limited to three per turn. Drum gains Momentum from declared Brute attacks. Warband’s Fury counters count Brute entries, including tokens. Losing defense auras performs lethal-damage checks. Paid abilities persist if their source leaves play, including equipped tokens sacrificed to their own granted ability.
 
-**Creator ruling:** Reckless must attack if able. Korgath’s Call can play Korgath from **hand or graveyard without paying his Essence cost**. He enters with Charge and +3 Attack for the turn. The Call itself still costs its printed essence, and its five-HP healing checks three Brute sacrifices during the current turn. The catalog text records this ruling rather than the older DOCX wording.
+**Creator ruling:** Reckless must attack if able. Korgath’s Call can play Korgath from **hand or Ossuary without paying his Essence cost**. He enters with Charge and +3 Attack for the turn. The Call itself still costs its printed essence, and its five-HP healing checks three Brute sacrifices during the current turn. The catalog text records this ruling rather than the older DOCX wording.
 
 ## Framework boundaries
 

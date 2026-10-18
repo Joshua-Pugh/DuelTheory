@@ -1,7 +1,7 @@
 import type {AshenCardData} from '../ashenPresentation';
 /** Rules-neutral manual tabletop. Explicit actions only; never reports rules-verified results. */
 export type TabletopZone = {id:string;label:string;slots:number;faceDownDefault?:boolean};
-export type GameDefinition = {schemaVersion:1;id:string;version:string;name:string;startingHand:number;healthLabel:string;startingHealth:number;zones:TabletopZone[]};
+export type GameDefinition = {schemaVersion:1;id:string;version:string;name:string;startingHand:number;healthLabel:string;startingHealth:number;zones:TabletopZone[];pileLabels?:Record<string,string>};
 export type TabletopCard = {instanceId:string;cardId:string;name:string;image?:string;presentation?:AshenCardData;type:string;owner:0|1;controller:0|1;zone:string;faceDown:boolean;rotated:boolean;counters:number};
 export type TabletopState = {schemaVersion:1;definition:GameDefinition;cards:Record<string,TabletopCard>;piles:Record<string,string[]>;health:[number,number];turn:number;active:0|1;events:string[];verified:false};
 export type TabletopAction =
@@ -14,7 +14,8 @@ export type TabletopAction =
  | {type:'PASS_TURN'};
 export const TABLETOP_KEY='dueltheory-creator-tabletop-v1';
 export const GOAT_TABLETOP:GameDefinition={schemaVersion:1,id:'goat-manual',version:'1.0.0',name:'GOAT — Manual Playtest',startingHand:5,startingHealth:8000,healthLabel:'LP',zones:[{id:'monster',label:'Monster Zones',slots:5,faceDownDefault:true},{id:'spell',label:'Spell / Trap Zones',slots:5,faceDownDefault:true},{id:'field',label:'Field Spell',slots:1}]};
-export const ASHEN_TABLETOP:GameDefinition={schemaVersion:1,id:'ashen-command-manual',version:'0.3.9',name:'Ashen Throne — Command Siege',startingHand:6,startingHealth:20,healthLabel:'Command HP',zones:[{id:'unit',label:'Frontline / Units',slots:7},{id:'support',label:'Runes / Relics',slots:5},{id:'ley',label:'Ley Fonts',slots:8},{id:'command',label:'Command Station',slots:1}]};
+export const ASHEN_TABLETOP:GameDefinition={schemaVersion:1,id:'ashen-command-manual',version:'0.3.9',name:'Ashen Throne — Command Siege',startingHand:6,startingHealth:20,healthLabel:'Command HP',pileLabels:{graveyard:'Ossuary'},zones:[{id:'unit',label:'Frontline / Units',slots:7},{id:'support',label:'Runes / Relics',slots:5},{id:'ley',label:'Ley Fonts',slots:8},{id:'command',label:'Command Station',slots:1}]};
+export function tabletopZoneLabel(definition:GameDefinition,zone:string){return definition.pileLabels?.[zone]||(definition.id===ASHEN_TABLETOP.id?ASHEN_TABLETOP.pileLabels?.[zone]:undefined)||zone;}
 export type TabletopInput={cardId:string;name:string;type:string;image?:string;presentation?:AshenCardData};
 export function createTabletop(definition:GameDefinition,decks:[TabletopInput[],TabletopInput[]]):TabletopState{
  const cards:Record<string,TabletopCard>={};const piles:Record<string,string[]>={};
@@ -37,7 +38,7 @@ export function tabletopDispatch(state:TabletopState,action:TabletopAction):Tabl
   const sourceKey=`${c.controller}:${c.zone}`;if(sourceKey===key)throw Error('Card is already in this zone');const list=s.piles[sourceKey];if(!list||!list.includes(c.instanceId))throw Error('Card not found in its source zone');
   list.splice(list.indexOf(c.instanceId),1);s.piles[key].push(c.instanceId);c.controller=action.seat;c.zone=action.zone;
   c.faceDown=action.faceDown??(definition?.faceDownDefault??action.zone==='deck');c.rotated=false;
-  lines.push(`${c.name}: Player ${action.seat+1} ${action.zone}${c.faceDown?' (face-down)':''}`);
+  lines.push(`${c.name}: Player ${action.seat+1} ${tabletopZoneLabel(s.definition,action.zone)}${c.faceDown?' (face-down)':''}`);
  }else if(action.type==='DRAW'){
   const n=action.count??1;if(!Number.isInteger(n)||n<1||n>10)throw Error('Draw 1–10 cards at a time');
   const deck=s.piles[`${action.seat}:deck`],hand=s.piles[`${action.seat}:hand`];

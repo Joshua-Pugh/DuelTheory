@@ -25,6 +25,12 @@ function finish(start:Battlefield,choose?:(s:Battlefield)=>string[]){let s=start
  return s;
  }throw Error('Choice/trigger loop did not finish');}
 describe('Noble deck and mixed AT duels',()=>{
+ it('states Bastion’s exact amount and adds one Untuned essence to the Basin',()=>{
+  const s=fixture(),id=source(s,'the-crown-s-bastion');moveAshenCard(s,id,'command');
+  expect(ashenCardMap.get('ashen-noble-the-crown-s-bastion')?.effectText).toContain('Add 1 Untuned essence to your Ley Basin');
+  const start=executeProgram(s,ashenAdapter,nobleEffects['ashen-noble-the-crown-s-bastion'].triggers![0].program,{source:id,player:'0'});
+  const done=continueProgram(start.state,ashenAdapter,start.pending!,['essence']);expect(done.state.basins[0].untuned).toBe(s.basins[0].untuned+1);expect(done.state.basins[0].oath).toBe(s.basins[0].oath);
+ });
  it('registers every Noble catalog card with valid portable programs',()=>{
   const cards=[...ashenCardMap.values()].filter(c=>c.faction==='Noble');expect(cards).toHaveLength(43);
   for(const card of cards){const d=nobleEffects[card.id];expect(d,card.name).toBeDefined();for(const p of [d.onPlay,d.onStart,d.onBurn,d.onReady,...(d.activated||[]),...(d.triggers||[]).map(t=>t.program)].filter(Boolean))expect(validateEffectProgram(p),card.name).toEqual([]);}

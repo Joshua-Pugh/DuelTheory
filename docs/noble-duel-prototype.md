@@ -9,7 +9,7 @@ All 43 Noble catalog cards have effect definitions. These combine with the 48 Br
 - Plan pauses with the viewed top cards and preserves their order; the player assigns top/bottom destinations and ordering. Unviewed cards retain their order.
 - Refine draws once, preserves drawn-card events, then asks for hand cards to bottom. Resuming a choice does not repay costs or repeat prior steps.
 - Portable mode choices, ranged selections, stat selectors, conditional availability, Fortify, Nullify, actor/target event filters, and per-turn ability metadata are reusable primitives. Game-specific flags, counter meanings, card movement, timing and auras stay in the Ashen adapter/session.
-- Clash entries have stable identities for targeting. Nullifying an Action sends its card to discard; nullifying an ability/trigger only removes that entry. Paid costs remain spent.
+- Clash entries have stable identities for targeting. Nullifying an Action sends its card to the Ossuary; nullifying an ability/trigger only removes that entry. Paid costs remain spent.
 - Aegis restricts enemy targeting; global effects still affect protected Units.
 
 ## Noble interactions

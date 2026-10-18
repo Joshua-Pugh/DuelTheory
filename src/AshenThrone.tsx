@@ -13,7 +13,7 @@ const phases=[
  ['Main Phase I','Play a Ley Font (maximum one per turn); burn Ready Fonts for Essence; play Units, Relics, Runes, Strategies and Tactics.'],
  ['Combat — The Skirmish','Muster → Declare Siege → Fatigue → Establish Defense → Damage Exchange → Damage Application → Combat End.'],
  ['Main Phase II','Play additional cards and abilities; unused Essence fades at end of turn.'],
- ['End Phase','Resolve end-of-turn effects, heal surviving Units to full Defense, discard to seven.']
+ ['End Phase','Resolve end-of-turn effects, heal surviving Units to full Defense, send excess hand cards to your Ossuary until seven remain.']
 ];
 const keywords=[
  ['Plan (X)','Look at the top X cards; put any number on bottom and arrange the rest on top.'],
