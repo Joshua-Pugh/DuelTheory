@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-const api='https://dueltheory-matches.cfpadvantage.workers.dev',deck=JSON.parse(await readFile('src/data/mattMonarchs.json','utf8'));
+const api='https://dueltheory-matches.cfpadvantage.workers.dev',deck=JSON.parse(await readFile('src/engine/fixtures/matt-monarchs.json','utf8'));
 const code=()=>Array.from(crypto.getRandomValues(new Uint8Array(8)),n=>'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'[n%32]).join('');
 const tokens=[crypto.randomUUID().replaceAll('-',''),crypto.randomUUID().replaceAll('-','')],room=code();
 async function req(seat,method,body){const r=await fetch(`${api}/matches/${room}/${method}`,{method:['info','read'].includes(method)?'GET':'POST',headers:{Authorization:`Bearer ${tokens[seat]}`,'Content-Type':'application/json','X-Request-ID':crypto.randomUUID()},...(body?{body:JSON.stringify(body)}:{})});const data=await r.json();assert.equal(r.status,200,JSON.stringify(data));return data;}

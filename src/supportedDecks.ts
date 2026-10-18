@@ -1,5 +1,3 @@
-import matt from './data/mattMonarchs.json';
-export const MATT_MONARCHS:Deck=matt;
 import {supportedFusions} from './engine/goatControlEffects';
 import {validateDeck} from './core/decks';
 import type {Card,Deck} from './core/types';

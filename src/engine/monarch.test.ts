@@ -1,6 +1,7 @@
 import {describe,it,expect} from 'vitest';
 import catalogJson from '../../public/catalog.json';
-import {MATT_MONARCHS,assessDeck} from '../supportedDecks';
+import {assessDeck} from '../supportedDecks';
+import MATT_MONARCHS from '../engine/fixtures/matt-monarchs.json';
 import type {Card,Deck} from '../core/types';
 import {createDuel,type DuelState,type Seat,type EngineContext,type LegalAction} from './model';
 import {dispatchDuel,legalActions,unsupportedEffects} from './rules';

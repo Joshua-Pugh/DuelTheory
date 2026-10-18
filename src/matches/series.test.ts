@@ -1,7 +1,7 @@
 import {describe,it,expect} from 'vitest';
 import catalogJson from '../../public/catalog.json';
 import type {Card} from '../core/types';
-import {MATT_MONARCHS} from '../supportedDecks';
+import MATT_MONARCHS from '../engine/fixtures/matt-monarchs.json';
 import {applyMatchCommand,matchView,member,validateSideboard,type Match} from './model';
 const catalog=catalogJson as Card[];
 function started(game:'goat'|'ashen'='goat',mode:'best3'|'single'='best3'){

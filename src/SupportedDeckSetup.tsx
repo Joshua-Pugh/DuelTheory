@@ -1,7 +1,6 @@
-import {CHAOS_TURBO,GOAT_CONTROL,MATT_MONARCHS,CHAOS_SOURCE,GOAT_CONTROL_SOURCE,CHAOS_SIDE_SOURCE,GOAT_CONTROL_SIDE_SOURCE} from './supportedDecks';
+import {CHAOS_TURBO,GOAT_CONTROL,CHAOS_SOURCE,GOAT_CONTROL_SOURCE,CHAOS_SIDE_SOURCE,GOAT_CONTROL_SIDE_SOURCE} from './supportedDecks';
 import type {Deck} from './core/types';
 const presets=[
- {key:'monarch',deck:MATT_MONARCHS,title:"Matt’s Monarchs",detail:'Player-built · 42 Main / 15 Side',description:'Monarch control with supported Main and Side Deck effects. Side between games in private Best of Three rooms.',file:'matt-monarchs',source:'',sideSource:''},
  {key:'chaos',deck:CHAOS_TURBO,title:'Chaos Turbo',detail:'Riclar91 · 2020 World Champion',description:'Tournament Main Deck and original 15-card Side Deck with implemented prototype effects.',file:'chaos-turbo',source:CHAOS_SOURCE,sideSource:CHAOS_SIDE_SOURCE},
  {key:'goat',deck:GOAT_CONTROL,title:'Goat Control',detail:'Lolmarcus · 2020 Worlds · 7th place',description:'Exact 40-card tournament Main Deck, original 15-card Side Deck, plus our supported 8-card prototype Fusion selection. Includes Metamorphosis, Thousand-Eyes Restrict and Scapegoat.',file:'goat-control',source:GOAT_CONTROL_SOURCE,sideSource:GOAT_CONTROL_SIDE_SOURCE},
 ];
