@@ -1131,7 +1131,7 @@
       "rarity": "Legendary",
       "attack": null,
       "defense": null,
-      "effectText": "Whenever Plan, Refine, or Fortify, place a Dominion counter on Crown of Dominion.\nOnce per turn, you may remove a counter to Nullify an enemy action.\nWhile Crown of Dominion has 5 or more counters on it, units you control have Aegis.",
+      "effectText": "Whenever you Plan, Refine, or Fortify, place a Dominion counter on Crown of Dominion.\nOnce per turn, you may remove a counter to Nullify an enemy action.\nWhile Crown of Dominion has 5 or more counters on it, units you control have Aegis.",
       "effectStatus": "source-transcribed",
       "artStatus": "placeholder",
       "sourceDeck": "The Crown’s Might",

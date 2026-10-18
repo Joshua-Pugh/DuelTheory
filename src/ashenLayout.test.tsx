@@ -12,6 +12,10 @@ describe('shared AT rules layout',()=>{
   const html=renderToStaticMarkup(<AshenBattlefield initialState={state}/>);
   expect(html).toContain('aria-label="1 Fatigue counter">F</span>');
  });
+ it('marks exhausted support cards with the same fatigue badge',()=>{
+  const state=newBattlefield(true,()=>.2);for(const c of Object.values(state.table.cards))c.rotated=false;const id=state.table.piles['0:support'][0];state.table.cards[id].rotated=true;
+  expect(renderToStaticMarkup(<AshenBattlefield initialState={state}/>)).toContain('aria-label="1 Fatigue counter">F</span>');
+ });
  it('uses the expanded art and rules geometry for every catalog card',()=>{
   for(const card of catalog.cards){const html=renderToStaticMarkup(<AshenCardFrame card={card}/>);expect(html).toContain('rules-expanded');expect(html).toContain('viewBox="0 220 1060 580"');}
  });

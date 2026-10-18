@@ -25,6 +25,17 @@ function finish(start:Battlefield,choose?:(s:Battlefield)=>string[]){let s=start
  return s;
  }throw Error('Choice/trigger loop did not finish');}
 describe('Noble deck and mixed AT duels',()=>{
+ it('gives Dominion counters only for its controller’s Plan, Refine and Fortify events',()=>{
+  const s=fixture(),id=source(s,'crown-of-dominion');moveAshenCard(s,id,'support');
+  expect(ashenCardMap.get('ashen-noble-crown-of-dominion')?.effectText).toContain('Whenever you Plan, Refine, or Fortify');
+  for(const kind of ['planned','refined','fortified']){
+   const entity=ashenAdapter.entities(s).find(e=>e.id===id)!;
+   const own=finish(drainTriggers(structuredClone(s),[{kind,source:id,player:'0',entity}]));
+   expect(own.rules?.counters?.[id]?.dominion).toBe(1);
+   const enemy=finish(drainTriggers(structuredClone(s),[{kind,source:id,player:'1',entity}]));
+   expect(enemy.rules?.counters?.[id]?.dominion||0).toBe(0);
+  }
+ });
  it('states Bastion’s exact amount and adds one Untuned essence to the Basin',()=>{
   const s=fixture(),id=source(s,'the-crown-s-bastion');moveAshenCard(s,id,'command');
   expect(ashenCardMap.get('ashen-noble-the-crown-s-bastion')?.effectText).toContain('Add 1 Untuned essence to your Ley Basin');

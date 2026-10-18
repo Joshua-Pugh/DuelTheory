@@ -1,5 +1,5 @@
 import {describe,it,expect} from 'vitest';
-import {newBruteDuel,submitAshenAction,passAshenPriority,nextAshenPhase,declareAshenAttackers,assignAshenBlocker,resolveAshenCombat,canBlockAshen,resumeBruteDuel,chooseKorgathForCall,settleAshenDuel,korgathCallChoices,confirmAshenTriggerOrder,orderAshenTrigger,burnInBruteDuel} from './duel';
+import {ashenResponseOptions,newBruteDuel,submitAshenAction,passAshenPriority,nextAshenPhase,declareAshenAttackers,assignAshenBlocker,resolveAshenCombat,canBlockAshen,resumeBruteDuel,chooseKorgathForCall,settleAshenDuel,korgathCallChoices,confirmAshenTriggerOrder,orderAshenTrigger,burnInBruteDuel} from './duel';
 import {moveAshenCard,ashenStats,ashenAdapter,playProgram} from './adapter';
 import {bruteEffects} from './bruteEffects';
 import {ashenCardMap} from '../../ashenDecks';
@@ -11,6 +11,18 @@ function hand(s:Battlefield,slug:string,seat=0){const key=field(s,slug,'hand',se
 function passes(s:Battlefield){if(s.rules!.duel!.ordering)s=confirmAshenTriggerOrder(s);let n=100;while(s.rules!.duel!.priority&&n--&&!s.rules?.pending)s=passAshenPriority(s,Number(s.rules!.duel!.priority!.holder) as 0|1);return s;}
 function combat(s:Battlefield){s.rules!.duel!.phase='combat';s.rules!.duel!.combat={stage:'attack',attackers:[],blockers:{},blocked:[]};return s;}
 describe('complete Brute duel',()=>{
+ it('offers a ready relic response and removes it while fatigued',()=>{
+  const s=setup(),ring=field(s,'ring-of-the-ley','support');
+  expect(ashenResponseOptions(s,'0').some(o=>o.source===ring)).toBe(true);
+  s.table.cards[ring].rotated=true;
+  expect(ashenResponseOptions(s,'0').some(o=>o.source===ring)).toBe(false);
+  s.table.cards[ring].rotated=false;
+  expect(ashenResponseOptions(s,'0').some(o=>o.source===ring)).toBe(true);
+ });
+ it('does not invent responses on an empty battlefield',()=>{
+  const s=setup();expect(ashenResponseOptions(s,'0')).toEqual([]);
+
+ });
  it('defines every Brute card and separates both decks and Command Stations',()=>{const s=newBruteDuel(()=>.4);for(const c of ashenCardMap.values())if(c.faction==='Brute')expect(bruteEffects[c.id],c.name).toBeDefined();for(const seat of [0,1]){expect(s.table.piles[seat+':hand']).toHaveLength(6);expect(s.table.piles[seat+':deck']).toHaveLength(54);expect(s.table.piles[seat+':command']).toHaveLength(1);}});
  it('pays once, offers real responses, and resolves Clash last in first out',()=>{
   let s=setup();const a=field(s,'warband-overseer'),strike=hand(s,'ashen-strike',1),response=hand(s,'ashen-strike',0);

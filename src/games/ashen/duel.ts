@@ -39,11 +39,13 @@ export function submitAshenAction(original:Battlefield,id:string,context:EffectC
  s=drainTriggers(s,paid.events.filter(e=>e.kind!=='resolved'));duel(s).priority=openPriority(['0','1'],context.player);
  s.table.events.push(`Clash: ${card.name}${ability?' — '+p.label:''}. Costs paid.`);return settleAshenDuel(s);
 }
-function canReact(s:Battlefield,who:string){
+export function ashenResponseOptions(s:Battlefield,who:string){
+ const options:{source:string;label:string}[]=[];
  const affordable=structuredClone(s);
  for(const c of Object.values(s.table.cards).filter(c=>String(c.controller)===who&&c.zone==='ley'&&!c.faceDown&&!c.rotated)){
   affordable.basins[c.controller][fontEssence(c.cardId)]++;
-  if(ashenEffects[c.cardId]?.onBurn&&s.table.piles[`${who}:unit`].length)return true;
+  const effect=ashenEffects[c.cardId]?.onBurn;
+  if(effect&&s.table.piles[`${who}:unit`].some(id=>!s.table.cards[id].faceDown)&&hasAshenChoices(s,effect.steps,{source:c.instanceId,player:who}))options.push({source:c.instanceId,label:`Burn ${c.name}: ${effect.label}`});
  }
 
  for(const c of Object.values(s.table.cards).filter(c=>String(c.controller)===who)){
@@ -51,11 +53,12 @@ function canReact(s:Battlefield,who:string){
   for(const p of programs){try{if(p.oncePerTurn&&s.rules?.abilityUses?.[`${s.rules.turn}:${c.instanceId}:${p.id}`])continue;
    const context={source:c.instanceId,player:who};if(!hasAshenChoices(s,p.steps,context))continue;const targets=p.targets?candidates(s,ashenAdapter,p.targets,context).map(e=>e.id).slice(0,p.targets.count):[];
    const costs=p.cost?.cards?candidates(s,ashenAdapter,p.cost.cards,context).map(e=>e.id).slice(0,p.cost.cards.count):[];
-   executeProgram(affordable,ashenAdapter,{...p,steps:[]},{...context,targets,costCards:costs});return true;
+   executeProgram(affordable,ashenAdapter,{...p,steps:[]},{...context,targets,costCards:costs});options.push({source:c.instanceId,label:`${c.name}: ${p.label}`});
   }catch{/* Unaffordable or without legal choices. */}}
  }
- return false;
+ return options;
 }
+function canReact(s:Battlefield,who:string){return ashenResponseOptions(s,who).length>0;}
 export function passAshenPriority(original:Battlefield,who:0|1){const s=structuredClone(original),d=duel(s);if(s.rules?.pending||d.ordering)throw Error('Finish the current selection first.');if(!d.priority)throw Error('No Clash response is pending.');const pass=passPriority(d.priority,String(who));d.priority=pass.done?null:pass.priority;if(pass.done){if(d.stack.length)resolveTopEntry(s);else d.responseWindow=false;}return settleAshenDuel(s);}
 function nextCallBlocked(s:Battlefield,id:string){const permission=duel(s).callPermission;return !!permission&&permission!==id;}
 export function korgathCallChoices(s:Battlefield){const d=duel(s);if(d.callPermission!=='choose')return [];return Object.values(s.table.cards).filter(c=>c.controller===s.table.active&&c.cardId==='ashen-brute-korgath-lord-of-ruin'&&['hand','graveyard'].includes(c.zone)).map(c=>c.instanceId);}
