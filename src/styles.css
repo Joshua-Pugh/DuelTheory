@@ -263,6 +263,7 @@ button:disabled{cursor:not-allowed;opacity:.36}
 .global-nav{flex-wrap:wrap;min-width:0}.global-header{flex-wrap:wrap}.header-end{margin-left:auto}
 
 /* Keep native selects inside the setup card, including their intrinsic option width. */
+.dt-platform-hero{padding:35px 0 20px}.dt-platform-hero h1{font-size:clamp(34px,5vw,58px);max-width:850px}.dt-platform-hero>p{max-width:760px;line-height:1.7}.dt-home-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:20px}.dt-platform-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;margin:24px 0}.dt-platform-grid .panel{padding:26px;display:flex;flex-direction:column;align-items:flex-start}.dt-platform-grid h2{margin:14px 0 4px}.dt-platform-grid p{color:var(--muted,#9eb1bc);line-height:1.7;flex:1}.dt-platform-grid .dt-home-actions{margin-top:0}@media(max-width:700px){.dt-platform-grid{grid-template-columns:1fr;gap:16px}.dt-platform-hero{padding-top:20px}.dt-platform-grid .panel{padding:20px}.dt-home-actions>button{white-space:normal}}
 .dt-supported-decks{min-width:0;max-width:100%;overflow-wrap:anywhere}
 .dt-supported-decks>div{min-width:0;max-width:100%}
 .dt-supported-decks label{flex:1 1 220px;min-width:0;max-width:100%;grid-template-columns:minmax(0,1fr)}
