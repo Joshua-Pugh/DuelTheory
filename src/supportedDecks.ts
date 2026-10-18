@@ -1,6 +1,8 @@
 import {supportedFusions} from './engine/goatControlEffects';
 import {validateDeck} from './core/decks';
 import type {Card,Deck} from './core/types';
+import ritual from './data/chaosRitualTurbo.json';
+export const CHAOS_RITUAL_TURBO:Deck=ritual;
 import goatControl from './data/goatControl.json';
 export const GOAT_CONTROL:Deck=goatControl;
 export const GOAT_CONTROL_SOURCE='https://www.goatformat.com/goat-control.html';
