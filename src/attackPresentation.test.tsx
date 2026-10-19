@@ -1,6 +1,6 @@
 import {describe,it,expect} from 'vitest';
 import {renderToStaticMarkup} from 'react-dom/server';
-import {attackPresentation,attackPath} from './attackPresentation';
+import {attackPresentation,attackPath,battleVisual} from './attackPresentation';
 import DuelField from './DuelField';
 import {createDuel} from './engine/model';
 import {dispatchDuel,legalActions} from './engine/rules';
@@ -20,4 +20,11 @@ describe('attack indicators and response context',()=>{
  it('marks a face-down target without revealing its identity',()=>{const {s}=setup(true);expect(attackPresentation(s,cards)?.targetName).toBe('face-down monster (Zone 3)');const view=html(s,0);expect(view).toContain('dt-is-attack-target');expect(view).not.toContain('Breaker the Magical Warrior → Magician of Faith');});
  it('shows replay context and removes active indicators when an attack ends',()=>{const {s}=setup();s.pendingAttack!.replay=true;expect(attackPresentation(s,cards)?.label).toContain('choose a new target');s.pendingAttack=undefined;expect(attackPresentation(s,cards)).toBeNull();expect(html(s,1)).not.toContain('dt-is-attacking');});
  it('uses board coordinates for a curved source-to-target arrow',()=>{expect(attackPath({x:20,y:300},{x:100,y:80})).toBe('M 20 300 C 20 190, 100 190, 100 80');});
+});
+
+describe('fast online attack visibility',()=>{
+ function finished(){const {s,attacker}=setup();s.pendingAttack=undefined;s.events.push({type:'BATTLE',turn:s.turn,seat:0,message:'Direct attack'});s.lastBattle={turn:s.turn,eventIndex:s.events.length,attackerId:attacker,sourceId:attacker,damage:1600,damagedSeat:1,attack:1600};return {s,attacker};}
+ it('keeps a completed attack visible across snapshots and reconnect renders',()=>{const {s,attacker}=finished();expect(battleVisual(s)).toMatchObject({completed:true,attack:{attackerId:attacker}});expect(battleVisual(structuredClone(s))).toEqual(battleVisual(s));const view=html(s,0);expect(view).toContain('LAST ATTACK');expect(view).toContain('data-attack-stage="last"');});
+ it('clears the last line when Battle Phase ends or the turn changes',()=>{const {s}=finished();s.phase='MAIN_2';expect(battleVisual(s)).toBeNull();s.phase='BATTLE';s.turn++;expect(battleVisual(s)).toBeNull();});
+ it('replaces the last line with a new attack, and clears it if that attack is canceled',()=>{const {s,attacker}=finished();s.pendingAttack={attackerId:attacker,attacker:0,defender:1};s.events.push({type:'ATTACK_DECLARE',turn:s.turn,seat:0,message:'New attack'});expect(battleVisual(s)?.completed).toBe(false);s.pendingAttack=undefined;s.events.push({type:'ATTACK_CANCEL',turn:s.turn,seat:0,message:'Canceled'});expect(battleVisual(s)).toBeNull();});
 });
