@@ -19,7 +19,7 @@ describe('isolated session service and basic game loop',()=>{
   const svc=new GameService();const a=svc.createGoatSession([deck('a'),deck('b')],catalog,1,0,'fixture');const b=svc.createGoatSession([deck('a'),deck('b')],catalog,1,0,'fixture');
   const snapshot=svc.getState(a);snapshot.players[0].lp=1;
   expect(svc.getState(a).players[0].lp).toBe(8000);
-  svc.dispatch(a,{type:'DRAW_PHASE',seat:0});expect(svc.getState(a).players[0].hand).toHaveLength(5);
+  svc.dispatch(a,{type:'DRAW_PHASE',seat:0});expect(svc.getState(a).players[0].hand).toHaveLength(6);
   expect(svc.getState(b).players[0].hand).toHaveLength(5);
   expect(svc.getHistory(a).actions).toHaveLength(1);
   expect(svc.close(a)).toBe(true);expect(()=>svc.getState(a)).toThrow();

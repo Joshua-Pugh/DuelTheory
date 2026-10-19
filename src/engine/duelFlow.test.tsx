@@ -79,7 +79,7 @@ describe('field presentation',()=>{
   expect(html).toContain('aria-label="Effect decision"');expect(html).toContain('Yes · use effect');const sidebar=html.slice(html.indexOf('<aside'),html.indexOf('</aside>'));expect(sidebar).not.toContain('Next phase →');expect(html.indexOf('Next phase →')).toBeLessThan(html.indexOf('<aside'));
  });
  it('animates opening deals and draws and deck searches, but not rewinds',()=>{
-  let s=createDuel(a,b,ctx,23);expect(drawnInstances(undefined,s)).toHaveLength(10);let next=dispatchDuel(s,{type:'DRAW_PHASE',seat:0},ctx);expect(drawnInstances(s,next)).toHaveLength(0);next.turn=2;next.pendingDraw=true;next.phase='DRAW';const drawn=dispatchDuel(next,{type:'DRAW_PHASE',seat:0},ctx);expect(drawnInstances(next,drawn)).toHaveLength(1);
+  let s=createDuel(a,b,ctx,23);expect(drawnInstances(undefined,s)).toHaveLength(10);let next=dispatchDuel(s,{type:'DRAW_PHASE',seat:0},ctx);expect(drawnInstances(s,next)).toHaveLength(1);next.turn=2;next.pendingDraw=true;next.phase='DRAW';const drawn=dispatchDuel(next,{type:'DRAW_PHASE',seat:0},ctx);expect(drawnInstances(next,drawn)).toHaveLength(1);
   const search=structuredClone(next),id=search.players[0].deck.shift()!;search.players[0].hand.push(id);search.cards[id].location='hand';search.events.push({type:'SEARCH',seat:0,turn:1,message:'search'});expect(drawnInstances(next,search)).toHaveLength(1);expect(drawnInstances(next,s)).toHaveLength(0);
  });
 });

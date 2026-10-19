@@ -168,7 +168,7 @@ function rawLegalActions(s:DuelState,ctx:EngineContext,seat:Seat):LegalAction[]{
  if(s.summonResponse){if(seat!==(s.summonResponse.priority??other(s.summonResponse.summoner)))return [];return [...deckResponseActions(s,ctx,seat),{type:'PASS_SUMMON_RESPONSE',seat,description:'Continue after summon'}];}
  if(s.freeResponse){if(s.freeResponse.priority!==seat)return [];return [...freeResponses(s,ctx,seat),{type:'PASS_FREE_RESPONSE',seat,description:'Continue after response opportunity'}];}
  if(s.current!==seat)return s.pendingDraw?[]:freeResponses(s,ctx,seat);
- if(s.pendingDraw)return [{type:'DRAW_PHASE',seat,description:s.turn===1?'Begin first turn (no opening draw)':'Draw for Draw Phase'}];
+ if(s.pendingDraw)return [{type:'DRAW_PHASE',seat,description:s.turn===1?'Draw for the opening Draw Phase (GOAT 2005)':'Draw for Draw Phase'}];
  const actions:LegalAction[]=[];
  if(s.phase==='BATTLE'&&s.turn>1){
   const defenders=s.players[other(seat)].zones.monster.filter((id):id is string=>id!==null);
@@ -377,7 +377,7 @@ export function dispatchDuel(original:DuelState,action:DuelAction,ctx:EngineCont
  s.priority=s.pendingTriggers!.length?(s.pendingTriggers!.some(x=>x.controller===s.current)?s.current:other(s.current)):other(seat);
  s.consecutivePasses=0;log(s,'ACTIVATE',`${t.mandatory?'Mandatory':'Optional'} trigger ${t.effectId} placed as Chain Link ${s.chain.length}.`,seat);break;
  }
- case 'DRAW_PHASE':if(s.turn>1)draw(s,seat,1);else log(s,'DRAW_SKIPPED','First player skips the opening draw.',seat);s.pendingDraw=false;openFreeResponse(s,ctx);break;
+ case 'DRAW_PHASE':draw(s,seat,1);s.pendingDraw=false;openFreeResponse(s,ctx);break;
  case 'NORMAL_SUMMON':{const card=getCard(s,action.instanceId,ctx);removeFromHand(p,action.instanceId);placeMonster(s,action.instanceId,seat,action.zone,action.position||'attack',['attack','faceDownDefense']);const instance=s.cards[action.instanceId];p.normalSummoned=true;enqueueApprenticeSummon(s,action.instanceId,seat);summonDeckTriggers(s,action.instanceId,true);if(!instance.faceDown&&(card.id===MANJU||card.id===SENJU)){s.pendingSearch={sourceId:action.instanceId,controller:seat,kind:card.id===MANJU?'RITUAL_ANY':'RITUAL_MONSTER'};}log(s,'NORMAL_SUMMON',`${card.name} ${instance.faceDown?'set':'Normal Summoned'} to zone ${action.zone+1}`,seat);break;}
  case 'DECLINE_TRIGGER':{log(s,'DECLINE','Optional summon search effect was declined.',seat);s.pendingSearch=undefined;break;}
  case 'TRIGGER_SEARCH':{const pending=s.pendingSearch!;s.pendingSearch=undefined;s.chain.push({instanceId:pending.sourceId,controller:seat,effectId:'SEARCH_RITUAL',targets:[],spellSpeed:1,searchIds:[action.searchId]});s.priority=other(seat);s.consecutivePasses=0;log(s,'ACTIVATE',`Triggered search of ${getCard(s,action.searchId,ctx).name}.`,seat);break;}
