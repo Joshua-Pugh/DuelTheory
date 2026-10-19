@@ -262,6 +262,7 @@ function calculateBasicDamage(s:DuelState,ctx:EngineContext){
  const attacker=s.cards[pending.attackerId];
  const attackerCard=getCard(s,pending.attackerId,ctx);
  const lpBefore=s.players.map(p=>p.lp),gyBefore=s.players.map(p=>[...p.graveyard]);
+ const attackerZone=s.cards[pending.attackerId]?.zone,targetZone=pending.targetId?s.cards[pending.targetId]?.zone:undefined;
  const battling=[pending.attackerId,...pending.targetId?[pending.targetId]:[]].map(id=>({id,controller:s.cards[id].controller,cardId:s.cards[id].cardId}));
  const kinetic=(id:string,foe:string|undefined)=>s.cards[id].cardId===79853073&&foe&&getCard(s,foe,ctx).race==='Warrior'?2000:0;
  const atk=battleAttack(s,pending.attackerId,ctx)+kinetic(pending.attackerId,pending.targetId);
@@ -290,7 +291,7 @@ function calculateBasicDamage(s:DuelState,ctx:EngineContext){
  if(attacker.cardId===72989439&&atk>defense&&target.cardId!==23205979&&(target.location!=='monster'||pending.battleDestruction?.includes(pending.targetId))&&attacker.effectUsedTurn!==s.turn&&(attacker.attacksThisTurn?.count??0)===1)(s.pendingTriggers??=[]).push({sourceId:pending.attackerId,controller:seat,effectId:'BLS_EXTRA_ATTACK',mandatory:false});
   log(s,'BATTLE',`${attackerCard.name} attacked ${defenderCard.name} (${atk} vs ${defense} ${wasDefense?'DEF':'ATK'}).`,seat);
  }
- s.lastBattle={turn:s.turn,eventIndex:s.events.length,attackerId:pending.attackerId,targetId:pending.targetId,sourceId:recipient===seat&&pending.targetId?pending.targetId:pending.attackerId,damagedSeat:recipient,damage:dealt,attack:atk,defense:defendingValue};
+ s.lastBattle={attackerZone,targetZone,attackerSeat:pending.attacker,turn:s.turn,eventIndex:s.events.length,attackerId:pending.attackerId,targetId:pending.targetId,sourceId:recipient===seat&&pending.targetId?pending.targetId:pending.attackerId,damagedSeat:recipient,damage:dealt,attack:atk,defense:defendingValue};
  for(const c of battling)if(s.players[other(c.controller)].lp<lpBefore[other(c.controller)]&&(c.cardId===76922029||c.cardId===23205979&&!pending.targetId))(s.pendingTriggers??=[]).push({sourceId:c.id,controller:c.controller,effectId:c.cardId===76922029?'DON':'REAPER_DISCARD',mandatory:c.cardId===23205979});
  for(const c of battling)if(c.cardId===PARSHATH&&s.players[other(c.controller)].lp<lpBefore[other(c.controller)])(s.pendingTriggers??=[]).push({sourceId:c.id,controller:c.controller,effectId:'PARSHATH_DRAW',mandatory:true});
  for(const c of battling)if(c.cardId===88240808&&s.players[other(c.controller)].lp<lpBefore[other(c.controller)])(s.pendingTriggers??=[]).push({sourceId:c.id,controller:c.controller,effectId:'KYCOO_BANISH',mandatory:false,eligibleIds:gyBefore[other(c.controller)]});

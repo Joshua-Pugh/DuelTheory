@@ -27,7 +27,7 @@ export function resolveChaos(s:DuelState,link:ChainLink,ctx:EngineContext):boole
   if(target&&p.deck.includes(target)&&card?.name.startsWith("Gravekeeper's")&&Number(card.atk)<=1500&&link.monsterZone!==undefined&&p.zones.monster[link.monsterZone]===null){p.deck.splice(p.deck.indexOf(target),1);placeMonster(s,target,seat,link.monsterZone,link.declaredType==='attack'?'attack':'faceUpDefense',['attack','faceUpDefense']);}
   p.deck=seededShuffle(p.deck,s.seed+s.events.length*7919);
  }else if(link.effectId==='NIGHT_DESTROY'){if(s.cards[target]?.location==='monster'&&s.cards[target].controller!==seat)toGraveyard(s,target);}
- else if(link.effectId==='NIGHT_RECOVER'){if(target!==link.instanceId&&p.graveyard.includes(target)&&getCard(s,target,ctx).type.includes('Flip')){p.graveyard.splice(p.graveyard.indexOf(target),1);p.hand.push(target);s.cards[target].location='hand';revealEffectCards(s,seat,[target],ctx,'Night Assailant returned a Flip monster');}}
+ else if(link.effectId==='NIGHT_RECOVER'){if(target!==link.instanceId&&p.graveyard.includes(target)&&getCard(s,target,ctx).type.includes('Flip')){p.graveyard.splice(p.graveyard.indexOf(target),1);p.hand.push(target);s.cards[target].location='hand';}}
  else if(link.effectId==='KYCOO_BANISH'){for(const id of link.searchIds??[])if(s.players[other(seat)].graveyard.includes(id)&&getCard(s,id,ctx).type.includes('Monster'))toBanished(s,id);}
  else if(link.effectId==='RAIGEKI_BREAK'){if(['monster','spell'].includes(s.cards[target]?.location))toGraveyard(s,target);}
  else if(link.effectId==='DUSTSHOOT'){

@@ -1,7 +1,7 @@
 import {restrictStat} from './goatControlEffects';
 import {lightResponses,HOSHI,SOUL} from './lightDeckEffects';
 import {chaosResponses,chaosMain,resolveChaos} from './chaosTurboEffects';
-import {getCard,revealEffectCards,log,removeFromHand,toGraveyard,toBanished,placeMonster,seededShuffle,settleLifePoints,detachFaceDown,type DuelState,type EngineContext,type Seat,type LegalAction,type ChainLink} from './model';
+import {getCard,log,removeFromHand,toGraveyard,toBanished,placeMonster,seededShuffle,settleLifePoints,detachFaceDown,type DuelState,type EngineContext,type Seat,type LegalAction,type ChainLink} from './model';
 
 export const TRIBE=33184167,TSUKUYOMI=34853266,CHAOS_SORCERER=9596126,BLS=72989439,BREAKER=71413901,ZORC=97642679,SHINATO=86327225,SERPENT=8131171;
 export const HEAVY_STORM=19613556,NOBLEMAN=71044499,DUO=44763025;
@@ -98,7 +98,7 @@ export function resolveDeckEffect(s:DuelState,link:ChainLink,ctx:EngineContext):
   const t=s.cards[target],zone=p.zones.monster.findIndex(x=>x===null);
   if(c.location==='spell'&&t?.location==='monster'&&!t.faceDown&&t.controller!==seat&&zone>=0){c.previousController=t.controller;s.players[t.controller].zones.monster[t.zone!]=null;t.controller=seat;t.zone=zone;p.zones.monster[zone]=target;c.linkedTarget=target;}
  }else if(effectId==='DMOC_RECOVER'){
-  if(p.graveyard.includes(target)&&getCard(s,target,ctx).type.includes('Spell')){p.graveyard.splice(p.graveyard.indexOf(target),1);p.hand.push(target);s.cards[target].location='hand';revealEffectCards(s,seat,[target],ctx,'Dark Magician of Chaos returned a Spell');}
+  if(p.graveyard.includes(target)&&getCard(s,target,ctx).type.includes('Spell')){p.graveyard.splice(p.graveyard.indexOf(target),1);p.hand.push(target);s.cards[target].location='hand';}
  }else if(effectId==='BLS_EXTRA_ATTACK'){
   if(c.location==='monster'&&!c.faceDown&&c.effectUsedTurn!==s.turn){c.extraAttackTurn=s.turn;c.effectUsedTurn=s.turn;}
  }else if(effectId==='SHINATO_DAMAGE'){
@@ -124,7 +124,7 @@ export function resolveDeckEffect(s:DuelState,link:ChainLink,ctx:EngineContext):
  }else if(effectId==='BREAKER_COUNTER'){
   if(c.location==='monster'&&!c.faceDown)c.spellCounters=1;
  }else if(effectId==='SERPENT_RECOVER'){
-  const i=p.graveyard.indexOf(link.instanceId);if(i>=0){p.graveyard.splice(i,1);p.hand.push(link.instanceId);c.location='hand';revealEffectCards(s,seat,[link.instanceId],ctx,'Sinister Serpent returned to hand');}
+  const i=p.graveyard.indexOf(link.instanceId);if(i>=0){p.graveyard.splice(i,1);p.hand.push(link.instanceId);c.location='hand';}
  }else return false;
  log(s,'RESOLVE',`${getCard(s,link.instanceId,ctx).name} effect resolved.`,seat);return true;
 }

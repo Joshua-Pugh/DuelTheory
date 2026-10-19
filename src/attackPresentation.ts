@@ -15,6 +15,6 @@ export function battleVisual(state:DuelState):{attack:PendingAttack;completed:bo
  const b=state.lastBattle;if(!b||b.turn!==state.turn)return null;
  let declaration=-1;for(let i=state.events.length-1;i>=0;i--){if(state.events[i].type==='ATTACK_DECLARE'){declaration=i;break;}}
  if(declaration>=b.eventIndex)return null; // A newer attack was canceled; do not revive the older line.
- const attacker=state.cards[b.attackerId]?.controller??0;
+ const attacker=b.attackerSeat??state.cards[b.attackerId]?.controller??0;
  return {attack:{attackerId:b.attackerId,targetId:b.targetId,attacker,defender:attacker===0?1:0},completed:true};
 }

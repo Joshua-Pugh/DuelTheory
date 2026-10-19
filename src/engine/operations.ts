@@ -11,6 +11,6 @@ export function recoverGraveCard(s:DuelState,seat:Seat,id:string,ctx:EngineConte
  const p=s.players[seat];const index=p.graveyard.indexOf(id);
  if(index<0||!accept(id))return false;
  p.graveyard.splice(index,1);p.hand.push(id);s.cards[id].location='hand';s.cards[id].zone=undefined;
- revealEffectCards(s,seat,[id],ctx,'Returned from Graveyard to hand');log(s,'RECOVER',`Recovered ${getCard(s,id,ctx).name} from Graveyard.`,seat);return true;
+ log(s,'RECOVER',`Recovered ${getCard(s,id,ctx).name} from Graveyard.`,seat);return true;
 }
 export function drawEffect(s:DuelState,seat:Seat,count:number){draw(s,seat,count);}

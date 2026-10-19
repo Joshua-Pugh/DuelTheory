@@ -61,7 +61,7 @@ export function matchView(s:Match,seat:0|1,catalog:readonly Card[]):MatchView{
   const hiddenNames:string[]=[];for(const c of Object.values(g.cards)){const hidden=c.location==='deck'&&!(searchingOwnDeck&&c.controller===seat)&&!exposed.has(c.instanceId)||c.controller!==seat&&(c.location==='hand'&&g.pendingChaos?.controller!==seat||c.location==='extra'||!!c.faceDown||!!c.equippedHidden);if(hidden){const name=catalog.find(x=>x.id===c.cardId)?.name;if(name)hiddenNames.push(name);c.cardId=0;}}
   for(const p of g.players)p.deck.sort();
   v.actions=v.actions.map(a=>{const target='targetId'in a&&typeof a.targetId==='string'?a.targetId:undefined;const name=target&&g.cards[target]?.cardId===0?catalog.find(c=>c.id===s.goat!.cards[target].cardId)?.name:undefined;return name?{...a,description:a.description.split(name).join('a face-down card')}:a;});
-  g.events=g.events.map(e=>({...e,message:e.revealedCardIds?.length?e.message:hiddenNames.reduce((text,name)=>text.split(name).join('a hidden card'),e.message)}));
+  g.events=g.events.map(e=>({...e,message:e.revealedCardIds?.length||e.type==='RECOVER'?e.message:hiddenNames.reduce((text,name)=>text.split(name).join('a hidden card'),e.message)}));
   // Pending choice payloads can contain private deck/hand information. Only their owner receives them.
   for(const key of ['pendingSearch','pendingDiscard','pendingDeckChoice','pendingRandomDiscard','pendingLightChoice','pendingChaos','pendingRitual'] as const){const p=g[key] as {controller?:number}|undefined;if(p&&p.controller!==undefined&&p.controller!==seat)delete g[key];}
  }
