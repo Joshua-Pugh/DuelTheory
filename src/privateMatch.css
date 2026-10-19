@@ -9,3 +9,6 @@
 .pm-series-setup{gap:14px}.pm-series-setup h1,.pm-series-setup h2,.pm-series-setup h3,.pm-series-setup p{margin:0}.pm-series-setup h1{font-size:30px}.pm-series-setup h2{font-size:20px}.pm-series-setup p{line-height:1.5}.pm-sideboard section{max-height:40dvh}.pm-sideboard h3{position:sticky;top:-14px;background:#17262c;padding:10px 0;margin-bottom:10px}.pm-sideboard button{background:#233831;border:1px solid #637665;border-radius:7px;color:#edf0e5;font:inherit;font-size:14px;cursor:pointer;min-height:42px}.pm-sideboard button:hover:not(:disabled){background:#344f40;border-color:#c6b076}.pm-sideboard button:disabled{opacity:.55;cursor:default}.pm-series-setup>.primary{position:sticky;bottom:12px;z-index:2;min-height:48px}.pm-series-setup+.pm-chat{margin-top:20px}
 
 .pm-series-setup .pm-sideboard section{max-height:30dvh}.pm-leave-actions{display:flex;gap:14px;flex-wrap:wrap;margin-top:20px}.pm-leave-actions button{min-height:48px}
+
+.pm-revealed-cards{display:flex;gap:18px;flex-wrap:wrap;justify-content:center}.pm-revealed-cards article{flex:1;min-width:180px;max-width:280px}.pm-revealed-cards img{max-height:40dvh;width:auto;max-width:100%;object-fit:contain}
+.pm-reveal-backdrop .dt-battle-reveal:has(article+article){width:min(780px,94vw);max-width:780px}.pm-reveal-backdrop .dt-modal-primary{position:sticky;bottom:0}

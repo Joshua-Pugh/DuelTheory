@@ -1,0 +1,5 @@
+import {describe,it,expect} from 'vitest';import {renderToStaticMarkup} from 'react-dom/server';import MatchRevealDialog from './MatchRevealDialog';import data from '../../public/catalog.json';import type {Card} from '../core/types';
+describe('opponent effect result dialog',()=>{
+ it('displays both searched copies with names and a continuation button',()=>{const html=renderToStaticMarkup(<MatchRevealDialog reveal={{id:'r',controller:0,cardId:31786629,cardIds:[31786629,31786629],kind:'effect',message:'Thunder Dragon added 2 cards.'}} catalog={data as Card[]} busy={false} onContinue={()=>{}}/>);expect(html.match(/<article/g)).toHaveLength(2);expect(html).toContain('Opponent’s effect result');expect(html).toContain('Thunder Dragon added 2 cards.');expect(html).toContain('Continue duel');});
+ it('keeps the original flip-reveal display compatible',()=>{expect(renderToStaticMarkup(<MatchRevealDialog reveal={{id:'r',controller:0,cardId:31560081}} catalog={data as Card[]} busy={false} onContinue={()=>{}}/>)).toContain('Magician of Faith');});
+});

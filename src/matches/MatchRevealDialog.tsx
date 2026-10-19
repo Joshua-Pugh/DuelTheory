@@ -1,0 +1,5 @@
+import type {Card} from '../core/types';
+import type {MatchReveal} from './model';
+export default function MatchRevealDialog({reveal,catalog,busy,onContinue}:{reveal:MatchReveal;catalog:readonly Card[];busy:boolean;onContinue:()=>void}){
+ return <div className="dt-room-modal-backdrop pm-reveal-backdrop"><section className="dt-room-modal dt-battle-reveal" role="dialog" aria-modal="true" aria-label="Opponent card revealed"><h2>{reveal.kind==='effect'?'Opponent’s effect result':'Opponent’s card revealed'}</h2>{reveal.message&&<p>{reveal.message}</p>}<small>Brief reveal pause · play resumes automatically if this is not acknowledged.</small><div className="pm-revealed-cards">{(reveal.cardIds??[reveal.cardId]).map((id,index)=>{const card=catalog.find(c=>c.id===id);return card&&<article key={index}>{card.image&&<img src={card.image} alt={card.name}/>}<h3>{card.name}</h3>{card.atk!==undefined&&<p>{card.atk} ATK / {card.def} DEF</p>}<p>{card.desc}</p></article>;})}</div><button autoFocus className="dt-modal-primary" disabled={busy} onClick={onContinue}>Continue duel</button></section></div>;
+}
