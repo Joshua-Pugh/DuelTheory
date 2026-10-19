@@ -74,7 +74,7 @@ export function chooseChaosTurbo(state:DuelState,legal:readonly LegalAction[],se
     case 'DUO':return result(enemy.hand.length>=2?150:enemy.hand.length?70:-20,'Trade Delinquent Duo for opposing hand resources.');
     case 'DUSTSHOOT':return result(155,'Use Trap Dustshoot while the opponent still has four cards.');
     case 'BREAKER_DESTROY':return result(s.cards[target!]?.controller!==seat?65:-20,'Spend Breaker’s counter to clear opposing back row.');
-    case 'NOBLEMAN':return result(85,'Remove an opposing set monster before it generates flip advantage.');
+    case 'NOBLEMAN':return result(s.cards[target!]?.controller!==seat?85:-100,'Remove an opposing set monster; preserve our own flip engine.');
     case 'HEAVY_STORM':return result((sum(enemy.zones.spell.filter((id):id is string=>!!id))-sum(own.zones.spell.filter((id):id is string=>!!id&&id!==source)))/100-3,'Use Heavy Storm when the exchange favors us.');
     case 'TRIBE_DESTROY':{const matching=(ids:string[])=>ids.filter(id=>!s.cards[id].faceDown&&card(id)?.race===a.declaredType);return result(matching(theirs).length?(sum(matching(theirs))-sum(matching(ours))-cost(a.costId?[a.costId]:[]))/100-5:-30,'Use Tribe only when the revealed monster-type exchange justifies the discard.');}
     case 'SNATCH':return result(70+worth(target)/100,'Turn an opposing threat into our own board advantage.');
