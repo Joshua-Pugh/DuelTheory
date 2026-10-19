@@ -94,7 +94,7 @@ function bookActions(s:DuelState,ctx:EngineContext,seat:Seat):LegalAction[]{
   .filter((id):id is string=>id!==null && !s.cards[id].token && !s.cards[id].faceDown && s.cards[id].position!=='faceDownDefense');
  for(const id of [...p.hand,...p.zones.spell.filter((x):x is string=>x!==null)]){
   const instance=s.cards[id];if(instance.cardId!==BOOK_OF_MOON)continue;
-  if(instance.location==='hand' && (seat!==s.current||!mainPhase(s)||s.pendingAttack!==undefined))continue;
+  if(instance.location==='hand' && seat!==s.current)continue;
   if(instance.location==='spell' && (!instance.faceDown||instance.setTurn===s.turn))continue;
   const zones=instance.location==='hand'?p.zones.spell.map((v,i)=>v===null?i:-1).filter(i=>i>=0):[instance.zone!];
   for(const zone of zones)for(const targetId of faceUp)actions.push({type:'ACTIVATE_BOOK_OF_MOON',seat,instanceId:id,zone,targetId,description:`Book of Moon: Set ${getCard(s,targetId,ctx).name} face-down in Defense Position`});
@@ -188,7 +188,7 @@ function rawLegalActions(s:DuelState,ctx:EngineContext,seat:Seat):LegalAction[]{
   else if(instance.position==='faceUpDefense')actions.push({type:'CHANGE_POSITION',seat,instanceId:id,position:'attack',description:`Change ${getCard(s,id,ctx).name} to Attack Position`});
  }
  }
- for(const id of p.zones.monster){if(!id)continue;const instance=s.cards[id];if(!restricts(s,id)&&instance.faceDown&&instance.summonedTurn!==s.turn&&instance.lastPositionTurn!==s.turn)actions.push({type:'FLIP_SUMMON',seat,instanceId:id,description:`Flip Summon ${getCard(s,id,ctx).name}`});}for(const id of p.hand){const card=getCard(s,id,ctx);if(isNormalSummonable(card)&&!p.normalSummoned){for(let zone=0;zone<5;zone++)if(p.zones.monster[zone]===null){actions.push({type:'NORMAL_SUMMON',seat,instanceId:id,zone,position:'attack',description:`Normal Summon ${card.name} in zone ${zone+1}`});actions.push({type:'NORMAL_SUMMON',seat,instanceId:id,zone,position:'faceDownDefense',description:`Set ${card.name} in monster zone ${zone+1}`});}}
+ for(const id of p.zones.monster){if(!id)continue;const instance=s.cards[id];if(!restricts(s,id)&&instance.faceDown&&instance.summonedTurn!==s.turn&&instance.lastPositionTurn!==s.turn&&instance.attackedTurn!==s.turn)actions.push({type:'FLIP_SUMMON',seat,instanceId:id,description:`Flip Summon ${getCard(s,id,ctx).name}`});}for(const id of p.hand){const card=getCard(s,id,ctx);if(isNormalSummonable(card)&&!p.normalSummoned){for(let zone=0;zone<5;zone++)if(p.zones.monster[zone]===null){actions.push({type:'NORMAL_SUMMON',seat,instanceId:id,zone,position:'attack',description:`Normal Summon ${card.name} in zone ${zone+1}`});actions.push({type:'NORMAL_SUMMON',seat,instanceId:id,zone,position:'faceDownDefense',description:`Set ${card.name} in monster zone ${zone+1}`});}}
  if(isSpellTrap(card)){for(let zone=0;zone<5;zone++)if(p.zones.spell[zone]===null){actions.push({type:'SET_SPELL_TRAP',seat,instanceId:id,zone,description:`Set ${card.name} in spell/trap zone ${zone+1}`});if(card.id===GRACEFUL_CHARITY)actions.push({type:'ACTIVATE_GRACEFUL_CHARITY',seat,instanceId:id,zone,description:'Activate Graceful Charity: draw 3, then discard 2'});if(card.id===POT_OF_GREED)actions.push({type:'ACTIVATE_POT_OF_GREED',seat,instanceId:id,zone,description:'Activate Pot of Greed: draw two cards'});}}}
  // Normal Spells previously Set may activate during either Main Phase, even on the Set turn.
  for(const id of p.zones.spell){if(!id||!s.cards[id].faceDown)continue;const c=s.cards[id];
@@ -460,6 +460,7 @@ function resolveChain(s:DuelState,resolveContext:EngineContext){const priorSummo
   const id=link.targets[0];const target=s.cards[id];
   if(target?.location==='monster' && !target.faceDown){
    target.position='faceDownDefense';target.faceDown=true;detachFaceDown(s,id);
+   if(s.pendingAttack?.attackerId===id)target.attackedTurn=s.turn;
    log(s,'POSITION_EFFECT',`Book of Moon turned ${getCard(s,id,resolveContext).name} face-down in Defense Position.`,link.controller);
   }else log(s,'RESOLVE','Book of Moon resolved without changing its target.',link.controller);
  }else if(link.effectId==='MST_DESTROY'){const target=link.targets[0];if(onField(s,target)){toGraveyard(s,target);log(s,'RESOLVE',`MST destroyed ${target}; destruction does not negate an already activated Normal Spell.`,link.controller);}else log(s,'RESOLVE','MST target is no longer on the field; no card destroyed.',link.controller);}else if(link.effectId==='MIRROR_FORCE'){
@@ -468,7 +469,8 @@ function resolveChain(s:DuelState,resolveContext:EngineContext){const priorSummo
   for(const id of ids)toGraveyard(s,id);
   log(s,'RESOLVE',`Mirror Force destroyed ${ids.length} Attack Position monster(s).`,link.controller);
  }else if(link.effectId==='SAKURETSU_ARMOR'){
-  const id=link.targets[0];if(id&&s.cards[id]?.location==='monster'){toGraveyard(s,id);log(s,'RESOLVE','Sakuretsu Armor destroyed the attacking monster.',link.controller);}
+  // GOAT rulings7.html: Book of Moon removes the attacking monster's required face-up state.
+  const id=link.targets[0],target=s.cards[id];if(id&&target?.location==='monster'&&!target.faceDown&&target.position==='attack'&&target.controller!==link.controller){toGraveyard(s,id);log(s,'RESOLVE','Sakuretsu Armor destroyed the attacking monster.',link.controller);}
   else log(s,'RESOLVE','Sakuretsu Armor did not destroy a monster.',link.controller);
  }else throw new DuelEngineError('UNSUPPORTED_EFFECT','Unknown effect');for(const id of [...link.targets,...link.searchIds??[]])if(s.cards[id]?.cardId===23205979&&s.cards[id].location==='monster'&&!s.cards[id].faceDown)toGraveyard(s,id);if(s.cards[link.instanceId].location==='spell'&&!s.cards[link.instanceId].linkedTarget&&![97077563,51452091].includes(s.cards[link.instanceId].cardId))toGraveyard(s,link.instanceId,'rule');}s.freeResponse=undefined;if(!s.chain.length&&s.deferredTriggers?.length){(s.pendingTriggers??=[]).push(...s.deferredTriggers);s.deferredTriggers=[];}if(s.summonResponse?.sourceId===priorSummon)s.summonResponse=undefined;s.consecutivePasses=0;s.priority=s.current;
  if(s.pendingAttack && s.pendingAttack.damageStep){
@@ -478,7 +480,7 @@ function resolveChain(s:DuelState,resolveContext:EngineContext){const priorSummo
   const pending=s.pendingAttack;const attacker=s.cards[pending.attackerId];
   const currentField=s.players[pending.defender].zones.monster.filter((id):id is string=>id!==null);
   if(!attacker||attacker.location!=='monster'||attacker.controller!==pending.attacker||attacker.position!=='attack'||attacker.faceDown){
-   s.pendingAttack=undefined;log(s,'ATTACK_CANCEL','Attack canceled because attacker left the field.',pending.attacker);
+   s.pendingAttack=undefined;log(s,'ATTACK_CANCEL','Attack canceled because the attacker left the field or is no longer face-up in Attack Position.',pending.attacker);
   }else if(pending.targetId && (s.cards[pending.targetId]?.location!=='monster'||s.cards[pending.targetId]?.controller!==pending.defender)){
    pending.replay=true;pending.defenderField=currentField;s.priority=pending.attacker;
    log(s,'REPLAY_REQUIRED','Attack target is no longer available. Attacker must select a new target or cancel.',pending.attacker);
