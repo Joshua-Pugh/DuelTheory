@@ -26,3 +26,9 @@ Recorded October 19, 2026. These are architectural requirements and planned work
 - Demo video: record a short narrated/captioned walkthrough from the actual UI. Show setup/coin flip, Thunder Dragon into Charity, Spy/Dekoichi/Faith advantage, discard recovery, LIGHT/DARK costs, Chaos payoff, and a Book response. Produce an honest gameplay example, not an animation implying perfect AI. Video has not been generated in this pass.
 
 Strategy references: https://www.goatformat.com/chaos-turbo.html, https://www.goatformat.com/home/ghostrider15s-chaos-turbo-analysis, https://www.goatformat.com/home/thunder-dragon-chaos.
+
+## Tactical planning update — October 19, 2026
+
+Chaos Turbo now uses a shared bounded beam-search utility with a GOAT simulation adapter. Limits: five strategic actions, beam width three, 64 expanded nodes; forced response/battle steps have a separate cap. Every selected move is matched back to a real legal action and the engine state is never replaced with a simulation.
+
+Planning uses a redacted clone, removes identities from both draw piles, estimates unknown defenders, and stops on unknown own draws or the next turn. Visible opposing responses use the baseline pilot; hidden back row is uncertainty, not a guarantee of safe lethal. This is current-turn tactical planning, not trained self-play or multi-turn prediction. Resource heuristics remain the fallback. Phone responsiveness still requires field testing on real devices.

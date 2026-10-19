@@ -1,8 +1,9 @@
+import {planChaosTurn} from './planning';
 import type {Card} from '../core/types';import type {DuelState,LegalAction,Seat} from '../engine/model';
 import {bestLegalAction,goatObservation,hasDecision,type Decision} from './policy';
 const TD=31786629,NIGHT=16226786,SERPENT=8131171,SPY=24317029,FAITH=31560081,DEKO=87621407,BLS=72989439,SORC=9596126,BOOK=14087893;
 /** A deterministic, resource-first Chaos Turbo prototype, not a trained/tournament-strength agent. */
-export function chooseChaosTurbo(state:DuelState,legal:readonly LegalAction[],seat:Seat,catalog:readonly Card[]):Decision<LegalAction>|undefined{
+export function chooseChaosTurboHeuristic(state:DuelState,legal:readonly LegalAction[],seat:Seat,catalog:readonly Card[]):Decision<LegalAction>|undefined{
  // Legal search-option order can mirror a shuffled pile. Canonicalize without reading descriptions.
  const actions=legal.filter(a=>a.seat===seat).map(action=>({action,key:JSON.stringify(Object.fromEntries(Object.entries(action).filter(([key])=>key!=='description').sort(([a],[b])=>a.localeCompare(b))))})).sort((a,b)=>a.key.localeCompare(b.key)).map(x=>x.action);if(!hasDecision(state,seat,actions))return;
  const cards=new Map(catalog.map(c=>[c.id,c]));
@@ -92,4 +93,10 @@ export function chooseChaosTurbo(state:DuelState,legal:readonly LegalAction[],se
   if(['PASS_CHAIN','RESOLVE_CHAIN','PASS_ATTACK_RESPONSE','PASS_SUMMON_RESPONSE','PASS_SUMMON_NEGATION','PASS_FREE_RESPONSE','CANCEL_REPLAY','DECLINE_TRIGGER','DECLINE_PENDING_TRIGGER','DECLINE_DD_WARRIOR_LADY'].includes(a.type))return result(0,'Preserve interaction when no beneficial response is needed.');
   return result(10,'Complete the available supported action.');
  });
+}
+
+/** Bounded tactical planning falls back to the resource strategy at uncertain boundaries. */
+export function chooseChaosTurbo(state:DuelState,legal:readonly LegalAction[],seat:Seat,catalog:readonly Card[]):Decision<LegalAction>|undefined{
+ const fallback=chooseChaosTurboHeuristic(state,legal,seat,catalog);
+ return fallback?planChaosTurn(state,legal,seat,catalog,chooseChaosTurboHeuristic)??fallback:undefined;
 }
