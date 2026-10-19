@@ -46,6 +46,25 @@ describe('Goat Control tournament baseline',()=>{
   const token=s.players[0].zones.monster.find(id=>id&&s.cards[id].token)!;s.turn++;s.summonLockedTurn=undefined;const meta=move(s,METAMORPHOSIS,'hand');
   s=act(s,'ACTIVATE_LIGHT_EFFECT',a=>a.type==='ACTIVATE_LIGHT_EFFECT'&&a.instanceId===meta&&a.materials?.includes(token)===true);expect(s.cards[token].tokenGone).toBe(true);expect(s.players[0].graveyard).not.toContain(token);
  });
+ it('converts an opponent-turn Sheep Token into Thousand-Eyes after the real turn transition',()=>{
+  let s=setup();s.current=1;s.priority=1;s.phase='END';
+  const goat=move(s,73915051,'spell',0,0,true),meta=move(s,METAMORPHOSIS,'hand');
+  s.freeResponse={priority:0,passed:[]};
+  s=resolve(act(s,'ACTIVATE_LIGHT_EFFECT',a=>a.type==='ACTIVATE_LIGHT_EFFECT'&&a.instanceId===goat));
+  expect(s.summonLockedTurn?.[0]).toBe(s.turn);
+  for(let n=0;n<12&&!(s.current===0&&s.phase==='MAIN_1');n++){
+   const actions=[...legalActions(s,ctx,0),...legalActions(s,ctx,1)];
+   const a=actions.find(a=>a.type==='PASS_FREE_RESPONSE')??actions.find(a=>a.type==='DRAW_PHASE')??actions.find(a=>a.type==='ADVANCE');
+   expect(a).toBeDefined();s=dispatchDuel(s,a!,ctx);
+  }
+  expect(s.current).toBe(0);expect(s.phase).toBe('MAIN_1');
+  const token=s.players[0].zones.monster.find(id=>id&&s.cards[id].token)!;
+  s=act(s,'ACTIVATE_LIGHT_EFFECT',a=>a.type==='ACTIVATE_LIGHT_EFFECT'&&a.instanceId===meta&&a.materials?.includes(token)===true);
+  s=resolve(s);expect(s.pendingLightChoice?.level).toBe(1);
+  const fusion=s.players[0].extra!.find(id=>s.cards[id].cardId===TER)!;
+  s=act(s,'COMPLETE_LIGHT_CHOICE',a=>a.type==='COMPLETE_LIGHT_CHOICE'&&a.choiceId===fusion&&a.declaredType==='attack');
+  expect(s.cards[fusion].location).toBe('monster');expect(s.cards[token].tokenGone).toBe(true);
+ });
  it('absorbs a monster and copies its ATK/DEF without changing ownership',()=>{
   let s=setup();const ter=move(s,TER,'monster'),target=move(s,18036057,'monster',1);s=absorb(s,ter,target);
   expect(s.cards[target]).toMatchObject({location:'spell',controller:0,owner:1,absorbed:true,linkedTarget:ter});expect(battleAttack(s,ter,ctx)).toBe(1900);expect(restrictStat(s,ter,'def',ctx)).toBe(1400);expect(s.players[1].zones.monster[0]).toBeNull();
