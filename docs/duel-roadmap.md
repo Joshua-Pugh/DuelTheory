@@ -40,3 +40,9 @@ Breaker counter placement/badges, center-field tabletop dice/counters, right-cli
 ## Response and Ritual follow-up — October 17, 2026
 
 See [response-ritual-flow-20261017.md](response-ritual-flow-20261017.md): skip response windows only when no supported legal response exists, own-summon Torrential, Call destruction cleanup, field-first Ritual activation/resolution, search and hand-to-field animations. Next: opponent tournament-deck selector BEFORE the coin flip, then effect coverage for sourced Chaos Turbo, Goat Control and Reasoning Gate lists; AI decision-making remains separate.
+
+## Chaos Turbo AI and platform direction — October 19, 2026
+
+The first local Chaos Turbo AI prototype is implemented through the same legal-action engine. Play → AI Practice opens a supported preset against the Riclar91 list; regular Duel Arena also offers opponent control selection. Coin flip, automatic draws, human response windows and required choices remain active. The AI is a deterministic strategy policy, not trained or certified tournament play. It cannot inspect opposing hidden card identities or the shuffle seed. AI sideboarding and private-room bot seats are future work.
+
+See `platform-roadmap.md` for the requested free YGO-module boundary, independent assets/deployment, creator publishing, original-game monetization planning, and the proposed gameplay demo video. These architectural separation steps are recorded, not completed.
