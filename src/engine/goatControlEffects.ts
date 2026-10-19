@@ -1,7 +1,7 @@
 import {draw,getCard,log,placeMonster,removeFromHand,toGraveyard,detachFaceDown,type DuelState,type EngineContext,type Seat,type LegalAction,type DuelAction,type ChainLink} from './model';
 export const METAMORPHOSIS=46411259,TER=63519819,MIMIC=74713516;
 /** Deliberately bounded prototype Fusion selection; other effects still require manual play. */
-export const supportedFusions=new Set([TER,58528964,17881964,56907389,19066538,54752875]);
+export const supportedFusions=new Set([87751584,TER,58528964,17881964,56907389,19066538,54752875]);
 export const goatControlIds=new Set([METAMORPHOSIS,TER,MIMIC,...supportedFusions]);
 const other=(seat:Seat):Seat=>seat===0?1:0;
 const monsters=(s:DuelState)=>Object.values(s.cards).filter(c=>c.location==='monster');

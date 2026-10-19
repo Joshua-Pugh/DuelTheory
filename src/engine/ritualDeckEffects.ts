@@ -20,14 +20,17 @@ const other=(seat:Seat):Seat=>seat===0?1:0;
 const monsters=(s:DuelState)=>[...s.players[0].zones.monster,...s.players[1].zones.monster].filter((id):id is string=>id!==null);
 const spells=(s:DuelState)=>[...s.players[0].zones.spell,...s.players[1].zones.spell].filter((id):id is string=>id!==null);
 export const faceUpMonsters=(s:DuelState)=>monsters(s).filter(id=>!s.cards[id].faceDown);
-export function battleAttack(s:DuelState,id:string,ctx:EngineContext):number{const c=s.cards[id],card=getCard(s,id,ctx);let value=(restrictStat(s,id,'atk',ctx)??Number(card.atk))+(c.cardId===BREAKER?(c.spellCounters??0)*300:0);for(const source of Object.values(s.cards).filter(x=>x.location==='monster'&&!x.faceDown)){if(source.cardId===HOSHI)value+=card.attribute==='LIGHT'?500:card.attribute==='DARK'?-400:0;if(source.cardId===SOUL&&source.controller!==c.controller&&s.current===c.controller&&s.phase==='BATTLE')value-=300;}return Math.max(0,value);}
+export function battleAttack(s:DuelState,id:string,ctx:EngineContext):number{const c=s.cards[id],card=getCard(s,id,ctx);let value=(restrictStat(s,id,'atk',ctx)??Number(card.atk))+(c.cardId===BREAKER?(c.spellCounters??0)*300:c.cardId===8034697?(c.spellCounters??0)*200:0);for(const source of Object.values(s.cards).filter(x=>x.location==='monster'&&!x.faceDown)){if(source.cardId===HOSHI)value+=card.attribute==='LIGHT'?500:card.attribute==='DARK'?-400:0;if(source.cardId===SOUL&&source.controller!==c.controller&&s.current===c.controller&&s.phase==='BATTLE')value-=300;}return Math.max(0,value);}
 export function summonDeckTriggers(s:DuelState,id:string,normal=false){
  const c=s.cards[id];if(c.faceDown)return;const ready=([c.controller,other(c.controller)] as Seat[]).filter(seat=>s.players[seat].zones.spell.some(x=>x&&[29401950,41420027,53582587,83555666,97077563,4178474,64697231].includes(s.cards[x].cardId)&&s.cards[x].faceDown&&s.cards[x].setTurn!==s.turn));if(ready.length)s.summonResponse={negatable:normal,summoner:c.controller,sourceId:id,priority:ready[0]};
  if(c.cardId===2134346)c.spiritReturnTurn=s.turn;
  if(c.cardId===TSUKUYOMI){c.spiritReturnTurn=s.turn;(s.pendingTriggers??=[]).push({sourceId:id,controller:c.controller,effectId:'TSUKUYOMI_SET',mandatory:true});}
+ if(c.cardId===30914564&&!normal)(s.pendingTriggers??=[]).push({sourceId:id,controller:c.controller,effectId:'SACRED_CRANE_DRAW',mandatory:true});
  if(c.cardId===40737112)(s.pendingTriggers??=[]).push({sourceId:id,controller:c.controller,effectId:'DMOC_RECOVER',mandatory:false});
  if(c.cardId===BREAKER&&normal)(s.pendingTriggers??=[]).push({sourceId:id,controller:c.controller,effectId:'BREAKER_COUNTER',mandatory:true});
 }
+/** Simultaneous summons share a response window while each monster keeps its own trigger. */
+export function summonGroupTriggers(s:DuelState,ids:string[]){for(const id of ids)summonDeckTriggers(s,id);if(ids.length>1&&s.summonResponse)s.summonResponse.sourceIds=ids;}
 export function deckMainActions(s:DuelState,ctx:EngineContext,seat:Seat):LegalAction[]{
  const p=s.players[seat],actions:LegalAction[]=[];
  const add=(instanceId:string,effectId:DeckEffect,extra:Partial<Extract<DeckEffectAction,{type:'ACTIVATE_DECK_EFFECT'}>>={},description?:string)=>actions.push({type:'ACTIVATE_DECK_EFFECT',seat,instanceId,effectId,...extra,description:description??`Activate ${getCard(s,instanceId,ctx).name} effect`});

@@ -10,13 +10,13 @@ import type {Phase} from './engine/model';
 import type {MatchView,Game,Pick,MatchCommand} from './matches/model';
 import {requestMatch,MatchRequestError,matchCommand,matchCredential,rememberMatch,forgetMatch,matchInvite,type Credential,type RoomInfo} from './matches/client';
 import {newRoomCode} from './commander/client';
-import {CHAOS_TURBO,GOAT_CONTROL} from './supportedDecks';
+import {REASONING_GATE,CHAOS_TURBO,GOAT_CONTROL} from './supportedDecks';
 import {OpeningCoinDialog} from './DuelLifecycleDialogs';
 import DuelField from './DuelField';
 import AshenBattlefield from './AshenBattlefield';
 import {unopposedResponse} from './duelResolution';
 import './privateMatch.css';
-const presets=[CHAOS_TURBO,GOAT_CONTROL];
+const presets=[CHAOS_TURBO,GOAT_CONTROL,REASONING_GATE];
 export default function PrivateMatchRoom({deck,catalog}:{deck:Deck;catalog:Card[]}){
  const inviteCode=()=>location.hash.match(/^#\/private\/([A-Z2-9]{8})$/)?.[1]||'';
  const [mode,setMode]=useState<'single'|'best3'>('single');

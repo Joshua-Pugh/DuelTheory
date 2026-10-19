@@ -1,3 +1,6 @@
+import reasoning from './data/reasoningGate.json';
+export const REASONING_GATE:Deck=reasoning;
+export const REASONING_GATE_SOURCE='https://www.goatformat.com/reasoning-gate-otk.html';
 import {supportedFusions} from './engine/goatControlEffects';
 import {validateDeck} from './core/decks';
 import type {Card,Deck} from './core/types';

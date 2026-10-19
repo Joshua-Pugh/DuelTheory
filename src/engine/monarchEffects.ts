@@ -21,7 +21,7 @@ export function monarchActions(s:DuelState,ctx:EngineContext,seat:Seat,responses
  if(c.cardId===36361633)add('ROAR');
  if(c.cardId===51452091)add('DECREE');
  if(c.cardId===15800838&&p.hand.length&&s.players[op].hand.length)add('MIND_CRUSH');
- if(c.cardId===29401950&&s.summonResponse?.summoner===op){const target=s.summonResponse.sourceId;if(s.cards[target]?.location==='monster'&&Number(getCard(s,target,ctx).atk)>=1500)add('BOTTOMLESS',target);}
+ if(c.cardId===29401950&&s.summonResponse&&(s.summonResponse.sourceIds||s.summonResponse.summoner===op)){const target=(s.summonResponse.sourceIds??[s.summonResponse.sourceId]).find(id=>s.cards[id]?.location==='monster'&&s.cards[id].controller===op&&!s.cards[id].faceDown&&Number(getCard(s,id,ctx).atk)>=1500);if(target)add('BOTTOMLESS',target);}
  if(c.cardId===62279055&&s.pendingAttack?.defender===seat&&!s.pendingAttack.damageStep)add('CYLINDER',s.pendingAttack.attackerId);
  if(c.cardId===41420027){const top=s.chain.at(-1);if(top&&/Spell|Trap/.test(getCard(s,top.instanceId,ctx).type))add('SOLEMN_CHAIN',top.instanceId);else if(!s.chain.length&&s.summonResponse&&s.summonResponse.summoner!==seat&&s.summonResponse.negatable)add('SOLEMN_SUMMON',s.summonResponse.sourceId);}
  }
@@ -41,7 +41,7 @@ export function resolveMonarch(s:DuelState,l:ChainLink,ctx:EngineContext):boolea
  case 'ENEMY_POSITION':if(t?.location==='monster'&&!t.faceDown)t.position=t.position==='attack'?'faceUpDefense':'attack';break;
  case 'THANKSGIVING':{const tokens=units(s).filter(c=>c.token);for(const c of tokens)toGraveyard(s,c.instanceId);p.lp+=tokens.length*800;break;}
  case 'SMASHING':{const selected=l.nonTargetId;const ts=units(s,op).filter(c=>!c.faceDown);if(ts.length){const max=Math.max(...ts.map(c=>Number(getCard(s,c.instanceId,ctx).def)));const chosen=ts.find(c=>c.instanceId===selected&&Number(getCard(s,c.instanceId,ctx).def)===max)??ts.find(c=>Number(getCard(s,c.instanceId,ctx).def)===max)!;toGraveyard(s,chosen.instanceId);}break;}
- case 'BOTTOMLESS':if(t?.location==='monster'&&!t.faceDown&&Number(getCard(s,target,ctx).atk)>=1500)toBanished(s,target,true);break;
+ case 'BOTTOMLESS':for(const id of s.summonResponse?.sourceIds??[target]){const c=s.cards[id];if(c?.location==='monster'&&c.controller===op&&!c.faceDown&&Number(getCard(s,id,ctx).atk)>=1500)toBanished(s,id,true);}break;
  case 'CYLINDER':if(s.pendingAttack?.attackerId===target&&t?.location==='monster'){s.players[op].lp=Math.max(0,s.players[op].lp-battleAttack(s,target,ctx));s.pendingAttack=undefined;settleLifePoints(s);}break;
  case 'SOLEMN_CHAIN':{const previous=s.chain.at(-1);if(previous?.instanceId===target){s.chain.pop();if(['monster','spell'].includes(t?.location))toGraveyard(s,target);}break;}
  case 'SOLEMN_SUMMON':if(t?.location==='monster'){toGraveyard(s,target);s.pendingTriggers=s.pendingTriggers?.filter(x=>x.sourceId!==target);if(s.pendingSearch?.sourceId===target)s.pendingSearch=undefined;s.summonResponse=undefined;}break;

@@ -1,6 +1,7 @@
-import {CHAOS_TURBO,GOAT_CONTROL,CHAOS_SOURCE,GOAT_CONTROL_SOURCE,CHAOS_SIDE_SOURCE,GOAT_CONTROL_SIDE_SOURCE} from './supportedDecks';
+import {REASONING_GATE,REASONING_GATE_SOURCE,CHAOS_TURBO,GOAT_CONTROL,CHAOS_SOURCE,GOAT_CONTROL_SOURCE,CHAOS_SIDE_SOURCE,GOAT_CONTROL_SIDE_SOURCE} from './supportedDecks';
 import type {Deck} from './core/types';
 const presets=[
+ {key:'reasoning',deck:REASONING_GATE,title:'Reasoning Gate',detail:'Carl Waite · featured tournament Main Deck',description:'Sourced 40-card Main Deck with a DuelTheory prototype 15-card Side Deck and Fusion selection. Includes opponent Level declarations, excavation and Dimension Fusion.',file:'reasoning-gate',source:REASONING_GATE_SOURCE,sideSource:''},
  {key:'chaos',deck:CHAOS_TURBO,title:'Chaos Turbo',detail:'Riclar91 · 2020 World Champion',description:'Tournament Main Deck and original 15-card Side Deck with implemented prototype effects.',file:'chaos-turbo',source:CHAOS_SOURCE,sideSource:CHAOS_SIDE_SOURCE},
  {key:'goat',deck:GOAT_CONTROL,title:'Goat Control',detail:'Lolmarcus · 2020 Worlds · 7th place',description:'Exact 40-card tournament Main Deck, original 15-card Side Deck, plus our supported 8-card prototype Fusion selection. Includes Metamorphosis, Thousand-Eyes Restrict and Scapegoat.',file:'goat-control',source:GOAT_CONTROL_SOURCE,sideSource:GOAT_CONTROL_SIDE_SOURCE},
 ];

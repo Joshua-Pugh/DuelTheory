@@ -1,6 +1,6 @@
 import {useDuelAudio} from './audio/useDuelAudio';
 import SupportedDeckSetup from './SupportedDeckSetup';
-import {CHAOS_TURBO,GOAT_CONTROL,assessDeck} from './supportedDecks';
+import {REASONING_GATE,CHAOS_TURBO,GOAT_CONTROL,assessDeck} from './supportedDecks';
 import {DIE_ROLL_DURATION} from './DuelEffectAnimations';
 import {shouldAutoResolve,unopposedResponse} from './duelResolution';
 import {directAttackQueue} from './battleShortcuts';
@@ -17,7 +17,7 @@ import './duelRoom.css';
 
 export default function EnginePreview({deck,catalog,preferences,onOpenPreferences,onLoadDeck}:{deck:Deck;catalog:Card[];preferences:DuelPreferences;onOpenPreferences:()=>void;onLoadDeck?:(deck:Deck)=>void}){
  const [playerDeck,setPlayerDeck]=useState('current'),[opponentDeck,setOpponentDeck]=useState('chaos');
- const selectedDeck=playerDeck==='chaos'?CHAOS_TURBO:playerDeck==='goat'?GOAT_CONTROL:deck,selectedOpponent=opponentDeck==='chaos'?CHAOS_TURBO:opponentDeck==='goat'?GOAT_CONTROL:deck;
+ const selectedDeck=playerDeck==='reasoning'?REASONING_GATE:playerDeck==='chaos'?CHAOS_TURBO:playerDeck==='goat'?GOAT_CONTROL:deck,selectedOpponent=opponentDeck==='reasoning'?REASONING_GATE:opponentDeck==='chaos'?CHAOS_TURBO:opponentDeck==='goat'?GOAT_CONTROL:deck;
  const coverage=assessDeck(selectedDeck,catalog),opponentCoverage=assessDeck(selectedOpponent,catalog);
  const service=useMemo(()=>new GameService(),[]),suppressAuto=useRef(false);
  const [id,setId]=useState<string|null>(null),[duel,setDuel]=useState<DuelState|null>(null);
