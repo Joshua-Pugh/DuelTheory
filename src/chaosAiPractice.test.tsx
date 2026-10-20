@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import {beforeEach,afterEach,it,expect,vi} from 'vitest';import {act} from 'react';import {createRoot,type Root} from 'react-dom/client';
-import {loadPracticeRecords,PRACTICE_RECORD_KEY} from './ai/practiceMatch';import EnginePreview from './EnginePreview';import DuelField from './DuelField';import json from '../public/catalog.json';import {CHAOS_TURBO} from './supportedDecks';import type {Card} from './core/types';import {DEFAULT_PREFERENCES} from './preferences';import {GameService} from './services/GameService';import {createDuel} from './engine/model';import {legalActions} from './engine/rules';
+import {loadPracticeRecords,PRACTICE_RECORD_KEY} from './ai/practiceMatch';import EnginePreview from './EnginePreview';import DuelField from './DuelField';import json from '../public/catalog.json';import {CHAOS_TURBO} from './supportedDecks';import type {Card} from './core/types';import {DEFAULT_PREFERENCES} from './preferences';import {GameService} from './services/GameService';import {createDuel} from './engine/model';import {legalActions,dispatchDuel} from './engine/rules';
 vi.mock('./services/GameService',async()=>{const actual=await vi.importActual<typeof import('./services/GameService')>('./services/GameService');const {openingCoin}=await import('./duelLifecycle');const seed=Array.from({length:10000},(_,i)=>i).find(i=>openingCoin(i).firstSeat===1)!;return {...actual,freshDuelSeed:()=>seed};});
 const catalog=json as Card[];let root:Root,host:HTMLDivElement;
 function click(text:string){const el=Array.from(document.querySelectorAll('button')).find(b=>b.textContent?.trim()===text);expect(el).toBeTruthy();act(()=>el!.click());}
@@ -59,3 +59,26 @@ it('requires confirmation before leaving and records a match loss only after yes
  act(()=>root.render(<EnginePreview initialAI deck={CHAOS_TURBO} catalog={catalog} preferences={DEFAULT_PREFERENCES} onOpenPreferences={()=>{}}/>));bestThree();click('Start GOAT duel');await tick(1);click('Begin duel');click('Exit duel ✕');expect(loadPracticeRecords(window.localStorage)).toEqual([]);click('Cancel');expect(document.querySelector('[aria-label="GOAT duel room"]')).toBeTruthy();click('Exit duel ✕');click('Yes · concede match');expect(loadPracticeRecords(window.localStorage)[0]).toMatchObject({winner:1,forfeited:true,wins:[0,0]});
 });
 it('does not start a manual AI match even with best-of-three selected',()=>{act(()=>root.render(<EnginePreview initialAI deck={CHAOS_TURBO} catalog={catalog} preferences={{...DEFAULT_PREFERENCES,mode:'manual'}} onOpenPreferences={()=>{}}/>));bestThree();expect((Array.from(document.querySelectorAll('button')).find(b=>b.textContent==='Start GOAT duel') as HTMLButtonElement).disabled).toBe(true);expect(window.localStorage.getItem(PRACTICE_RECORD_KEY)).toBeNull();});
+
+it('renders Zaborg target selection after tributing a Premature-revived Breaker',()=>{
+ const ctx={cards:new Map(catalog.map(c=>[c.id,c]))};const deck={...CHAOS_TURBO,main:[...CHAOS_TURBO.main,70828912,51945556]};let state=createDuel(deck,deck,ctx,42);state.turn=3;state.phase='MAIN_1';state.pendingDraw=false;state.current=0;state.priority=0;
+ const move=(cardId:number,owner:0|1,location:'hand'|'graveyard'|'monster')=>{const c=Object.values(state.cards).find(c=>c.cardId===cardId&&c.owner===owner)!;const p=state.players[owner];p.deck=p.deck.filter(id=>id!==c.instanceId);p.hand=p.hand.filter(id=>id!==c.instanceId);c.location=location;if(location==='monster'){c.zone=0;c.position='attack';p.zones.monster[0]=c.instanceId;}else p[location].push(c.instanceId);return c.instanceId;};
+ const premature=move(70828912,0,'hand'),breaker=move(71413901,0,'graveyard'),zaborg=move(51945556,0,'hand');move(9596126,1,'monster');
+ const dispatch=(predicate:(a:ReturnType<typeof legalActions>[number])=>boolean)=>{const a=[...legalActions(state,ctx,0),...legalActions(state,ctx,1)].find(predicate);expect(a).toBeDefined();state=dispatchDuel(state,a!,ctx);};
+ dispatch(a=>a.type==='ACTIVATE_DECK_EFFECT'&&a.instanceId===premature&&a.effectId==='PREMATURE'&&a.targetId===breaker);
+ for(let i=0;state.chain.length&&i<10;i++)dispatch(a=>a.type==='PASS_CHAIN');
+ if(state.summonResponse){for(let i=0;state.summonResponse&&i<3;i++)dispatch(a=>a.type==='PASS_SUMMON_RESPONSE');}
+ const render=()=>root.render(<DuelField fixedSeat={0} state={state} catalog={catalog} actions={legalActions(state,ctx,0)} manualMode={false} onAction={a=>{state=dispatchDuel(state,a,ctx);render();}} onManual={()=>{}} onSkipPhase={()=>{}} onUndo={()=>{}} onVerify={()=>{}} onExit={()=>{}} notice=""/>);
+ act(()=>render());
+ act(()=>(document.querySelector(`.dt-field-hand [data-instance="${zaborg}"]`) as HTMLButtonElement).click());
+ click('Tribute Summon');
+ act(()=>(document.querySelector('.dt-picker-grid .eligible') as HTMLButtonElement).click());
+ act(()=>(document.querySelector('.dt-field-zone.dt-zone-eligible') as HTMLButtonElement)?.click());
+ expect(document.body.textContent).toContain('Zaborg · choose a monster to destroy');
+ expect(document.querySelectorAll('.dt-targetable')).toHaveLength(2);
+ const sorcerer=Object.values(state.cards).find(c=>c.owner===1&&c.cardId===9596126)!;
+ act(()=>(document.querySelector(`[data-instance="${sorcerer.instanceId}"]`) as HTMLButtonElement).click());
+ expect(state.chain.at(-1)).toMatchObject({effectId:'ZABORG_DESTROY',targets:[sorcerer.instanceId]});
+ for(let i=0;state.chain.length&&i<10;i++)dispatch(a=>a.type==='PASS_CHAIN');
+ expect(state.cards[sorcerer.instanceId].location).toBe('graveyard');
+});
