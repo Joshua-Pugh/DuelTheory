@@ -1,3 +1,4 @@
+import {removalPayoff,sensibleActions} from './strategy';
 import {planChaosTurn} from './planning';
 import type {Card} from '../core/types';import type {DuelState,LegalAction,Seat} from '../engine/model';
 import {bestLegalAction,goatObservation,hasDecision,type Decision} from './policy';
@@ -5,7 +6,7 @@ const TD=31786629,NIGHT=16226786,SERPENT=8131171,SANGAN=26202165,SPY=24317029,FA
 /** A deterministic, resource-first Chaos Turbo prototype, not a trained/tournament-strength agent. */
 export function chooseChaosTurboHeuristic(state:DuelState,legal:readonly LegalAction[],seat:Seat,catalog:readonly Card[]):Decision<LegalAction>|undefined{
  // Legal search-option order can mirror a shuffled pile. Canonicalize without reading descriptions.
- const actions=legal.filter(a=>a.seat===seat).map(action=>({action,key:JSON.stringify(Object.fromEntries(Object.entries(action).filter(([key])=>key!=='description').sort(([a],[b])=>a.localeCompare(b))))})).sort((a,b)=>a.key.localeCompare(b.key)).map(x=>x.action);if(!hasDecision(state,seat,actions))return;
+ const actions=sensibleActions(state,legal,seat,catalog).map(action=>({action,key:JSON.stringify(Object.fromEntries(Object.entries(action).filter(([key])=>key!=='description').sort(([a],[b])=>a.localeCompare(b))))})).sort((a,b)=>a.key.localeCompare(b.key)).map(x=>x.action);if(!hasDecision(state,seat,actions))return;
  const cards=new Map(catalog.map(c=>[c.id,c]));
  return bestLegalAction(goatObservation(state,seat),actions,(s,a)=>{
   const own=s.players[seat],enemy=s.players[seat===0?1:0],field=(who:Seat)=>s.players[who].zones.monster.filter((id):id is string=>!!id),ours=field(seat),theirs=field(seat===0?1:0);
@@ -15,6 +16,7 @@ export function chooseChaosTurboHeuristic(state:DuelState,legal:readonly LegalAc
   const worth=(id:string|undefined)=>{if(!id)return 0;const c=card(id);if(!c)return 1700;return c.id===BLS?3600:c.id===SORC?2900:c.id===88240808&&chaosReady?4800:c.id===55144522?3400:c.id===79571449?3300:c.id===44763025?3100:c.id===FAITH?2200:c.id===SPY?2100:c.id===DEKO?2000:c.id===NIGHT?1500:c.type.includes('Monster')?Math.max(Number(c.atk)||0,Number(c.def)||0)+200:1500;};
   // Night recovers a Flip; Serpent returns later; spare Thunder Dragons become discard value.
   const discard=(id:string)=>{const c=card(id);if(c?.id===NIGHT&&own.graveyard.some(x=>card(x)?.type.includes('Flip')&&x!==id))return -1400;if(c?.id===SERPENT)return -1000;if(c?.id===TD&&(own.hand.filter(x=>card(x)?.id===TD).length>1||!own.deck.some(x=>card(x)?.id===TD)))return -700;const attribute=c?.attribute;if(attribute&&['LIGHT','DARK'].includes(attribute)&&!own.graveyard.some(x=>card(x)?.attribute===attribute)&&own.hand.some(x=>[BLS,SORC].includes(card(x)?.id??0)))return worth(id)-900;return worth(id);};
+  const removal=(id:string|undefined)=>removalPayoff(s,id,seat,x=>worth(x));
   const sum=(ids:readonly string[])=>ids.reduce((n,id)=>n+worth(id),0),cost=(ids:readonly string[]|undefined)=>ids?.reduce((n,id)=>n+discard(id),0)??0;
   const result=(value:number,reason:string)=>({value,reason});
   const source='instanceId'in a?a.instanceId:'sourceId'in a?a.sourceId:undefined;
@@ -34,6 +36,8 @@ export function chooseChaosTurboHeuristic(state:DuelState,legal:readonly LegalAc
   if(a.type==='ACTIVATE_TRIGGER'){
    const effect=s.pendingTriggers?.find(t=>t.sourceId===a.sourceId)?.effectId;
    let value=100+worth(a.choiceId)/100;
+   if(effect==='ZABORG_DESTROY'&&a.choiceId)value=s.cards[a.choiceId].controller===seat?-200:100+removal(a.choiceId)/100;
+   if(effect==='NIGHT_DESTROY'&&a.choiceId)value=100+removal(a.choiceId)/100;
    if(effect==='KYCOO_BANISH')value=100+(a.searchIds?.length??0)*10+(a.searchIds??[]).reduce((n,id)=>n+worth(id)/1000,0);
    if(effect==='TSUKUYOMI_SET'&&a.choiceId){value=s.cards[a.choiceId].controller===seat?([FAITH,DEKO,SPY].includes(card(a.choiceId)?.id??0)?130:-40):125+atk(a.choiceId)/1000;}
    if(a.monsterZone!==undefined)value+=a.declaredType==='faceUpDefense'&&(card(a.choiceId)?.id===SPY)?5:a.declaredType==='attack'?2:0;
@@ -41,7 +45,8 @@ export function chooseChaosTurboHeuristic(state:DuelState,legal:readonly LegalAc
   }
   if(a.type==='SPECIAL_SUMMON_CHAOS'){
    const materialCost=a.materials.reduce((n,id)=>n+worth(id)+(card(id)?.type.includes('Flip')&&own.hand.some(x=>card(x)?.id===NIGHT)?1000:0),0)/2000,strongest=Math.max(0,...theirs.filter(id=>!s.cards[id].faceDown).map(atk));
-   return result((s.turn===1&&ours.length?-15:s.turn===1?35:ours.length>=3&&theirs.length===0?25:95)+(card(a.instanceId)?.id===BLS?5:0)+(a.position==='attack'?5:-10)+(strongest>2000?12:0)-materialCost,'Convert established LIGHT/DARK resources into a Chaos threat without banishing valuable recovery targets first.');
+   const established=ours.length>=2&&Math.max(0,...ours.map(atk))>=strongest;
+   return result((established?-65:s.turn===1&&ours.length?-15:s.turn===1?35:ours.length>=3&&theirs.length===0?25:95)+(card(a.instanceId)?.id===BLS?5:0)+(a.position==='attack'?5:-10)+(strongest>2000?12:0)-materialCost,'Convert established LIGHT/DARK resources into a Chaos threat without banishing valuable recovery targets first.');
   }
   if(a.type==='NORMAL_SUMMON'||a.type==='TRIBUTE_SUMMON'){
    const c=card(a.instanceId),set=a.position==='faceDownDefense',flip=c?.type.includes('Flip'),pressure=Math.max(0,...theirs.filter(id=>!s.cards[id].faceDown).map(atk));
@@ -57,9 +62,11 @@ export function chooseChaosTurboHeuristic(state:DuelState,legal:readonly LegalAc
    return result(value,'Establish Spy/Dekoichi/Faith for resource advantage, or summon a useful attacker.');
   }
   if(a.type==='FLIP_SUMMON'&&support(a.instanceId)&&!combatPayoff(a.instanceId))return result(-20,'Keep the support monster face-down rather than expose it as a weak attacker.');
+  if(a.type==='FLIP_SUMMON'&&card(a.instanceId)?.id===NIGHT){const targets=theirs.filter(id=>s.cards[id].faceDown||atk(id)>1600||[FAITH,SPY,DEKO,88240808].includes(card(id)?.id??0));return result(targets.length?110:-15,'Keep Night Assailant set until its removal answers a meaningful threat.');}
   if(a.type==='FLIP_SUMMON')return result(110,'Cash in a surviving flip monster for another resource advantage.');
   if(a.type==='SET_SPELL_TRAP'){
    const c=card(a.instanceId),same=own.zones.spell.some(id=>id&&card(id)?.id===c?.id);
+   if(same||own.zones.spell.filter(Boolean).length>=2)return result(-25,'Keep follow-up interaction in hand instead of stacking duplicate or excessive back row.');
    return result(c?.type.includes('Trap')?40-(same?20:0):c?.id===BOOK?(s.phase==='MAIN_2'?25:own.hand.filter(id=>card(id)?.id===BOOK).length>1?20:-5):-20,'Prepare interaction while keeping a Book in hand for this turn’s battle when useful.');
   }
   if(a.type==='CHANGE_POSITION'&&support(a.instanceId)){const threatened=theirs.some(id=>s.cards[id].faceDown||atk(id)>atk(a.instanceId));return result(a.position==='faceUpDefense'&&threatened?85:a.position==='attack'&&combatPayoff(a.instanceId)?90:-20,'Keep vulnerable support monsters in defense unless attacking has a clear payoff.');}
@@ -76,18 +83,18 @@ export function chooseChaosTurboHeuristic(state:DuelState,legal:readonly LegalAc
    return result(!inChain&&s.current===seat&&card(a.targetId)?.id===88240808&&chaosReady?115:defending&&attacker===a.targetId?90:!inChain&&s.current===seat&&atk(a.targetId)>Math.max(0,...ours.map(atk))&&Number(card(a.targetId)?.def??2000)<Math.max(0,...ours.map(atk))?50:top?.effectId==='TER_ABSORB'&&top.instanceId===a.targetId?65:-15,'Stop a dangerous attack or make a known threat easier to defeat.');
   }
   if(a.type==='ACTIVATE_ATTACK_TRAP')return result(defending?100:-20,'Stop the declared attack when the battle trap is legal.');
-  if(a.type==='ACTIVATE_MST')return result(s.cards[a.targetId]?.controller!==seat?45:-20,'Remove opposing back-row interaction.');
+  if(a.type==='ACTIVATE_MST')return result(s.cards[a.targetId]?.controller!==seat?35+removal(a.targetId)/100:-100,'Remove opposing back-row interaction.');
   if(a.type==='ACTIVATE_DECK_EFFECT'){
    switch(a.effectId){
     case 'DUO':return result(enemy.hand.length>=2?150:enemy.hand.length?70:-20,'Trade Delinquent Duo for opposing hand resources.');
     case 'DUSTSHOOT':return result(155,'Use Trap Dustshoot while the opponent still has four cards.');
-    case 'BREAKER_DESTROY':return result(s.cards[target!]?.controller!==seat?65:-20,'Spend Breaker’s counter to clear opposing back row.');
+    case 'BREAKER_DESTROY':return result(s.cards[target!]?.controller!==seat?45+removal(target)/100:-100,'Spend Breaker’s counter to clear opposing back row.');
     case 'NOBLEMAN':return result(s.cards[target!]?.controller!==seat?85:-100,'Remove an opposing set monster; preserve our own flip engine.');
     case 'HEAVY_STORM':return result((sum(enemy.zones.spell.filter((id):id is string=>!!id))-sum(own.zones.spell.filter((id):id is string=>!!id&&id!==source)))/100-3,'Use Heavy Storm when the exchange favors us.');
     case 'TRIBE_DESTROY':{const matching=(ids:string[])=>ids.filter(id=>!s.cards[id].faceDown&&card(id)?.race===a.declaredType);return result(matching(theirs).length?(sum(matching(theirs))-sum(matching(ours))-cost(a.costId?[a.costId]:[]))/100-5:-30,'Use Tribe only when the revealed monster-type exchange justifies the discard.');}
     case 'SNATCH':return result(70+worth(target)/100,'Turn an opposing threat into our own board advantage.');
     case 'CHAOS_BANISH':{const id=target!,power=atk(source!),t=s.cards[id];return result(t.controller!==seat&&(atk(id)>=power||t.position!=='attack'||theirs.length>1)?90+worth(id)/1000:-10,'Banish a difficult threat; preserve attacks when combat is the better payoff.');}
-    case 'RAIGEKI_BREAK':{const t=s.cards[target!];return result(t.controller!==seat?(worth(target)-cost(a.costId?[a.costId]:[]))/100+(defending?45:5):-40,'Pair Raigeki Break with Night Assailant, Serpent or spare Thunder Dragon for an efficient exchange.');}
+    case 'RAIGEKI_BREAK':{const t=s.cards[target!];return result(t.controller!==seat?(removal(target)-cost(a.costId?[a.costId]:[]))/100+(defending?45:5):-40,'Pair Raigeki Break with Night Assailant, Serpent or spare Thunder Dragon for an efficient exchange.');}
     case 'RING':{const damage=atk(target!);return result(damage>=enemy.lp&&damage<own.lp?10000:damage>=own.lp?-100:s.cards[target!].controller!==seat?35+damage/1000:-20,'Use Ring for safe lethal damage or an efficient removal, avoiding self-lethal.');}
     case 'TORRENTIAL':return result((sum(theirs)-sum(ours))/100-5,'Use Torrential only when the board exchange is favorable.');
     case 'CARD_DESTRUCTION':return result(own.hand.length>1&&own.hand.filter(id=>[TD,NIGHT,SERPENT].includes(card(id)?.id??0)).length>=2&&cost(own.hand.filter(id=>id!==source))<1000?80:-20,'Reload a hand rich in discard value; avoid throwing away strong hands.');
@@ -104,6 +111,6 @@ export function chooseChaosTurboHeuristic(state:DuelState,legal:readonly LegalAc
 
 /** Bounded tactical planning falls back to the resource strategy at uncertain boundaries. */
 export function chooseChaosTurbo(state:DuelState,legal:readonly LegalAction[],seat:Seat,catalog:readonly Card[]):Decision<LegalAction>|undefined{
- const fallback=chooseChaosTurboHeuristic(state,legal,seat,catalog);
- return fallback?planChaosTurn(state,legal,seat,catalog,chooseChaosTurboHeuristic)??fallback:undefined;
+ const options=sensibleActions(state,legal,seat,catalog),fallback=chooseChaosTurboHeuristic(state,options,seat,catalog);
+ return fallback?planChaosTurn(state,options,seat,catalog,chooseChaosTurboHeuristic)??fallback:undefined;
 }

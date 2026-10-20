@@ -1,3 +1,4 @@
+import {sensibleActions} from './strategy';
 import type {Card} from '../core/types';
 import type {DuelState,LegalAction,Seat} from '../engine/model';
 import {dispatchDuel,legalActions} from '../engine/rules';
@@ -30,7 +31,11 @@ export function planChaosTurn(state:DuelState,legal:readonly LegalAction[],seat:
   const resourceBonus=own.hand.filter(id=>s.cards[id].cardId===8131171).length*650;
   const exposure=own.zones.monster.reduce((n,id)=>{if(!id)return n;const c=s.cards[id];return n+([8131171,26202165].includes(c.cardId)&&c.position==='attack'?900:0);},0);
   const redundantSerpent=own.zones.monster.some(id=>id&&s.cards[id].cardId===8131171)&&(own.zones.monster.filter(Boolean).length>1||enemyMonsters.length===0)?500:0;
-  return value(seat)-value(opponent)+(own.lp-enemy.lp)*.15+resourceBonus-exposure-redundantSerpent;
+  const reserve=own.hand.reduce((n,id)=>n+([72989439,9596126].includes(s.cards[id].cardId)?900:0),0);
+  const overextension=Math.max(0,own.zones.monster.filter(Boolean).length-2)*1100+Math.max(0,own.zones.spell.filter(Boolean).length-2)*450;
+  const exposedDamage=(victim:Seat)=>{const attacker=s.players[victim===0?1:0],defender=s.players[victim],blockers=defender.zones.monster.filter(Boolean).length;const attacks=attacker.zones.monster.filter((id):id is string=>!!id&&!s.cards[id].faceDown&&s.cards[id].position==='attack').map(id=>Number(ctx.cards.get(s.cards[id].cardId)?.atk)||0).sort((a,b)=>b-a);return attacks.slice(blockers).reduce((n,a)=>n+a,0);};
+  const survival=Math.min(own.lp,exposedDamage(seat))*.2;
+  return value(seat)-value(opponent)+(own.lp-enemy.lp)*.15+resourceBonus+reserve-exposure-redundantSerpent-overextension-survival;
  };
  // Keep zone-equivalent actions from consuming the entire beam.
  const ranked=(s:DuelState,actions:readonly LegalAction[],who:Seat,count:number)=>{
@@ -52,7 +57,7 @@ export function planChaosTurn(state:DuelState,legal:readonly LegalAction[],seat:
  };
  const result=searchSequences(initial,{
   terminal:boundary,evaluate,
-  actions:s=>{const options=legalActions(s,ctx,seat).filter(a=>tactical.has(a.type));const picks=ranked(s,options,seat,5);const advance=options.find(a=>a.type==='ADVANCE');if(advance&&!picks.includes(advance))picks.push(advance);return picks;},
+  actions:s=>{const options=sensibleActions(s,legalActions(s,ctx,seat),seat,catalog).filter(a=>tactical.has(a.type));const picks=ranked(s,options,seat,5);const advance=options.find(a=>a.type==='ADVANCE');if(advance&&!picks.includes(advance))picks.push(advance);return picks;},
   step:(s,a)=>{try{return normalize(dispatchDuel(s,a,ctx));}catch{return undefined;}}
  },{depth:5,width:3,nodes:64});
  if(!result||result.value<=evaluate(initial)+75)return;
