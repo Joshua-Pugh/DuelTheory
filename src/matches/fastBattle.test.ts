@@ -1,4 +1,5 @@
-import {applyMatchCommand,member,type Match} from './model';
+import {battleVisuals} from '../attackPresentation';
+import {applyMatchCommand,matchView,member,type Match} from './model';
 import {describe,it,expect} from 'vitest';
 import catalogJson from '../../public/catalog.json';
 import type {Card,Deck} from '../core/types';
@@ -23,3 +24,11 @@ describe('uncontested private battles',()=>{
 });
 
 it('room authority batches attacks but keeps the face-up reveal acknowledgement barrier',()=>{const g=setup(),id=place(g,71413901,0),target=place(g,faith,1,0,true);let room:Match={code:'ABCDEFGH',game:'goat',revision:0,phase:'playing',members:[member('A',{deck}),member('B',{deck})],chat:[],goat:g,manual:false};const action=legalActions(g,ctx,0).find(a=>a.type==='DECLARE_ATTACK'&&a.attackerId===id&&a.targetId===target)!;room=applyMatchCommand(room,0,{type:'goat',action},catalog,42);expect(room.reveal).toBeDefined();expect(room.goat?.lastBattle).toBeUndefined();expect(room.goat?.pendingAttack?.damageStep).toBe('CALCULATE');room=applyMatchCommand(room,0,{type:'ackReveal',id:room.reveal!.id},catalog,42);expect(room.reveal).toBeUndefined();expect(room.goat?.lastBattle).toMatchObject({attackerId:id,damage:0});expect(room.goat?.pendingAttack).toBeUndefined();});
+
+it('keeps both attack arrows in one final opponent snapshot even if the first update was missed',()=>{
+ const g=setup(),first=place(g,71413901,0,0),second=place(g,71413901,0,1);let room:Match={code:'ABCDEFGH',game:'goat',revision:0,phase:'playing',members:[member('A',{deck}),member('B',{deck})],chat:[],goat:g,manual:false};
+ for(const attackerId of [first,second]){const action=legalActions(room.goat!,ctx,0).find(a=>a.type==='DECLARE_ATTACK'&&a.attackerId===attackerId&&!a.targetId)!;room=applyMatchCommand(room,0,{type:'goat',action},catalog,42);}
+ expect(room.goat?.players[1].lp).toBe(4800);expect(room.goat?.battleHistory?.map(b=>b.attackerId)).toEqual([first,second]);
+ const reconnected=JSON.parse(JSON.stringify(matchView(room,1,catalog)));expect(battleVisuals(reconnected.goat).map(v=>v.attack.attackerId)).toEqual([first,second]);expect(battleVisuals(reconnected.goat).every(v=>v.completed)).toBe(true);
+ reconnected.goat.phase='MAIN_2';expect(battleVisuals(reconnected.goat)).toEqual([]);reconnected.goat.phase='BATTLE';reconnected.goat.turn++;expect(battleVisuals(reconnected.goat)).toEqual([]);
+});
