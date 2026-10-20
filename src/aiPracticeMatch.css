@@ -3,3 +3,5 @@
 @media(max-width:600px){.ai-side-lists{grid-template-columns:1fr}.ai-side-lists section{max-height:30dvh}.ai-match-dialog{padding:14px}.ai-match-dialog footer{bottom:-14px}.ai-match-dialog footer button{flex:1 1 180px}.ai-records th,.ai-records td{padding:8px;font-size:12px}}
 
 .dt-matchup-selectors input{box-sizing:border-box;width:100%;min-width:0;padding:12px;color:#efe0bd;background:#101c20;border:1px solid #85714e;border-radius:6px;font-size:16px}.dt-room-header:has(.ai-practice-score) .dt-tabletop-toggle,.dt-room-header:has(.ai-practice-score) button:disabled{display:none}@media(max-width:600px){.ai-practice-score{flex-basis:100%;text-align:center}}
+
+.ai-learning-panel details{max-height:250px;overflow:auto}.ai-match-dialog textarea{display:block;width:100%;min-height:90px;max-height:25dvh;resize:vertical;margin-top:6px}

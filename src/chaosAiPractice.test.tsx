@@ -1,3 +1,4 @@
+import {loadLearning,LEARNING_KEY} from './ai/learning';
 // @vitest-environment happy-dom
 import {beforeEach,afterEach,it,expect,vi} from 'vitest';import {act} from 'react';import {createRoot,type Root} from 'react-dom/client';
 import {loadPracticeRecords,PRACTICE_RECORD_KEY} from './ai/practiceMatch';import EnginePreview from './EnginePreview';import DuelField from './DuelField';import json from '../public/catalog.json';import {CHAOS_TURBO} from './supportedDecks';import type {Card} from './core/types';import {DEFAULT_PREFERENCES} from './preferences';import {GameService} from './services/GameService';import {createDuel} from './engine/model';import {legalActions,dispatchDuel} from './engine/rules';
@@ -81,4 +82,20 @@ it('renders Zaborg target selection after tributing a Premature-revived Breaker'
  expect(state.chain.at(-1)).toMatchObject({effectId:'ZABORG_DESTROY',targets:[sorcerer.instanceId]});
  for(let i=0;state.chain.length&&i<10;i++)dispatch(a=>a.type==='PASS_CHAIN');
  expect(state.cards[sorcerer.instanceId].location).toBe('graveyard');
+});
+
+it('records only with consent, pauses for move feedback and stops recording when switched off',async()=>{
+ const dispatch=vi.spyOn(GameService.prototype,'dispatch');
+ const render=(enabled:boolean)=>root.render(<EnginePreview initialAI deck={CHAOS_TURBO} catalog={catalog} preferences={{...DEFAULT_PREFERENCES,aiLearning:enabled}} onOpenPreferences={()=>{}}/>);
+ act(()=>render(true));click('Start GOAT duel');await tick(1);click('Begin duel');
+ let review:HTMLButtonElement|undefined;
+ for(let i=0;i<12;i++){await tick(1500);review=Array.from(document.querySelectorAll('button')).find(b=>b.textContent==='Review last AI move');if(review&&!review.disabled)break;}
+ expect(review?.disabled).toBe(false);expect(loadLearning(localStorage).length).toBeGreaterThan(0);
+ click('Pause AI');const paused=dispatch.mock.calls.length;await tick(3000);expect(dispatch.mock.calls).toHaveLength(paused);click('Resume AI');
+ act(()=>review!.click());expect(document.querySelector('[aria-label="Review the AI’s last move"]')).toBeTruthy();const count=dispatch.mock.calls.length;await tick(5000);expect(dispatch.mock.calls).toHaveLength(count);
+ click('Save feedback');expect(loadLearning(localStorage).some(r=>r.feedback?.rating==='bad')).toBe(true);
+ act(()=>render(false));const records=localStorage.getItem(LEARNING_KEY);await tick(5000);expect(localStorage.getItem(LEARNING_KEY)).toBe(records);expect(document.body.textContent).not.toContain('Review last AI move');
+});
+it('does not collect AI practice decisions with the default preferences',async()=>{
+ act(()=>root.render(<EnginePreview initialAI deck={CHAOS_TURBO} catalog={catalog} preferences={DEFAULT_PREFERENCES} onOpenPreferences={()=>{}}/>));click('Start GOAT duel');await tick(1);click('Begin duel');await tick(5000);expect(localStorage.getItem(LEARNING_KEY)).toBeNull();
 });
