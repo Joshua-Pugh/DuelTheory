@@ -1,3 +1,4 @@
+import {shuffleSearchedDeck} from './deckShuffle';
 import {restrictStat} from './goatControlEffects';
 import {lightResponses,HOSHI,SOUL} from './lightDeckEffects';
 import {chaosResponses,chaosMain,resolveChaos} from './chaosTurboEffects';
@@ -58,7 +59,7 @@ export function deckMainActions(s:DuelState,ctx:EngineContext,seat:Seat):LegalAc
 }
 export function dispatchDeckEffect(s:DuelState,a:DeckEffectAction,ctx:EngineContext){
  const p=s.players[a.seat];
- if(a.type==='COMPLETE_DUSTSHOOT'){const pending=s.pendingChaos!;const opponent=s.players[other(a.seat)];if(a.targetId&&opponent.hand.includes(a.targetId)){removeFromHand(opponent,a.targetId);opponent.deck.push(a.targetId);s.cards[a.targetId].location='deck';opponent.deck=seededShuffle(opponent.deck,s.seed+s.events.length*7919);}s.pendingChaos=undefined;if(s.cards[pending.sourceId].location==='spell')toGraveyard(s,pending.sourceId,'rule');log(s,'RESOLVE','Trap Dustshoot hand inspection completed; returned monster shuffled into Deck.',a.seat);return;}
+ if(a.type==='COMPLETE_DUSTSHOOT'){const pending=s.pendingChaos!;const opponent=s.players[other(a.seat)];if(a.targetId&&opponent.hand.includes(a.targetId)){removeFromHand(opponent,a.targetId);opponent.deck.push(a.targetId);s.cards[a.targetId].location='deck';shuffleSearchedDeck(s,other(a.seat));}s.pendingChaos=undefined;if(s.cards[pending.sourceId].location==='spell')toGraveyard(s,pending.sourceId,'rule');log(s,'RESOLVE','Trap Dustshoot hand inspection completed; returned monster shuffled into Deck.',a.seat);return;}
  if(a.type==='COMPLETE_DIE_ROLL'){
   const roll=s.pendingRoll!;s.pendingRoll=undefined;const result=roll.result;log(s,'DIE_RESULT',`Dark Master - Zorc rolled ${result}.`,a.seat);
   if(result===6||result<=2){const owner=result===6?a.seat:other(a.seat);for(const id of [...s.players[owner].zones.monster])if(id)toGraveyard(s,id);}
@@ -115,7 +116,7 @@ export function resolveDeckEffect(s:DuelState,link:ChainLink,ctx:EngineContext):
  }else if(effectId==='HEAVY_STORM'){
   for(const id of spells(s))toGraveyard(s,id);
  }else if(effectId==='NOBLEMAN'){
-  if(s.cards[target]?.location==='monster'&&s.cards[target].faceDown){const card=getCard(s,target,ctx);toBanished(s,target);if(card.type.includes('Flip'))for(const owner of [0,1] as Seat[]){for(const id of [...s.players[owner].deck])if(getCard(s,id,ctx).name===card.name){s.players[owner].deck.splice(s.players[owner].deck.indexOf(id),1);s.cards[id].location='banished';s.cards[id].faceDown=false;s.players[owner].banished.push(id);}s.players[owner].deck=seededShuffle(s.players[owner].deck,s.seed+s.events.length+owner*7919);}log(s,'REVEAL',`Nobleman of Crossout banished ${card.name}${card.type.includes('Flip')?' and matching copies from both Decks':''}.`,seat);}
+  if(s.cards[target]?.location==='monster'&&s.cards[target].faceDown){const card=getCard(s,target,ctx);toBanished(s,target);if(card.type.includes('Flip'))for(const owner of [0,1] as Seat[]){for(const id of [...s.players[owner].deck])if(getCard(s,id,ctx).name===card.name){s.players[owner].deck.splice(s.players[owner].deck.indexOf(id),1);s.cards[id].location='banished';s.cards[id].faceDown=false;s.players[owner].banished.push(id);}shuffleSearchedDeck(s,owner);}log(s,'REVEAL',`Nobleman of Crossout banished ${card.name}${card.type.includes('Flip')?' and matching copies from both Decks':''}.`,seat);}
  }else if(effectId==='DUO'){
   const opponent=other(seat),hand=s.players[opponent].hand;
   if(hand.length){s.pendingRandomDiscard={sourceId:link.instanceId,controller:opponent,order:seededShuffle(hand,effectRandom(s))};s.priority=opponent;s.consecutivePasses=0;log(s,'RANDOM_DISCARD_READY','Delinquent Duo: hand shuffled face-down for the random discard.',opponent);}

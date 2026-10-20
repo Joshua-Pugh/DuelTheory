@@ -80,7 +80,10 @@ export function chooseChaosTurboHeuristic(state:DuelState,legal:readonly LegalAc
   if(a.type==='ACTIVATE_BOOK_OF_MOON'){
    const t=s.cards[a.targetId],top=s.chain.at(-1),attacker=s.pendingAttack?.attackerId;
    if(t.controller===seat){const endangered=s.chain.some(l=>l.targets.includes(a.targetId)&&!(l.effectId==='CHAOS_BANISH'&&card(l.instanceId)?.id===BLS)||l.effectId==='MIRROR_FORCE'&&t.position==='attack');return result(endangered?120+worth(a.targetId)/1000:-15,'Protect a threatened monster from destruction/control or preserve its flip value.');}
-   return result(!inChain&&s.current===seat&&card(a.targetId)?.id===88240808&&chaosReady?115:defending&&attacker===a.targetId?90:!inChain&&s.current===seat&&atk(a.targetId)>Math.max(0,...ours.map(atk))&&Number(card(a.targetId)?.def??2000)<Math.max(0,...ours.map(atk))?50:top?.effectId==='TER_ABSORB'&&top.instanceId===a.targetId?65:-15,'Stop a dangerous attack or make a known threat easier to defeat.');
+   const defendingTarget=s.pendingAttack?.targetId,guard=defendingTarget?(s.cards[defendingTarget].position==='attack'?atk(defendingTarget):Number(card(defendingTarget)?.def??1800)):0;
+   const battleDanger=defending&&attacker===a.targetId&&(Math.max(0,atk(a.targetId)-guard)>=own.lp||atk(a.targetId)>=2200||!!defendingTarget&&atk(a.targetId)>guard&&worth(defendingTarget)>=2800);
+   const resetSearch=[95492061,23401839,FAITH,SPY,DEKO,NIGHT].includes(card(a.targetId)?.id??0);
+   return result(!inChain&&s.current===seat&&card(a.targetId)?.id===88240808&&chaosReady?115:battleDanger?90+atk(a.targetId)/1000-(resetSearch&&own.lp>atk(a.targetId)?65:0):!inChain&&s.current===seat&&atk(a.targetId)>Math.max(0,...ours.map(atk))&&Number(card(a.targetId)?.def??2000)<Math.max(0,...ours.map(atk))?50:top?.effectId==='TER_ABSORB'&&top.instanceId===a.targetId?65:-15,'Stop a dangerous attack or make a known threat easier to defeat.');
   }
   if(a.type==='ACTIVATE_ATTACK_TRAP')return result(defending?100:-20,'Stop the declared attack when the battle trap is legal.');
   if(a.type==='ACTIVATE_MST')return result(s.cards[a.targetId]?.controller!==seat?35+removal(a.targetId)/100:-100,'Remove opposing back-row interaction.');

@@ -13,6 +13,10 @@ export function sensibleActions(s:DuelState,actions:readonly LegalAction[],seat:
  return actions.filter(a=>{
   if(a.seat!==seat)return false;
   const target='targetId'in a?a.targetId:undefined;
+  if(target&&(a.type==='ACTIVATE_MST'||a.type==='ACTIVATE_DECK_EFFECT'&&['RAIGEKI_BREAK','BREAKER_DESTROY'].includes(a.effectId))){
+   const card=cards.get(s.cards[target]?.cardId);
+   if(s.chain.some(link=>link.instanceId===target)&&card&&!['Continuous','Equip','Field'].includes(card.race??''))return false;
+  }
   if(!target||s.cards[target]?.controller!==seat)return true;
   if(a.type==='ACTIVATE_MST')return false;
   if(a.type!=='ACTIVATE_DECK_EFFECT')return true;

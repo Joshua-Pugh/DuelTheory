@@ -1,5 +1,6 @@
+import {shuffleSearchedDeck} from './deckShuffle';
 import {MIMIC} from './goatControlEffects';
-import {draw,getCard,revealEffectCards,log,placeMonster,removeFromHand,seededShuffle,toBanished,toGraveyard,type DuelState,type EngineContext,type ChainLink,type LegalAction,type Seat} from './model';
+import {draw,getCard,revealEffectCards,log,placeMonster,removeFromHand,toBanished,toGraveyard,type DuelState,type EngineContext,type ChainLink,type LegalAction,type Seat} from './model';
 export const MERCHANT=32362575;
 export const SPY=24317029,NIGHT=16226786,KYCOO=88240808,CARD_DESTRUCTION=72892473,RAIGEKI_BREAK=4178474,DUSTSHOOT=64697231;
 export const chaosEffectIds=new Set([MERCHANT,SPY,NIGHT,KYCOO,CARD_DESTRUCTION,RAIGEKI_BREAK,DUSTSHOOT,83011278]);
@@ -25,7 +26,7 @@ export function resolveChaos(s:DuelState,link:ChainLink,ctx:EngineContext):boole
  }else if(link.effectId==='SPY_SUMMON'){
   const card=target?getCard(s,target,ctx):undefined;
   if(target&&p.deck.includes(target)&&card?.name.startsWith("Gravekeeper's")&&Number(card.atk)<=1500&&link.monsterZone!==undefined&&p.zones.monster[link.monsterZone]===null){p.deck.splice(p.deck.indexOf(target),1);placeMonster(s,target,seat,link.monsterZone,link.declaredType==='attack'?'attack':'faceUpDefense',['attack','faceUpDefense']);}
-  p.deck=seededShuffle(p.deck,s.seed+s.events.length*7919);
+  shuffleSearchedDeck(s,seat);
  }else if(link.effectId==='NIGHT_DESTROY'){if(s.cards[target]?.location==='monster'&&s.cards[target].controller!==seat)toGraveyard(s,target);}
  else if(link.effectId==='NIGHT_RECOVER'){if(target!==link.instanceId&&p.graveyard.includes(target)&&getCard(s,target,ctx).type.includes('Flip')){p.graveyard.splice(p.graveyard.indexOf(target),1);p.hand.push(target);s.cards[target].location='hand';}}
  else if(link.effectId==='KYCOO_BANISH'){for(const id of link.searchIds??[])if(s.players[other(seat)].graveyard.includes(id)&&getCard(s,id,ctx).type.includes('Monster'))toBanished(s,id);}
