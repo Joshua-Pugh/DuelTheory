@@ -25,7 +25,12 @@ export function planChaosTurn(state:DuelState,legal:readonly LegalAction[],seat:
  const evaluate=(s:DuelState)=>{
   if(s.drawnGame)return -10000;if(s.winner!==null)return s.winner===seat?100000:-100000;
   const value=(who:Seat)=>{const p=s.players[who];return p.hand.length*350+p.zones.monster.reduce((n,id)=>{if(!id)return n;const c=s.cards[id],card=ctx.cards.get(c.cardId)??unknown;return n+600+Math.max(Number(card.atk)||0,Number(card.def)||0)*.35;},0)+p.zones.spell.filter(Boolean).length*250;};
-  return value(seat)-value(opponent)+(s.players[seat].lp-s.players[opponent].lp)*.15;
+  // Support cards are resources/blockers, not free board value from weak ATK bodies.
+  const own=s.players[seat],enemy=s.players[opponent],enemyMonsters=enemy.zones.monster.filter((id):id is string=>!!id);
+  const resourceBonus=own.hand.filter(id=>s.cards[id].cardId===8131171).length*650;
+  const exposure=own.zones.monster.reduce((n,id)=>{if(!id)return n;const c=s.cards[id];return n+([8131171,26202165].includes(c.cardId)&&c.position==='attack'?900:0);},0);
+  const redundantSerpent=own.zones.monster.some(id=>id&&s.cards[id].cardId===8131171)&&(own.zones.monster.filter(Boolean).length>1||enemyMonsters.length===0)?500:0;
+  return value(seat)-value(opponent)+(own.lp-enemy.lp)*.15+resourceBonus-exposure-redundantSerpent;
  };
  // Keep zone-equivalent actions from consuming the entire beam.
  const ranked=(s:DuelState,actions:readonly LegalAction[],who:Seat,count:number)=>{

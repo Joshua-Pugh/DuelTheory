@@ -1,7 +1,7 @@
 import {planChaosTurn} from './planning';
 import type {Card} from '../core/types';import type {DuelState,LegalAction,Seat} from '../engine/model';
 import {bestLegalAction,goatObservation,hasDecision,type Decision} from './policy';
-const TD=31786629,NIGHT=16226786,SERPENT=8131171,SPY=24317029,FAITH=31560081,DEKO=87621407,BLS=72989439,SORC=9596126,BOOK=14087893;
+const TD=31786629,NIGHT=16226786,SERPENT=8131171,SANGAN=26202165,SPY=24317029,FAITH=31560081,DEKO=87621407,BLS=72989439,SORC=9596126,BOOK=14087893;
 /** A deterministic, resource-first Chaos Turbo prototype, not a trained/tournament-strength agent. */
 export function chooseChaosTurboHeuristic(state:DuelState,legal:readonly LegalAction[],seat:Seat,catalog:readonly Card[]):Decision<LegalAction>|undefined{
  // Legal search-option order can mirror a shuffled pile. Canonicalize without reading descriptions.
@@ -20,6 +20,8 @@ export function chooseChaosTurboHeuristic(state:DuelState,legal:readonly LegalAc
   const source='instanceId'in a?a.instanceId:'sourceId'in a?a.sourceId:undefined;
   const target='targetId'in a?a.targetId:undefined;
   const inChain=s.chain.length>0,defending=s.pendingAttack?.defender===seat;
+  const combatPayoff=(id:string)=>s.turn>1&&s.phase!=='MAIN_2'&&(atk(id)>=enemy.lp&&theirs.length===0||card(id)?.id!==SERPENT&&theirs.some(t=>!s.cards[t].faceDown&&s.cards[t].position==='attack'&&atk(t)<atk(id)));
+  const support=(id:string)=>[SERPENT,SANGAN].includes(card(id)?.id??0);
   if(a.type==='DRAW_PHASE')return result(1000,'Draw for the turn.');
   if(['ADVANCE_DAMAGE_STEP','COMPLETE_DIE_ROLL'].includes(a.type))return result(1000,'Continue the required battle or random result.');
   if(a.type==='CHOOSE_RANDOM_DISCARD')return result(100,'Choose a face-down random discard without inspecting it.');
@@ -44,6 +46,9 @@ export function chooseChaosTurboHeuristic(state:DuelState,legal:readonly LegalAc
   if(a.type==='NORMAL_SUMMON'||a.type==='TRIBUTE_SUMMON'){
    const c=card(a.instanceId),set=a.position==='faceDownDefense',flip=c?.type.includes('Flip'),pressure=Math.max(0,...theirs.filter(id=>!s.cards[id].faceDown).map(atk));
    if(a.type==='TRIBUTE_SUMMON')return result(-20,'Preserve the flip engine rather than spend multiple monsters on a normal Tribute Summon.');
+   const liveDiscard=actions.some(x=>x.type==='ACTIVATE_GRACEFUL_CHARITY'||x.type==='ACTIVATE_DECK_EFFECT'&&x.costId===a.instanceId&&(x.targetId? s.cards[x.targetId]?.controller!==seat:theirs.some(id=>!s.cards[id].faceDown&&card(id)?.race===x.declaredType)));
+   if(c?.id===SERPENT)return result(set?(ours.length===0&&theirs.length>0&&!liveDiscard?55:-15):combatPayoff(a.instanceId)?95:-40,'Keep Serpent for repeatable discard costs; set it only when a blocker is needed, or attack for lethal.');
+   if(c?.id===SANGAN)return result(set?70:combatPayoff(a.instanceId)?90:-25,'Set Sangan for defense and its search; attack only when there is a concrete combat payoff.');
    let value=set?(flip?75:15):(flip?10:65+(c?.id===71413901?8:0));
    if(c?.id===FAITH&&!own.graveyard.some(id=>card(id)?.type.includes('Spell')))value-=30;
    if(c?.id===SPY&&set)value+=pressure>1400?15:8;
@@ -51,11 +56,13 @@ export function chooseChaosTurboHeuristic(state:DuelState,legal:readonly LegalAc
    if(c?.id===TD)value=-25;
    return result(value,'Establish Spy/Dekoichi/Faith for resource advantage, or summon a useful attacker.');
   }
+  if(a.type==='FLIP_SUMMON'&&support(a.instanceId)&&!combatPayoff(a.instanceId))return result(-20,'Keep the support monster face-down rather than expose it as a weak attacker.');
   if(a.type==='FLIP_SUMMON')return result(110,'Cash in a surviving flip monster for another resource advantage.');
   if(a.type==='SET_SPELL_TRAP'){
    const c=card(a.instanceId),same=own.zones.spell.some(id=>id&&card(id)?.id===c?.id);
    return result(c?.type.includes('Trap')?40-(same?20:0):c?.id===BOOK?(s.phase==='MAIN_2'?25:own.hand.filter(id=>card(id)?.id===BOOK).length>1?20:-5):-20,'Prepare interaction while keeping a Book in hand for this turn’s battle when useful.');
   }
+  if(a.type==='CHANGE_POSITION'&&support(a.instanceId)){const threatened=theirs.some(id=>s.cards[id].faceDown||atk(id)>atk(a.instanceId));return result(a.position==='faceUpDefense'&&threatened?85:a.position==='attack'&&combatPayoff(a.instanceId)?90:-20,'Keep vulnerable support monsters in defense unless attacking has a clear payoff.');}
   if(a.type==='CHANGE_POSITION')return result(a.position==='attack'&&atk(a.instanceId)>=Math.max(0,...theirs.filter(id=>!s.cards[id].faceDown).map(atk))?25:-10,'Move a useful surviving monster into attack position.');
   if(a.type==='DECLARE_ATTACK'||a.type==='REPLAY_ATTACK'){
    const attacker=a.type==='DECLARE_ATTACK'?a.attackerId:s.pendingAttack!.attackerId,power=atk(attacker);
