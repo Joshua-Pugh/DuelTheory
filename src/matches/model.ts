@@ -1,3 +1,5 @@
+import {validateSideboard} from '../core/sideboard';
+export {validateSideboard} from '../core/sideboard';
 import {advanceUncontestedBattle} from './fastBattle';
 import {validateDeck} from '../core/decks';
 import type {Card,Deck} from '../core/types';
@@ -82,11 +84,6 @@ export function matchWaitingFor(s:Match):MatchView['waitingFor']{
 function nextReveal(s:Match){if(!s.reveal&&s.revealQueue?.length){s.reveal=s.revealQueue.shift();s.reveal!.expiresAt=Date.now()+15000;}if(!s.revealQueue?.length)delete s.revealQueue;}
 export function releaseExpiredReveal(s:Match,now=Date.now()):boolean{if(s.reveal&&(!s.reveal.expiresAt||s.reveal.expiresAt<=now||!s.goat||s.reveal.kind!=='effect'&&!Object.values(s.goat.cards).some(c=>c.cardId===s.reveal!.cardId&&c.controller===s.reveal!.controller&&c.location==='monster'&&!c.faceDown))){delete s.reveal;nextReveal(s);s.revision++;return true;}return false;}
 
-/** Registered card pool and section sizes are immutable across a match. */
-export function validateSideboard(original:Deck,next:Deck){
- const pool=(d:Deck)=>[...d.main,...d.extra,...d.side].sort((a,b)=>a-b).join(',');
- if(original.main.length!==next.main.length||original.extra.length!==next.extra.length||original.side.length!==next.side.length||pool(original)!==pool(next))throw Error('Exchange cards one for one from your registered Side Deck. Main, Extra and Side counts must stay the same.');
-}
 export function settleMatchResult(s:Match){
  if(s.phase!=='playing')return;
  const result=s.goat?(s.goat.drawnGame?'draw':s.goat.winner):s.ashen?.rules?.duel?.winner;
