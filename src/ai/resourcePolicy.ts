@@ -114,4 +114,3 @@ export function chooseResourceHeuristic(state:DuelState,legal:readonly LegalActi
  };
  return bestLegalAction(goatObservation(state,seat),actions,(s,a)=>adjust?adjust(s,a,score(s,a)):score(s,a));
 }
-
