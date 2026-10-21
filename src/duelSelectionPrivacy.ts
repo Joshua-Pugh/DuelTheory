@@ -9,3 +9,6 @@ export function selectionCard(state:DuelState,id:string,viewer:Seat,lookup:(id:s
 export function materialOrigins(state:DuelState,ids:string[]):Record<string,string>{
  return Object.fromEntries(ids.map(id=>[id,state.cards[id]?.location==='monster'?'On your field':state.cards[id]?.location==='hand'?'In your hand':'In your Graveyard']));
 }
+export function graveyardOrigins(state:DuelState,ids:string[],viewer:Seat):Record<string,string>{
+ return Object.fromEntries(ids.map(id=>{const owner=state.cards[id].owner;return [id,`${owner===viewer?'Your':'Opponent’s'} Graveyard · Player ${owner+1}`];}));
+}
