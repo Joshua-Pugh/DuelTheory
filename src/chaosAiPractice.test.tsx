@@ -1,3 +1,5 @@
+import {GameLogWriter,GAME_LOG_SETTING} from './ai/gameLogs';
+import {DISPLAY_NAME_KEY} from './playerProfile';
 import {loadLearning,LEARNING_KEY} from './ai/learning';
 // @vitest-environment happy-dom
 import {beforeEach,afterEach,it,expect,vi} from 'vitest';import {act} from 'react';import {createRoot,type Root} from 'react-dom/client';
@@ -98,4 +100,17 @@ it('records only with consent, pauses for move feedback and stops recording when
 });
 it('does not collect AI practice decisions with the default preferences',async()=>{
  act(()=>root.render(<EnginePreview initialAI deck={CHAOS_TURBO} catalog={catalog} preferences={DEFAULT_PREFERENCES} onOpenPreferences={()=>{}}/>));click('Start GOAT duel');await tick(1);click('Begin duel');await tick(5000);expect(localStorage.getItem(LEARNING_KEY)).toBeNull();
+});
+
+it('records complete opted-in AI games under the saved profile, including actions and concession',async()=>{
+ localStorage.setItem(DISPLAY_NAME_KEY,'Mad Scientist');
+ const write=vi.spyOn(GameLogWriter.prototype,'write').mockResolvedValue(undefined);
+ act(()=>root.render(<EnginePreview initialAI deck={CHAOS_TURBO} catalog={catalog} preferences={DEFAULT_PREFERENCES} onOpenPreferences={()=>{}}/>));const checkbox=Array.from(document.querySelectorAll('input[type=checkbox]')).find(el=>el.closest('label')?.textContent?.includes('Record all my future AI games')) as HTMLInputElement;act(()=>checkbox.click());expect(localStorage.getItem(GAME_LOG_SETTING)).toBe('true');click('Start GOAT duel');await tick(1);click('Begin duel');await tick(5000);
+ expect(write).toHaveBeenCalled();const rows=write.mock.calls.map(c=>c[0]);expect(rows[0]).toMatchObject({displayName:'Mad Scientist',game:1,status:'in-progress'});expect(rows.at(-1)!.actions.length).toBeGreaterThan(0);expect(rows.at(-1)!.decisions.some(d=>d.record.actor===1&&d.record.reason)).toBe(true);
+ click('Exit duel ✕');click('Yes · concede match');expect(write.mock.calls.at(-1)![0]).toMatchObject({status:'conceded',result:1});
+});
+it('does not record full games without opt-in or when playing both seats locally',async()=>{
+ const write=vi.spyOn(GameLogWriter.prototype,'write').mockResolvedValue(undefined);
+ act(()=>root.render(<EnginePreview initialAI deck={CHAOS_TURBO} catalog={catalog} preferences={DEFAULT_PREFERENCES} onOpenPreferences={()=>{}}/>));click('Start GOAT duel');await tick(1);click('Begin duel');await tick(2000);expect(write).not.toHaveBeenCalled();
+ act(()=>root.unmount());root=createRoot(host);localStorage.setItem(GAME_LOG_SETTING,'true');act(()=>root.render(<EnginePreview deck={CHAOS_TURBO} catalog={catalog} preferences={DEFAULT_PREFERENCES} onOpenPreferences={()=>{}}/>));click('Start GOAT duel');await tick(1);click('Begin duel');await tick(2000);expect(write).not.toHaveBeenCalled();
 });

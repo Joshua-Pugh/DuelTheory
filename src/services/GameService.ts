@@ -166,6 +166,8 @@ export class GameService {
   }
   return state;
  }
+ /** Lightweight replay log: never clone every historical board during live recording. */
+ getActionLog(id:string){return structuredClone(this.session(id).actions);}
  getHistory(id:string){const s=this.session(id);return {actions:structuredClone(s.actions),snapshots:structuredClone(s.snapshots),rulesVerified:s.rulesVerified};}
  close(id:string):boolean{return this.sessions.delete(id);}
 }

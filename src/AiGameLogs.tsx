@@ -1,0 +1,28 @@
+import {useEffect,useRef,useState} from 'react';
+import {GAME_LOG_SETTING,GameLogWriter,newGameLog,updateGameLog,finishGameLog,listGameLogs,listGameLogSummaries,getGameLog,reviewProfile,gameLogReport,type GameLog,type GameLogSummary} from './ai/gameLogs';
+import {loadDisplayName} from './playerProfile';
+import type {DuelState,LegalAction} from './engine/model';
+import type {SessionAction} from './services/GameService';
+
+export function useAiGameLogs(){
+ const [enabled,setEnabled]=useState(()=>{try{return localStorage.getItem(GAME_LOG_SETTING)==='true';}catch{return false;}}),[warning,setWarning]=useState(''),[revision,setRevision]=useState(0);
+ const active=useRef<GameLog|null>(null),writer=useRef<GameLogWriter|null>(null);
+ if(!writer.current)writer.current=new GameLogWriter(undefined,()=>setWarning('A game log could not be saved. Free browser storage and export existing logs. Gameplay can continue.'));
+ const persist=(log:GameLog,refresh=false)=>{active.current=log;void writer.current!.write(log).then(()=>{if(refresh)setRevision(v=>v+1);});};
+ const start=(input:Omit<Parameters<typeof newGameLog>[0],'profile'|'displayName'>,state:DuelState)=>{active.current=null;if(!enabled)return;try{persist(newGameLog({...input,profile:reviewProfile(localStorage),displayName:loadDisplayName()},state),true);}catch{setWarning('Unable to start a game log. Browser storage may be unavailable.');}};
+ const update=(state:DuelState,actions:SessionAction[],before?:DuelState,choice?:LegalAction,options?:LegalAction[],reason?:string)=>{if(!active.current)return;try{persist(updateGameLog(active.current,state,actions,before,choice,options,reason),state.winner!==null||!!state.drawnGame);}catch{setWarning('Unable to update this game log. Gameplay can continue.');}};
+ const finish=(status:'conceded'|'left',result?:0|1|'draw')=>{if(active.current)persist(finishGameLog(active.current,status,result),true);};
+ const issue=(message:string)=>{if(active.current)persist({...active.current,issues:[...active.current.issues,{at:new Date().toISOString(),message,actionCount:active.current.actions.length}]});};
+ const toggle=(value:boolean)=>{try{localStorage.setItem(GAME_LOG_SETTING,String(value));setEnabled(value);setWarning('');}catch{setWarning('Unable to remember the recording setting.');}};
+ return {enabled,warning,revision,start,update,finish,issue,toggle};
+}
+
+function download(name:string,text:string,type:string){const url=URL.createObjectURL(new Blob([text],{type})),link=document.createElement('a');link.href=url;link.download=name;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+export default function AiGameLogs({enabled,onToggle,revision,warning}:{enabled:boolean;onToggle:(value:boolean)=>void;revision:number;warning:string}){
+ const [logs,setLogs]=useState<GameLogSummary[]>([]),[error,setError]=useState(''),[selected,setSelected]=useState(''),[refresh,setRefresh]=useState(0);
+ useEffect(()=>{let live=true;void listGameLogSummaries().then(rows=>{if(live){setLogs(rows);setError('');}}).catch(()=>{if(live)setError('Game log storage is unavailable in this browser.');});return()=>{live=false;};},[revision,refresh]);
+ const [current,setCurrent]=useState<GameLog|undefined>();
+ useEffect(()=>{let live=true;setCurrent(undefined);if(selected)void getGameLog(selected).then(row=>{if(live)setCurrent(row);}).catch(()=>{if(live)setError('Unable to open this game log.');});return()=>{live=false;};},[selected,revision,refresh]);
+ const exportAll=async()=>{try{const games=await listGameLogs();download('DuelTheory-AI-game-logs.json',JSON.stringify({schema:1,exported:new Date().toISOString(),games},null,2),'application/json');}catch{setError('Unable to export game logs.');}};
+ return <section className="panel"><h3>AI Game Logs</h3><label><input type="checkbox" checked={enabled} onChange={e=>onToggle(e.target.checked)}/> Record all my future AI games on this device</label><p>Records decks, shuffle seeds, both players’ actions, AI explanations, outcomes and errors. Includes unfinished games. Uses your saved display name and a stable device ID; names do not grant access to logs. Enable before starting a game.</p><p>Private browser storage · no automatic uploads · no automatic training. Logs remain until browser data is cleared; export regularly to keep a backup. Past games cannot be recovered.</p><p>{logs.length} games · {logs.filter(l=>l.result===0).length} player wins · {logs.filter(l=>l.result===1).length} AI wins · {logs.filter(l=>l.status==='in-progress').length} in progress / interrupted</p><div className="dt-setup-actions"><button onClick={()=>setRefresh(v=>v+1)}>Refresh game logs</button><button disabled={!logs.length} onClick={()=>void exportAll()}>Export all game logs</button></div>{(warning||error)&&<p role="status">{warning||error}</p>}<details><summary>Review recorded games</summary><label>Game<select value={selected} onChange={e=>setSelected(e.target.value)}><option value="">Choose a game</option>{logs.map(l=><option key={l.id} value={l.id}>{new Date(l.started).toLocaleString()} · {l.displayName||'Player'} · {l.decks[0].name} · Game {l.game} · {l.status}</option>)}</select></label>{current&&<><p>{current.actions.length} actions · {current.decisions.filter(d=>d.record.actor===1).length} AI decisions · {current.issues.length} errors</p><button onClick={()=>download(`DuelTheory-AI-review-${current.id}.txt`,gameLogReport(current),'text/plain')}>Export readable review</button><details><summary>AI decision timeline</summary>{current.decisions.filter(d=>d.record.actor===1).map((d,i)=><p key={i}>Action {d.actionIndex+1} · Turn {d.record.turn} · {d.record.reason||JSON.stringify(d.record.chosen)}</p>)}</details></>}</details></section>;
+}
