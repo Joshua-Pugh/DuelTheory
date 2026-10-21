@@ -104,4 +104,21 @@
  .dt-effect-prompt,.dt-effect-prompt.opponent,.dt-effect-prompt.dt-response-strip{top:calc(var(--dt-view-top,0px) + var(--dt-view-height,100dvh) - 8px - env(safe-area-inset-bottom,0px));bottom:auto;transform:translate(-50%,-100%);width:min(410px,calc(var(--dt-view-width,100vw) - 16px));max-height:calc(var(--dt-view-height,100dvh) - 24px);z-index:6}
 }
 
-@media(max-width:1100px),(max-height:650px),(any-pointer:coarse){.dt-card-menu{top:calc(var(--dt-view-top,0px) + 8px)!important;left:calc(var(--dt-view-left,0px) + 8px)!important;right:auto;bottom:auto;width:calc(var(--dt-view-width,100vw) - 16px);max-height:calc(var(--dt-view-height,100dvh) - 16px);overflow:auto}.dt-card-menu>header{position:sticky;top:0;z-index:1;background:#172b28}.dt-duel-room:has(.dt-selection-prompt) .dt-room-content{padding-bottom:90px}}
+@media(max-width:1100px),(max-height:650px),(any-pointer:coarse){.dt-card-menu{top:calc(var(--dt-view-top,0px) + 8px)!important;left:calc(var(--dt-view-left,0px) + 8px)!important;right:auto;bottom:auto;width:calc(var(--dt-view-width,100vw) - 16px);max-height:calc(var(--dt-view-height,100dvh) - 16px);overflow:auto}.dt-card-menu>header{position:sticky;top:0;z-index:1;background:#172b28}}
+
+/* Status changes must not resize the four field rows or move the player's hand. */
+.dt-main-status{flex:0 0 48px;height:48px;min-height:48px;max-height:48px;overflow:auto;align-content:center;flex-wrap:wrap;gap:4px 9px;overscroll-behavior:contain;overflow-anchor:none}
+.dt-wait-status{position:absolute;bottom:38px;left:12px;right:12px;z-index:4;background:#142827ed;border-radius:5px;pointer-events:none}
+.dt-duel-board,.dt-room-content,.dt-choice-dialog,.dt-picker-grid,.dt-grouped-picker{overflow-anchor:none}
+.dt-choice-dialog:has(.dt-grouped-picker){height:min(740px,calc(var(--dt-view-height,100dvh) - 40px))}
+.dt-choice-eligibility{min-height:12px;line-height:12px}
+.dt-duel-room .dt-board-half{gap:10px;margin:3px auto}
+.dt-duel-room .dt-field-zone{padding:2px 3px 11px}
+.dt-duel-room .dt-field-card{max-width:96%}
+.dt-duel-room .dt-field-hand{padding:2px 0}
+.dt-field-card.is-defense{transform:rotate(90deg) scale(.85)}
+.dt-pile-empty{font-size:25px}.dt-field-card .dt-counter-badge{font-size:14px;min-width:26px;padding:3px 5px}.dt-field-card .dt-attack-badge{font-size:15px;padding:3px 5px}
+.dt-monster-stats{font-size:clamp(10px,.9vw,13px)}
+@media(max-width:600px){.dt-main-status{flex-basis:44px;height:44px;min-height:44px;max-height:44px}.dt-duel-room .dt-board-half{gap:4px}.dt-duel-room .dt-field-hand{height:54px;min-height:54px}.dt-duel-room .dt-field-zone{padding:1px 1px 7px}.dt-field-card .dt-counter-badge{font-size:11px;min-width:20px;padding:2px 3px}.dt-field-card .dt-attack-badge{font-size:12px;padding:2px 3px}.dt-monster-stats{font-size:9px}.dt-choice-dialog:has(.dt-grouped-picker){height:calc(var(--dt-view-height,100dvh) - 16px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))}}
+
+.dt-roll-status{position:absolute;top:42px;left:12px;right:12px;z-index:4;background:#142827ed;border-radius:5px;pointer-events:none}
