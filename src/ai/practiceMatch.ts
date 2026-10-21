@@ -7,9 +7,9 @@ export type PracticeMatch={id:string;label:string;setupKey:string;mode:PracticeM
 export const PRACTICE_RECORD_KEY='dueltheory.ai.match-records.v1';
 export const PILOT_VERSION='chaos-turbo-2026-10-21-review-1';
 export function setupKey(deck:Deck,label:string){return JSON.stringify([label,...(['main','extra','side'] as const).map(zone=>[...deck[zone]].sort((a,b)=>a-b))]);}
-export function newPracticeMatch(deck:Deck,opponent:Deck,mode:PracticeMode,label:string,first:Seat):PracticeMatch{
+export function newPracticeMatch(deck:Deck,opponent:Deck,mode:PracticeMode,label:string,first:Seat,pilot=PILOT_VERSION):PracticeMatch{
  const name=label.trim()||deck.name;
- return {id:crypto.randomUUID(),label:name,setupKey:setupKey(deck,name),mode,registered:structuredClone(deck),deck:structuredClone(deck),opponent:structuredClone(opponent),pilot:PILOT_VERSION,started:new Date().toISOString(),phase:'playing',games:[],wins:[0,0],first};
+ return {id:crypto.randomUUID(),label:name,setupKey:setupKey(deck,name),mode,registered:structuredClone(deck),deck:structuredClone(deck),opponent:structuredClone(opponent),pilot,started:new Date().toISOString(),phase:'playing',games:[],wins:[0,0],first};
 }
 export function finishPracticeGame(match:PracticeMatch,result:PracticeResult,seed:number,turns:number):PracticeMatch{
  if(match.phase!=='playing')return match;

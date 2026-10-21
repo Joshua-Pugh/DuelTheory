@@ -4,7 +4,7 @@ export {bestLegalAction,type Decision} from '../framework/decisions';
 /** GOAT observation adapter. No hidden opponent identities or shuffle seed reach the policy. */
 export function goatObservation(state:DuelState,seat:Seat):DuelState{
  const s=structuredClone(state);s.seed=0;s.events=s.events.map(e=>({...e,message:''}));
- for(const c of Object.values(s.cards))if(c.controller!==seat&&(c.location==='hand'&&s.pendingChaos?.controller!==seat||c.location==='deck'||c.location==='extra'||c.faceDown||c.equippedHidden))c.cardId=0;
+ for(const c of Object.values(s.cards))if(c.equippedHidden&&c.owner!==seat||c.controller!==seat&&(c.location==='hand'&&s.pendingChaos?.controller!==seat||c.location==='deck'||c.location==='extra'||c.faceDown||c.equippedHidden))c.cardId=0;
  for(const p of s.players)p.deck.sort();
  return s;
 }

@@ -37,3 +37,5 @@ it('serializes snapshots and recovers from a failed write without throwing into 
  expect(saved).toEqual([`${log.id}:1`,`${log.id}:3`]);expect(errors).toHaveLength(1);
 });
 it('uses a stable per-device UUID, independent of mutable display names',()=>{const data=new Map<string,string>(),storage={getItem:(key:string)=>data.get(key)??null,setItem:(key:string,value:string)=>{data.set(key,value);}};const id=reviewProfile(storage);expect(reviewProfile(storage)).toBe(id);expect(id).not.toBe('Mad Scientist');});
+
+it('keeps a selected pilot identity in the game and its decision records',()=>{const {service,id,log}=fixture(),before=service.getState(id),choice=service.getLegalActions(id,0).find(a=>a.type==='DRAW_PHASE')!;const updated=updateGameLog({...log,pilot:'goat-control-test'},service.dispatch(id,choice),service.getActionLog(id),before,choice,[choice]);expect(updated.pilot).toBe('goat-control-test');expect(updated.decisions[0].record.pilot).toBe('goat-control-test');});
