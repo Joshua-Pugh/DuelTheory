@@ -1,3 +1,4 @@
+import {loadDisplayName,rememberSeatName} from './playerProfile';
 import MatchRevealDialog from './matches/MatchRevealDialog';
 import {directAttackQueue} from './battleShortcuts';
 import {useDuelAudio,useMatchResultAudio} from './audio/useDuelAudio';
@@ -20,7 +21,7 @@ const presets=[CHAOS_TURBO,GOAT_CONTROL,REASONING_GATE];
 export default function PrivateMatchRoom({deck,catalog}:{deck:Deck;catalog:Card[]}){
  const inviteCode=()=>location.hash.match(/^#\/private\/([A-Z2-9]{8})$/)?.[1]||'';
  const [mode,setMode]=useState<'single'|'best3'>('single');
- const [code,setCode]=useState(inviteCode),[game,setGame]=useState<Game>('goat'),[name,setName]=useState(''),[choice,setChoice]=useState('0'),[faction,setFaction]=useState<'Brute'|'Noble'>('Brute');
+ const [code,setCode]=useState(inviteCode),[game,setGame]=useState<Game>('goat'),[name,setName]=useState(loadDisplayName),[choice,setChoice]=useState('0'),[faction,setFaction]=useState<'Brute'|'Noble'>('Brute');
  const [credential,setCredential]=useState<Credential|null>(null),[room,setRoom]=useState<MatchView|null>(null),[info,setInfo]=useState<RoomInfo|null>(null),[error,setError]=useState(''),[busy,setBusy]=useState(false),[chatOpen,setChatOpen]=useState(false),[text,setText]=useState(''),[copied,setCopied]=useState(false);
  useDuelAudio(room?.goat,room?.seat,catalog);
  useMatchResultAudio(room?.code,room?.series?.results,room?.seat);
@@ -41,7 +42,7 @@ export default function PrivateMatchRoom({deck,catalog}:{deck:Deck;catalog:Card[
  const latestMessage=room?.chat.at(-1)?.id;
  const jumpToLatest=()=>{const box=messagesRef.current;if(box)box.scrollTop=box.scrollHeight;followLatest.current=true;setAtLatest(true);};
  useEffect(()=>{if(chatVisible&&(!wasChatVisible.current||followLatest.current))jumpToLatest();wasChatVisible.current=chatVisible;},[chatVisible,latestMessage]);
- const accept=useCallback((next:MatchView)=>{lastContact.current=Date.now();setConnectionSlow(false);if(disconnected.current||activeCode.current&&next.code!==activeCode.current)return;const previous=current.current;if(previous&&next.revision<previous.revision)return;if(previous?.revision===next.revision&&JSON.stringify(previous.waitingFor)===JSON.stringify(next.waitingFor)){setError('');return;}if(!previous){setGame(next.game);const mine=next.members[next.seat]?.deckName;setFaction(mine==='Noble'?'Noble':'Brute');const index=presets.findIndex(p=>p.name===mine);setChoice(index<0?'current':String(index));}if(previous&&JSON.stringify(previous.goat)===JSON.stringify(next.goat))next.goat=previous.goat;if(previous&&JSON.stringify(previous.ashen)===JSON.stringify(next.ashen))next.ashen=previous.ashen;current.current=next;setRoom(next);setError('');},[]);
+ const accept=useCallback((next:MatchView)=>{lastContact.current=Date.now();setConnectionSlow(false);if(disconnected.current||activeCode.current&&next.code!==activeCode.current)return;const previous=current.current;if(previous&&next.revision<previous.revision)return;if(previous?.revision===next.revision&&JSON.stringify(previous.waitingFor)===JSON.stringify(next.waitingFor)){setError('');return;}if(!previous){rememberSeatName(next.members[next.seat]?.name);setGame(next.game);const mine=next.members[next.seat]?.deckName;setFaction(mine==='Noble'?'Noble':'Brute');const index=presets.findIndex(p=>p.name===mine);setChoice(index<0?'current':String(index));}if(previous&&JSON.stringify(previous.goat)===JSON.stringify(next.goat))next.goat=previous.goat;if(previous&&JSON.stringify(previous.ashen)===JSON.stringify(next.ashen))next.ashen=previous.ashen;current.current=next;setRoom(next);setError('');},[]);
  const selecting=useRef(false),nextPollAt=useRef(0),readFailures=useRef(0),reading=useRef(false),autoGate=useRef(new AutomaticActionGate());
  const [autoRetry,setAutoRetry]=useState(0);
  const pauseForLimit=(e:unknown)=>{if(e instanceof MatchRequestError&&e.status===429)nextPollAt.current=Date.now()+pollDelay(1,e.retryAfterMs);};

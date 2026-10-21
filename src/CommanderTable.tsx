@@ -1,3 +1,4 @@
+import {loadDisplayName,rememberSeatName} from './playerProfile';
 import {useEffect,useRef,useState} from 'react';
 import {Users,Heart,Shield,Copy,RefreshCcw,LogOut} from 'lucide-react';
 import {commanderSources,commanderWarnings,commanderEliminated,commanderGameReady,type CommanderRoomState,type RoomCommand} from './commander/model';
@@ -9,7 +10,7 @@ import CommanderWakeLock from './CommanderWakeLock';
 
 export default function CommanderTable(){
  const [seat,setSeat]=useState<RoomSeat|null>(()=>{const invite=new URLSearchParams(location.search).get('commander');return invite?savedRoomSeat(invite):savedRoomSeat();}),[state,setState]=useState<CommanderRoomState|null>(null);
- const [name,setName]=useState(''),[commander,setCommander]=useState(''),[partner,setPartner]=useState('');
+ const [name,setName]=useState(()=>loadDisplayName().slice(0,24)),[commander,setCommander]=useState(''),[partner,setPartner]=useState('');
  const [code,setCode]=useState(()=>new URLSearchParams(location.search).get('commander')||''),[title,setTitle]=useState('Friday night Commander'),[capacity,setCapacity]=useState(4);
  const [busy,setBusy]=useState(false),[error,setError]=useState(''),[status,setStatus]=useState(''),[connected,setConnected]=useState(false);
  const [amount,setAmount]=useState(1),[damageSource,setDamageSource]=useState(''),[alsoLife,setAlsoLife]=useState(true),[custom,setCustom]=useState('Energy');
@@ -23,7 +24,7 @@ export default function CommanderTable(){
   if(!/^[A-Z2-9]{8}$/.test(roomCode))throw Error('Enter the eight-character room code.');
   const remembered=create?null:savedRoomSeat(roomCode),token=remembered?.token||newSeatToken(),api=remembered?.api||COMMANDER_API;
   const reply=await roomRequest(api,roomCode,token,remembered?'read':create?'create':'join',{name,commanders:[commander||'Commander 1',...(partner.trim()?[partner]:[])],title,capacity});
-  const next={api,code:roomCode,token,playerId:reply.playerId};saveRoomSeat(next);setSeat(next);accept(reply.state);setConnected(true);setStatus(create?'Room created. Share the code with your table.':'You joined the table.');
+  const next={api,code:roomCode,token,playerId:reply.playerId};saveRoomSeat(next);rememberSeatName(reply.state.players.find(p=>p.id===reply.playerId)?.name);setSeat(next);accept(reply.state);setConnected(true);setStatus(create?'Room created. Share the code with your table.':'You joined the table.');
  }catch(e){setError(e instanceof Error?e.message:String(e));}finally{setBusy(false);}};
  const change=async(command:RoomCommand)=>{if(!seat||busy)return;setBusy(true);setError('');try{const reply=await roomRequest(seat.api,seat.code,seat.token,'action',command);if(liveSeat.current?.token!==seat.token)return;accept(reply.state);setConnected(true);setStatus('Saved to the table.');}catch(e){setConnected(false);setError(e instanceof Error?e.message:String(e));}finally{setBusy(false);}};
  const leave=()=>{saveRoomSeat(null);setSeat(null);setState(null);setConnected(false);setStatus('Disconnected on this device. Your seat remains in the room.');};
