@@ -1,3 +1,4 @@
+import {graveyardStat} from './graveyardDeckEffects';
 import {jinzo} from './trapStatus';
 export {jinzo} from './trapStatus';
 import {battleAttack} from './ritualDeckEffects';
@@ -15,13 +16,13 @@ export function monarchActions(s:DuelState,ctx:EngineContext,seat:Seat,responses
  const targets=units(s,op).filter(c=>!c.faceDown);
  if(!responses){if(c.cardId===37520316&&p.zones.monster.includes(null))for(const t of units(s,op))add('MIND_CONTROL',t.instanceId);if(c.cardId===87910978&&p.lp>800&&p.zones.monster.includes(null))for(const t of targets)add('BRAIN',t.instanceId);
  if(c.cardId===57182235&&units(s).some(c=>c.token))add('THANKSGIVING');
- if(c.cardId===97169186&&targets.length){const max=Math.max(...targets.map(c=>Number(getCard(s,c.instanceId,ctx).def)));for(const t of targets.filter(c=>Number(getCard(s,c.instanceId,ctx).def)===max))add('SMASHING',t.instanceId);}}
+ if(c.cardId===97169186&&targets.length){const max=Math.max(...targets.map(c=>graveyardStat(s,c.instanceId,'def',ctx)));for(const t of targets.filter(c=>graveyardStat(s,c.instanceId,'def',ctx)===max))add('SMASHING',t.instanceId);}}
  if(c.cardId===98045062&&(!hand&&c.setTurn!==s.turn||hand)){for(const t of targets){add('ENEMY_POSITION',t.instanceId);if(p.zones.monster.includes(null)||units(s,seat).length)for(const cost of units(s,seat).filter(c=>c.cannotTributeTurn!==s.turn))add('ENEMY_CONTROL',t.instanceId,[cost.instanceId]);}}
  if(!hand&&c.setTurn!==s.turn&&(!jinzo(s)||c.cardId===41420027&&s.summonResponse?.negatable&&units(s).filter(c=>c.cardId===77585513&&!c.faceDown).every(c=>c.instanceId===s.summonResponse?.sourceId))){
  if(c.cardId===36361633)add('ROAR');
  if(c.cardId===51452091)add('DECREE');
  if(c.cardId===15800838&&p.hand.length&&s.players[op].hand.length)add('MIND_CRUSH');
- if(c.cardId===29401950&&s.summonResponse&&(s.summonResponse.sourceIds||s.summonResponse.summoner===op)){const target=(s.summonResponse.sourceIds??[s.summonResponse.sourceId]).find(id=>s.cards[id]?.location==='monster'&&s.cards[id].controller===op&&!s.cards[id].faceDown&&Number(getCard(s,id,ctx).atk)>=1500);if(target)add('BOTTOMLESS',target);}
+ if(c.cardId===29401950&&s.summonResponse&&(s.summonResponse.sourceIds||s.summonResponse.summoner===op)){const target=(s.summonResponse.sourceIds??[s.summonResponse.sourceId]).find(id=>s.cards[id]?.location==='monster'&&s.cards[id].controller===op&&!s.cards[id].faceDown&&battleAttack(s,id,ctx)>=1500);if(target)add('BOTTOMLESS',target);}
  if(c.cardId===62279055&&s.pendingAttack?.defender===seat&&!s.pendingAttack.damageStep)add('CYLINDER',s.pendingAttack.attackerId);
  if(c.cardId===41420027){const top=s.chain.at(-1);if(top&&/Spell|Trap/.test(getCard(s,top.instanceId,ctx).type))add('SOLEMN_CHAIN',top.instanceId);else if(!s.chain.length&&s.summonResponse&&s.summonResponse.summoner!==seat&&s.summonResponse.negatable)add('SOLEMN_SUMMON',s.summonResponse.sourceId);}
  }
@@ -40,15 +41,15 @@ export function resolveMonarch(s:DuelState,l:ChainLink,ctx:EngineContext):boolea
  case 'BRAIN':case 'ENEMY_CONTROL':temporaryControl(s,target,seat);break;
  case 'ENEMY_POSITION':if(t?.location==='monster'&&!t.faceDown)t.position=t.position==='attack'?'faceUpDefense':'attack';break;
  case 'THANKSGIVING':{const tokens=units(s).filter(c=>c.token);for(const c of tokens)toGraveyard(s,c.instanceId);p.lp+=tokens.length*800;break;}
- case 'SMASHING':{const selected=l.nonTargetId;const ts=units(s,op).filter(c=>!c.faceDown);if(ts.length){const max=Math.max(...ts.map(c=>Number(getCard(s,c.instanceId,ctx).def)));const chosen=ts.find(c=>c.instanceId===selected&&Number(getCard(s,c.instanceId,ctx).def)===max)??ts.find(c=>Number(getCard(s,c.instanceId,ctx).def)===max)!;toGraveyard(s,chosen.instanceId);}break;}
- case 'BOTTOMLESS':for(const id of s.summonResponse?.sourceIds??[target]){const c=s.cards[id];if(c?.location==='monster'&&c.controller===op&&!c.faceDown&&Number(getCard(s,id,ctx).atk)>=1500)toBanished(s,id,true);}break;
+ case 'SMASHING':{const selected=l.nonTargetId;const ts=units(s,op).filter(c=>!c.faceDown);if(ts.length){const max=Math.max(...ts.map(c=>graveyardStat(s,c.instanceId,'def',ctx)));const chosen=ts.find(c=>c.instanceId===selected&&graveyardStat(s,c.instanceId,'def',ctx)===max)??ts.find(c=>graveyardStat(s,c.instanceId,'def',ctx)===max)!;toGraveyard(s,chosen.instanceId);}break;}
+ case 'BOTTOMLESS':for(const id of s.summonResponse?.sourceIds??[target]){const c=s.cards[id];if(c?.location==='monster'&&c.controller===op&&!c.faceDown&&battleAttack(s,id,ctx)>=1500)toBanished(s,id,true);}break;
  case 'CYLINDER':if(s.pendingAttack?.attackerId===target&&t?.location==='monster'){s.players[op].lp=Math.max(0,s.players[op].lp-battleAttack(s,target,ctx));s.pendingAttack=undefined;settleLifePoints(s);}break;
  case 'SOLEMN_CHAIN':{const previous=s.chain.at(-1);if(previous?.instanceId===target){s.chain.pop();if(['monster','spell'].includes(t?.location))toGraveyard(s,target);}break;}
  case 'SOLEMN_SUMMON':if(t?.location==='monster'){toGraveyard(s,target);s.pendingTriggers=s.pendingTriggers?.filter(x=>x.sourceId!==target);if(s.pendingSearch?.sourceId===target)s.pendingSearch=undefined;s.summonResponse=undefined;}break;
  case 'THESTALOS':randomDiscard(s,op,ctx,true);break;
  case 'MOBIUS':for(const id of l.searchIds??[])if(s.cards[id]?.location==='spell')toGraveyard(s,id);break;
  case 'JAR':{const hands=s.players.map(p=>[...p.hand]);for(const owner of [seat,op])for(const id of hands[owner]){s.players[owner].hand.splice(s.players[owner].hand.indexOf(id),1);toGraveyard(s,id,'discard');}const bothOut=s.players.every(p=>p.deck.length<5);draw(s,seat,5);draw(s,op,5);if(bothOut){s.winner=null;s.drawnGame=true;}break;}
- case 'DON':if(l.declaredType==='Discard 1 random card')randomDiscard(s,op,ctx);else for(let i=0;i<2;i++){const id=s.players[op].deck.shift();if(id)toGraveyard(s,id,'effect');}break;
+ case 'DON':if(l.declaredType==='Discard 1 random card')randomDiscard(s,op,ctx);else for(let i=0;i<2;i++){const id=s.players[op].deck.shift();if(id)toGraveyard(s,id,'send');}break;
  case 'REAPER_DISCARD':randomDiscard(s,op,ctx);break;
  default:return false;
  }log(s,'RESOLVE',`${l.effectId.replaceAll('_',' ')} resolved.`,seat);return true;

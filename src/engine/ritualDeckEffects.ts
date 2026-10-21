@@ -1,8 +1,9 @@
+import {graveyardStat} from './graveyardDeckEffects';
 import {shuffleSearchedDeck} from './deckShuffle';
 import {restrictStat} from './goatControlEffects';
 import {lightResponses,HOSHI,SOUL} from './lightDeckEffects';
 import {chaosResponses,chaosMain,resolveChaos} from './chaosTurboEffects';
-import {getCard,log,removeFromHand,toGraveyard,toBanished,placeMonster,seededShuffle,settleLifePoints,detachFaceDown,type DuelState,type EngineContext,type Seat,type LegalAction,type ChainLink} from './model';
+import {getCard,log,removeFromHand,toGraveyard,toGraveyardTogether,toBanished,placeMonster,seededShuffle,settleLifePoints,detachFaceDown,type DuelState,type EngineContext,type Seat,type LegalAction,type ChainLink} from './model';
 
 export const TRIBE=33184167,TSUKUYOMI=34853266,CHAOS_SORCERER=9596126,BLS=72989439,BREAKER=71413901,ZORC=97642679,SHINATO=86327225,SERPENT=8131171;
 export const HEAVY_STORM=19613556,NOBLEMAN=71044499,DUO=44763025;
@@ -21,7 +22,7 @@ const other=(seat:Seat):Seat=>seat===0?1:0;
 const monsters=(s:DuelState)=>[...s.players[0].zones.monster,...s.players[1].zones.monster].filter((id):id is string=>id!==null);
 const spells=(s:DuelState)=>[...s.players[0].zones.spell,...s.players[1].zones.spell].filter((id):id is string=>id!==null);
 export const faceUpMonsters=(s:DuelState)=>monsters(s).filter(id=>!s.cards[id].faceDown);
-export function battleAttack(s:DuelState,id:string,ctx:EngineContext):number{const c=s.cards[id],card=getCard(s,id,ctx);let value=(restrictStat(s,id,'atk',ctx)??Number(card.atk))+(c.cardId===BREAKER?(c.spellCounters??0)*300:c.cardId===8034697?(c.spellCounters??0)*200:0);for(const source of Object.values(s.cards).filter(x=>x.location==='monster'&&!x.faceDown)){if(source.cardId===HOSHI)value+=card.attribute==='LIGHT'?500:card.attribute==='DARK'?-400:0;if(source.cardId===SOUL&&source.controller!==c.controller&&s.current===c.controller&&s.phase==='BATTLE')value-=300;}return Math.max(0,value);}
+export function battleAttack(s:DuelState,id:string,ctx:EngineContext):number{const c=s.cards[id],card=getCard(s,id,ctx);let value=(restrictStat(s,id,'atk',ctx)??graveyardStat(s,id,'atk',ctx))+(c.cardId===BREAKER?(c.spellCounters??0)*300:c.cardId===8034697?(c.spellCounters??0)*200:0);value+=(c.bazooBoosts??[]).filter(b=>b.expiresTurn>=s.turn).reduce((sum,b)=>sum+b.amount,0);if(s.pendingAttack?.lilyBoosted?.includes(id))value+=3000;for(const source of Object.values(s.cards).filter(x=>x.location==='monster'&&!x.faceDown)){if(source.cardId===HOSHI)value+=card.attribute==='LIGHT'?500:card.attribute==='DARK'?-400:0;if(source.cardId===SOUL&&source.controller!==c.controller&&s.current===c.controller&&s.phase==='BATTLE')value-=300;}return Math.max(0,value);}
 export function summonDeckTriggers(s:DuelState,id:string,normal=false){
  const c=s.cards[id];if(c.faceDown)return;const ready=([c.controller,other(c.controller)] as Seat[]).filter(seat=>s.players[seat].zones.spell.some(x=>x&&[29401950,41420027,53582587,83555666,97077563,4178474,64697231].includes(s.cards[x].cardId)&&s.cards[x].faceDown&&s.cards[x].setTurn!==s.turn));if(ready.length)s.summonResponse={negatable:normal,summoner:c.controller,sourceId:id,priority:ready[0]};
  if(c.cardId===2134346)c.spiritReturnTurn=s.turn;
@@ -95,7 +96,7 @@ export function resolveDeckEffect(s:DuelState,link:ChainLink,ctx:EngineContext):
  if(effectId==='RING'){
   if(s.cards[target]?.location==='monster'&&!s.cards[target].faceDown){const damage=battleAttack(s,target,ctx);toGraveyard(s,target);for(const player of s.players)player.lp=Math.max(0,player.lp-damage);settleLifePoints(s);}
  }else if(effectId==='TORRENTIAL'){
-  for(const id of monsters(s))toGraveyard(s,id);
+  toGraveyardTogether(s,monsters(s));
  }else if(effectId==='CALL'||effectId==='PREMATURE'){
   if(c.location==='spell'&&!c.faceDown&&p.graveyard.includes(target)&&link.monsterZone!==undefined&&p.zones.monster[link.monsterZone]===null){p.graveyard.splice(p.graveyard.indexOf(target),1);placeMonster(s,target,seat,link.monsterZone,'attack',['attack']);c.linkedTarget=target;summonDeckTriggers(s,target);}
  }else if(effectId==='SNATCH'){
@@ -108,13 +109,13 @@ export function resolveDeckEffect(s:DuelState,link:ChainLink,ctx:EngineContext):
  }else if(effectId==='SHINATO_DAMAGE'){
   s.players[other(seat)].lp=Math.max(0,s.players[other(seat)].lp-(link.value??0));settleLifePoints(s);
  }else if(effectId==='TRIBE_DESTROY'){
-  for(const id of faceUpMonsters(s).filter(id=>getCard(s,id,ctx).race===link.declaredType))toGraveyard(s,id);
+  toGraveyardTogether(s,faceUpMonsters(s).filter(id=>getCard(s,id,ctx).race===link.declaredType));
  }else if(effectId==='CHAOS_BANISH'){
   if(s.cards[target]?.location==='monster'&&(c.cardId===BLS||!s.cards[target].faceDown))toBanished(s,target);
  }else if(effectId==='BREAKER_DESTROY'){
   if(s.cards[target]?.location==='spell')toGraveyard(s,target);
  }else if(effectId==='HEAVY_STORM'){
-  for(const id of spells(s))toGraveyard(s,id);
+  toGraveyardTogether(s,spells(s));
  }else if(effectId==='NOBLEMAN'){
   if(s.cards[target]?.location==='monster'&&s.cards[target].faceDown){const card=getCard(s,target,ctx);toBanished(s,target);if(card.type.includes('Flip'))for(const owner of [0,1] as Seat[]){for(const id of [...s.players[owner].deck])if(getCard(s,id,ctx).name===card.name){s.players[owner].deck.splice(s.players[owner].deck.indexOf(id),1);s.cards[id].location='banished';s.cards[id].faceDown=false;s.players[owner].banished.push(id);}shuffleSearchedDeck(s,owner);}log(s,'REVEAL',`Nobleman of Crossout banished ${card.name}${card.type.includes('Flip')?' and matching copies from both Decks':''}.`,seat);}
  }else if(effectId==='DUO'){

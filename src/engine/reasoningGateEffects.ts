@@ -1,6 +1,6 @@
 import {seededCoinTosses} from '../framework/random';
 import {excavateUntil} from '../framework/excavation';
-import {getCard,log,revealEffectCards,placeMonster,seededShuffle,toGraveyard,settleLifePoints,type DuelState,type EngineContext,type Seat,type LegalAction,type ChainLink} from './model';
+import {getCard,log,revealEffectCards,placeMonster,seededShuffle,toGraveyard,toGraveyardTogether,settleLifePoints,type DuelState,type EngineContext,type Seat,type LegalAction,type ChainLink} from './model';
 import type {LightAction,LightChoice,LightEffect} from './lightDeckEffects';
 export const REASONING=58577036,GATE=43040603,DIMENSION=23557835,CRANE=30914564,BLOWBACK=25551951,MARIONETTE=8034697,CEASEFIRE=36468556,REINCARNATION=74848038,VORTEX=69162969;
 export const reasoningIds=new Set([87751584,REASONING,GATE,DIMENSION,CRANE,BLOWBACK,MARIONETTE,CEASEFIRE,REINCARNATION,VORTEX]);
@@ -53,7 +53,7 @@ function excavate(s:DuelState,ctx:EngineContext,sourceId:string,seat:Seat,level?
  if(!hit){p.deck=seededShuffle(p.deck,s.seed+s.events.length*7919);s.pendingLightChoice=undefined;log(s,'RESOLVE','No Normal Summonable monster found; shuffled the excavated cards back into the Deck.',seat);return;}
  p.deck.splice(0,picked.length);
  const summon=Number(getCard(s,hit,ctx).level)!==level&&!getCard(s,hit,ctx).type.includes('Spirit')&&canSummon(s,seat)&&zones(s,seat).length>0;
- for(const id of picked)if(id!==hit||!summon)toGraveyard(s,id,'effect');
+ for(const id of picked)if(id!==hit||!summon)toGraveyard(s,id,'send');
  if(summon){p.deck.unshift(hit);s.pendingLightChoice={kind:'GATE_SUMMON',sourceId,controller:seat,firstId:hit};}else s.pendingLightChoice=undefined;
 }
 function nextDimension(s:DuelState,ctx:EngineContext,p:LightChoice){
@@ -64,7 +64,7 @@ function nextDimension(s:DuelState,ctx:EngineContext,p:LightChoice){
 }
 export function completeReasoning(s:DuelState,a:Extract<LightAction,{type:'COMPLETE_LIGHT_CHOICE'|'FINISH_LIGHT_CHOICE'}>,ctx:EngineContext){
  const p=s.pendingLightChoice!;
- if(p.kind==='GATLING_PICK'&&a.type==='COMPLETE_LIGHT_CHOICE'){(p.chosenIds??=[]).push(a.choiceId!);if(p.chosenIds.length>=Math.min(p.level!,monsters(s).length)){for(const id of p.chosenIds)if(s.cards[id].location==='monster')toGraveyard(s,id);s.pendingLightChoice=undefined;}}
+ if(p.kind==='GATLING_PICK'&&a.type==='COMPLETE_LIGHT_CHOICE'){(p.chosenIds??=[]).push(a.choiceId!);if(p.chosenIds.length>=Math.min(p.level!,monsters(s).length)){toGraveyardTogether(s,p.chosenIds.filter(id=>s.cards[id].location==='monster'));s.pendingLightChoice=undefined;}}
  else if(p.kind==='REASON_LEVEL'){log(s,'DECLARE',`Reasoning: Player ${a.seat+1} declared Level ${'declaredType'in a?a.declaredType:''}.`,a.seat);excavate(s,ctx,p.sourceId,other(a.seat),Number('declaredType'in a?a.declaredType:0));}
  else if(p.kind==='GATE_SUMMON'&&a.type==='COMPLETE_LIGHT_CHOICE'){s.players[a.seat].deck.splice(s.players[a.seat].deck.indexOf(p.firstId!),1);placeMonster(s,p.firstId!,a.seat,a.monsterZone!,a.declaredType as 'attack'|'faceUpDefense',['attack','faceUpDefense']);s.pendingLightChoice=undefined;log(s,'SPECIAL_SUMMON','Excavated monster Special Summoned.',a.seat);}
  else if(p.kind==='DIMENSION_PICK'){
@@ -81,7 +81,7 @@ export function resolveReasoning(s:DuelState,l:ChainLink,ctx:EngineContext):bool
  case 'MONSTER_GATE':if(canSummon(s,seat))excavate(s,ctx,l.instanceId,seat);break;
  case 'DIMENSION_FUSION':{const first=([s.current,other(s.current)] as Seat[]).find(n=>canSummon(s,n)&&zones(s,n).length&&dimensionCandidates(s,ctx,n).length);if(first!==undefined)s.pendingLightChoice={kind:'DIMENSION_PICK',sourceId:l.instanceId,controller:first,origin:first,picks:[]};break;}
  case 'SACRED_CRANE_DRAW':{const id=p.deck.shift();if(!id){s.winner=op;log(s,'DECK_OUT','Sacred Crane could not draw from an empty Deck.',seat);}else{p.hand.push(id);s.cards[id].location='hand';log(s,'DRAW','Sacred Crane drew 1 card.',seat);}break;}
- case 'VORTEX':for(const c of monsters(s).filter(c=>c.controller===op&&!c.faceDown))toGraveyard(s,c.instanceId);break;
+ case 'VORTEX':toGraveyardTogether(s,monsters(s).filter(c=>c.controller===op&&!c.faceDown).map(c=>c.instanceId));break;
  case 'REINCARNATION':if(p.graveyard.includes(target)){p.graveyard.splice(p.graveyard.indexOf(target),1);p.hand.push(target);s.cards[target].location='hand';log(s,'RECOVER','Monster Reincarnation recovered a monster.',seat);}break;
  case 'GATLING':case 'BLOWBACK':{const rolls=seededCoinTosses(3,s.seed+s.events.length*7919),heads=rolls.filter(Boolean).length;log(s,'COIN_RESULT',`${getCard(s,l.instanceId,ctx).name}: ${rolls.map(h=>h?'Heads':'Tails').join(', ')}.`,seat);if(l.effectId==='GATLING'&&heads>0&&monsters(s).length)s.pendingLightChoice={kind:'GATLING_PICK',sourceId:l.instanceId,controller:seat,level:heads,chosenIds:[]};else if(l.effectId==='BLOWBACK'&&heads>=2&&['monster','spell'].includes(s.cards[target]?.location))toGraveyard(s,target);break;}
  case 'MARIONETTE':if(s.cards[target]?.location==='monster')toGraveyard(s,target);break;

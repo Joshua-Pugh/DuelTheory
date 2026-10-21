@@ -1,3 +1,4 @@
+import {graveBanishBlocked} from './graveyardDeckEffects';
 import {shuffleSearchedDeck} from './deckShuffle';
 import {MIMIC} from './goatControlEffects';
 import {draw,getCard,revealEffectCards,log,placeMonster,removeFromHand,toBanished,toGraveyard,type DuelState,type EngineContext,type ChainLink,type LegalAction,type Seat} from './model';
@@ -20,7 +21,7 @@ export function resolveChaos(s:DuelState,link:ChainLink,ctx:EngineContext):boole
   const revealed:string[]=[];let added:string|undefined;
   while(p.deck.length){const id=p.deck.shift()!;revealed.push(getCard(s,id,ctx).name);
    if(/Spell|Trap/.test(getCard(s,id,ctx).type)){p.hand.push(id);s.cards[id].location='hand';s.cards[id].zone=undefined;added=id;break;}
-   toGraveyard(s,id,'effect');
+   toGraveyard(s,id,'send');
   }
   if(added)revealEffectCards(s,seat,[added],ctx,'Magical Merchant added to hand');log(s,'EXCAVATE',`Magical Merchant revealed: ${revealed.join(', ')||'no cards'}. ${added?`Added ${getCard(s,added,ctx).name} to hand; sent the other revealed cards to the Graveyard.`:'No Spell or Trap found; sent the revealed cards to the Graveyard.'}`,seat);
  }else if(link.effectId==='SPY_SUMMON'){
@@ -29,7 +30,7 @@ export function resolveChaos(s:DuelState,link:ChainLink,ctx:EngineContext):boole
   shuffleSearchedDeck(s,seat);
  }else if(link.effectId==='NIGHT_DESTROY'){if(s.cards[target]?.location==='monster'&&s.cards[target].controller!==seat)toGraveyard(s,target);}
  else if(link.effectId==='NIGHT_RECOVER'){if(target!==link.instanceId&&p.graveyard.includes(target)&&getCard(s,target,ctx).type.includes('Flip')){p.graveyard.splice(p.graveyard.indexOf(target),1);p.hand.push(target);s.cards[target].location='hand';}}
- else if(link.effectId==='KYCOO_BANISH'){for(const id of link.searchIds??[])if(s.players[other(seat)].graveyard.includes(id)&&getCard(s,id,ctx).type.includes('Monster'))toBanished(s,id);}
+ else if(link.effectId==='KYCOO_BANISH'){if(!graveBanishBlocked(s,seat))for(const id of link.searchIds??[])if(s.players[other(seat)].graveyard.includes(id)&&getCard(s,id,ctx).type.includes('Monster'))toBanished(s,id);}
  else if(link.effectId==='RAIGEKI_BREAK'){if(['monster','spell'].includes(s.cards[target]?.location))toGraveyard(s,target);}
  else if(link.effectId==='DUSTSHOOT'){
   s.pendingChaos={kind:'DUSTSHOOT',sourceId:link.instanceId,controller:seat};s.priority=seat;return true;

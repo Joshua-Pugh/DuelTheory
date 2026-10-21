@@ -1,3 +1,4 @@
+import {lilyActions} from '../engine/graveyardDeckEffects';
 import {validateSideboard} from '../core/sideboard';
 export {validateSideboard} from '../core/sideboard';
 import {advanceUncontestedBattle} from './fastBattle';
@@ -76,7 +77,7 @@ export function matchWaitingFor(s:Match):MatchView['waitingFor']{
  if(s.phase!=='playing')return;
  if(s.reveal)return {seat:s.reveal.controller===0?1:0,kind:'reveal'};
  if(s.choosing&&s.choosing.until>Date.now())return {seat:s.choosing.seat,kind:'selection'};
- const g=s.goat;if(g){const p=g.pendingDiscard??g.pendingSearch??g.pendingDeckChoice??g.pendingLightChoice??g.pendingChaos??g.pendingRitual??g.pendingRandomDiscard;if(p)return {seat:p.controller,kind:'selection'};const trigger=g.pendingTriggers?.[0];if(trigger)return {seat:trigger.controller,kind:'selection'};if(g.chain.length)return {seat:g.priority,kind:'response'};if(g.summonResponse)return {seat:g.summonResponse.priority??(g.summonResponse.summoner===0?1:0),kind:'response'};if(g.freeResponse)return {seat:g.freeResponse.priority,kind:'response'};if(g.pendingAttack&&!g.pendingAttack.damageStep)return {seat:g.pendingAttack.defender,kind:'response'};}
+ const g=s.goat;if(g){const lilySeat=([0,1] as const).find(seat=>lilyActions(g,seat)?.length);if(lilySeat!==undefined)return {seat:lilySeat,kind:'response'};const p=g.pendingDiscard??g.pendingSearch??g.pendingDeckChoice??g.pendingLightChoice??g.pendingChaos??g.pendingRitual??g.pendingRandomDiscard;if(p)return {seat:p.controller,kind:'selection'};const trigger=g.pendingTriggers?.[0];if(trigger)return {seat:trigger.controller,kind:'selection'};if(g.chain.length)return {seat:g.priority,kind:'response'};if(g.summonResponse)return {seat:g.summonResponse.priority??(g.summonResponse.summoner===0?1:0),kind:'response'};if(g.freeResponse)return {seat:g.freeResponse.priority,kind:'response'};if(g.pendingAttack&&!g.pendingAttack.damageStep)return {seat:g.pendingAttack.defender,kind:'response'};}
  const b=s.ashen,d=b?.rules?.duel;if(b&&d){const player=b.rules?.pending?.flow.context.player;if(player==='0'||player==='1')return {seat:Number(player) as 0|1,kind:'selection'};if(d.callPermission||d.ordering)return {seat:b.table.active,kind:'selection'};if(d.priority)return {seat:Number(d.priority.holder) as 0|1,kind:'response'};if(d.combat?.stage==='block')return {seat:b.table.active===0?1:0,kind:'selection'};}
 }
 

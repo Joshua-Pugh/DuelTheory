@@ -9,7 +9,7 @@ export const restricts=(s:DuelState,id:string)=>monsters(s).some(c=>c.cardId===T
 export const absorbedMonster=(s:DuelState,id:string)=>Object.values(s.cards).find(c=>c.location==='spell'&&c.absorbed&&c.linkedTarget===id);
 export function restrictStat(s:DuelState,id:string,stat:'atk'|'def',ctx:EngineContext):number|undefined{
  if(s.cards[id]?.cardId!==TER||s.cards[id].faceDown)return;
- const equip=absorbedMonster(s,id);return equip&&!equip.faceDown?Number(getCard(s,equip.instanceId,ctx)[stat])||0:0;
+ const equip=absorbedMonster(s,id);return equip&&!equip.faceDown?Math.max(0,Number(getCard(s,equip.instanceId,ctx)[stat])||0):0;
 }
 export function goatControlMain(s:DuelState,ctx:EngineContext,seat:Seat):LegalAction[]{
  const p=s.players[seat],actions:LegalAction[]=[];

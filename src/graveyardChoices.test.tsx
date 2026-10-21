@@ -1,0 +1,13 @@
+import {it,expect} from 'vitest';
+import {renderToStaticMarkup} from 'react-dom/server';
+import DuelField,{CardPicker} from './DuelField';
+import catalogJson from '../public/catalog.json';
+import type {Card} from './core/types';
+import {createDuel} from './engine/model';
+import {legalActions} from './engine/rules';
+import {actionLabel,nextChoice} from './duelInteraction';
+const catalog=catalogJson as Card[],ctx={cards:new Map(catalog.map(c=>[c.id,c]))};
+const deck={id:'test',name:'test',main:Array(40).fill(79575620),side:[],extra:[]};
+it('renders distinct, visible pay/decline controls for Lily, including the defending seat',()=>{const s=createDuel(deck,deck,ctx);s.turn=3;s.current=0;s.phase='BATTLE';s.pendingDraw=false;const id=s.players[1].hand.shift()!;s.cards[id].location='monster';s.cards[id].zone=0;s.cards[id].position='attack';s.cards[id].faceDown=false;s.players[1].zones.monster[0]=id;s.pendingAttack={attackerId:id,attacker:1,defender:0,damageStep:'CALCULATE'};const actions=legalActions(s,ctx,1);expect(new Set(actions.map(actionLabel)).size).toBe(2);const html=renderToStaticMarkup(<DuelField fixedSeat={1} state={s} catalog={catalog} actions={actions} manualMode={false} onAction={()=>{}} onManual={()=>{}} onSkipPhase={()=>{}} onUndo={()=>{}} onVerify={()=>{}} onExit={()=>{}} notice=""/>);expect(html).toContain('Pay 2000 LP');expect(html).toContain('Do not pay');});
+it('keeps an explicit finish button available while selecting fewer than five Soul Release targets',()=>{const html=renderToStaticMarkup(<CardPicker title="Soul Release" ids={['a']} eligible={['a']} lookup={()=>catalog[0]} onConfirm={()=>{}} onClose={()=>{}} required autoAdvance multiple={false} deck={false} finishLabel="Confirm 2 target(s)"/>);expect(html).toContain('Confirm 2 target(s)');expect(html).not.toContain('>Cancel</button>');});
+it('labels Vampire’s declaration as a card type instead of a summon position',()=>{const s=createDuel(deck,deck,ctx),sourceId=s.players[0].hand[0];s.pendingTriggers=[{sourceId,controller:0,effectId:'VAMPIRE_SEND',mandatory:true}];const a={type:'ACTIVATE_TRIGGER' as const,seat:0 as const,sourceId,declaredType:'Spell',description:'declare'};expect(nextChoice([a],[],s)?.title).toBe('Vampire Lord · declare Monster, Spell or Trap');});
