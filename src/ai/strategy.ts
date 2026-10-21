@@ -1,3 +1,5 @@
+import {trapNegated} from '../engine/trapStatus';
+import {battleAttack} from '../engine/ritualDeckEffects';
 import type {Card} from '../core/types';
 import type {DuelState,LegalAction,Seat} from '../engine/model';
 /** Public attachments matter: destroying Premature/Call can remove two cards at once. */
@@ -12,6 +14,18 @@ export function sensibleActions(s:DuelState,actions:readonly LegalAction[],seat:
  const cards=new Map(catalog.map(c=>[c.id,c]));
  return actions.filter(a=>{
   if(a.seat!==seat)return false;
+  if(a.type==='ACTIVATE_POT_OF_GREED'&&s.players[seat].deck.length<2||a.type==='ACTIVATE_GRACEFUL_CHARITY'&&s.players[seat].deck.length<3)return false;
+  const source='instanceId'in a?a.instanceId:undefined;
+  if(source&&a.type.startsWith('ACTIVATE')&&cards.get(s.cards[source]?.cardId)?.type.includes('Trap')&&trapNegated(s,source))return false;
+  if((a.type==='DECLARE_ATTACK'||a.type==='REPLAY_ATTACK')&&a.targetId){
+   const attacker=a.type==='DECLARE_ATTACK'?a.attackerId:s.pendingAttack?.attackerId,target=s.cards[a.targetId];
+   if(attacker&&target&&!target.faceDown){const ctx={cards},power=battleAttack(s,attacker,ctx),defender=cards.get(target.cardId),guard=target.position==='attack'?battleAttack(s,a.targetId,ctx):Number(defender?.def)||0;
+    // Lily's publicly available boost is a known combat threat, not hidden information.
+    if(target.cardId===79575620&&s.players[target.controller].lp>2000&&power<guard+3000)return false;
+    // Never throw an ordinary resource monster away just to reduce board size.
+    if(target.position==='attack'&&power<guard&&![83011277,83011278,26202165].includes(s.cards[attacker].cardId))return false;
+   }
+  }
   const target='targetId'in a?a.targetId:undefined;
   if(target&&(a.type==='ACTIVATE_MST'||a.type==='ACTIVATE_DECK_EFFECT'&&['RAIGEKI_BREAK','BREAKER_DESTROY'].includes(a.effectId))){
    const card=cards.get(s.cards[target]?.cardId);

@@ -22,6 +22,7 @@ export function planChaosTurn(state:DuelState,legal:readonly LegalAction[],seat:
  if(!legal.some(a=>a.seat===seat&&(a.type==='DECLARE_ATTACK'||a.type==='SPECIAL_SUMMON_CHAOS'||a.type==='ACTIVATE_DECK_EFFECT'&&['SNATCH','CHAOS_BANISH','RAIGEKI_BREAK','BREAKER_DESTROY'].includes(a.effectId))))return;
  const ctx={cards:new Map([...catalog,unknown].map(c=>[c.id,c]))},opponent:Seat=seat===0?1:0;
  const initial=planningObservation(state,seat),startTurn=state.turn;
+ const baselineMonsters=Math.max(2,initial.players[seat].zones.monster.filter(Boolean).length),baselineBackrow=Math.max(2,initial.players[seat].zones.spell.filter(Boolean).length);
  const boundary=(s:DuelState)=>s.turn!==startTurn||s.winner!==null||!!s.drawnGame||s.pendingDraw||s.players.some(p=>p.hand.some(id=>s.cards[id].cardId===0)&&p===s.players[seat]);
  const evaluate=(s:DuelState)=>{
   if(s.drawnGame)return -10000;if(s.winner!==null)return s.winner===seat?100000:-100000;
@@ -32,7 +33,7 @@ export function planChaosTurn(state:DuelState,legal:readonly LegalAction[],seat:
   const exposure=own.zones.monster.reduce((n,id)=>{if(!id)return n;const c=s.cards[id];return n+([8131171,26202165].includes(c.cardId)&&c.position==='attack'?900:0);},0);
   const redundantSerpent=own.zones.monster.some(id=>id&&s.cards[id].cardId===8131171)&&(own.zones.monster.filter(Boolean).length>1||enemyMonsters.length===0)?500:0;
   const reserve=own.hand.reduce((n,id)=>n+([72989439,9596126].includes(s.cards[id].cardId)?900:0),0);
-  const overextension=Math.max(0,own.zones.monster.filter(Boolean).length-2)*1100+Math.max(0,own.zones.spell.filter(Boolean).length-2)*450;
+  const overextension=Math.max(0,own.zones.monster.filter(Boolean).length-baselineMonsters)*1100+Math.max(0,own.zones.spell.filter(Boolean).length-baselineBackrow)*450;
   const exposedDamage=(victim:Seat)=>{const attacker=s.players[victim===0?1:0],defender=s.players[victim],blockers=defender.zones.monster.filter(Boolean).length;const attacks=attacker.zones.monster.filter((id):id is string=>!!id&&!s.cards[id].faceDown&&s.cards[id].position==='attack').map(id=>Number(ctx.cards.get(s.cards[id].cardId)?.atk)||0).sort((a,b)=>b-a);return attacks.slice(blockers).reduce((n,a)=>n+a,0);};
   const survival=Math.min(own.lp,exposedDamage(seat))*.2;
   return value(seat)-value(opponent)+(own.lp-enemy.lp)*.15+resourceBonus+reserve-exposure-redundantSerpent-overextension-survival;
