@@ -6,13 +6,20 @@ export function normalizeAudio(value:unknown):AudioSettings{const v=value as Par
 function load():AudioSettings{try{return normalizeAudio(JSON.parse(localStorage.getItem(KEY)||'null'));}catch{return {...defaults};}}
 /** One context for the app. No network assets, queued autoplay, or rules-engine dependencies. */
 export class SoundManager{
- settings=load();private context:AudioContext|null=null;private master:GainNode|null=null;private voices=new Set<AudioScheduledSourceNode>();private listeners=new Set<()=>void>();private last=0;
+ settings=load();private context:AudioContext|null=null;private master:GainNode|null=null;private voices=new Set<AudioScheduledSourceNode>();private listeners=new Set<()=>void>();private last=0;private playbackSerial=0;
  subscribe=(f:()=>void)=>{this.listeners.add(f);return()=>{this.listeners.delete(f);};};
  snapshot=()=>this.settings;
  update=(patch:Partial<AudioSettings>)=>{this.settings=normalizeAudio({...this.settings,...patch});try{localStorage.setItem(KEY,JSON.stringify(this.settings));}catch{/* Session settings remain usable. */}if(this.master&&this.context)this.master.gain.setTargetAtTime(this.settings.enabled?this.settings.volume*0.18:0,this.context.currentTime,0.015);for(const f of this.listeners)f();};
- unlock=async()=>{if(typeof window==='undefined')return;try{const Constructor=window.AudioContext??(window as unknown as {webkitAudioContext?:typeof AudioContext}).webkitAudioContext;if(!Constructor)return;if(this.context?.state==='closed'){this.context=null;this.master=null;}this.context??=new Constructor();if(!this.master){this.master=this.context.createGain();this.master.gain.value=this.settings.enabled?this.settings.volume*0.18:0;this.master.connect(this.context.destination);}if(this.context.state!=='running'){const resumed=this.context.resume();/* Prime output synchronously inside the mobile tap. */const source=this.context.createBufferSource();source.buffer=this.context.createBuffer(1,1,this.context.sampleRate);source.connect(this.context.destination);source.onended=()=>source.disconnect();source.start();await resumed.catch(()=>{});}}catch{/* Unsupported audio never interrupts play. */}};
- stop=()=>{for(const voice of this.voices){try{voice.stop();}catch{/* Already ended. */}}this.voices.clear();this.last=0;};
- play(cues:SoundCue[]){const ctx=this.context;if(!ctx||ctx.state!=='running'||!this.settings.enabled||typeof document!=='undefined'&&document.hidden)return;
+ unlock=async()=>{if(typeof window==='undefined')return false;try{const Constructor=window.AudioContext??(window as unknown as {webkitAudioContext?:typeof AudioContext}).webkitAudioContext;if(!Constructor)return false;if(this.context?.state==='closed'){this.context=null;this.master=null;}this.context??=new Constructor();if(!this.master){this.master=this.context.createGain();this.master.gain.value=this.settings.enabled?this.settings.volume*0.18:0;this.master.connect(this.context.destination);}if(this.context.state!=='running'){const resumed=this.context.resume();/* Prime output synchronously inside the mobile tap. */const source=this.context.createBufferSource();source.buffer=this.context.createBuffer(1,1,this.context.sampleRate);source.connect(this.context.destination);source.onended=()=>source.disconnect();source.start();let timeout:number|undefined;try{await Promise.race([resumed.catch(()=>{}),new Promise<void>(resolve=>{timeout=window.setTimeout(resolve,1000);})]);}finally{if(timeout!==undefined)window.clearTimeout(timeout);}}return this.context.state==='running';}catch{/* Unsupported audio never interrupts play. */return false;}};
+ stop=()=>{this.playbackSerial++;for(const voice of this.voices){try{voice.stop();}catch{/* Already ended. */}}this.voices.clear();this.last=0;};
+ /** Recreate the device connection only on an explicit recovery gesture. */
+ recover=async()=>{this.stop();const old=this.context;this.context=null;this.master=null;if(old&&old.state!=='closed')void old.close().catch(()=>{});return this.unlock();};
+ play(cues:SoundCue[]){if(!cues.length||!this.settings.enabled||typeof document!=='undefined'&&document.hidden)return;
+  const ctx=this.context,serial=++this.playbackSerial;
+  if(!ctx||ctx.state!=='running'){
+   // Resume is asynchronous: retain only the latest fresh cue, never a backlog.
+   const started=Date.now();void this.unlock().then(ready=>{if(ready&&serial===this.playbackSerial&&Date.now()-started<500)this.play(cues);});return;
+  }
   // A poll may include several actions. Cap the burst and never build a stale queue.
   const chosen=cues.slice(-5);let start=Math.max(ctx.currentTime+0.01,this.last);if(start>ctx.currentTime+0.5)start=ctx.currentTime+0.01;
   for(const cue of chosen){this.effect(cue.event,start,cue.intensity??1);start+=0.065;}this.last=start;

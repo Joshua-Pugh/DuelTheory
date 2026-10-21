@@ -2,7 +2,7 @@
 import {afterEach,it,expect,vi} from 'vitest';
 import {act} from 'react';
 import {createRoot,type Root} from 'react-dom/client';
-import {CardPicker} from './DuelField';
+import DuelField,{CardPicker} from './DuelField';
 import catalogJson from '../public/catalog.json';
 import type {Card} from './core/types';
 import {createDuel} from './engine/model';
@@ -30,4 +30,38 @@ it.each([1,2,3])('lets Bazoo select and confirm %i monsters before paying the co
  expect(confirm).toHaveBeenCalledTimes(1);expect(state.players[0].banished).toHaveLength(count);
  while(state.chain.length){const pass=legalActions(state,ctx,state.priority).find(a=>a.type==='PASS_CHAIN')!;state=dispatchDuel(state,pass,ctx);}
  expect(battleAttack(state,bazoo.instanceId,ctx)).toBe(1600+300*count);
+});
+
+it('completes Bazoo through the full duel menu and material picker',()=>{
+ Object.assign(globalThis,{IS_REACT_ACT_ENVIRONMENT:true});
+ vi.stubGlobal('matchMedia',()=>({matches:false,addEventListener(){},removeEventListener(){}}));
+ const deck={id:'full-bazoo',name:'Bazoo',main:[40133511,...Array(39).fill(3773196)],side:[],extra:[]};
+ let state=createDuel(deck,deck,ctx,42);state.turn=3;state.phase='MAIN_1';state.pendingDraw=false;
+ const bazoo=Object.values(state.cards).find(c=>c.owner===0&&c.cardId===40133511)!;
+ const materials=Object.values(state.cards).filter(c=>c.owner===0&&c.cardId===3773196).slice(0,3);
+ for(const c of [bazoo,...materials]){for(const key of ['deck','hand'] as const)state.players[0][key]=state.players[0][key].filter(id=>id!==c.instanceId);if(c===bazoo){Object.assign(c,{location:'monster',zone:0,position:'attack',faceDown:false});state.players[0].zones.monster[0]=c.instanceId;}else{c.location='graveyard';state.players[0].graveyard.push(c.instanceId);}}
+ const confirm=vi.fn((a:Parameters<typeof dispatchDuel>[1])=>{state=dispatchDuel(state,a,ctx);render();});
+ host=document.createElement('div');document.body.append(host);root=createRoot(host);
+ const render=()=>root!.render(<DuelField fixedSeat={0} state={state} catalog={catalog} actions={legalActions(state,ctx,0)} onAction={confirm} onManual={()=>{}} manualMode={false} onSkipPhase={()=>{}} onUndo={()=>{}} onVerify={()=>{}} onExit={()=>{}} notice=""/>);
+ act(render);
+ act(()=>host!.querySelector<HTMLButtonElement>(`[data-instance="${bazoo.instanceId}"]`)!.click());
+ const activate=Array.from(document.querySelectorAll<HTMLButtonElement>('.dt-card-menu button')).find(b=>b.textContent==='Activate effect…');expect(activate).toBeDefined();act(()=>activate!.click());
+ const picks=Array.from(document.querySelectorAll<HTMLButtonElement>('.dt-picker-grid button'));expect(picks).toHaveLength(3);
+ for(const pick of picks)act(()=>pick.click());expect(confirm).not.toHaveBeenCalled();
+ const button=Array.from(document.querySelectorAll('button')).find(b=>b.textContent==='Confirm selection')!;expect(button.disabled).toBe(false);act(()=>button.click());
+ expect(confirm).toHaveBeenCalledTimes(1);expect(state.players[0].banished).toHaveLength(3);
+ while(state.chain.length){const pass=legalActions(state,ctx,state.priority).find(a=>a.type==='PASS_CHAIN')!;state=dispatchDuel(state,pass,ctx);}
+ expect(battleAttack(state,bazoo.instanceId,ctx)).toBe(2500);
+ vi.unstubAllGlobals();
+});
+
+it('can skip an unavailable Shining Angel recruit before responding to a BLS chain',()=>{
+ Object.assign(globalThis,{IS_REACT_ACT_ENVIRONMENT:true});vi.stubGlobal('matchMedia',()=>({matches:false,addEventListener(){},removeEventListener(){}}));
+ const deck={id:'angel-test',name:'Angel test',main:Array(40).fill(3773196),side:[],extra:[]};let state=createDuel(deck,deck,ctx,42);state.turn=3;state.phase='BATTLE';state.current=1;state.pendingDraw=false;
+ const angel=state.players[0].hand.shift()!,bls=state.players[1].hand.shift()!;Object.assign(state.cards[angel],{cardId:95956346,location:'graveyard'});state.players[0].graveyard.push(angel);Object.assign(state.cards[bls],{cardId:72989439,location:'monster',zone:0,position:'attack',faceDown:false});state.players[1].zones.monster[0]=bls;
+ state.pendingTriggers=[{sourceId:angel,controller:0,effectId:'SHINING_ANGEL_SUMMON',mandatory:false}];state.chain=[{instanceId:bls,controller:1,effectId:'BLS_EXTRA_ATTACK',targets:[],spellSpeed:1}];state.priority=0;
+ const send=vi.fn((a:Parameters<typeof dispatchDuel>[1])=>{state=dispatchDuel(state,a,ctx);render();});host=document.createElement('div');document.body.append(host);root=createRoot(host);
+ const render=()=>root!.render(<DuelField aiOpponent fixedSeat={0} state={state} catalog={catalog} actions={legalActions(state,ctx,0)} onAction={send} onManual={()=>{}} manualMode={false} onSkipPhase={()=>{}} onUndo={()=>{}} onVerify={()=>{}} onExit={()=>{}} notice=""/>);act(render);
+ const skip=Array.from(document.querySelectorAll<HTMLButtonElement>('button')).find(b=>b.textContent?.includes('skip Shining Angel'));
+ expect(skip,'A recruiter with no valid choices must still be dismissible').toBeDefined();act(()=>skip!.click());expect(state.pendingTriggers).toHaveLength(0);expect(legalActions(state,ctx,state.priority).some(a=>a.type==='PASS_CHAIN')).toBe(true);vi.unstubAllGlobals();
 });
