@@ -95,3 +95,10 @@ export function settleMatchResult(s:Match){
  series.chooser=result==='draw'?(s.goat?.current??s.ashen?.table.active??0):result===0?1:0;
  series.ready=[false,false];s.phase='sideboarding';
 }
+
+/** Authenticated read optimization: activity may change without advancing gameplay revision. */
+export type MatchPoll=MatchView|{unchanged:true;revision:number;waitingFor?:MatchView['waitingFor']};
+export function pollMatchView(s:Match,seat:0|1,catalog:readonly Card[],since?:number):MatchPoll{
+ if(Number.isInteger(since)&&since===s.revision)return {unchanged:true,revision:s.revision,waitingFor:matchWaitingFor(s)};
+ return matchView(s,seat,catalog);
+}
