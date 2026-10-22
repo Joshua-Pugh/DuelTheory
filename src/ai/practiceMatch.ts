@@ -5,7 +5,7 @@ export type PracticeResult=Seat|'draw';
 export type PracticeGame={result:PracticeResult;deck:Deck;seed:number;first:Seat;turns:number};
 export type PracticeMatch={id:string;label:string;setupKey:string;mode:PracticeMode;registered:Deck;deck:Deck;opponent:Deck;pilot:string;started:string;ended?:string;phase:'playing'|'between'|'complete';games:PracticeGame[];wins:[number,number];first:Seat;winner?:PracticeResult;forfeited?:boolean};
 export const PRACTICE_RECORD_KEY='dueltheory.ai.match-records.v1';
-export const PILOT_VERSION='chaos-turbo-2026-10-21-review-1';
+export const PILOT_VERSION='chaos-turbo-2026-10-21-review-2';
 export function setupKey(deck:Deck,label:string){return JSON.stringify([label,...(['main','extra','side'] as const).map(zone=>[...deck[zone]].sort((a,b)=>a-b))]);}
 export function newPracticeMatch(deck:Deck,opponent:Deck,mode:PracticeMode,label:string,first:Seat,pilot=PILOT_VERSION):PracticeMatch{
  const name=label.trim()||deck.name;

@@ -5,6 +5,20 @@ import {CHAOS_TURBO} from '../supportedDecks';
 import {GameService} from '../services/GameService';
 import {newGameLog,updateGameLog,finishGameLog,GameLogWriter,reviewProfile,gameLogReport} from './gameLogs';
 const catalog=catalogJson as Card[];
+it('stores the human hand separately from the AI observation and keeps snapshots immutable',()=>{
+ const {service,id,log}=fixture(),before=service.getState(id);expect(log.playerHands?.[0].cards.map(c=>c.cardId)).toEqual(before.players[0].hand.map(id=>before.cards[id].cardId));
+ service.dispatch(id,{type:'DRAW_PHASE',seat:0});const next=service.getState(id),updated=updateGameLog(log,next,service.getActionLog(id));
+ expect(updated.playerHands?.map(h=>h.cards.length)).toEqual([5,6]);expect(log.playerHands?.[0].cards).toHaveLength(5);
+ next.cards[next.players[0].hand[0]].cardId=0;expect(updated.playerHands?.at(-1)?.cards.every(c=>c.cardId!==0)).toBe(true);
+});
+it('keeps explicit human hand snapshots out of the AI decision record',()=>{
+ const service=new GameService(),id=service.createGoatSession([CHAOS_TURBO,CHAOS_TURBO],catalog,42,1,'auto'),before=service.getState(id);
+ const log=newGameLog({profile:'device',displayName:'Player',match:'private-review',game:1,seed:42,first:1,decks:[CHAOS_TURBO,CHAOS_TURBO]},before),options=service.getLegalActions(id,1),choice=options[0];
+ const updated=updateGameLog(log,service.dispatch(id,choice),service.getActionLog(id),before,choice,options);
+ expect(updated.playerHands?.[0].cards).toHaveLength(5);expect(updated.playerHands?.[0].cards.every(c=>c.cardId>0)).toBe(true);
+ expect((updated.decisions[0].record.observation as {players:Array<{hand:unknown}>}).players[0].hand).toEqual({count:5});
+ expect(updated.decisions[0].record).not.toHaveProperty('playerHands');
+});
 function fixture(){const service=new GameService(),id=service.createGoatSession([CHAOS_TURBO,CHAOS_TURBO],catalog,42,0,'auto');return {service,id,log:newGameLog({profile:'device-id',displayName:'Mad Scientist',match:'best3-id',game:1,seed:42,first:0,decks:[CHAOS_TURBO,CHAOS_TURBO]},service.getState(id))};}
 it('records phase shortcut actions and replays the exact game from decks and seed',()=>{
  const {service,id,log}=fixture();service.dispatch(id,{type:'DRAW_PHASE',seat:0});const state=service.advancePhase(id,'MAIN_1'),updated=updateGameLog(log,state,service.getActionLog(id));
@@ -23,6 +37,7 @@ it('rewinds the replay branch and discards decisions for undone actions',()=>{
  const {service,id,log}=fixture(),before=service.getState(id),options=service.getLegalActions(id,0),choice=options.find(a=>a.type==='DRAW_PHASE')!;
  const updated=updateGameLog(log,service.dispatch(id,choice),service.getActionLog(id),before,choice,options);
  const rewound=updateGameLog(updated,service.rewind(id,0),service.getActionLog(id));expect(rewound.actions).toHaveLength(0);expect(rewound.decisions).toHaveLength(0);expect(rewound.rewinds).toBe(1);
+ expect(rewound.playerHands).toHaveLength(1);expect(rewound.playerHands?.[0].actionCount).toBe(0);expect(rewound.playerHands?.[0].cards).toHaveLength(5);
 });
 it('captures every best-of-three game separately including sided decks and unfinished/conceded outcomes',()=>{
  const {service,id,log}=fixture(),sided=structuredClone(CHAOS_TURBO);[sided.main[0],sided.side[0]]=[sided.side[0],sided.main[0]];

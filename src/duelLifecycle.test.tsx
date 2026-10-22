@@ -1,14 +1,22 @@
-import {describe,it,expect} from 'vitest';
+import {describe,it,expect,vi} from 'vitest';
 import {renderToStaticMarkup} from 'react-dom/server';
 import {openingCoin,duelResult} from './duelLifecycle';
 import {OpeningCoinDialog,DuelEndedDialog} from './DuelLifecycleDialogs';
-import {GameService} from './services/GameService';
+import {GameService,freshDuelSeed} from './services/GameService';
 import {createDuel,type Seat} from './engine/model';
 import type {Card,Deck} from './core/types';
 const card:Card={id:1,name:'Test Monster',type:'Normal Monster',level:4,atk:1800,def:1000,desc:''};
 const catalog=[card],ctx={cards:new Map([[card.id,card]])};
 const deck=(count=40):Deck=>({id:'test',name:'test',main:Array(count).fill(1),extra:[],side:[]});
 describe('opening toss',()=>{
+ it('is exactly balanced over paired seed halves, with no forced alternation',()=>{
+  let heads=0,tails=0;for(let seed=0;seed<65536;seed++){const a=openingCoin(seed),b=openingCoin((seed^0x80000000)>>>0);expect(a.firstSeat).not.toBe(b.firstSeat);heads+=Number(a.face==='Heads')+Number(b.face==='Heads');tails+=Number(a.face==='Tails')+Number(b.face==='Tails');}
+  expect(heads).toBe(65536);expect(tails).toBe(65536);
+ });
+ it('gets a fresh unsigned session seed directly from cryptographic randomness',()=>{
+  const random=vi.spyOn(globalThis.crypto,'getRandomValues').mockReturnValueOnce(Uint32Array.of(0)).mockReturnValueOnce(Uint32Array.of(0xffffffff));
+  try{expect(freshDuelSeed()).toBe(0);expect(freshDuelSeed()).toBe(0xffffffff);expect(random).toHaveBeenCalledTimes(2);expect(random.mock.calls.every(([a])=>a instanceof Uint32Array&&a.length===1)).toBe(true);}finally{random.mockRestore();}
+ });
  it('reproduces a fixed toss and offers both outcomes across session seeds',()=>{
   const seats=new Set<Seat>();for(let seed=0;seed<4096;seed++){const coin=openingCoin(seed);expect(coin).toEqual(openingCoin(seed));expect(coin.face).toBe(coin.firstSeat===0?'Heads':'Tails');seats.add(coin.firstSeat);}expect([...seats].sort()).toEqual([0,1]);
  });

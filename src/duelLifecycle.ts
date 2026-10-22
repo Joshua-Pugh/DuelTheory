@@ -1,6 +1,9 @@
 import {seededShuffle,type DuelState,type Seat} from './engine/model';
 
-/** One unbiased toss from the session seed; a saved seed reproduces both toss and shuffle. */
+/** A uniform crypto-generated 32-bit session seed gives an unbiased toss.
+ * XOR and the shuffle's odd-multiplier LCG are permutations of uint32 values:
+ * exactly half land in each half of the range. Fixed seeds repeat intentionally.
+ */
 export function openingCoin(seed:number):{face:'Heads'|'Tails';firstSeat:Seat}{
  const firstSeat=seededShuffle<Seat>([0,1],(seed^0x9e3779b9)>>>0)[0];
  return {face:firstSeat===0?'Heads':'Tails',firstSeat};

@@ -7,7 +7,7 @@ import {newPracticeMatch,finishPracticeGame,forfeitPractice,loadPracticeRecords,
 import {validateSideboard} from './core/sideboard';
 import PublicCardReveal from './PublicCardReveal';
 import {AI_PILOTS,type AiPilotId} from './ai/pilots';
-import {goatPlayerView,hasDecision} from './ai/policy';
+import {goatObservation,goatPlayerView,hasDecision} from './ai/policy';
 import {useDuelAudio} from './audio/useDuelAudio';
 import SupportedDeckSetup from './SupportedDeckSetup';
 import {REASONING_GATE,CHAOS_TURBO,GOAT_CONTROL,assessDeck} from './supportedDecks';
@@ -86,7 +86,7 @@ export default function EnginePreview({initialAI=false,deck,savedDecks=[],catalo
  // Deal animations run first; every later Draw Phase draws once without a separate deck click.
  useEffect(()=>{
   if(fullManual||!id||!duel||!showDuel||concede||learningOpen||learningPaused||sessionAi&&aiMatch?.phase!=='playing'||coinSeed!==null||reveal||aiReveal||suppressAuto.current||(duel.winner!==null||duel.drawnGame))return;
-  const aiDecision=sessionAi?activePilot.choose(duel,allActions,1,catalog):undefined;
+  const aiDecision=sessionAi?activePilot.choose(goatObservation(duel,1),allActions,1,catalog):undefined;
   const automatic=aiDecision?.action??(duel.pendingRoll?actions.find(a=>a.type==='COMPLETE_DIE_ROLL'):duel.pendingDraw?actions.find(a=>a.type==='DRAW_PHASE'):unopposedResponse(actions)??actions.find(a=>a.type==='ADVANCE_DAMAGE_STEP'));
   if(!automatic)return;
   const timer=window.setTimeout(()=>{

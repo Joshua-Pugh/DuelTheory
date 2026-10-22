@@ -1,5 +1,6 @@
 import {GameLogWriter,GAME_LOG_SETTING} from './ai/gameLogs';
 import {DISPLAY_NAME_KEY} from './playerProfile';
+import {AI_PILOTS} from './ai/pilots';
 import {loadLearning,LEARNING_KEY} from './ai/learning';
 // @vitest-environment happy-dom
 import {beforeEach,afterEach,it,expect,vi} from 'vitest';import {act} from 'react';import {createRoot,type Root} from 'react-dom/client';
@@ -10,6 +11,14 @@ function click(text:string){const el=Array.from(document.querySelectorAll('butto
 async function tick(ms:number){await act(async()=>{await vi.advanceTimersByTimeAsync(ms);});}
 beforeEach(()=>{window.localStorage.clear();vi.useFakeTimers();Object.assign(globalThis,{IS_REACT_ACT_ENVIRONMENT:true});vi.stubGlobal('matchMedia',vi.fn((query:string)=>({matches:query.includes('reduced-motion'),addEventListener(){},removeEventListener(){}})));host=document.createElement('div');document.body.append(host);root=createRoot(host);});
 afterEach(()=>{act(()=>root.unmount());host.remove();vi.clearAllTimers();vi.useRealTimers();vi.restoreAllMocks();vi.unstubAllGlobals();});
+it('redacts the human hand before calling the live AI pilot',async()=>{
+ const pilot=vi.spyOn(AI_PILOTS.chaos,'choose');
+ act(()=>root.render(<EnginePreview initialAI deck={CHAOS_TURBO} catalog={catalog} preferences={DEFAULT_PREFERENCES} onOpenPreferences={()=>{}}/>));
+ click('Start GOAT duel');await tick(1);click('Begin duel');await tick(1);
+ expect(pilot).toHaveBeenCalled();const state=pilot.mock.calls[0][0];
+ expect(state.players[0].hand).toHaveLength(5);expect(state.players[0].hand.every(id=>state.cards[id].cardId===0)).toBe(true);
+ expect(state.players[1].hand.every(id=>state.cards[id].cardId>0)).toBe(true);expect(state).not.toHaveProperty('playerHands');
+});
 it('starts the AI from the coin flip, fixes the human seat, progresses and pauses when exited',async()=>{
  const dispatch=vi.spyOn(GameService.prototype,'dispatch');act(()=>root.render(<EnginePreview initialAI deck={CHAOS_TURBO} catalog={catalog} preferences={DEFAULT_PREFERENCES} onOpenPreferences={()=>{}}/>));
  expect((document.querySelector('[aria-label="Opponent deck"]') as HTMLSelectElement).disabled).toBe(true);
@@ -121,5 +130,5 @@ it.each([false,true])('starts with a saved personal deck directly from the duel 
 
 it('selects Goat Control AI and preserves its pilot identity across a best-of-three and logs',async()=>{
  localStorage.setItem(GAME_LOG_SETTING,'true');const write=vi.spyOn(GameLogWriter.prototype,'write').mockResolvedValue(undefined),initial=GameService.prototype.createGoatSession;const create=vi.spyOn(GameService.prototype,'createGoatSession').mockImplementation(function(this:GameService,...args){const id=initial.apply(this,args),state=this.getState(id);state.winner=1;state.pendingDraw=false;return this.restoreOnline(state,catalog,false);});
- act(()=>root.render(<EnginePreview initialAI deck={CHAOS_TURBO} catalog={catalog} preferences={DEFAULT_PREFERENCES} onOpenPreferences={()=>{}}/>));const select=document.querySelector<HTMLSelectElement>('[aria-label="AI opponent"]')!;act(()=>{select.value='goat';select.dispatchEvent(new Event('change',{bubbles:true}));});bestThree();expect(document.body.textContent).toContain('How this AI plays Goat Control');click('Start GOAT duel');await tick(1);click('Begin duel');expect(create.mock.calls[0][0][1].name).toContain('Goat');expect(document.body.textContent).toContain('Goat Control AI');expect(write.mock.calls[0][0].pilot).toBe('goat-control-2026-10-21-v1');const first=document.querySelector<HTMLInputElement>('input[name="ai-first"]')!;act(()=>first.click());click('Ready for next game');expect(create.mock.calls[1][0][1]).toEqual(create.mock.calls[0][0][1]);expect(write.mock.calls.at(-1)![0].pilot).toBe('goat-control-2026-10-21-v1');const saved=loadPracticeRecords(localStorage);expect(saved[0].pilot).toBe('goat-control-2026-10-21-v1');
+ act(()=>root.render(<EnginePreview initialAI deck={CHAOS_TURBO} catalog={catalog} preferences={DEFAULT_PREFERENCES} onOpenPreferences={()=>{}}/>));const select=document.querySelector<HTMLSelectElement>('[aria-label="AI opponent"]')!;act(()=>{select.value='goat';select.dispatchEvent(new Event('change',{bubbles:true}));});bestThree();expect(document.body.textContent).toContain('How this AI plays Goat Control');click('Start GOAT duel');await tick(1);click('Begin duel');expect(create.mock.calls[0][0][1].name).toContain('Goat');expect(document.body.textContent).toContain('Goat Control AI');expect(write.mock.calls[0][0].pilot).toBe('goat-control-2026-10-21-v2');const first=document.querySelector<HTMLInputElement>('input[name="ai-first"]')!;act(()=>first.click());click('Ready for next game');expect(create.mock.calls[1][0][1]).toEqual(create.mock.calls[0][0][1]);expect(write.mock.calls.at(-1)![0].pilot).toBe('goat-control-2026-10-21-v2');const saved=loadPracticeRecords(localStorage);expect(saved[0].pilot).toBe('goat-control-2026-10-21-v2');
 });

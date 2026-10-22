@@ -1,4 +1,5 @@
 import {sensibleActions} from './strategy';
+import {publicSetRead} from './opponentRead';
 import type {Card} from '../core/types';
 import type {DuelState,LegalAction,Seat} from '../engine/model';
 import {dispatchDuel,legalActions} from '../engine/rules';
@@ -20,7 +21,8 @@ export function planningObservation(state:DuelState,seat:Seat){
 export function planChaosTurn(state:DuelState,legal:readonly LegalAction[],seat:Seat,catalog:readonly Card[],pilot:Pilot):Decision<LegalAction>|undefined{
  if(state.current!==seat||!['MAIN_1','BATTLE','MAIN_2'].includes(state.phase)||state.chain.length||state.pendingAttack||state.summonResponse||state.freeResponse||state.pendingTriggers?.length)return;
  if(!legal.some(a=>a.seat===seat&&(a.type==='DECLARE_ATTACK'||a.type==='SPECIAL_SUMMON_CHAOS'||a.type==='ACTIVATE_DECK_EFFECT'&&['SNATCH','CHAOS_BANISH','RAIGEKI_BREAK','BREAKER_DESTROY'].includes(a.effectId))))return;
- const ctx={cards:new Map([...catalog,unknown].map(c=>[c.id,c]))},opponent:Seat=seat===0?1:0;
+ const read=publicSetRead(goatObservation(state,seat),seat,new Map(catalog.map(c=>[c.id,c])));
+ const ctx={cards:new Map([...catalog,{...unknown,def:read.defenseEstimate}].map(c=>[c.id,c]))},opponent:Seat=seat===0?1:0;
  const initial=planningObservation(state,seat),startTurn=state.turn;
  const baselineMonsters=Math.max(2,initial.players[seat].zones.monster.filter(Boolean).length),baselineBackrow=Math.max(2,initial.players[seat].zones.spell.filter(Boolean).length);
  const boundary=(s:DuelState)=>s.turn!==startTurn||s.winner!==null||!!s.drawnGame||s.pendingDraw||s.players.some(p=>p.hand.some(id=>s.cards[id].cardId===0)&&p===s.players[seat]);

@@ -1,5 +1,6 @@
 import {battleAttack} from '../engine/ritualDeckEffects';
 import {removalPayoff,sensibleActions} from './strategy';
+import {publicSetRead} from './opponentRead';
 import type {Card} from '../core/types';import type {DuelState,LegalAction,Seat} from '../engine/model';
 import {bestLegalAction,goatObservation,hasDecision,type Decision} from './policy';
 const TD=31786629,NIGHT=16226786,SERPENT=8131171,SANGAN=26202165,SPY=24317029,FAITH=31560081,DEKO=87621407,BLS=72989439,SORC=9596126,BOOK=14087893;
@@ -8,6 +9,7 @@ export function chooseResourceHeuristic(state:DuelState,legal:readonly LegalActi
  // Legal search-option order can mirror a shuffled pile. Canonicalize without reading descriptions.
  const actions=sensibleActions(state,legal,seat,catalog).map(action=>({action,key:JSON.stringify(Object.fromEntries(Object.entries(action).filter(([key])=>key!=='description').sort(([a],[b])=>a.localeCompare(b))))})).sort((a,b)=>a.key.localeCompare(b.key)).map(x=>x.action);if(!hasDecision(state,seat,actions))return;
  const cards=new Map(catalog.map(c=>[c.id,c]));
+ const observation=goatObservation(state,seat),setRead=publicSetRead(observation,seat,cards);
  const score=(s:DuelState,a:LegalAction)=>{
   const own=s.players[seat],enemy=s.players[seat===0?1:0],field=(who:Seat)=>s.players[who].zones.monster.filter((id):id is string=>!!id),ours=field(seat),theirs=field(seat===0?1:0);
   const card=(id:string|undefined)=>id?cards.get(s.cards[id]?.cardId):undefined;
@@ -58,6 +60,8 @@ export function chooseResourceHeuristic(state:DuelState,legal:readonly LegalActi
    let value=set?(flip?75:15):(flip?10:65+(c?.id===71413901?8:0));
    if(c?.id===FAITH&&!own.graveyard.some(id=>card(id)?.type.includes('Spell')))value-=30;
    if(c?.id===SPY&&set)value+=pressure>1400?15:8;
+   if(!set&&!flip&&(Number(c?.atk)||0)>=1700&&theirs.some(id=>!s.cards[id].faceDown&&s.cards[id].position==='attack'&&atk(id)<(Number(c?.atk)||0))&&pressure<(Number(c?.atk)||0)&&s.turn>1&&s.phase==='MAIN_1'&&ours.length<2)value+=35;
+   if(!set&&!flip&&(Number(c?.atk)||0)>=1700&&ours.length===0&&theirs.length>0&&theirs.length<=2&&theirs.every(id=>s.cards[id].faceDown)&&own.lp>3000&&s.turn>1&&s.phase==='MAIN_1')value+=25;
    if(!set&&(Number(c?.atk)||0)<pressure&&!flip)value-=25;
    if(c?.id===TD)value=-25;
    return result(value,'Establish Spy/Dekoichi/Faith for resource advantage, or summon a useful attacker.');
@@ -75,12 +79,13 @@ export function chooseResourceHeuristic(state:DuelState,legal:readonly LegalActi
   if(a.type==='DECLARE_ATTACK'||a.type==='REPLAY_ATTACK'){
    const attacker=a.type==='DECLARE_ATTACK'?a.attackerId:s.pendingAttack!.attackerId,power=atk(attacker);
    if(!a.targetId)return result(power>=enemy.lp?10000:70+power/1000,'Convert board advantage into direct damage.');
-   const t=s.cards[a.targetId],guard=t.faceDown?1800:t.position==='attack'?atk(a.targetId):Number(card(a.targetId)?.def??1800),advantage=power-guard;
+   const t=s.cards[a.targetId],guard=t.faceDown?setRead.defenseEstimate:t.position==='attack'?atk(a.targetId):Number(card(a.targetId)?.def??1800),advantage=power-guard;
+   if(t.faceDown&&(power>=1700||setRead.flipEngine&&power>=1500&&power>=setRead.defenseEstimate)&&own.lp>2500&&ours.length>=theirs.length)return result(25+power/1000+setRead.urgency/100,`Probe when life and board position allow. ${setRead.reason}`);
    return result(advantage>0?80+worth(a.targetId)/1000:advantage===0&&!t.faceDown&&t.position==='attack'&&worth(a.targetId)>=worth(attacker)?20:-20,'Prefer favorable attacks; estimate unknown defenders without reading their identities.');
   }
   if(a.type==='ACTIVATE_BOOK_OF_MOON'){
    const t=s.cards[a.targetId],top=s.chain.at(-1),attacker=s.pendingAttack?.attackerId;
-   if(t.controller===seat){const endangered=s.chain.some(l=>l.targets.includes(a.targetId)&&!(l.effectId==='CHAOS_BANISH'&&card(l.instanceId)?.id===BLS)||l.effectId==='MIRROR_FORCE'&&t.position==='attack');return result(endangered?120+worth(a.targetId)/1000:-15,'Protect a threatened monster from destruction/control or preserve its flip value.');}
+   if(t.controller===seat){const endangered=s.chain.some(l=>l.targets.includes(a.targetId)&&!['RAIGEKI_BREAK','NIGHT_DESTROY','ZABORG_DESTROY','EXILED'].includes(l.effectId)&&!(l.effectId==='CHAOS_BANISH'&&card(l.instanceId)?.id===BLS)||l.effectId==='MIRROR_FORCE'&&t.position==='attack');return result(endangered?120+worth(a.targetId)/1000:-15,'Use Book for protection only when turning face-down actually defeats the pending effect.');}
    const defendingTarget=s.pendingAttack?.targetId,guard=defendingTarget?(s.cards[defendingTarget].position==='attack'?atk(defendingTarget):Number(card(defendingTarget)?.def??1800)):0;
    const battleDanger=defending&&attacker===a.targetId&&(Math.max(0,atk(a.targetId)-guard)>=own.lp||atk(a.targetId)>=2200||!!defendingTarget&&atk(a.targetId)>guard&&worth(defendingTarget)>=2800);
    const resetSearch=[95492061,23401839,FAITH,SPY,DEKO,NIGHT].includes(card(a.targetId)?.id??0);
@@ -112,5 +117,5 @@ export function chooseResourceHeuristic(state:DuelState,legal:readonly LegalActi
   if(['PASS_CHAIN','RESOLVE_CHAIN','PASS_ATTACK_RESPONSE','PASS_SUMMON_RESPONSE','PASS_SUMMON_NEGATION','PASS_FREE_RESPONSE','CANCEL_REPLAY','DECLINE_TRIGGER','DECLINE_PENDING_TRIGGER','DECLINE_DD_WARRIOR_LADY'].includes(a.type))return result(0,'Preserve interaction when no beneficial response is needed.');
   return result(10,'Complete the available supported action.');
  };
- return bestLegalAction(goatObservation(state,seat),actions,(s,a)=>adjust?adjust(s,a,score(s,a)):score(s,a));
+ return bestLegalAction(observation,actions,(s,a)=>adjust?adjust(s,a,score(s,a)):score(s,a));
 }
