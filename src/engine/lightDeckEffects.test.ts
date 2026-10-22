@@ -20,6 +20,26 @@ function resolve(s:DuelState){for(let i=0;i<20&&s.chain.length&&!s.pendingLightC
 function activate(s:DuelState,id:string){return act(s,'ACTIVATE_LIGHT_EFFECT',a=>'instanceId'in a&&a.instanceId===id);}
 function battle(s:DuelState,attackerId:string,targetId?:string){s.phase='BATTLE';s=act(s,'DECLARE_ATTACK',a=>a.type==='DECLARE_ATTACK'&&a.attackerId===attackerId&&a.targetId===targetId);s=act(s,'PASS_ATTACK_RESPONSE');for(let i=0;i<4;i++)s=act(s,'ADVANCE_DAMAGE_STEP');return s;}
 describe('player-built Venus LIGHT deck',()=>{
+ it('offers Last Will immediately after a tribute, without waiting for an unrelated chain',()=>{
+  let s=setup();const will=move(s,LAST_WILL,'hand'),ball=move(s,SHINE_BALL,'monster'),monarch=move(s,ZABORG,'hand'),target=move(s,HOSHI,'deck');
+  s=resolve(activate(s,will));
+  s=act(s,'TRIBUTE_SUMMON',a=>a.type==='TRIBUTE_SUMMON'&&a.instanceId===monarch&&a.materials.includes(ball)&&a.position==='attack');
+  expect(s.deferredTriggers??[]).toEqual([]);
+  expect(s.pendingTriggers?.some(t=>t.effectId==='LAST_WILL_SUMMON')).toBe(true);
+  // Queue the Monarch's summon effect and Last Will on the same turn.
+  s=act(s,'ACTIVATE_TRIGGER',a=>a.type==='ACTIVATE_TRIGGER'&&a.sourceId===monarch&&a.choiceId===monarch);
+  expect(legalActions(s,ctx,0).some(a=>a.type==='ADVANCE')).toBe(false);
+  s=act(s,'ACTIVATE_TRIGGER',a=>a.type==='ACTIVATE_TRIGGER'&&a.sourceId===will&&a.choiceId===target&&a.declaredType==='attack');s=resolve(s);
+  expect(s.turn).toBe(3);expect(s.cards[target].location).toBe('monster');
+  expect(s.pendingTriggers??[]).toEqual([]);
+ });
+ it('offers Last Will at the end of the qualifying battle, before leaving the turn',()=>{
+  let s=setup();const will=move(s,LAST_WILL,'hand'),ball=move(s,SHINE_BALL,'monster'),enemy=move(s,ASURA,'monster',1),target=move(s,HOSHI,'deck');
+  s=resolve(activate(s,will));s=battle(s,ball,enemy);
+  expect(s.cards[ball].location).toBe('graveyard');expect(s.deferredTriggers??[]).toEqual([]);
+  expect(legalActions(s,ctx,0).some(a=>a.type==='ACTIVATE_TRIGGER'&&a.sourceId===will&&a.choiceId===target)).toBe(true);
+  expect(legalActions(s,ctx,0).some(a=>a.type==='ADVANCE')).toBe(false);
+ });
  it('preserves all forty supplied cards and enables guided play without weakening unsupported-deck safety',()=>{expect(VENUS_LIGHT.main).toHaveLength(40);expect(parseYdk(ydk)).toEqual({main:VENUS_LIGHT.main,extra:[],side:[]});expect(assessDeck(VENUS_LIGHT,catalog).supported).toBe(true);expect(unsupportedEffects(ctx,VENUS_LIGHT.main.filter(id=>ctx.cards.get(id)?.type!=='Normal Monster'))).toEqual([]);expect(assessDeck({...VENUS_LIGHT,main:[...VENUS_LIGHT.main.slice(1),86988864]},catalog).supported).toBe(false);});
  it('Venus pays exactly 500 at activation, selects on resolution, and can summon repeatedly',()=>{
   let s=setup();const venus=move(s,VENUS,'monster'),ball=move(s,SHINE_BALL,'deck');s=activate(s,venus);expect(s.players[0].lp).toBe(7500);expect(s.cards[ball].location).toBe('deck');s=resolve(s);expect(s.pendingLightChoice?.kind).toBe('VENUS');
