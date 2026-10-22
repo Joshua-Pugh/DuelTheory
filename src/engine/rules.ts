@@ -78,6 +78,12 @@ function triggerOptions(s:DuelState,ctx:EngineContext,seat:Seat):LegalAction[]{
 const other=(seat:Seat):Seat=>seat===0?1:0;
 const mainPhase=(s:DuelState)=>s.phase==='MAIN_1'||s.phase==='MAIN_2';
 const ritualSearchable=(s:DuelState,ctx:EngineContext,seat:Seat,kind:'RITUAL_ANY'|'RITUAL_MONSTER')=>s.players[seat].deck.filter(id=>{const card=getCard(s,id,ctx);return (card.type.includes('Monster')&&card.type.includes('Ritual'))||(kind==='RITUAL_ANY'&&card.type.includes('Spell')&&(card.race==='Ritual'||card.type.includes('Ritual')));});
+function queueRitualSearch(s:DuelState,ctx:EngineContext,sourceId:string,controller:Seat){
+ const card=getCard(s,sourceId,ctx);if(card.id!==MANJU&&card.id!==SENJU)return;
+ const kind=card.id===MANJU?'RITUAL_ANY':'RITUAL_MONSTER';
+ if(ritualSearchable(s,ctx,controller,kind).length)s.pendingSearch={sourceId,controller,kind};
+ else log(s,'SEARCH_UNAVAILABLE',`${card.name}: no searchable Ritual cards remain; continue playing.`,controller);
+}
 const onField=(s:DuelState,id:string)=>s.cards[id]?.location==='spell';
 const targets=(s:DuelState)=>[...s.players[0].zones.spell,...s.players[1].zones.spell].filter((id):id is string=>id!==null);
 function mstActions(s:DuelState,ctx:EngineContext,seat:Seat):LegalAction[]{
@@ -168,7 +174,7 @@ function rawLegalActions(s:DuelState,ctx:EngineContext,seat:Seat):LegalAction[]{
  if(!s.chain.length&&s.summonResponse&&s.summonResponse.negatable){const windowSeat=other(s.summonResponse.summoner);const counters=deckResponseActions(s,ctx,windowSeat).filter(a=>a.type==='ACTIVATE_LIGHT_EFFECT'&&a.effectId==='SOLEMN_SUMMON');if(counters.length)return seat===windowSeat?[...counters,{type:'PASS_SUMMON_NEGATION',seat,description:'Allow summon · continue to summon effects'}]:[];}
  if(s.pendingTriggers?.length&&!s.chain.some(l=>l.effectId==='SOLEMN_SUMMON'))return triggerOptions(s,ctx,seat);
  if(s.pendingRitual){if(seat!==s.pendingRitual.controller)return [];const choices=ritualChoices(s,ctx,seat,s.pendingRitual.sourceId);return choices.length?choices:[{type:'FINISH_RITUAL',seat,description:'Ritual has no remaining legal materials'}];}
- if(s.pendingSearch){if(s.pendingSearch.controller!==seat)return [];return [{type:'DECLINE_TRIGGER',seat,description:'Decline optional search trigger'},...ritualSearchable(s,ctx,seat,s.pendingSearch.kind).map(searchId=>({type:'TRIGGER_SEARCH' as const,seat,sourceId:s.pendingSearch!.sourceId,searchId,description:`Activate search trigger: add ${getCard(s,searchId,ctx).name} to hand`}))];}
+ if(s.pendingSearch){if(s.pendingSearch.controller!==seat)return [];return [{type:'DECLINE_TRIGGER',seat,description:ritualSearchable(s,ctx,seat,s.pendingSearch.kind).length?'Decline optional search trigger':'No Ritual cards left · continue'},...ritualSearchable(s,ctx,seat,s.pendingSearch.kind).map(searchId=>({type:'TRIGGER_SEARCH' as const,seat,sourceId:s.pendingSearch!.sourceId,searchId,description:`Activate search trigger: add ${getCard(s,searchId,ctx).name} to hand`}))];}
  if(s.chain.length){if(seat!==s.priority)return [];if(s.chain.some(l=>l.damageStep))return [{type:'PASS_CHAIN',seat,description:'Continue Damage Step effect chain'}];const actions=[...mstActions(s,ctx,seat),...bookActions(s,ctx,seat),...deckResponseActions(s,ctx,seat)];actions.push({type:'PASS_CHAIN',seat,description:'Pass chain response priority'});if(s.consecutivePasses===1)actions.push({type:'RESOLVE_CHAIN',seat,description:'Resolve chain (both players passed)'});return actions;}
  if(s.summonResponse){if(seat!==(s.summonResponse.priority??other(s.summonResponse.summoner)))return [];return [...deckResponseActions(s,ctx,seat),{type:'PASS_SUMMON_RESPONSE',seat,description:'Continue after summon'}];}
  if(s.freeResponse){if(s.freeResponse.priority!==seat)return [];return [...freeResponses(s,ctx,seat),{type:'PASS_FREE_RESPONSE',seat,description:'Continue after response opportunity'}];}
@@ -370,7 +376,7 @@ export function dispatchDuel(original:DuelState,action:DuelAction,ctx:EngineCont
  case 'FLIP_SUMMON':{
  const instance=s.cards[action.instanceId];instance.faceDown=false;instance.position='attack';instance.lastPositionTurn=s.turn;enqueueApprenticeSummon(s,action.instanceId,seat);summonDeckTriggers(s,action.instanceId);if(s.summonResponse?.sourceId===action.instanceId)s.summonResponse.negatable=true;
  const id=instance.cardId;if(id===33508719)(s.pendingTriggers??=[]).push({sourceId:action.instanceId,controller:seat,effectId:'JAR',mandatory:true});chaosFlip(s,action.instanceId);
- if(id===MANJU||id===SENJU)s.pendingSearch={sourceId:action.instanceId,controller:seat,kind:id===MANJU?'RITUAL_ANY':'RITUAL_MONSTER'};
+ queueRitualSearch(s,ctx,action.instanceId,seat);
  if(id===MAGICIAN_OF_FAITH||id===DEKOICHI)(s.pendingTriggers??=[]).push({sourceId:action.instanceId,controller:seat,effectId:id===MAGICIAN_OF_FAITH?'MOF_RECOVER':'DEKOICHI_DRAW',mandatory:true});
  log(s,'FLIP_SUMMON',`${getCard(s,action.instanceId,ctx).name} was Flip Summoned.`,seat);break;
  }
@@ -389,7 +395,7 @@ export function dispatchDuel(original:DuelState,action:DuelAction,ctx:EngineCont
  s.consecutivePasses=0;log(s,'ACTIVATE',`${t.mandatory?'Mandatory':'Optional'} trigger ${t.effectId} placed as Chain Link ${s.chain.length}.`,seat);break;
  }
  case 'DRAW_PHASE':draw(s,seat,1);s.pendingDraw=false;openFreeResponse(s,ctx);break;
- case 'NORMAL_SUMMON':{const card=getCard(s,action.instanceId,ctx);removeFromHand(p,action.instanceId);placeMonster(s,action.instanceId,seat,action.zone,action.position||'attack',['attack','faceDownDefense']);const instance=s.cards[action.instanceId];p.normalSummoned=true;enqueueApprenticeSummon(s,action.instanceId,seat);summonDeckTriggers(s,action.instanceId,true);if(!instance.faceDown&&(card.id===MANJU||card.id===SENJU)){s.pendingSearch={sourceId:action.instanceId,controller:seat,kind:card.id===MANJU?'RITUAL_ANY':'RITUAL_MONSTER'};}log(s,'NORMAL_SUMMON',`${card.name} ${instance.faceDown?'set':'Normal Summoned'} to zone ${action.zone+1}`,seat);break;}
+ case 'NORMAL_SUMMON':{const card=getCard(s,action.instanceId,ctx);removeFromHand(p,action.instanceId);placeMonster(s,action.instanceId,seat,action.zone,action.position||'attack',['attack','faceDownDefense']);const instance=s.cards[action.instanceId];p.normalSummoned=true;enqueueApprenticeSummon(s,action.instanceId,seat);summonDeckTriggers(s,action.instanceId,true);if(!instance.faceDown)queueRitualSearch(s,ctx,action.instanceId,seat);log(s,'NORMAL_SUMMON',`${card.name} ${instance.faceDown?'set':'Normal Summoned'} to zone ${action.zone+1}`,seat);break;}
  case 'DECLINE_TRIGGER':{log(s,'DECLINE','Optional summon search effect was declined.',seat);s.pendingSearch=undefined;break;}
  case 'TRIGGER_SEARCH':{const pending=s.pendingSearch!;s.pendingSearch=undefined;s.chain.push({instanceId:pending.sourceId,controller:seat,effectId:'SEARCH_RITUAL',targets:[],spellSpeed:1,searchIds:[action.searchId]});s.priority=other(seat);s.consecutivePasses=0;log(s,'ACTIVATE',`Triggered search of ${getCard(s,action.searchId,ctx).name}.`,seat);break;}
  case 'ACTIVATE_THUNDER_DRAGON':{removeFromHand(p,action.instanceId);toGraveyard(s,action.instanceId);s.chain.push({instanceId:action.instanceId,controller:seat,effectId:'THUNDER_SEARCH',targets:[],spellSpeed:1,searchIds:action.searchIds});s.priority=other(seat);s.consecutivePasses=0;log(s,'ACTIVATE',`Thunder Dragon discarded as cost to search up to two copies.`,seat);break;}
