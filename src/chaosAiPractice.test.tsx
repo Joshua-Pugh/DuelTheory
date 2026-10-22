@@ -1,6 +1,7 @@
 import {GameLogWriter,GAME_LOG_SETTING} from './ai/gameLogs';
 import {DISPLAY_NAME_KEY} from './playerProfile';
 import {AI_PILOTS} from './ai/pilots';
+import {loadOverallRecord,overallTotals} from './ai/overallRecord';
 import {loadLearning,LEARNING_KEY} from './ai/learning';
 // @vitest-environment happy-dom
 import {beforeEach,afterEach,it,expect,vi} from 'vitest';import {act} from 'react';import {createRoot,type Root} from 'react-dom/client';
@@ -11,6 +12,7 @@ function click(text:string){const el=Array.from(document.querySelectorAll('butto
 async function tick(ms:number){await act(async()=>{await vi.advanceTimersByTimeAsync(ms);});}
 beforeEach(()=>{window.localStorage.clear();vi.useFakeTimers();Object.assign(globalThis,{IS_REACT_ACT_ENVIRONMENT:true});vi.stubGlobal('matchMedia',vi.fn((query:string)=>({matches:query.includes('reduced-motion'),addEventListener(){},removeEventListener(){}})));host=document.createElement('div');document.body.append(host);root=createRoot(host);});
 afterEach(()=>{act(()=>root.unmount());host.remove();vi.clearAllTimers();vi.useRealTimers();vi.restoreAllMocks();vi.unstubAllGlobals();});
+it('clears legacy setup totals and shows one zeroed record under the saved name',()=>{localStorage.setItem(PRACTICE_RECORD_KEY,JSON.stringify([{id:'old',phase:'complete',winner:1,pilot:'old-version'}]));localStorage.setItem(DISPLAY_NAME_KEY,'Mad Scientist');act(()=>root.render(<EnginePreview initialAI deck={CHAOS_TURBO} catalog={catalog} preferences={DEFAULT_PREFERENCES} onOpenPreferences={()=>{}}/>));const panel=document.querySelector('[aria-label="Overall AI record"]')!;expect(panel.textContent).toContain('Mad Scientist');expect(panel.textContent).not.toContain('old-version');expect(panel.querySelectorAll('td')[0].textContent).toBe('0–0–0');expect(panel.querySelectorAll('td')[1].textContent).toBe('0–0–0');expect(localStorage.getItem(PRACTICE_RECORD_KEY)).toBeNull();expect(overallTotals(loadOverallRecord(localStorage)).matches.losses).toBe(0);});
 it('redacts the human hand before calling the live AI pilot',async()=>{
  const pilot=vi.spyOn(AI_PILOTS.chaos,'choose');
  act(()=>root.render(<EnginePreview initialAI deck={CHAOS_TURBO} catalog={catalog} preferences={DEFAULT_PREFERENCES} onOpenPreferences={()=>{}}/>));
