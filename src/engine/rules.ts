@@ -16,6 +16,7 @@ export const MYSTICAL_SPACE_TYPHOON=5318639;
 export const CONTRACT_WITH_THE_ABYSS=69035382;
 export const MANJU=95492061;
 export const SENJU=23401839;
+export const SONIC_BIRD=57617178;
 export const THUNDER_DRAGON=31786629;
 export const SANGAN=26202165;
 export const MAGICIAN_OF_FAITH=31560081;
@@ -77,10 +78,10 @@ function triggerOptions(s:DuelState,ctx:EngineContext,seat:Seat):LegalAction[]{
 
 const other=(seat:Seat):Seat=>seat===0?1:0;
 const mainPhase=(s:DuelState)=>s.phase==='MAIN_1'||s.phase==='MAIN_2';
-const ritualSearchable=(s:DuelState,ctx:EngineContext,seat:Seat,kind:'RITUAL_ANY'|'RITUAL_MONSTER')=>s.players[seat].deck.filter(id=>{const card=getCard(s,id,ctx);return (card.type.includes('Monster')&&card.type.includes('Ritual'))||(kind==='RITUAL_ANY'&&card.type.includes('Spell')&&(card.race==='Ritual'||card.type.includes('Ritual')));});
+const ritualSearchable=(s:DuelState,ctx:EngineContext,seat:Seat,kind:'RITUAL_ANY'|'RITUAL_MONSTER'|'RITUAL_SPELL')=>s.players[seat].deck.filter(id=>{const card=getCard(s,id,ctx);return (kind!=='RITUAL_SPELL'&&card.type.includes('Monster')&&card.type.includes('Ritual'))||(kind!=='RITUAL_MONSTER'&&card.type.includes('Spell')&&(card.race==='Ritual'||card.type.includes('Ritual')));});
 function queueRitualSearch(s:DuelState,ctx:EngineContext,sourceId:string,controller:Seat){
- const card=getCard(s,sourceId,ctx);if(card.id!==MANJU&&card.id!==SENJU)return;
- const kind=card.id===MANJU?'RITUAL_ANY':'RITUAL_MONSTER';
+ const card=getCard(s,sourceId,ctx);if(card.id!==MANJU&&card.id!==SENJU&&card.id!==SONIC_BIRD)return;
+ const kind=card.id===MANJU?'RITUAL_ANY':card.id===SONIC_BIRD?'RITUAL_SPELL':'RITUAL_MONSTER';
  if(ritualSearchable(s,ctx,controller,kind).length)s.pendingSearch={sourceId,controller,kind};
  else log(s,'SEARCH_UNAVAILABLE',`${card.name}: no searchable Ritual cards remain; continue playing.`,controller);
 }
@@ -518,4 +519,4 @@ function resolveChain(s:DuelState,resolveContext:EngineContext,preserveSummon=fa
   }else {pending.damageStep='START';log(s,'DAMAGE_STEP','Attack response chain resolved. Damage Step begins.',pending.attacker);}
  }
 }
-export function unsupportedEffects(ctx:EngineContext,ids:number[]):string[]{return [...new Set(ids)].filter(id=>!graveyardDeckIds.has(id)&&!reasoningIds.has(id)&&!monarchIds.has(id)&&!goatControlIds.has(id)&&!lightEffectIds.has(id)&&!chaosEffectIds.has(id)&&!ritualDeckEffectIds.has(id)&&id!==BOOK_OF_MOON&&id!==MIRROR_FORCE&&id!==SAKURETSU_ARMOR&&id!==GRACEFUL_CHARITY&&id!==POT_OF_GREED&&id!==MYSTICAL_SPACE_TYPHOON&&id!==CONTRACT_WITH_THE_ABYSS&&id!==CONTRACT_WITH_THE_DARK_MASTER&&id!==SHINATOS_ARK&&id!==MANJU&&id!==SENJU&&id!==THUNDER_DRAGON&&id!==SANGAN&&id!==MAGICIAN_OF_FAITH&&id!==DEKOICHI&&id!==MYSTIC_TOMATO&&id!==SHINING_ANGEL&&id!==DD_WARRIOR_LADY&&id!==APPRENTICE_MAGICIAN).map(id=>ctx.cards.get(id)?.name||String(id));}
+export function unsupportedEffects(ctx:EngineContext,ids:number[]):string[]{return [...new Set(ids)].filter(id=>!graveyardDeckIds.has(id)&&!reasoningIds.has(id)&&!monarchIds.has(id)&&!goatControlIds.has(id)&&!lightEffectIds.has(id)&&!chaosEffectIds.has(id)&&!ritualDeckEffectIds.has(id)&&id!==BOOK_OF_MOON&&id!==MIRROR_FORCE&&id!==SAKURETSU_ARMOR&&id!==GRACEFUL_CHARITY&&id!==POT_OF_GREED&&id!==MYSTICAL_SPACE_TYPHOON&&id!==CONTRACT_WITH_THE_ABYSS&&id!==CONTRACT_WITH_THE_DARK_MASTER&&id!==SHINATOS_ARK&&id!==MANJU&&id!==SENJU&&id!==SONIC_BIRD&&id!==THUNDER_DRAGON&&id!==SANGAN&&id!==MAGICIAN_OF_FAITH&&id!==DEKOICHI&&id!==MYSTIC_TOMATO&&id!==SHINING_ANGEL&&id!==DD_WARRIOR_LADY&&id!==APPRENTICE_MAGICIAN).map(id=>ctx.cards.get(id)?.name||String(id));}
