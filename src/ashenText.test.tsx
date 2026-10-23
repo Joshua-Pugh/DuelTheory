@@ -5,6 +5,13 @@ import {rulesForCard,cleanTypeLine} from './ashenPresentation';
 import RulesText from './RulesText';
 import CardMaterials from './CardMaterials';
 describe('source card text',()=>{
+ it('keeps complete control clauses and corrected spelling in the shared card renderer',()=>{
+  const warhowl=catalog.cards.find(c=>c.name==='Warhowl Instigator')!;
+  expect(warhowl.effectText).toContain('under your control, draw a card.');
+  expect(renderToStaticMarkup(<RulesText text={warhowl.effectText}/>)).toContain('under your control');
+  expect(catalog.cards.find(c=>c.name==='Ashenfield War Ram')!.effectText).toContain('each Noble you control');
+  for(const c of catalog.cards)expect(c.effectText).not.toMatch(/under your,|each Noble your control|to ant target|damage is delt|Kordath/);
+ });
  it('provides rules for all 91 entries without costs or footer text in the type line',()=>{
   expect(catalog.cards).toHaveLength(91);
   for(const c of catalog.cards){expect(c.effectText.trim().length).toBeGreaterThan(0);expect(c.effectStatus).toBe('source-transcribed');expect(c.subtype).not.toMatch(/Ashen Throne|A\d+\s*\/|^\d/);}

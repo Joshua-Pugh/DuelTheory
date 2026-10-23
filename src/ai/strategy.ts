@@ -9,6 +9,11 @@ export function removalPayoff(s:DuelState,id:string|undefined,seat:Seat,worth:(i
  if(!c.faceDown&&[70828912,97077563].includes(c.cardId)&&c.linkedTarget){const linked=s.cards[c.linkedTarget];if(linked?.location==='monster')value+=linked.controller!==seat?worth(linked.instanceId):-worth(linked.instanceId);}
  return value;
 }
+/** Only count unopposed friendly removals as committed; a new enemy link may change the outcome. */
+export function committedRemoval(s:DuelState,id:string,seat:Seat){
+ let lastOpponent=-1;s.chain.forEach((l,i)=>{if(l.controller!==seat)lastOpponent=i;});
+ return s.chain.some((l,i)=>i>lastOpponent&&l.controller===seat&&l.targets.includes(id)&&['RAIGEKI_BREAK','RING','ZABORG_DESTROY','NIGHT_DESTROY','CHAOS_BANISH'].includes(l.effectId));
+}
 /** Separate voluntary friendly fire from compulsory targeting and non-destructive effects. */
 export function sensibleActions(s:DuelState,actions:readonly LegalAction[],seat:Seat,catalog:readonly Card[]){
  const cards=new Map(catalog.map(c=>[c.id,c]));
@@ -36,7 +41,8 @@ export function sensibleActions(s:DuelState,actions:readonly LegalAction[],seat:
     // Lily's publicly available boost is a known combat threat, not hidden information.
     if(target.cardId===79575620&&s.players[target.controller].lp>2000&&power<guard+3000)return false;
     // Never throw an ordinary resource monster away just to reduce board size.
-    if(target.position==='attack'&&power<guard&&![83011277,83011278,26202165].includes(s.cards[attacker].cardId))return false;
+    const lady=s.cards[attacker].cardId===7572887&&s.players[seat].lp>Math.max(0,guard-power);
+    if(target.position==='attack'&&power<guard&&!lady&&![83011277,83011278,26202165].includes(s.cards[attacker].cardId))return false;
    }
   }
   const target='targetId'in a?a.targetId:undefined;

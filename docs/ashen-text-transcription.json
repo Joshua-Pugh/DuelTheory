@@ -78,7 +78,7 @@
     "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
   },
   "ashen-noble-ashenfield-war-ram": {
-    "effectText": "Siege\nWhenever Ashenfield War Ram deals damage to a Command Station, each Noble your control gets Fortify 1.",
+    "effectText": "Siege\nWhenever Ashenfield War Ram deals damage to a Command Station, each Noble you control gets Fortify 1.",
     "flavorText": "",
     "subtype": "Unit — Noble Siege Engine",
     "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
@@ -312,13 +312,13 @@
     "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
   },
   "ashen-brute-crude-spearthrower": {
-    "effectText": "Ranged\nSoar Units blocked by Crude Spearthrower, take 1 damage before combat damage is delt.",
+    "effectText": "Ranged\nSoar Units blocked by Crude Spearthrower, take 1 damage before combat damage is dealt.",
     "flavorText": "",
     "subtype": "Unit — Brute Hunter",
     "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
   },
   "ashen-brute-warhowl-instigator": {
-    "effectText": "Whenever a non-token Brute enters the frontline under your, draw a card.",
+    "effectText": "Whenever a non-token Brute enters the frontline under your control, draw a card.",
     "flavorText": "",
     "subtype": "Unit — Brute Raider",
     "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
@@ -378,7 +378,7 @@
     "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
   },
   "ashen-brute-ashclaw-skyreaver": {
-    "effectText": "Soar\nWhen Ashclaw Skyreaver enters the Front Line, create three 1A/1D frenzied brute tokens.\nPay 1{Untuned} and sacrifice a Brute: deal 1 damage to ant target.",
+    "effectText": "Soar\nWhen Ashclaw Skyreaver enters the Front Line, create three 1A/1D frenzied brute tokens.\nPay 1{Untuned} and sacrifice a Brute: deal 1 damage to any target.",
     "flavorText": "",
     "subtype": "Unit — Brute Warbeast",
     "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
@@ -390,7 +390,7 @@
     "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
   },
   "ashen-brute-korgath-lord-of-ruin": {
-    "effectText": "Charge, Relentless\nWhenever a Brute you control dies, Kordath, Lord of Ruin deals 1 damage to each Command Station.",
+    "effectText": "Charge, Relentless\nWhenever a Brute you control dies, Korgath, Lord of Ruin deals 1 damage to each Command Station.",
     "flavorText": "",
     "subtype": "Legendary Unit — Brute Warlord",
     "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"

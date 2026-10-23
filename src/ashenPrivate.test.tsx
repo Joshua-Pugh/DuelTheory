@@ -1,0 +1,5 @@
+// @vitest-environment happy-dom
+import {afterEach,expect,it} from 'vitest';import {renderToStaticMarkup} from 'react-dom/server';
+import AshenDuelArena from './AshenDuelArena';import PrivateMatchRoom from './PrivateMatchRoom';import {pageFromLocation} from './platformRoutes';import {CHAOS_TURBO} from './supportedDecks';import json from '../public/catalog.json';import type {Card} from './core/types';
+afterEach(()=>{location.hash='';localStorage.clear();});
+it('links directly from the AT arena to an AT-selected private room',()=>{const html=renderToStaticMarkup(<AshenDuelArena/>);expect(html).toContain('href="#/private/ashen"');expect(html).toContain('room chat');expect(pageFromLocation('#/private/ashen')).toBe('private');location.hash='#/private/ashen';const room=renderToStaticMarkup(<PrivateMatchRoom deck={CHAOS_TURBO} catalog={json as Card[]}/>);expect(room).toContain('<option value="ashen" selected="">');expect(room).toContain('Brutes · Broken Fist');expect(room).toContain('Nobles · Crown’s Might');expect(room).toContain('Create private room');});

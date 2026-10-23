@@ -1,5 +1,5 @@
 import {battleAttack} from '../engine/ritualDeckEffects';
-import {removalPayoff,sensibleActions} from './strategy';
+import {committedRemoval,removalPayoff,sensibleActions} from './strategy';
 import {publicSetRead} from './opponentRead';
 import type {Card} from '../core/types';import type {DuelState,LegalAction,Seat} from '../engine/model';
 import {bestLegalAction,goatObservation,hasDecision,type Decision} from './policy';
@@ -27,6 +27,11 @@ export function chooseResourceHeuristic(state:DuelState,legal:readonly LegalActi
   const combatPayoff=(id:string)=>s.turn>1&&s.phase!=='MAIN_2'&&(atk(id)>=enemy.lp&&theirs.length===0||card(id)?.id!==SERPENT&&theirs.some(t=>!s.cards[t].faceDown&&s.cards[t].position==='attack'&&atk(t)<atk(id)));
   const support=(id:string)=>[SERPENT,SANGAN].includes(card(id)?.id??0);
   if(a.type==='DRAW_PHASE')return result(1000,'Draw for the turn.');
+  if(a.type==='ACTIVATE_DD_WARRIOR_LADY'){
+   const battle=s.pendingAttack,enemy=battle?.targetId&&(s.cards[battle.attackerId].controller===seat?battle.targetId:battle.attackerId),lady=battle?.ddLadyId;
+   const useful=enemy&&lady&&(battle?.battleDestruction?.includes(lady)||!battle?.battleDestruction?.includes(enemy)||[26202165,83011277,83011278,8131171].includes(s.cards[enemy].cardId));
+   return result(useful?120:-20,'Banish to answer a surviving threat or deny graveyard value; keep Lady after an ordinary favorable battle.');
+  }
   if(['ADVANCE_DAMAGE_STEP','COMPLETE_DIE_ROLL'].includes(a.type))return result(1000,'Continue the required battle or random result.');
   if(a.type==='CHOOSE_RANDOM_DISCARD')return result(100,'Choose a face-down random discard without inspecting it.');
   if(a.type==='CHOOSE_DISCARD')return result(200-cost(a.discardIds)/100,'Discard recoverable cards or surplus Thunder Dragons; preserve power cards.');
@@ -38,6 +43,11 @@ export function chooseResourceHeuristic(state:DuelState,legal:readonly LegalActi
   if(a.type==='ACTIVATE_TRIGGER'){
    const effect=s.pendingTriggers?.find(t=>t.sourceId===a.sourceId)?.effectId;
    let value=100+worth(a.choiceId)/100;
+   if(effect==='MOF_RECOVER'&&a.choiceId){
+    const threat=theirs.some(id=>!s.cards[id].faceDown&&atk(id)>=2200),recovered=card(a.choiceId)?.id;
+    if(threat&&recovered===45986603)value=170;
+    if(threat&&recovered===BOOK)value=150;
+   }
    if(effect==='ZABORG_DESTROY'&&a.choiceId)value=s.cards[a.choiceId].controller===seat?-200:100+removal(a.choiceId)/100;
    if(effect==='TOMATO_SUMMON'||effect==='SHINING_ANGEL_SUMMON'){const chosen=card(a.choiceId),lethal=s.current===seat&&s.phase==='BATTLE'&&theirs.length===0&&Number(chosen?.atk)>=enemy.lp;value=lethal?10000:100+(chosen?.id===SANGAN?35:chosen?.id===83011278||chosen?.id===83011277?25:chosen?.id===SPY?15:chosen?.type.includes('Flip')?0:worth(a.choiceId)/200);}
    if(effect==='NIGHT_DESTROY'&&a.choiceId)value=100+removal(a.choiceId)/100;
@@ -57,6 +67,7 @@ export function chooseResourceHeuristic(state:DuelState,legal:readonly LegalActi
    const liveDiscard=actions.some(x=>x.type==='ACTIVATE_GRACEFUL_CHARITY'||x.type==='ACTIVATE_DECK_EFFECT'&&x.costId===a.instanceId&&(x.targetId? s.cards[x.targetId]?.controller!==seat:theirs.some(id=>!s.cards[id].faceDown&&card(id)?.race===x.declaredType)));
    if(c?.id===SERPENT)return result(set?(ours.length===0&&theirs.length>0&&!liveDiscard?55:-15):combatPayoff(a.instanceId)?95:-40,'Keep Serpent for repeatable discard costs; set it only when a blocker is needed, or attack for lethal.');
    if(c?.id===SANGAN)return result(set?70:combatPayoff(a.instanceId)?90:-25,'Set Sangan for defense and its search; attack only when there is a concrete combat payoff.');
+   if(c?.id===7572887&&!set&&s.turn>1&&s.phase==='MAIN_1'&&!ours.some(id=>card(id)?.id===63519819&&!s.cards[id].faceDown)&&theirs.some(id=>!s.cards[id].faceDown&&atk(id)>1500&&own.lp>Math.max(0,atk(id)-1500)))return result(115,'Use Lady to answer a larger visible threat when the battle damage is survivable.');
    let value=set?(flip?75:15):(flip?10:65+(c?.id===71413901?8:0));
    if(c?.id===FAITH&&!own.graveyard.some(id=>card(id)?.type.includes('Spell')))value-=30;
    if(c?.id===SPY&&set)value+=pressure>1400?15:8;
@@ -80,12 +91,13 @@ export function chooseResourceHeuristic(state:DuelState,legal:readonly LegalActi
    const attacker=a.type==='DECLARE_ATTACK'?a.attackerId:s.pendingAttack!.attackerId,power=atk(attacker);
    if(!a.targetId)return result(power>=enemy.lp?10000:70+power/1000,'Convert board advantage into direct damage.');
    const t=s.cards[a.targetId],guard=t.faceDown?setRead.defenseEstimate:t.position==='attack'?atk(a.targetId):Number(card(a.targetId)?.def??1800),advantage=power-guard;
+   if(card(attacker)?.id===7572887&&!t.faceDown&&advantage<0&&own.lp>-advantage&&worth(a.targetId)>=worth(attacker))return result(95,'Trade Lady for a larger visible threat through her banish effect.');
    if(t.faceDown&&(power>=1700||setRead.flipEngine&&power>=1500&&power>=setRead.defenseEstimate)&&own.lp>2500&&ours.length>=theirs.length)return result(25+power/1000+setRead.urgency/100,`Probe when life and board position allow. ${setRead.reason}`);
    return result(advantage>0?80+worth(a.targetId)/1000:advantage===0&&!t.faceDown&&t.position==='attack'&&worth(a.targetId)>=worth(attacker)?20:-20,'Prefer favorable attacks; estimate unknown defenders without reading their identities.');
   }
   if(a.type==='ACTIVATE_BOOK_OF_MOON'){
    const t=s.cards[a.targetId],top=s.chain.at(-1),attacker=s.pendingAttack?.attackerId;
-   if(t.controller===seat){const endangered=s.chain.some(l=>l.targets.includes(a.targetId)&&!['RAIGEKI_BREAK','NIGHT_DESTROY','ZABORG_DESTROY','EXILED'].includes(l.effectId)&&!(l.effectId==='CHAOS_BANISH'&&card(l.instanceId)?.id===BLS)||l.effectId==='MIRROR_FORCE'&&t.position==='attack');return result(endangered?120+worth(a.targetId)/1000:-15,'Use Book for protection only when turning face-down actually defeats the pending effect.');}
+   if(t.controller===seat){const endangered=s.chain.some(l=>l.controller!==seat&&(l.targets.includes(a.targetId)&&(['RING','SAKURETSU_ARMOR','SNATCH'].includes(l.effectId)||l.effectId==='CHAOS_BANISH'&&card(l.instanceId)?.id===SORC)||l.effectId==='MIRROR_FORCE'&&t.position==='attack'));return result(endangered?120+worth(a.targetId)/1000:-15,'Use Book for protection only when turning face-down actually defeats the pending opposing effect.');}
    const defendingTarget=s.pendingAttack?.targetId,guard=defendingTarget?(s.cards[defendingTarget].position==='attack'?atk(defendingTarget):Number(card(defendingTarget)?.def??1800)):0;
    const battleDanger=defending&&attacker===a.targetId&&(Math.max(0,atk(a.targetId)-guard)>=own.lp||atk(a.targetId)>=2200||!!defendingTarget&&atk(a.targetId)>guard&&worth(defendingTarget)>=2800);
    const resetSearch=[95492061,23401839,FAITH,SPY,DEKO,NIGHT].includes(card(a.targetId)?.id??0);
@@ -104,8 +116,8 @@ export function chooseResourceHeuristic(state:DuelState,legal:readonly LegalActi
     case 'SNATCH':return result(70+worth(target)/100,'Turn an opposing threat into our own board advantage.');
     case 'CHAOS_BANISH':{const id=target!,power=atk(source!),t=s.cards[id];return result(t.controller!==seat&&(atk(id)>=power||t.position!=='attack'||theirs.length>1)?90+worth(id)/1000:-10,'Banish a difficult threat; preserve attacks when combat is the better payoff.');}
     case 'RAIGEKI_BREAK':{const t=s.cards[target!];return result(t.controller!==seat?(removal(target)-cost(a.costId?[a.costId]:[]))/100+(defending?45:5):-40,'Pair Raigeki Break with Night Assailant, Serpent or spare Thunder Dragon for an efficient exchange.');}
-    case 'RING':{const damage=atk(target!),spentFlip=damage<=1000&&s.chain.some(l=>l.instanceId===target&&['MOF_RECOVER','DEKOICHI_DRAW','SANGAN_SEARCH'].includes(l.effectId));return result(damage>=enemy.lp&&damage<own.lp?10000:damage>=own.lp?-100:spentFlip?-20:s.cards[target!].controller!==seat?35+damage/1000:-20,'Use Ring for safe lethal damage or an efficient removal, avoiding self-lethal.');}
-    case 'TORRENTIAL':return result((sum(theirs)-sum(ours))/100-5,'Use Torrential only when the board exchange is favorable.');
+    case 'RING':{const damage=atk(target!),spentSearch=damage<=1600&&s.chain.some(l=>l.instanceId===target&&['MOF_RECOVER','DEKOICHI_DRAW','SANGAN_SEARCH','SEARCH_RITUAL','SPY_SUMMON','MIMIC_DRAW'].includes(l.effectId));return result(damage>=enemy.lp&&damage<own.lp?10000:damage>=own.lp?-100:spentSearch?-20:s.cards[target!].controller!==seat?35+damage/1000:-20,'Use Ring for safe lethal or a relevant body; removing a searcher does not negate its queued effect.');}
+    case 'TORRENTIAL':return result((sum(theirs.filter(id=>!committedRemoval(s,id,seat)))-sum(ours.filter(id=>!committedRemoval(s,id,seat))))/100-5,'Use Torrential for additional board value, accounting for removal already on the chain.');
     case 'CARD_DESTRUCTION':return result(own.hand.length>1&&own.hand.filter(id=>[TD,NIGHT,SERPENT].includes(card(id)?.id??0)).length>=2&&cost(own.hand.filter(id=>id!==source))<1000?80:-20,'Reload a hand rich in discard value; avoid throwing away strong hands.');
     default:return result(target?35+worth(target)/1000:20,'Use a supported legal effect.');
    }

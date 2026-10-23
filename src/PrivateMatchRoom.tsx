@@ -22,7 +22,7 @@ const noSavedDecks:Deck[]=[];
 export default function PrivateMatchRoom({deck,savedDecks=noSavedDecks,catalog}:{deck:Deck;savedDecks?:Deck[];catalog:Card[]}){
  const inviteCode=()=>location.hash.match(/^#\/private\/([A-Z2-9]{8})$/)?.[1]||'';
  const [mode,setMode]=useState<'single'|'best3'>('single');
- const [code,setCode]=useState(inviteCode),[game,setGame]=useState<Game>('goat'),[name,setName]=useState(loadDisplayName),[choice,setChoice]=useState('0'),[faction,setFaction]=useState<'Brute'|'Noble'>('Brute');
+ const [code,setCode]=useState(inviteCode),[game,setGame]=useState<Game>(()=>location.hash==='#/private/ashen'?'ashen':'goat'),[name,setName]=useState(loadDisplayName),[choice,setChoice]=useState('0'),[faction,setFaction]=useState<'Brute'|'Noble'>('Brute');
  const [credential,setCredential]=useState<Credential|null>(null),[room,setRoom]=useState<MatchView|null>(null),[info,setInfo]=useState<RoomInfo|null>(null),[error,setError]=useState(''),[busy,setBusy]=useState(false),[chatOpen,setChatOpen]=useState(false),[text,setText]=useState(''),[copied,setCopied]=useState(false);
  useDuelAudio(room?.goat,room?.seat,catalog);
  useMatchResultAudio(room?.code,room?.series?.results,room?.seat);

@@ -366,7 +366,7 @@ export function dispatchDuel(original:DuelState,action:DuelAction,ctx:EngineCont
  case 'ACTIVATE_DD_WARRIOR_LADY':{
   const pending=s.pendingAttack!;const sourceId=pending.ddLadyId!;
   pending.ddLadyId=undefined;pending.damageStep='END';
-  s.chain.push({instanceId:sourceId,controller:seat,effectId:'DD_WARRIOR_LADY_BANISH',targets:[pending.attackerId,pending.targetId!],spellSpeed:1});
+  s.chain.push({instanceId:sourceId,controller:seat,effectId:'DD_WARRIOR_LADY_BANISH',targets:[pending.attackerId,pending.targetId!],spellSpeed:1,damageStep:true});
   s.priority=other(seat);s.consecutivePasses=0;
   log(s,'ACTIVATE','D.D. Warrior Lady effect activated after damage calculation.',seat);break;
  }
