@@ -16,6 +16,19 @@ export function sensibleActions(s:DuelState,actions:readonly LegalAction[],seat:
   if(a.seat!==seat)return false;
   if(a.type==='ACTIVATE_POT_OF_GREED'&&s.players[seat].deck.length<2||a.type==='ACTIVATE_GRACEFUL_CHARITY'&&s.players[seat].deck.length<3)return false;
   const source='instanceId'in a?a.instanceId:undefined;
+  // An earlier friendly response already handles this target. Keep follow-up
+  // interaction unless an opponent has added another link since that response.
+  const targetId='targetId'in a?a.targetId:undefined;
+  const responseKind=a.type==='ACTIVATE_BOOK_OF_MOON'?'BOOK_OF_MOON':a.type==='ACTIVATE_DECK_EFFECT'&&['RAIGEKI_BREAK','RING'].includes(a.effectId)?'removal':undefined;
+  if(targetId&&responseKind){
+   if(responseKind==='BOOK_OF_MOON'&&s.chain.some(l=>l.effectId==='BOOK_OF_MOON_SET'&&l.targets.includes(targetId)))return false;
+   let lastOpponent=-1;s.chain.forEach((l,i)=>{if(l.controller!==seat)lastOpponent=i;});
+   if(s.chain.some((l,i)=>i>lastOpponent&&l.controller===seat&&l.targets.includes(targetId)&&['RAIGEKI_BREAK','RING','ZABORG_DESTROY','NIGHT_DESTROY','CHAOS_BANISH'].includes(l.effectId)))return false;
+  }
+  if(a.type==='DECLARE_ATTACK'||a.type==='REPLAY_ATTACK'){
+   const attacker=a.type==='DECLARE_ATTACK'?a.attackerId:s.pendingAttack?.attackerId;
+   if(attacker&&s.cards[attacker]?.token&&battleAttack(s,attacker,{cards})<=0)return false;
+  }
   if(source&&a.type.startsWith('ACTIVATE')&&cards.get(s.cards[source]?.cardId)?.type.includes('Trap')&&trapNegated(s,source))return false;
   if((a.type==='DECLARE_ATTACK'||a.type==='REPLAY_ATTACK')&&a.targetId){
    const attacker=a.type==='DECLARE_ATTACK'?a.attackerId:s.pendingAttack?.attackerId,target=s.cards[a.targetId];

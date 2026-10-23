@@ -42,7 +42,7 @@ export function chooseResourceHeuristic(state:DuelState,legal:readonly LegalActi
    if(effect==='TOMATO_SUMMON'||effect==='SHINING_ANGEL_SUMMON'){const chosen=card(a.choiceId),lethal=s.current===seat&&s.phase==='BATTLE'&&theirs.length===0&&Number(chosen?.atk)>=enemy.lp;value=lethal?10000:100+(chosen?.id===SANGAN?35:chosen?.id===83011278||chosen?.id===83011277?25:chosen?.id===SPY?15:chosen?.type.includes('Flip')?0:worth(a.choiceId)/200);}
    if(effect==='NIGHT_DESTROY'&&a.choiceId)value=100+removal(a.choiceId)/100;
    if(effect==='KYCOO_BANISH')value=100+(a.searchIds?.length??0)*10+(a.searchIds??[]).reduce((n,id)=>n+worth(id)/1000,0);
-   if(effect==='TSUKUYOMI_SET'&&a.choiceId){value=s.cards[a.choiceId].controller===seat?([FAITH,DEKO,SPY].includes(card(a.choiceId)?.id??0)?130:-40):125+atk(a.choiceId)/1000;}
+   if(effect==='TSUKUYOMI_SET'&&a.choiceId){const id=card(a.choiceId)?.id,useful=id===FAITH?own.graveyard.some(x=>card(x)?.type.includes('Spell')):id===DEKO||id===74713516?own.deck.length>0:id===SPY?own.deck.some(x=>card(x)?.id===SPY)&&ours.length<5:false;value=s.cards[a.choiceId].controller===seat?(useful?130:-40):125+atk(a.choiceId)/1000;}
    if(a.monsterZone!==undefined)value+=a.declaredType==='faceUpDefense'&&(card(a.choiceId)?.id===SPY)?5:a.declaredType==='attack'?2:0;
    return result(value,'Resolve the flip/recovery engine or exploit a useful summon trigger.');
   }
@@ -98,7 +98,7 @@ export function chooseResourceHeuristic(state:DuelState,legal:readonly LegalActi
     case 'DUO':return result(own.lp<=2000&&enemy.hand.length<2?-35:enemy.hand.length>=2?150:enemy.hand.length?70:-20,'Trade Delinquent Duo for opposing hand resources.');
     case 'DUSTSHOOT':return result(155,'Use Trap Dustshoot while the opponent still has four cards.');
     case 'BREAKER_DESTROY':return result(s.cards[target!]?.controller!==seat?45+removal(target)/100:-100,'Spend Breaker’s counter to clear opposing back row.');
-    case 'NOBLEMAN':return result(s.cards[target!]?.controller!==seat?85:-100,'Remove an opposing set monster; preserve our own flip engine.');
+    case 'NOBLEMAN':return result(s.cards[target!]?.controller!==seat?s.phase==='MAIN_1'&&s.turn>1&&ours.some(id=>card(id)?.id===BLS&&!s.cards[id].faceDown&&s.cards[id].position==='attack')?125:85:-100,'Clear a set with Nobleman before spending BLS’s attack on banishing it.');
     case 'HEAVY_STORM':return result((sum(enemy.zones.spell.filter((id):id is string=>!!id))-sum(own.zones.spell.filter((id):id is string=>!!id&&id!==source)))/100-3,'Use Heavy Storm when the exchange favors us.');
     case 'TRIBE_DESTROY':{const matching=(ids:string[])=>ids.filter(id=>!s.cards[id].faceDown&&card(id)?.race===a.declaredType);return result(matching(theirs).length?(sum(matching(theirs))-sum(matching(ours))-cost(a.costId?[a.costId]:[]))/100-5:-30,'Use Tribe only when the revealed monster-type exchange justifies the discard.');}
     case 'SNATCH':return result(70+worth(target)/100,'Turn an opposing threat into our own board advantage.');
