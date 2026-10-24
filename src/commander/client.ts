@@ -1,7 +1,8 @@
 import type {CommanderRoomState,RoomCommand} from './model';
 export type RoomSeat={code:string;token:string;playerId:string;api:string};
 export type RoomReply={state:CommanderRoomState;playerId:string};
-export const COMMANDER_API=(import.meta as ImportMeta & {env:Record<string,string>}).env.VITE_COMMANDER_API_URL||'https://dueltheory-commander.cfpadvantage.workers.dev';
+export const TABLE_API=(import.meta as ImportMeta & {env:Record<string,string>}).env.VITE_TABLE_API_URL||(import.meta as ImportMeta & {env:Record<string,string>}).env.VITE_COMMANDER_API_URL||'https://dueltheory-commander.cfpadvantage.workers.dev';
+export const COMMANDER_API=TABLE_API; // Original endpoint alias for existing clients.
 const storageKey='dueltheory-commander-seat-v1';
 export function savedRoomSeat(code?:string):RoomSeat|null{try{const s=JSON.parse(localStorage.getItem(code?storageKey+':'+code:storageKey)||'null');return s&&typeof s.code==='string'&&typeof s.token==='string'&&typeof s.playerId==='string'&&typeof s.api==='string'?s:null;}catch{return null;}}
 export const saveRoomSeat=(s:RoomSeat|null)=>{if(s){localStorage.setItem(storageKey,JSON.stringify(s));localStorage.setItem(storageKey+':'+s.code,JSON.stringify(s));}else localStorage.removeItem(storageKey);};
@@ -16,5 +17,5 @@ export async function roomRequest(api:string,code:string,token:string,method:'cr
  }
  throw Error('Unable to confirm the room update.');
 }
-export function roomInvite(code:string){const url=new URL(location.href);url.search='';url.searchParams.set('commander',code);url.hash='';return url.toString();}
+export function roomInvite(code:string){const url=new URL(location.href);url.search='';url.searchParams.set('table',code);url.hash='';return url.toString();}
 export type CounterCommand=Extract<RoomCommand,{type:'adjust'}>;

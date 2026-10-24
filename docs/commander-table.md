@@ -1,3 +1,5 @@
+> Superseded by [DuelTheory Table Companion](table-companion.md). This document describes the original implementation and legacy-room behavior, not the current product defaults.
+
 # Commander Table prototype
 
 DT's Commander Table is a manual multiplayer game companion. The host creates a room, shares its eight-character code/link, and each person joins on their own phone. Each seat can update only its own values. No MTG card simulation is involved.

@@ -1,7 +1,8 @@
+import {newCommanderRoom} from '../../src/commander/model';
 import {DurableObject} from 'cloudflare:workers';
-import {applyRoomCommand,newCommanderRoom,RoomError,type CommanderRoomState,type RoomCommand} from '../../src/commander/model';
-type StoredRoom={state:CommanderRoomState;members:Record<string,string>;requests:Record<string,string>;expires:number};
-type Result={status:number;body:{error:string}|{state:CommanderRoomState;playerId:string}};
+import {applyRoomCommand,newTableRoom,RoomError,type TableRoomState,type RoomCommand} from '../../src/table/model';
+type StoredRoom={state:TableRoomState;members:Record<string,string>;requests:Record<string,string>;expires:number};
+type Result={status:number;body:{error:string}|{state:TableRoomState;playerId:string}};
 const lifetime=24*60*60*1000;
 export class CommanderRoom extends DurableObject<Env>{
  constructor(ctx:DurableObjectState,env:Env){super(ctx,env);this.ctx.storage.sql.exec('CREATE TABLE IF NOT EXISTS room (id INTEGER PRIMARY KEY CHECK(id=1), data TEXT NOT NULL)');}
@@ -13,13 +14,13 @@ export class CommanderRoom extends DurableObject<Env>{
    let room=this.load();if(room&&room.expires<Date.now())room=null;
    if(method==='create'){
     if(room){if(room.members[hash]===room.state.host)return {status:200,body:{state:room.state,playerId:room.state.host}};return {status:409,body:{error:'That code is in use. Create a new room.'}};}
-    const actor=crypto.randomUUID(),state=newCommanderRoom(code,input.title,input.capacity,actor);
-    room={state:applyRoomCommand(state,actor,{type:'join',name:input.name as string,commanders:input.commanders as string[]},requestId),members:{[hash]:actor},requests:{[requestId]:actor},expires:Date.now()+lifetime};this.save(room);return {status:201,body:{state:room.state,playerId:actor}};
+    const actor=crypto.randomUUID(),state=input.profile===undefined?newCommanderRoom(code,input.title,input.capacity,actor):newTableRoom(code,input.title,input.capacity,actor,input.profile);
+    room={state:applyRoomCommand(state,actor,{type:'join',name:input.name as string,sources:input.sources as string[]|undefined,commanders:input.commanders as string[]|undefined},requestId),members:{[hash]:actor},requests:{[requestId]:actor},expires:Date.now()+lifetime};this.save(room);return {status:201,body:{state:room.state,playerId:actor}};
    }
    if(!room)return {status:404,body:{error:'Room not found or expired. Rooms last 24 hours after the last change.'}};
    let actor=room.members[hash];
    if(method==='join'){
-    if(!actor){actor=crypto.randomUUID();room.state=applyRoomCommand(room.state,actor,{type:'join',name:input.name as string,commanders:input.commanders as string[]},requestId);room.members[hash]=actor;room.requests[requestId]=actor;room.expires=Date.now()+lifetime;this.save(room);}
+    if(!actor){actor=crypto.randomUUID();room.state=applyRoomCommand(room.state,actor,{type:'join',name:input.name as string,sources:input.sources as string[]|undefined,commanders:input.commanders as string[]|undefined},requestId);room.members[hash]=actor;room.requests[requestId]=actor;room.expires=Date.now()+lifetime;this.save(room);}
     return {status:200,body:{state:room.state,playerId:actor}};
    }
    if(!actor)return {status:403,body:{error:'This device does not have a seat in that room. Join the room first.'}};
@@ -40,7 +41,7 @@ export default {
   const reply=(body:unknown,status=200)=>Response.json(body,{status,headers});
   if(origin&&!allowed.includes(origin))return reply({error:'Origin is not allowed.'},403);
   if(request.method==='OPTIONS')return new Response(null,{status:204,headers});
-  const url=new URL(request.url);if(url.pathname==='/health')return reply({ok:true,service:'DuelTheory Commander rooms'});
+  const url=new URL(request.url);if(url.pathname==='/health')return reply({ok:true,service:'DuelTheory Table Companion'});
   const match=url.pathname.match(/^\/rooms\/([A-Z2-9]{8})\/(create|join|read|action)$/);if(!match)return reply({error:'Unknown endpoint.'},404);
   const [,code,method]=match;if(request.method!==(method==='read'?'GET':'POST'))return reply({error:'Method not allowed.'},405);
   const token=request.headers.get('Authorization')?.replace(/^Bearer /,'')||'';if(!/^[a-zA-Z0-9_-]{32,128}$/.test(token))return reply({error:'A valid device seat token is required.'},401);
