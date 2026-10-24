@@ -19,8 +19,8 @@ export function checkAshenVictory(s:Battlefield){const d=duel(s);if(s.table.heal
 function requireIdle(s:Battlefield){if(s.rules?.pending||duel(s).stack.length||duel(s).jobs.length||duel(s).callPermission||duel(s).responseWindow||duel(s).ordering)throw Error('Finish the current Clash or choice first.');if(duel(s).winner!==undefined)throw Error('This duel is over.');}
 function reactive(s:Battlefield,id:string,p?:EffectProgram){const c=s.table.cards[id];return p?!!p.cost&&!['rig-outfit','lance-outfit'].includes(p.id):c?.type==='Tactic';}
 function ensureTiming(s:Battlefield,id:string,context:EffectContext,ability?:EffectProgram){const d=duel(s),c=s.table.cards[id];if(d.winner!==undefined||s.rules?.pending||d.ordering)throw Error('Resolve the current choice first.');if(!c||String(c.controller)!==context.player)throw Error('You do not control this card.');if(d.priority){if(d.priority.holder!==context.player)throw Error('Another player has priority.');if(!reactive(s,id,ability))throw Error('Only Tactics and reactive abilities may join the Clash.');}else if((context.player!==active(s)&&!(d.phase==='combat'&&d.combat?.stage==='block'&&reactive(s,id,ability)))||!['main1','main2','combat'].includes(d.phase)||(!reactive(s,id,ability)&&!['main1','main2'].includes(d.phase)))throw Error('This action is not legal in this phase.');}
-export function submitAshenAction(original:Battlefield,id:string,context:EffectContext,abilityId?:string):Battlefield{
- let s=structuredClone(original);const d=duel(s),card=s.table.cards[id];let p:EffectProgram;
+function prepareAshenAction(s:Battlefield,id:string,context:EffectContext,abilityId?:string){
+ const d=duel(s),card=s.table.cards[id];let p:EffectProgram;
  const ability=abilityId?availableAshenAbilities(s,id).find(p=>p.id===abilityId):undefined;
  if(abilityId&&!ability)throw Error('Ability is unavailable.');ensureTiming(s,id,context,ability);
  if(ability){if(!['unit','support','ley'].includes(card.zone))throw Error('Ability source is not in play.');p=ability;}else{
@@ -30,8 +30,21 @@ export function submitAshenAction(original:Battlefield,id:string,context:EffectC
   if(d.callPermission===id)p={...p,cost:{}};
  }
  if(nextCallBlocked(s,id))throw Error('Finish Korgath’s Call before another action.');
- const clean:EffectContext={source:id,player:context.player,targets:context.targets||[],costCards:context.costCards||[],sourceStats:ashenAdapter.stats!(s,id)};
  const useKey=`${s.rules!.turn}:${id}:${p.id}`;if(p.oncePerTurn&&s.rules!.abilityUses?.[useKey])throw Error('This ability has already been used this turn.');
+ return {card,ability,p};
+}
+/** Validate timing, candidates and payment without applying any effect or changing the table. */
+export function inspectAshenAction(s:Battlefield,id:string,who:0|1,abilityId?:string){
+ try{const context:EffectContext={source:id,player:String(who)};const {p}=prepareAshenAction(s,id,context,abilityId);
+  context.targets=p.targets?candidates(s,ashenAdapter,p.targets,context).map(e=>e.id).slice(0,p.targets.count):[];
+  context.costCards=p.cost?.cards?candidates(s,ashenAdapter,p.cost.cards,context).map(e=>e.id).slice(0,p.cost.cards.count):[];
+  executeProgram(s,ashenAdapter,{...p,steps:[]},context);return {allowed:true,reason:''};
+ }catch(e){return {allowed:false,reason:e instanceof Error?e.message:String(e)};}
+}
+export function submitAshenAction(original:Battlefield,id:string,context:EffectContext,abilityId?:string):Battlefield{
+ let s=structuredClone(original);const {card,ability,p}=prepareAshenAction(s,id,context,abilityId);
+ const clean:EffectContext={source:id,player:context.player,targets:context.targets||[],costCards:context.costCards||[],sourceStats:ashenAdapter.stats!(s,id)};
+ const useKey=`${s.rules!.turn}:${id}:${p.id}`;
  const paid=executeProgram(s,ashenAdapter,{...p,steps:[]},clean);if(p.oncePerTurn){paid.state.rules!.abilityUses??={};paid.state.rules!.abilityUses[useKey]=1;}s=paid.state;const next=duel(s);
  if(!ability){if(card.type==='Ley Font')s.rules!.fontPlayed[card.controller]=true;moveAshenCard(s,id,'clash');}
  next.stack.push({kind:ability?'ability':'action',program:{...p,cost:undefined},context:{...clean,costCards:[]},bonus:next.callPermission===id});

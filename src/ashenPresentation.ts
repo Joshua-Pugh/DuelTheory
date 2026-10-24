@@ -8,7 +8,11 @@ export type AshenCardData={id?:string;cardId?:string;name:string;type:string;sub
 const sources=new Map<string,AshenCardData>(catalog.cards.map(card=>[card.id,card]));
 export function rulesForCard(card:AshenCardData){
  const source=sources.get(card.id??card.cardId??'');
- const text=card.rulesOverride?(card.description??card.effectText??''):(card.effectText||card.description||source?.effectText||'');
+ let text=card.rulesOverride?(card.description??card.effectText??''):(card.effectText||card.description||source?.effectText||'');
+ // Repair known transcription mistakes in older native copies, leaving explicit Studio overrides alone.
+ if(source&&!card.rulesOverride){
+  for(const [old,fixed] of [['under your,','under your control,'],['each Noble your control','each Noble you control'],['damage is delt.','damage is dealt.'],['to ant target.','to any target.'],['Kordath, Lord of Ruin','Korgath, Lord of Ruin'],['Whenever Plan, Refine, or Fortify','Whenever you Plan, Refine, or Fortify'],['Verdant Veil Font enters','Verdant Veil Fount enters']])text=text.replaceAll(old,fixed);
+ }
  return {text,flavor:card.flavorText??(card.rulesOverride?'':source?.flavorText??'')};
 }
 export function cleanTypeLine(card:AshenCardData){

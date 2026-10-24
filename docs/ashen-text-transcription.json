@@ -246,7 +246,7 @@
     "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
   },
   "ashen-noble-verdant-veil-fount": {
-    "effectText": "Verdant Veil Font enters play spent.\nBurn (flip facedown): Add {Untuned} (Untuned Essence) to your Ley Basin.\nPay {Untuned} {Untuned} (2 Essence of any type): Target unit gains Evade until end of turn. Active only once per turn.",
+    "effectText": "Verdant Veil Fount enters play spent.\nBurn (flip facedown): Add {Untuned} (Untuned Essence) to your Ley Basin.\nPay {Untuned} {Untuned} (2 Essence of any type): Target unit gains Evade until end of turn. Active only once per turn.",
     "flavorText": "“Walk where shadows refuse to follow.”",
     "subtype": "Advanced Ley Font — Untuned",
     "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"

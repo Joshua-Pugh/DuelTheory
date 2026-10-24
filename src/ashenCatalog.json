@@ -1355,7 +1355,7 @@
       "rarity": "Bronze",
       "attack": null,
       "defense": null,
-      "effectText": "Verdant Veil Font enters play spent.\nBurn (flip facedown): Add {Untuned} (Untuned Essence) to your Ley Basin.\nPay {Untuned} {Untuned} (2 Essence of any type): Target unit gains Evade until end of turn. Active only once per turn.",
+      "effectText": "Verdant Veil Fount enters play spent.\nBurn (flip facedown): Add {Untuned} (Untuned Essence) to your Ley Basin.\nPay {Untuned} {Untuned} (2 Essence of any type): Target unit gains Evade until end of turn. Active only once per turn.",
       "effectStatus": "source-transcribed",
       "artStatus": "placeholder",
       "sourceDeck": "The Crown’s Might",

@@ -64,7 +64,7 @@ for faction in ['Noble','Brute']:
   subtype=re.sub(r'\s+A\s*\d+\s*/.*$','',subtype).strip()
   if subtype.endswith('— Legendary'):subtype='Legendary '+subtype.removesuffix('— Legendary').strip()
   if subtype.endswith('Legendary') and not subtype.startswith('Legendary'):subtype='Legendary '+subtype.removesuffix('Legendary').strip(' —')
-  editorial={'under your,':'under your control,','damage is delt.':'damage is dealt.','to ant target.':'to any target.','Kordath, Lord of Ruin':'Korgath, Lord of Ruin','each Noble your control':'each Noble you control'}
+  editorial={'Verdant Veil Font enters':'Verdant Veil Fount enters','under your,':'under your control,','damage is delt.':'damage is dealt.','to ant target.':'to any target.','Kordath, Lord of Ruin':'Korgath, Lord of Ruin','each Noble your control':'each Noble you control'}
   for old,new in editorial.items():rules=[line.replace(old,new) for line in rules]
   entry={'effectText':'\n'.join(rules),'flavorText':'\n'.join(flavor),'subtype':subtype,'effectSource':path.name}
   previous=report.get(card['id'])
