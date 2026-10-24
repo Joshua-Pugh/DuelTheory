@@ -1,0 +1,17 @@
+// @vitest-environment happy-dom
+import {afterEach,expect,it,vi} from 'vitest';
+import {act,useState} from 'react';
+import {createRoot,type Root} from 'react-dom/client';
+import HoldAdjustButton from './HoldAdjustButton';
+let root:Root|undefined;
+afterEach(()=>{if(root)act(()=>root!.unmount());root=undefined;document.body.innerHTML='';vi.useRealTimers();});
+function pointer(button:HTMLButtonElement,type:string){button.dispatchEvent(new PointerEvent(type,{bubbles:true,button:0,pointerId:1}));}
+async function mount(onStep:(n:number)=>void|boolean|Promise<void|boolean>){Object.assign(globalThis,{IS_REACT_ACT_ENVIRONMENT:true});const el=document.createElement('div');document.body.append(el);root=createRoot(el);await act(async()=>root!.render(<HoldAdjustButton label="Increase" disabled={false} busy={false} onStep={onStep}>+</HoldAdjustButton>));return el.querySelector('button')!;}
+it('taps once for 1 and suppresses the compatibility click',async()=>{vi.useFakeTimers();const step=vi.fn(),button=await mount(step);await act(async()=>pointer(button,'pointerdown'));await act(async()=>vi.advanceTimersByTimeAsync(100));await act(async()=>{pointer(button,'pointerup');button.click();});expect(step.mock.calls).toEqual([[1]]);await act(async()=>vi.advanceTimersByTimeAsync(2000));expect(step).toHaveBeenCalledTimes(1);});
+it('repeats 10 while held, stops on blur and adds no extra 1 on release',async()=>{vi.useFakeTimers();const step=vi.fn(async()=>true),button=await mount(step);await act(async()=>pointer(button,'pointerdown'));await act(async()=>vi.advanceTimersByTimeAsync(550));await act(async()=>vi.advanceTimersByTimeAsync(450));expect(step.mock.calls).toEqual([[10],[10]]);await act(async()=>window.dispatchEvent(new Event('blur')));await act(async()=>vi.advanceTimersByTimeAsync(2000));await act(async()=>{pointer(button,'pointerup');button.click();});expect(step).toHaveBeenCalledTimes(2);});
+it('serializes network updates and does not queue more work after release',async()=>{
+ vi.useFakeTimers();Object.assign(globalThis,{IS_REACT_ACT_ENVIRONMENT:true});let finish!:(value:boolean)=>void;const step=vi.fn((_n:number)=>new Promise<boolean>(resolve=>{finish=resolve;}));
+ function Harness(){const [busy,setBusy]=useState(false);return <HoldAdjustButton label="Increase" disabled={false} busy={busy} onStep={async n=>{setBusy(true);const ok=await step(n);setBusy(false);return ok;}}>+</HoldAdjustButton>;}
+ const el=document.createElement('div');document.body.append(el);root=createRoot(el);await act(async()=>root!.render(<Harness/>));const button=el.querySelector('button')!;
+ await act(async()=>pointer(button,'pointerdown'));await act(async()=>vi.advanceTimersByTimeAsync(550));expect(button.disabled).toBe(false);await act(async()=>vi.advanceTimersByTimeAsync(3000));expect(step).toHaveBeenCalledTimes(1);await act(async()=>pointer(button,'pointerup'));await act(async()=>finish(true));await act(async()=>vi.advanceTimersByTimeAsync(2000));expect(step.mock.calls).toEqual([[10]]);
+});

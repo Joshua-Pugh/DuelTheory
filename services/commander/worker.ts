@@ -50,7 +50,7 @@ export default {
    if(method==='create'||method==='join'){const limit=await env.ROOM_LIMITER.limit({key:request.headers.get('CF-Connecting-IP')||'unknown'});if(!limit.success)return reply({error:'Too many attempts. Please wait a minute.'},429);}
    const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(token))),b=>b.toString(16).padStart(2,'0')).join('');
    const input=method==='read'?{}:await boundedJson(request);
-   const result=await env.COMMANDER_ROOMS.getByName(code).operate(code,hash,method,requestId,input);return reply(result.body,result.status);
+   const result=await env.COMMANDER_ROOMS.getByName(code).operate(code,hash,method,requestId,input);return reply({...result.body,serverNow:Date.now()},result.status);
   }catch(error){if(error instanceof RoomError)return reply({error:error.message},400);console.error(JSON.stringify({event:'commander-room-failure',method}));return reply({error:'Room service is temporarily unavailable. Your last confirmed totals are unchanged.'},503);}
  }
 } satisfies ExportedHandler<Env>;

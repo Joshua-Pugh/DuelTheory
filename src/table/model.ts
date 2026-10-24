@@ -1,9 +1,12 @@
 import {DUEL_PROFILE,validateTableProfile,type TableProfile} from './profiles';
+import {defaultTurnTimer,turnTimeRemaining,type TurnTimer} from './timer';
 /** Manual multiplayer scorekeeping; this does not adjudicate card effects. */
-export type TablePlayer={id:string;name:string;sources?:string[];commanders:string[];life:number;poison:number;damage:Record<string,number>;counters:Record<string,number>;conceded:boolean};
+export type TotalsSnapshot={life:number;poison:number;damage:Record<string,number>;counters:Record<string,number>};
+export type LastTableEntry={id:string;text:string;before:TotalsSnapshot};
+export type TablePlayer={lastEntry?:LastTableEntry;id:string;name:string;sources?:string[];commanders:string[];life:number;poison:number;damage:Record<string,number>;counters:Record<string,number>;conceded:boolean};
 export type FirstPlayerRoll={round:number;eligible:string[];rolls:Record<string,number>;winner?:string};
 export type TableTitle={label:string;reminder:string;version:number;holder?:string};
-export type TableRoomState={tableTitle?:TableTitle;profile?:TableProfile;code:string;title:string;host:string;capacity:number;started:boolean;revision:number;players:TablePlayer[];firstPlayer?:FirstPlayerRoll;turnOrder?:string[];turn?:number;log:{id:string;at:number;player:string;text:string}[]};
+export type TableRoomState={timer?:TurnTimer;tableTitle?:TableTitle;profile?:TableProfile;code:string;title:string;host:string;capacity:number;started:boolean;revision:number;players:TablePlayer[];firstPlayer?:FirstPlayerRoll;turnOrder?:string[];turn?:number;log:{id:string;at:number;player:string;text:string}[]};
 export const sharedTableTitle=(s:TableRoomState):TableTitle=>s.tableTitle??{label:'Table Title',reminder:'',version:0};
 export type RoomCommand=
  |{type:'join';name:string;sources?:string[];commanders?:string[]}
@@ -11,6 +14,8 @@ export type RoomCommand=
  |{type:'concede';value:boolean}
  |{type:'roll';round:number}|{type:'endTurn';turn:number}
  |{type:'claimTitle'|'releaseTitle';version:number}|{type:'configureTitle';version:number;label:string;reminder:string}
+ |{type:'undo';entryId:string}
+ |{type:'configureTimer';version:number;durationSeconds:number}|{type:'timer';version:number;turn:number;mode:'pause'|'resume'|'restart'}
  |{type:'start'}|{type:'reset'};
 export class RoomError extends Error{}
 const label=(value:unknown,max:number)=>{if(typeof value!=='string'||!value.trim()||value.trim().length>max)throw new RoomError(`Enter text between 1 and ${max} characters.`);return value.trim();};
@@ -20,7 +25,7 @@ export function newTableRoom(code:string,title:unknown,capacity:unknown,host:str
  return {profile:settings,code,title:label(title,50),host,capacity:Number(capacity),started:false,revision:0,players:[],log:[]};
 }
 export const sourceKey=(playerId:string,index:number)=>`${playerId}:${index}`;
-export function tableSources(s:TableRoomState){return s.players.flatMap(p=>(p.sources??p.commanders).map((name,i)=>({key:sourceKey(p.id,i),name,owner:p.name})));}
+export function tableSources(s:TableRoomState){return s.players.flatMap(p=>(p.sources??p.commanders).map((name,i)=>({key:sourceKey(p.id,i),name,owner:p.name,ownerId:p.id})));}
 // Old wire fields (life/commanders/poison) remain readable for existing room clients.
 export function roomProfile(s:TableRoomState):TableProfile{return s.profile??LEGACY_PROFILE;}
 export const LEGACY_PROFILE:TableProfile={schemaVersion:1,name:'Existing table settings',health:{label:'Life',start:40,defeatAt:0},counters:[{label:'Poison',start:0,defeatAt:10}],sourceDamage:{enabled:true,label:'Combat damage',defeatAt:21}};
@@ -55,7 +60,32 @@ export function applyRoomCommand(original:TableRoomState,actor:string,input:Room
   player={id:actor,name,commanders:names.map(n=>label(n,80)),...(s.profile?{sources:names.map(n=>label(n,80))}:{}),life:roomProfile(s).health.start,poison:0,damage:{},counters:Object.fromEntries((s.profile?.counters??[]).map(c=>[c.label,c.start])),conceded:false};s.players.push(player);text='joined the table';
  }else{
   if(!player)throw new RoomError('Join this room before changing values.');
-  if(input.type==='claimTitle'||input.type==='releaseTitle'||input.type==='configureTitle'){
+  if(input.type==='undo'){
+   const entry=player.lastEntry;if(!tableGameReady(s)||!entry||entry.id!==input.entryId)throw new RoomError('That entry is no longer available to undo.');
+   Object.assign(player,structuredClone(entry.before));delete player.lastEntry;text=`undid last entry: ${entry.text}`;
+  }
+  else if(input.type==='configureTimer'||input.type==='timer'){
+   const timer=s.timer??defaultTurnTimer();
+   if(input.version!==timer.version)throw new RoomError('The timer changed. Refresh its current state and try again.');
+   if(input.type==='configureTimer'){
+    if(actor!==s.host)throw new RoomError('Only the host can configure the turn timer.');
+    if(!Number.isInteger(input.durationSeconds)||input.durationSeconds<0||input.durationSeconds>7200)throw new RoomError('Choose a turn timer from 1 second to 120 minutes, or 0 to disable.');
+    s.timer={durationSeconds:input.durationSeconds,remainingMs:input.durationSeconds*1000,version:timer.version+1,turn:s.turn,...(input.durationSeconds&&tableGameReady(s)&&!tableGameOver(s)?{runningSince:now}:{})};
+    text=input.durationSeconds?`set a ${input.durationSeconds}-second turn timer`:'disabled the turn timer';
+   }else{
+    if(!tableGameReady(s)||tableGameOver(s)||!timer.durationSeconds||input.turn!==s.turn)throw new RoomError('The turn changed or its timer is not active.');
+    if(actor!==currentTurnPlayer(s)&&actor!==s.host)throw new RoomError('Only the current player or host can control the timer.');
+    if(input.mode==='pause'){
+     if(timer.runningSince===undefined)throw new RoomError('The timer is already paused.');
+     s.timer={...timer,remainingMs:turnTimeRemaining(timer,now),runningSince:undefined,version:timer.version+1};text='paused the turn timer';
+    }else if(input.mode==='resume'){
+     if(timer.runningSince!==undefined||timer.remainingMs<=0)throw new RoomError('Pause a running timer, or restart an expired timer.');
+     s.timer={...timer,runningSince:now,version:timer.version+1};text='resumed the turn timer';
+    }else if(input.mode==='restart'){s.timer={...timer,remainingMs:timer.durationSeconds*1000,runningSince:now,version:timer.version+1};text='restarted the turn timer';}
+    else throw new RoomError('Unknown timer control.');
+   }
+  }
+  else if(input.type==='claimTitle'||input.type==='releaseTitle'||input.type==='configureTitle'){
    const marker=sharedTableTitle(s);
    if(input.version!==marker.version)throw new RoomError('The table title changed. Check the current holder and try again.');
    if(input.type==='configureTitle'){
@@ -88,8 +118,8 @@ export function applyRoomCommand(original:TableRoomState,actor:string,input:Room
    const ending=currentTurnPlayer(s),marker=sharedTableTitle(s);
    do{s.turn++;}while(s.players.some(p=>p.id===currentTurnPlayer(s)&&tableEliminated(p,s)));text=`ended the turn${marker.holder===ending&&marker.reminder?` · ${marker.label} reminder: ${marker.reminder}`:''} · turn ${s.turn}: ${s.players.find(p=>p.id===currentTurnPlayer(s))?.name}`;
   }
-  else if(input.type==='reset'){if(actor!==s.host)throw new RoomError('Only the host can reset the game.');for(const p of s.players){p.life=roomProfile(s).health.start;p.poison=0;p.damage={};p.counters=Object.fromEntries((s.profile?.counters??[]).map(c=>[c.label,c.start]));p.conceded=false;}if(s.tableTitle)s.tableTitle={...s.tableTitle,holder:undefined,version:s.tableTitle.version+1};s.started=false;delete s.firstPlayer;delete s.turnOrder;delete s.turn;text=`reset the table to ${roomProfile(s).health.start} ${roomProfile(s).health.label}; seats are open`;}
-  else if(input.type==='concede'){if(typeof input.value!=='boolean')throw new RoomError('Invalid concession.');player.conceded=input.value;text=input.value?'conceded':'returned to the game';}
+  else if(input.type==='reset'){if(actor!==s.host)throw new RoomError('Only the host can reset the game.');for(const p of s.players){p.life=roomProfile(s).health.start;p.poison=0;p.damage={};p.counters=Object.fromEntries((s.profile?.counters??[]).map(c=>[c.label,c.start]));p.conceded=false;delete p.lastEntry;}if(s.tableTitle)s.tableTitle={...s.tableTitle,holder:undefined,version:s.tableTitle.version+1};s.started=false;delete s.firstPlayer;delete s.turnOrder;delete s.turn;text=`reset the table to ${roomProfile(s).health.start} ${roomProfile(s).health.label}; seats are open`;}
+  else if(input.type==='concede'){if(typeof input.value!=='boolean')throw new RoomError('Invalid concession.');player.conceded=input.value;delete player.lastEntry;text=input.value?'conceded':'returned to the game';}
   else if(input.type==='adjust'){
    const n=input.delta;if(!Number.isInteger(n)||n===0||Math.abs(n)>999)throw new RoomError('Use a whole-number change from 1 to 999.');
    if(input.field==='life'){const next=player.life+n;if(Math.abs(next)>99999)throw new RoomError('Primary total is out of range.');player.life=next;text=`${n>0?'+':''}${n} ${roomProfile(s).health.label} → ${next}`;}
@@ -106,6 +136,8 @@ export function applyRoomCommand(original:TableRoomState,actor:string,input:Room
     if(!Object.hasOwn(player.counters,key)&&Object.keys(player.counters).length>=8)throw new RoomError('Use up to 8 custom counters.');
     const next=(Object.hasOwn(player.counters,key)?player.counters[key]:0)+n;if(next<0||next>9999)throw new RoomError('Counter is out of range.');player.counters[key]=next;text=`${n>0?'+':''}${n} ${key} → ${next}`;
    }else throw new RoomError('Unknown counter.');
+   const before=original.players.find(p=>p.id===actor)!;
+   player.lastEntry={id:requestId,text,before:structuredClone({life:before.life,poison:before.poison,damage:before.damage,counters:before.counters})};
   }else throw new RoomError('Unknown action.');
  }
  for(const p of s.players){const was=original.players.find(old=>old.id===p.id);if(was&&!tableEliminated(was,original)&&tableEliminated(p,s))text+=` · ${p.name} eliminated (${p.conceded?'conceded':tableWarnings(p,s).join(', ')})`;else if(was&&tableEliminated(was,original)&&!tableEliminated(p,s)&&input.type!=='reset')text+=` · ${p.name} restored after correction`;}
@@ -113,5 +145,10 @@ export function applyRoomCommand(original:TableRoomState,actor:string,input:Room
  text+=settleFirstPlayer(s);
  if(s.turnOrder?.length&&s.turn&&activeTablePlayers(s).length>=2&&s.players.some(p=>p.id===currentTurnPlayer(s)&&tableEliminated(p,s))){do{s.turn++;}while(s.players.some(p=>p.id===currentTurnPlayer(s)&&tableEliminated(p,s)));text+=` · turn ${s.turn}: ${s.players.find(p=>p.id===currentTurnPlayer(s))?.name}`;}
  if(tableGameOver(s)&&!tableGameOver(original)){const winner=activeTablePlayers(s)[0];text+=winner?` · ${winner.name} wins; game over`:' · no active players remain; game over';}
+ if(s.timer?.durationSeconds){
+  if(input.type==='reset')s.timer={...s.timer,remainingMs:s.timer.durationSeconds*1000,runningSince:undefined,turn:undefined,version:s.timer.version+1};
+  else if(tableGameOver(s)&&s.timer.runningSince!==undefined)s.timer={...s.timer,remainingMs:turnTimeRemaining(s.timer,now),runningSince:undefined,version:s.timer.version+1};
+  else if(s.turn&&original.turn!==s.turn)s.timer={...s.timer,remainingMs:s.timer.durationSeconds*1000,runningSince:now,turn:s.turn,version:s.timer.version+1};
+ }
  s.revision++;s.log=[{id:requestId,at:now,player:player!.name,text},...s.log].slice(0,80);return s;
 }

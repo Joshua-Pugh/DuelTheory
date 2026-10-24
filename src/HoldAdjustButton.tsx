@@ -1,0 +1,16 @@
+import {useEffect,useRef,useState} from 'react';
+/** Tap once for 1; hold for serialized, confirmed steps of 10. */
+export default function HoldAdjustButton({label,children,disabled,busy,onStep}:{label:string;children:string;disabled:boolean;busy:boolean;onStep:(amount:number)=>void|boolean|Promise<void|boolean>}){
+ const latest=useRef({disabled,busy,onStep});latest.current={disabled,busy,onStep};
+ const timer=useRef<ReturnType<typeof setTimeout>|undefined>(undefined),clearClick=useRef<ReturnType<typeof setTimeout>|undefined>(undefined),active=useRef(false),generation=useRef(0),suppressClick=useRef(false),repeated=useRef(false);
+ const [holding,setHolding]=useState(false);
+ const stop=()=>{active.current=false;generation.current++;clearTimeout(timer.current);setHolding(false);};
+ const invoke=async(n:number)=>{try{return await latest.current.onStep(n);}catch{return false;}};
+ const repeat=async(token:number)=>{if(!active.current||generation.current!==token||latest.current.disabled)return;repeated.current=true;const ok=await invoke(10);if(generation.current!==token)return;if(ok===false){stop();return;}if(active.current&&generation.current===token&&!latest.current.disabled)timer.current=setTimeout(()=>void repeat(token),450);};
+ useEffect(()=>{const release=()=>stop(),visibility=()=>{if(document.hidden)stop();};window.addEventListener('pointerup',release);window.addEventListener('pointercancel',release);window.addEventListener('blur',release);document.addEventListener('visibilitychange',visibility);return()=>{active.current=false;generation.current++;clearTimeout(timer.current);clearTimeout(clearClick.current);window.removeEventListener('pointerup',release);window.removeEventListener('pointercancel',release);window.removeEventListener('blur',release);document.removeEventListener('visibilitychange',visibility);};},[]);
+ useEffect(()=>{if(disabled)stop();},[disabled]);
+ useEffect(()=>{stop();},[label]);
+ return <button className="ct-hold-adjust" aria-label={label} disabled={disabled||(busy&&!holding)} aria-busy={busy} onContextMenu={e=>e.preventDefault()} onPointerDown={e=>{if(e.button!==0||latest.current.disabled||latest.current.busy||active.current)return;suppressClick.current=true;repeated.current=false;active.current=true;const token=++generation.current;setHolding(true);try{e.currentTarget.setPointerCapture(e.pointerId);}catch{/* Older browsers still have the global release handlers. */}timer.current=setTimeout(()=>void repeat(token),550);}}
+ onPointerUp={()=>{const tap=active.current&&!repeated.current;stop();if(tap&&!latest.current.disabled&&!latest.current.busy)void invoke(1);clearTimeout(clearClick.current);clearClick.current=setTimeout(()=>{suppressClick.current=false;},0);}}
+ onLostPointerCapture={()=>stop()} onPointerCancel={()=>{stop();suppressClick.current=false;}} onPointerLeave={()=>stop()} onClick={e=>{if(suppressClick.current){suppressClick.current=false;return;}if(e.detail===0&&!latest.current.disabled&&!latest.current.busy)void invoke(1);}}>{children}</button>;
+}

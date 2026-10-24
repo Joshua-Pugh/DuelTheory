@@ -20,6 +20,14 @@ for(let i=0;i<30;i++){
  await Promise.all([[a,host.playerId],[b,guest.playerId]].filter(([,id])=>state.firstPlayer.eligible.includes(id)).map(([token])=>call(token,'action',{type:'roll',round:state.firstPlayer.round})));
 }
 assert.ok((await call(a,'read')).state.firstPlayer.winner);
+await call(b,'action',{type:'configureTimer',version:0,durationSeconds:120},400);
+await call(a,'action',{type:'configureTimer',version:0,durationSeconds:120});
+let timing=await call(a,'read');assert.equal(typeof timing.serverNow,'number');assert.equal(timing.state.timer.durationSeconds,120);assert.ok(timing.state.timer.runningSince<=timing.serverNow);
+const pauseId=randomUUID();await call(a,'action',{type:'timer',version:1,turn:timing.state.turn,mode:'pause'},200,pauseId);await call(a,'action',{type:'timer',version:1,turn:timing.state.turn,mode:'pause'},200,pauseId);
+timing=await call(b,'read');assert.equal(timing.state.timer.runningSince,undefined);assert.ok(timing.state.timer.remainingMs>0&&timing.state.timer.remainingMs<=120000);
+await call(a,'action',{type:'timer',version:1,turn:timing.state.turn,mode:'resume'},400);
+await call(a,'action',{type:'timer',version:2,turn:timing.state.turn,mode:'resume'});
+await call(a,'action',{type:'endTurn',turn:timing.state.turn});timing=await call(b,'read');assert.equal(timing.state.timer.turn,2);assert.equal(timing.state.timer.remainingMs,120000);
 await call(a,'action',{type:'claimTitle',version:0});
 await call(b,'action',{type:'claimTitle',version:1});
 await call(a,'action',{type:'claimTitle',version:1},400);
@@ -30,13 +38,19 @@ const claimId=randomUUID();await call(b,'action',{type:'claimTitle',version:4},2
 assert.equal((await call(a,'read')).state.tableTitle.holder,guest.playerId);
 const id=randomUUID();await call(b,'action',{type:'adjust',field:'counter',key:'Energy',delta:4,playerId:host.playerId},200,id);await call(b,'action',{type:'adjust',field:'counter',key:'Energy',delta:4},200,id);
 let {state}=await call(a,'read');assert.equal(state.players[0].counters.Energy,3);assert.equal(state.players[1].counters.Energy,7);
+await call(a,'action',{type:'undo',entryId:id},400);
+const undoId=randomUUID();await call(b,'action',{type:'undo',entryId:id},200,undoId);await call(b,'action',{type:'undo',entryId:id},200,undoId);
+state=(await call(a,'read')).state;assert.equal(state.players[1].counters.Energy,3);await call(b,'action',{type:'undo',entryId:id},400);
 await call(b,'action',{type:'adjust',field:'damage',key:`${host.playerId}:0`,delta:12,loseLife:true});
 state=(await call(a,'read')).state;assert.equal(state.players[1].life,23);assert.match(state.log[0].text,/eliminated.*Host wins/);
 assert.equal(state.tableTitle.holder,undefined);
-await call(b,'action',{type:'adjust',field:'damage',key:`${host.playerId}:0`,delta:-1});
+assert.equal(state.timer.runningSince,undefined);
+await call(b,'action',{type:'undo',entryId:state.players[1].lastEntry.id});
 state=(await call(a,'read')).state;assert.match(state.log[0].text,/restored after correction/);
+assert.equal(state.players[1].life,35);assert.deepEqual(state.players[1].damage,{});
 await call(b,'action',{type:'adjust',field:'counter',key:'Corruption',delta:6});state=(await call(a,'read')).state;assert.match(state.log[0].text,/6\+ Corruption/);
 await call(b,'action',{type:'reset'},400);await call(a,'action',{type:'reset'});state=(await call(b,'read')).state;
 assert.deepEqual(state.profile,profile);assert.deepEqual(state.players.map(p=>p.life),[35,35]);assert.deepEqual(state.players[1].counters,{Energy:3,Corruption:0});assert.equal(state.started,false);
 assert.equal(state.tableTitle.label,'Objective');assert.equal(state.tableTitle.holder,undefined);
-console.log('PASS: profiles, ready gate, authenticated edits, idempotency, damage, defeat/correction, reset and exclusive shared-title transfer ('+code+').');
+assert.equal(state.timer.runningSince,undefined);assert.equal(state.timer.remainingMs,120000);assert.ok(state.players.every(p=>!p.lastEntry));
+console.log('PASS: profiles, ownership, undo and timer idempotency, synchronized turns, linked damage, defeat/correction, reset and shared title ('+code+').');

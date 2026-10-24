@@ -1,6 +1,6 @@
 import type {CommanderRoomState,RoomCommand} from './model';
 export type RoomSeat={code:string;token:string;playerId:string;api:string};
-export type RoomReply={state:CommanderRoomState;playerId:string};
+export type RoomReply={state:CommanderRoomState;playerId:string;serverNow?:number};
 export const TABLE_API=(import.meta as ImportMeta & {env:Record<string,string>}).env.VITE_TABLE_API_URL||(import.meta as ImportMeta & {env:Record<string,string>}).env.VITE_COMMANDER_API_URL||'https://dueltheory-commander.cfpadvantage.workers.dev';
 export const COMMANDER_API=TABLE_API; // Original endpoint alias for existing clients.
 const storageKey='dueltheory-commander-seat-v1';
