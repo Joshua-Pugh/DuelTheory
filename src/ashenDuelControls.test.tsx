@@ -12,6 +12,8 @@ import {executeProgram} from './framework';
 import {ashenAdapter} from './games/ashen/adapter';
 import {moveAshenCard} from './games/ashen/adapter';
 import {rulesForCard,RESOURCES} from './ashenPresentation';
+import {newAshenDuel} from './games/ashen/duel';
+import AshenEffectNotices from './AshenEffectNotices';
 vi.mock('./useFittedRules',()=>({default:()=>{}}));
 (globalThis as Record<string,unknown>).IS_REACT_ACT_ENVIRONMENT=true;
 let root:Root|undefined;
@@ -76,4 +78,11 @@ it('keeps a Command Station target choice with the effect owner and labels each 
  const s=setup(),source=s.table.piles['1:command'][0];const result=executeProgram(s,ashenAdapter,{version:1,id:'station-ping',label:'Foresight damage',steps:[{op:'select',selection:{filter:{zones:['command']},count:1,label:'Choose a Command Station'}},{op:'damage',targets:'targets',amount:1}]},{player:'1',source});result.state.rules!.pending={flow:result.pending!,label:'Foresight damage'};
  await mount(<AshenBattlefield initialState={result.state} learning={false}/>);expect(document.querySelector('[aria-label="Choose a Command Station"]')).toBeNull();await click(document.querySelector('.ab-choice-wait button')!);
  const dialog=document.querySelector('[aria-label="Choose a Command Station"]')!;expect(dialog.textContent).toContain('Player 1 · Command Station');expect(dialog.textContent).toContain('Player 2 · Command Station');
+});
+it('shows Command reductions in the hand, viewer and card menu',async()=>{
+ const s=newAshenDuel(['Noble','Brute'],42,0),card=Object.values(s.table.cards).find(c=>c.controller===0&&c.cardId==='ashen-noble-high-strategist')!;if(card.zone!=='hand')moveAshenCard(s,card.instanceId,'hand');s.rules!.nobleMarks={0:{planned:1,refined:1}};await mount(<AshenBattlefield initialState={s} learning={false}/>);
+ expect(document.querySelector(`[data-ashen-card="${card.instanceId}"]`)?.parentElement?.textContent).toContain('Command −2');await click(document.querySelector(`[data-ashen-card="${card.instanceId}"]`)!);const menu=document.querySelector('.dt-action-dialog')!;expect(menu.textContent).toContain('Command active · −2 generic');expect(menu.querySelector('[aria-label^="Current cost:"]')).not.toBeNull();expect(menu.querySelector('[aria-label^="Printed cost:"]')).not.toBeNull();expect(menu.textContent).toContain('Plan 1 · Refine 1');
+});
+it('announces newly triggered cards and damage without replaying old notices on reconnect',async()=>{
+ const history=['Triggered: old card'];await mount(<AshenEffectNotices events={history}/>);expect(document.querySelector('.ab-effect-notices')).toBeNull();const trigger='Triggered: Player 1 · Rune of Clarity · Draw trigger';await act(async()=>root!.render(<AshenEffectNotices events={[...history,trigger,trigger]}/>));expect(document.querySelector('.ab-effect-notices')?.textContent).toContain('Rune of Clarity');expect(document.querySelector('.ab-effect-notices')?.textContent).toContain('×2');await click(document.querySelector('[aria-label="Dismiss effect notices"]')!);expect(document.querySelector('.ab-effect-notices')).toBeNull();
 });

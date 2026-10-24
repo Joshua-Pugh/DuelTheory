@@ -10,7 +10,7 @@ const damage=(amount:number):EffectStep=>({op:'damage',targets:'targets',amount}
 const stationPing=(n:number):EffectStep[]=>[select(stations,'Choose a Command Station'),damage(n)];
 const stack:Selector={zones:['clash'],types:['Action','Effect'],controller:'any'};
 const nullify=(filter:Selector=stack):EffectStep[]=>[select(filter,'Choose a Clash entry to Nullify'),{op:'nullify',targets:'targets'}];
-const trigger=(id:string,event:string,steps:EffectStep[],zones=['unit'],subject:Selector={controller:'self'},limitPerTurn?:number):TriggerDefinition=>({id,event,sourceZones:zones,subject,actor:'self',program:p(id,id.replaceAll('-',' '),steps),limitPerTurn});
+const trigger=(id:string,event:string,steps:EffectStep[],zones=['unit'],subject:Selector={controller:'self'},limitPerTurn?:number):TriggerDefinition=>({id,event,sourceZones:zones,subject,actor:'self',program:p(id,({'clarity-draw':'Draw trigger: deal 1 damage to a Command Station','foresight-bottom':'Bottom-deck trigger: deal 1 damage to a Command Station','longbow-refine':'Refine trigger: deal 1 damage to a Command Station','archer-plan':'Plan trigger: deal 1 damage to a Command Station'} as Record<string,string>)[id]||id.replaceAll('-',' '),steps),limitPerTurn});
 const mode=(id:string,label:string,steps:EffectStep[])=>({id,label,steps});
 const choice=(options:{id:string;label:string;steps:EffectStep[];when?:{kind:'flag';flag:string}}[],max=1,allIf?:string,min=1):EffectStep=>({op:'mode',options,max,min,...(allIf?{allIf:flag(allIf)}:{})});
 const rules:Record<string,AshenEffectDefinition>={

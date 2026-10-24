@@ -1,6 +1,6 @@
 import {openPriority,continueProgram,seededShuffle,executeProgram,candidates,matchingTriggers,type EffectResult,type EffectEvent,type EffectAdapter,type EffectProgram,type EffectContext,type Entity,type Selection} from '../../framework';
 import {ashenCardMap} from '../../ashenDecks';
-import {cardPresentation,type Resource} from '../../ashenPresentation';
+import {cardPresentation,type ResourceCost,type Resource} from '../../ashenPresentation';
 import {emptyAshenRules,type Battlefield,type AshenWork} from '../../ashenBattlefieldState';
 import {tabletopDispatch} from '../../services/CreatorTabletop';
 import {FLAMEBELCHER_ABILITY} from './bruteEffects';
@@ -59,7 +59,7 @@ export const ashenAdapter:EffectAdapter<Battlefield>={
   return true;
  },
  heal:(s,id,amount)=>{const c=s.table.cards[id];if(c?.zone==='command')s.table.health[c.controller]+=amount;else if(c?.zone==='unit'&&s.rules)s.rules.damage[id]=Math.max(0,(s.rules.damage[id]||0)-amount);},
- damage:(s,id,amount)=>{const c=s.table.cards[id];if(!c)return false;if(c.zone==='command'){s.table.health[c.controller]-=amount;return false;}if(c.zone!=='unit')throw Error('Damage requires a Unit or Command Station.');s.rules??=emptyAshenRules();s.rules.damage[id]=(s.rules.damage[id]||0)+amount;if(s.rules.damage[id]>=ashenStats(s,id).defense)return ashenAdapter.destroy(s,id);return false;},
+ damage:(s,id,amount)=>{const c=s.table.cards[id];if(!c)return false;if(c.zone==='command'){const before=s.table.health[c.controller];s.table.health[c.controller]-=amount;s.table.events.push(`Damage: ${c.name} · Player ${c.controller+1} · ${before} → ${s.table.health[c.controller]} HP (${amount} damage).`);return false;}if(c.zone!=='unit')throw Error('Damage requires a Unit or Command Station.');s.rules??=emptyAshenRules();s.rules.damage[id]=(s.rules.damage[id]||0)+amount;if(s.rules.damage[id]>=ashenStats(s,id).defense)return ashenAdapter.destroy(s,id);return false;},
  modify:(s,id,stats,keywords,duration)=>{if(!s.table.cards[id]||['graveyard','banished','deck','hand'].includes(s.table.cards[id].zone))return;s.rules??=emptyAshenRules();s.rules.modifiers.push({id,stats:{...stats},keywords:[...keywords],duration});},
  token:(s,p,definition)=>{s.rules??=emptyAshenRules();let id:string;do{id=`ashen-token-${++s.rules.serial}`;}while(s.table.cards[id]);const seat=player(p);s.table.cards[id]={instanceId:id,cardId:'token',name:definition.name,type:definition.type,owner:seat,controller:seat,zone:definition.zone,faceDown:false,rotated:!definition.keywords?.includes('Charge'),counters:0,presentation:{name:definition.name,type:definition.type,subtype:'Unit — Brute Token',faction:'Brute',attack:definition.stats.attack,defense:definition.stats.defense,effectText:definition.keywords?.join(', ')||'Deployment Fatigue.'}};s.table.piles[`${p}:${definition.zone}`].push(id);if(definition.keywords?.length)s.rules.modifiers.push({id,stats:{},keywords:[...definition.keywords],duration:'permanent'});if(ashenStats(s,id).keywords.includes('Charge'))s.table.cards[id].rotated=false;if(definition.tags.includes('Attacking')&&s.rules.duel?.combat){s.rules.duel.combat.attackers.push(id);s.table.cards[id].rotated=true;}return id;},
 };
@@ -71,6 +71,13 @@ export function hasAshenChoices(state:Battlefield,steps:EffectProgram['steps'],c
  }
  return true;
 }
+/** One cost calculation for engine payment and all card/action presentations. */
+export function ashenActionCost(state:Battlefield,id:string){
+ const card=state.table.cards[id],data=ashenData(state,id),printed:ResourceCost={...(data?cardPresentation(data).resourceCost:{})};
+ const isCommand=!!ashenEffects[card?.cardId]?.keywords?.includes('Command'),marks=state.rules?.nobleMarks?.[card?.controller]||{};
+ const planned=marks.planned||0,refined=marks.refined||0,reduction=isCommand?Math.min(printed.untuned||0,planned+refined):0;
+ return {printed,payable:{...printed,untuned:Math.max(0,(printed.untuned||0)-reduction)},isCommand,reduction,planned,refined};
+}
 export function playProgram(state:Battlefield,id:string):EffectProgram{
  const card=state.table.cards[id],definition=ashenEffects[card?.cardId];
  if(!card||!definition||card.zone!=='hand')throw Error('This card is not in the assisted effect batch.');
@@ -78,10 +85,9 @@ export function playProgram(state:Battlefield,id:string):EffectProgram{
  if(card.type==='Ley Font'&&state.rules?.fontPlayed[card.controller])throw Error('You have already played a Ley Font this turn.');
  const cost=cardPresentation(ashenData(state,id)!).resourceCost;
  if(!cost&&card.type!=='Ley Font')throw Error('Printed cost is not verified for this card; use manual play.');
- const printed=cost||{};
- const {untuned=0,...colored}=printed;
+ const {untuned=0,...colored}=ashenActionCost(state,id).payable;
  const base=definition.onPlay||{version:1 as const,id:'deploy',label:`Deploy ${card.name}`,steps:[]};
- return {...base,cost:{...base.cost,resources:colored,generic:Math.max(0,untuned-(definition.keywords?.includes('Command')?((state.rules?.nobleMarks?.[card.controller]?.planned||0)+(state.rules?.nobleMarks?.[card.controller]?.refined||0)):0))}};
+ return {...base,cost:{...base.cost,resources:colored,generic:untuned}};
 }
 export function effectChoices(state:Battlefield,program:EffectProgram,context:EffectContext):{kind:'costCards'|'targets';selection:Selection;entities:Entity[]}[]{
  return ([['costCards',program.cost?.cards],['targets',program.targets]] as const).flatMap(([kind,selection])=>selection?[{kind,selection,entities:candidates(state,ashenAdapter,selection,context)}]:[]);
@@ -116,11 +122,19 @@ export function pendingAshenChoices(state:Battlefield){
 export function resumeAshenEffect(state:Battlefield,ids:string[]):Battlefield{
  const pending=state.rules?.pending;if(!pending)throw Error('No effect choice is pending.');
  const staged=structuredClone(state);delete staged.rules!.pending;
- return completeOrPause(continueProgram(staged,ashenAdapter,pending.flow,ids),pending.label,pending.work);
+ return completeOrPause(continueProgram(staged,ashenAdapter,pending.flow,ids),pending.label,pending.work,pending.emittedEvents);
 }
-export function completeOrPause(result:EffectResult<Battlefield>,label:string,work?:AshenWork):Battlefield{
- if(result.pending){result.state.rules??=emptyAshenRules();result.state.rules.pending={flow:result.pending,label,work};result.state.table.events.push(`Choose cards to continue: ${label}.`);return result.state;}
- let state=drainTriggers(result.state,result.events,work);
+export function completeOrPause(result:EffectResult<Battlefield>,label:string,work?:AshenWork,emittedEvents=0):Battlefield{
+ const fresh=result.events.slice(emittedEvents),step=result.pending?.steps[0];
+ // Refine's draw triggers resolve before its bottom-deck choice. Keep the trusted continuation;
+ // emittedEvents prevents draws and their Refine bookkeeping from firing a second time on resume.
+ if(result.pending&&result.state.rules?.duel&&step?.op==='choose'&&step.destination==='deck-bottom'&&fresh.some(e=>e.kind==='drawn')){
+  let state=drainTriggers(result.state,fresh,work);state.rules!.resumeAfterTriggers??=[];
+  state.rules!.resumeAfterTriggers.push({flow:result.pending,label,emittedEvents:result.events.length});
+  state.table.events.push(`Waiting for draw triggers before completing: ${label}.`);return state;
+ }
+ if(result.pending){result.state.rules??=emptyAshenRules();result.state.rules.pending={flow:result.pending,label,work,emittedEvents};result.state.table.events.push(`Choose cards to continue: ${label}.`);return result.state;}
+ let state=drainTriggers(result.state,fresh,work);
  for(const event of result.events)if(event.kind==='revealed'&&event.entity)state.table.events.push(`Revealed: ${state.table.cards[event.entity.id]?.name||event.entity.type}.`);
  state.table.events.push(state.rules?.duel?`Resolved: ${label}.`:`Assisted sandbox: ${label}. Clash/combat remain manual.`);return state;
 }
@@ -152,12 +166,12 @@ export function drainTriggers(initial:Battlefield,events:EffectEvent[],previous?
     state.rules??=emptyAshenRules();state.rules.triggerUses??={};const key=`${state.rules.turn}:${entry.context.source}:${entry.triggerId}`;
     if(entry.triggerId==='cavalier-refine'&&(state.rules.nobleMarks?.[Number(event.player)]?.refined||0)>1)continue;
     if(entry.limit&&(state.rules.triggerUses[key]||0)>=entry.limit)continue;
-    state.rules.triggerUses[key]=(state.rules.triggerUses[key]||0)+1;work.triggers.push(entry);
+    state.rules.triggerUses[key]=(state.rules.triggerUses[key]||0)+1;state.table.events.push(`Triggered: Player ${Number(entry.context.player)+1} · ${state.table.cards[entry.context.source]?.name||entry.program.label} · ${entry.program.label}.`);work.triggers.push(entry);
    }
    continue;
   }
   const entry=work.triggers.shift()!;
-  if(state.rules?.duel){state.rules.duel.stack.push({...entry,kind:'trigger'});state.rules.duel.priority=openPriority(['0','1'],entry.context.player);continue;}
+  if(state.rules?.duel){state.rules.duel.stack.push({...entry,kind:'trigger',notified:true});state.rules.duel.priority=openPriority(['0','1'],entry.context.player);continue;}
   const resolved=executeProgram(state,ashenAdapter,entry.program,entry.context);state=resolved.state;
   if(resolved.pending){state.rules??=emptyAshenRules();state.rules.pending={flow:resolved.pending,label:entry.program.label,work};return state;}
   work.events.push(...sacrificeEvents(resolved.events),...stateBasedDeaths(state));state.table.events.push(`Triggered: ${entry.program.label}.`);
