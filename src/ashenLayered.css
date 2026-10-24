@@ -68,3 +68,8 @@
 
 /* Keep decorative rules ornaments out of readable card text. */
 .layered-frame .ashen-frame-effect::before,.layered-frame .ashen-frame-effect::after{display:none;content:none}
+
+/* Keep long names complete on one line; the shared hook fits after costs and fonts settle. */
+.ashen-frame-card.layered-frame .ashen-frame-title h3{font-size:var(--fit-title-size,4.6cqi);white-space:nowrap;overflow:visible;text-overflow:clip;max-width:none;min-width:0;flex:1 1 auto;margin:0;line-height:1.04}
+
+.ashen-frame-customize>p{grid-column:1/-1;font-size:11px;line-height:1.4;margin:0 0 4px;color:#cdbd98}

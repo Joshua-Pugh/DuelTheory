@@ -53,7 +53,7 @@ export type EffectAdapter<S>={
  destroy:(state:S,id:string)=>boolean;
  heal?:(state:S,id:string,amount:number)=>void;
  damage:(state:S,id:string,amount:number)=>boolean;
- modify:(state:S,id:string,stats:Record<string,number>,keywords:string[],duration:'turn'|'permanent')=>void;
+ modify:(state:S,id:string,stats:Record<string,number>,keywords:string[],duration:'turn'|'permanent',source?:string)=>void;
  token:(state:S,player:string,definition:TokenDefinition)=>string;
 };
 export class EffectError extends Error{constructor(message:string){super(message);this.name='EffectError';}}
@@ -150,7 +150,7 @@ export function continueProgram<S>(original:S,adapter:EffectAdapter<S>,continuat
   else if(step.op==='counter'){for(const e of entities(step.targets)){adapter.counter(state,e.id,step.counter,step.amount);emit('counter',e,step.amount,step.counter);}}
   else if(step.op==='token'){for(let i=0,n=amount(step.count);i<n;i++){if(--flow.budget<0)throw new EffectError('Effect execution budget exceeded.');const id=adapter.token(state,context.player,step.token);emit('entered',adapter.entities(state).find(e=>e.id===id));}}
   else if(step.op==='if'){flow.steps.unshift(...(condition(step.condition)?step.then:step.otherwise||[]));}
-  else if(step.op==='modify'){for(const e of entities(step.targets)){adapter.modify(state,e.id,Object.fromEntries(Object.entries(step.stats).map(([key,value])=>[key,typeof value==='number'?value:amount(value)])),step.keywords||[],step.duration);emit('modified',e);}}
+  else if(step.op==='modify'){for(const e of entities(step.targets)){adapter.modify(state,e.id,Object.fromEntries(Object.entries(step.stats).map(([key,value])=>[key,typeof value==='number'?value:amount(value)])),step.keywords||[],step.duration,context.source);emit('modified',e);}}
   else if(step.op==='damage'||step.op==='destroy'){const n=step.op==='damage'?amount(step.amount):0,observers=structuredClone(adapter.entities(state));for(const e of entities(step.targets)){if(--flow.budget<0)throw new EffectError('Effect execution budget exceeded.');const died=step.op==='damage'?adapter.damage(state,e.id,n):adapter.destroy(state,e.id);emit(step.op,e,n);events[events.length-1].observers=observers;if(died){destroyedEntities.push(e);emit('destroyed',e);events[events.length-1].observers=observers;}}}
   else throw new EffectError('Unknown effect operation.');
  }

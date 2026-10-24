@@ -1,7 +1,7 @@
 import {continueProgram,candidates,matches,executeProgram,openPriority,passPriority,type Priority,type EffectProgram,type EffectContext,type EffectEvent,type EffectStackEntry} from '../../framework';
 import {newBattlefield,emptyBasin,fontEssence,type Battlefield} from '../../ashenBattlefieldState';
 import type {AshenFaction} from '../../ashenDecks';
-import {ashenAdapter,ashenStats,availableAshenAbilities,playProgram,moveAshenCard,drainTriggers,completeOrPause,resumeAshenEffect,hasAshenChoices} from './adapter';
+import {ashenAdapter,ashenData,ashenStats,availableAshenAbilities,playProgram,moveAshenCard,drainTriggers,completeOrPause,resumeAshenEffect,hasAshenChoices} from './adapter';
 import {ashenEffects} from './effectPacks';
 
 export type Phase='start'|'main1'|'combat'|'main2'|'end';
@@ -165,7 +165,7 @@ export function declareAshenAttackers(original:Battlefield,ids:string[]){let s=s
   if(Object.entries(s.rules?.attachments||{}).some(([relic,target])=>target===id&&s.table.cards[relic]?.zone==='support'&&s.table.cards[relic].cardId==='ashen-noble-ashenfield-lance'))add(program('lance-siege','Ashenfield Lance: gain Siege',[{op:'modify',targets:'source',stats:{},keywords:['Siege'],duration:'turn'}]));
   if(slug==='ashen-brute-raging-mauler')add(program('rage-attack','Rage: +2 Attack per other attacking Brute',[{op:'modify',targets:'source',stats:{attack:{count:{zones:['unit'],tags:['Brute','Attacking'],controller:'self',excludeSource:true},multiplier:2}},duration:'turn'}]));
   if(slug==='ashen-brute-skyclaw-raider')add(program('skyclaw-attack','Skyclaw Raider attack bonus',[{op:'if',condition:{kind:'count',filter:{zones:['unit'],tags:['Brute','Attacking'],controller:'self',excludeSource:true},atLeast:1},then:[{op:'modify',targets:'source',stats:{attack:1},duration:'turn'}]}]));
-  for(const keep of Object.values(s.table.cards).filter(x=>x.controller===c.controller&&x.zone==='command'&&x.cardId==='ashen-brute-the-broken-fist-keep'))add({...program('keep-attack','The Broken Fist Keep: +1 Attack',[{op:'modify',targets:'targets',stats:{attack:1},duration:'turn'}]),targets:{filter:{zones:['unit'],controller:'self'},count:1,label:'Attacking Brute'}},{player:active(s),source:keep.instanceId,targets:[id]});
+  for(const keep of Object.values(s.table.cards).filter(x=>x.controller===c.controller&&x.zone==='command'&&x.cardId==='ashen-brute-the-broken-fist-keep'&&ashenData(s,id)?.faction==='Brute'))add({...program('keep-attack','The Broken Fist Keep: +1 Attack',[{op:'modify',targets:'targets',stats:{attack:1},duration:'turn'}]),targets:{filter:{zones:['unit'],controller:'self'},count:1,label:'Attacking Brute'}},{player:active(s),source:keep.instanceId,targets:[id]});
   for(const drum of Object.values(s.table.cards).filter(x=>x.controller===c.controller&&x.zone==='support'&&x.cardId==='ashen-brute-drum-of-the-pit'))add(program('drum-attack','Drum of the Pit gains Momentum',[{op:'counter',targets:'source',counter:'momentum',amount:1}]),{player:active(s),source:drum.instanceId});
   const n=slug==='ashen-brute-skarn-the-unchained'?2:slug==='ashen-brute-battlefield-howler'?1:0;
   if(n)add(program('attacking-brutes','Create exhausted and attacking Brutes',[{op:'token',token:{name:'Frenzied Brute',type:'Unit',tags:['Brute','Token','Attacking'],stats:{attack:1,defense:1},zone:'unit'},count:n}]));
