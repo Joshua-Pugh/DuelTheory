@@ -7,6 +7,9 @@ import AshenBattlefield from './AshenBattlefield';
 import AshenPhaseControls from './AshenPhaseControls';
 import ResourcePool from './duelUi/ResourcePool';
 import {newBruteDuel,inspectAshenAction,submitAshenAction,nextAshenPhase} from './games/ashen/duel';
+import {ashenTurnNumber} from './ashenBattlefieldState';
+import {executeProgram} from './framework';
+import {ashenAdapter} from './games/ashen/adapter';
 import {moveAshenCard} from './games/ashen/adapter';
 import {rulesForCard,RESOURCES} from './ashenPresentation';
 vi.mock('./useFittedRules',()=>({default:()=>{}}));
@@ -21,7 +24,7 @@ it('uses SP to enter combat and replaces the main strip with combat steps',async
  const s=setup(),fn=callbacks();await mount(<AshenPhaseControls state={s} seat={0} attackIds={[]} blockAttack={null} {...fn}/>);
  const sp=document.querySelector('[data-phase="combat"]') as HTMLButtonElement;expect(sp.textContent).toBe('SP');expect(sp.disabled).toBe(false);await click(sp);expect(fn.onNext).toHaveBeenCalledOnce();
  const combat=nextAshenPhase(s);await act(async()=>root!.render(<AshenPhaseControls state={combat} seat={0} attackIds={[]} blockAttack={null} {...fn}/>));
- expect(document.querySelector('[data-phase="combat"]')).toBeNull();expect(document.querySelector('[data-phase="attack"]')?.textContent).toBe('ATK');expect(document.querySelector('[data-phase="block"]')?.textContent).toBe('BLK');expect((document.querySelector('[data-phase="main2"]') as HTMLButtonElement).disabled).toBe(true);
+ expect(document.querySelector('[data-phase="combat"]')).toBeNull();expect(document.querySelector('[data-phase="attack"]')?.textContent).toBe('ATK');expect(document.querySelector('[data-phase="block"]')?.textContent).toBe('BLK');expect((document.querySelector('[data-phase="main2"]') as HTMLButtonElement).disabled).toBe(false);
 });
 it('locks phase progression for the other seat and while a choice is pending',()=>{
  const s=setup(),fn=callbacks();expect(renderToStaticMarkup(<AshenPhaseControls state={s} seat={1} attackIds={[]} blockAttack={null} {...fn}/>)).toMatch(/data-phase="combat"[^>]*disabled/);
@@ -52,4 +55,25 @@ it('uses the same action menu and commands in private AT rooms',async()=>{
 it('repairs old native transcription copies while respecting explicit custom rules',()=>{
  const card={cardId:'ashen-noble-crown-of-dominion',name:'Crown',type:'Relic',description:'Whenever Plan, Refine, or Fortify, draw a card.'};expect(rulesForCard(card).text).toContain('Whenever you Plan');expect(rulesForCard({...card,rulesOverride:true}).text).toBe(card.description);
  const native={...card,cardId:'ashen-brute-warhowl-instigator',description:'under your, draw a card.'};expect(rulesForCard(native).text).toContain('under your control,');expect(rulesForCard({...native,cardId:'custom-card'}).text).toBe(native.description);
+});
+it('sends the selected End Phase shortcut from a private AT duel',async()=>{
+ const s=setup(),send=vi.fn();await mount(<AshenBattlefield remote={{state:s,seat:0,send}} learning={false}/>);
+ const end=document.querySelector('[data-phase="end"]') as HTMLButtonElement;expect(end.disabled).toBe(false);await click(end);expect(send).toHaveBeenCalledWith({type:'phase',phase:'end'});
+});
+it('counts a full two-player cycle without resetting individual-turn ability limits',()=>{
+ const s=setup();for(const serial of [1,2,3,4,7,8]){s.rules!.turn=serial;expect(ashenTurnNumber(s)).toBe(Math.ceil(serial/2));expect(s.rules!.turn).toBe(serial);}
+});
+it('keeps a local Plan choice with its owner until the view changes',async()=>{
+ const s=setup(),source=s.table.piles['1:command'][0];const result=executeProgram(s,ashenAdapter,{version:1,id:'test-plan',label:'Plan 2',steps:[{op:'plan',count:2}]},{player:'1',source});result.state.rules!.pending={flow:result.pending!,label:'Plan 2'};
+ await mount(<AshenBattlefield initialState={result.state} learning={false}/>);
+ expect(document.querySelector('[aria-label="Plan: arrange viewed cards"]')).toBeNull();const switcher=Array.from(document.querySelectorAll('.ab-choice-wait button')).find(b=>b.textContent==='Play Player 2')!;await click(switcher);expect(document.querySelector('[aria-label="Plan: arrange viewed cards"]')).not.toBeNull();
+});
+it('does not expose another player’s pending Plan choices in a private room',async()=>{
+ const s=setup(),source=s.table.piles['1:command'][0];const result=executeProgram(s,ashenAdapter,{version:1,id:'test-plan',label:'Plan 2',steps:[{op:'plan',count:2}]},{player:'1',source});result.state.rules!.pending={flow:result.pending!,label:'Plan 2'};
+ await mount(<AshenBattlefield remote={{state:result.state,seat:0,send:vi.fn()}} learning={false}/>);expect(document.querySelector('[aria-label="Plan: arrange viewed cards"]')).toBeNull();expect(document.querySelector('.ab-choice-wait')?.textContent).toContain('Player 2 chooses');expect(document.querySelector('.ab-choice-wait button')).toBeNull();
+});
+it('keeps a Command Station target choice with the effect owner and labels each target seat',async()=>{
+ const s=setup(),source=s.table.piles['1:command'][0];const result=executeProgram(s,ashenAdapter,{version:1,id:'station-ping',label:'Foresight damage',steps:[{op:'select',selection:{filter:{zones:['command']},count:1,label:'Choose a Command Station'}},{op:'damage',targets:'targets',amount:1}]},{player:'1',source});result.state.rules!.pending={flow:result.pending!,label:'Foresight damage'};
+ await mount(<AshenBattlefield initialState={result.state} learning={false}/>);expect(document.querySelector('[aria-label="Choose a Command Station"]')).toBeNull();await click(document.querySelector('.ab-choice-wait button')!);
+ const dialog=document.querySelector('[aria-label="Choose a Command Station"]')!;expect(dialog.textContent).toContain('Player 1 · Command Station');expect(dialog.textContent).toContain('Player 2 · Command Station');
 });

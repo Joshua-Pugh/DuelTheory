@@ -112,6 +112,27 @@ export function nextAshenPhase(original:Battlefield){let s=structuredClone(origi
  else if(d.phase==='main2'){d.phase='end';const marks=s.rules!.nobleMarks?.[s.table.active]||{};if(marks.planned&&marks.refined){const source=s.table.piles[`${s.table.active}:command`].find(id=>s.table.cards[id].cardId==='ashen-noble-the-crown-s-bastion');if(source)d.jobs.push({kind:'program',context:{source,player:active(s)},program:program('bastion-end','Bastion: end-turn Fortify',[{op:'select',selection:{filter:{zones:['unit'],types:['Unit'],tags:['Noble'],controller:'self'},count:1,label:'Bastion: choose a Noble'}},{op:'fortify',targets:'targets',amount:1}])});}d.jobs.push({kind:'endCleanup'},{kind:'newTurn'});}
  else throw Error('Finish the current phase.');return settleAshenDuel(s);
 }
+/** Forward shortcuts still pass through required combat and end/start bookkeeping. */
+export function assertAshenPhaseAdvance(s:Battlefield,target:Phase){
+ requireIdle(s);const d=duel(s),order:Phase[]=['start','main1','combat','main2','end'];
+ if(!['combat','main2','end'].includes(target)||order.indexOf(target)<=order.indexOf(d.phase))throw Error('Choose a later phase.');
+ if(d.phase==='combat'&&!['attack','finished'].includes(d.combat?.stage||''))throw Error('Finish the Skirmish before advancing.');
+ if(['main2','end'].includes(target)&&(d.phase==='main1'||d.phase==='combat'&&d.combat?.stage==='attack')){
+  if(s.table.piles[`${s.table.active}:unit`].some(id=>!s.table.cards[id].rotated&&!s.table.cards[id].faceDown&&ashenStats(s,id).keywords.includes('Reckless')))throw Error('Reckless Units must attack if able. Finish the Skirmish first.');
+ }
+}
+export function advanceAshenTo(original:Battlefield,target:Phase){
+ assertAshenPhaseAdvance(original,target);let s=original;
+ for(let n=0;n<4;n++){
+  if(duel(s).phase===target)return s;
+  if(duel(s).phase==='combat'&&duel(s).combat?.stage==='attack')s=declareAshenAttackers(s,[]);
+  s=nextAshenPhase(s);
+  // End can immediately complete and begin the next turn, or pause for an end effect.
+  if(target==='end'&&(s.rules!.turn!==original.rules!.turn||duel(s).phase==='end'))return s;
+  if(s.rules?.pending||duel(s).priority||duel(s).stack.length||duel(s).jobs.length)return s;
+ }
+ throw Error('Unable to reach that phase.');
+}
 export function settleAshenDuel(initial:Battlefield):Battlefield{
  let s=initial,budget=512;
  while(budget--){const d=duel(s);for(const entry of d.stack)entry.key??=`clash-${++s.rules!.serial}`;checkAshenVictory(s);if(d.winner!==undefined||s.rules?.pending||d.callPermission==='choose'||d.ordering)return s;

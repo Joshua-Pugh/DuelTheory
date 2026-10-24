@@ -25,6 +25,28 @@ function finish(start:Battlefield,choose?:(s:Battlefield)=>string[]){let s=start
  return s;
  }throw Error('Choice/trigger loop did not finish');}
 describe('Noble deck and mixed AT duels',()=>{
+ it('keeps Rune of Foresight targeting with its controller in either seat',()=>{
+  for(const seat of [0,1] as const){
+   let s=newAshenDuel(['Noble','Noble'],42,seat);s.table.active=seat;s.basins[seat].oath=50;
+   const rune=source(s,'rune-of-foresight',seat);moveAshenCard(s,rune,'support');
+   s=submitAshenAction(s,rune,{source:rune,player:String(seat)},'foresight-plan');
+   let targeted=false;
+   for(let n=0;n<60;n++){
+    const flow=s.rules?.pending?.flow,step=flow?.steps[0];
+    if(flow&&step){
+     expect(flow.context.player).toBe(String(seat));
+     if(step.op==='plan')s=resumeBruteDuel(s,flow.planIds!.map((id,i)=>(i===0?'b:':'t:')+id));
+     else if(step.op==='mode')s=resumeBruteDuel(s,[step.options.find(o=>o.id==='essence')?.id||step.options[0].id]);
+     else if(step.op==='select'){
+      expect(flow.context.source).toBe(rune);targeted=true;
+      const enemy=s.table.piles[`${seat===0?1:0}:command`][0];s=resumeBruteDuel(s,[enemy]);
+     }else throw Error('Unexpected choice');
+    }else if(s.rules!.duel!.priority)s=passAshenPriority(s,Number(s.rules!.duel!.priority!.holder) as 0|1);
+    else break;
+   }
+   expect(targeted).toBe(true);expect(s.table.health[seat===0?1:0]).toBe(19);expect(s.table.health[seat]).toBe(20);
+  }
+ });
  it('gives Dominion counters only for its controller’s Plan, Refine and Fortify events',()=>{
   const s=fixture(),id=source(s,'crown-of-dominion');moveAshenCard(s,id,'support');
   expect(ashenCardMap.get('ashen-noble-crown-of-dominion')?.effectText).toContain('Whenever you Plan, Refine, or Fortify');
