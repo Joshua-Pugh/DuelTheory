@@ -5,6 +5,8 @@ Table Companion is a game-neutral manual scorekeeping product for physical table
 ## Available now
 
 - Shared rooms for 2–8 players, private device seats, invite links, reconnecting and own-seat controls.
+- Compact player dashboard with centered totals, local-seat −/+ shortcuts, current-turn highlighting and expandable detailed controls. Opponent totals remain read-only.
+- A shared **Table Title** with an editable label and optional end-of-turn reminder. Players manually claim the title; only one player holds it at a time. Holder/host can clear it, and only the host can rename/configure it. Version checks reject stale concurrent changes; request retries are idempotent. Eliminating the holder clears the title for manual reassignment. Reset clears the holder while retaining its label/reminder. Damage and game-specific effects never transfer it automatically.
 - Editable primary total label, starting value and optional defeat threshold at or below a value.
 - Up to eight named resources/counters with individual starting values and optional defeat thresholds at or above a value. Additional unconfigured counters can be entered during play within that same eight-counter limit.
 - Optional named-source damage tracking: up to eight sources per player, independent source identities even when names match, optional defeat threshold per source and optional linked reduction/correction of the primary total.
@@ -31,6 +33,8 @@ Table Companion is a game-neutral manual scorekeeping product for physical table
 ```
 
 Null thresholds disable that defeat condition. Settings are fixed when a room is created and validated by the server. A joining player cannot replace them. Profile files contain no executable code. Values must be integers, labels bounded and unique, and starting values must not already cause defeat.
+
+The title is a room-level shared marker, separate from player counters and profile defeat rules. Configure its label and reminder in the active table. Reminders are displayed and logged when that holder's turn ends; they do not draw cards or simulate rewards. Numeric edits preserve an empty input instead of inserting zero, select the existing value on focus and normalize leading zeros on blur. Required blank starting totals cannot be saved as a valid profile; optional blank thresholds remain disabled.
 
 ## Compatibility and deployment
 

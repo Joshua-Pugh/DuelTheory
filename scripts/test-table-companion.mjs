@@ -13,19 +13,30 @@ const guest=await call(b,'join',{name:'Guest',sources:['Unit'],profile:{...profi
 assert.deepEqual(guest.state.profile,profile);assert.equal(guest.state.players[1].life,35);assert.equal(guest.state.players[1].counters.Energy,3);
 assert.ok(!JSON.stringify(guest).includes(a));assert.ok(!JSON.stringify(guest).includes(b));
 await call(b,'action',{type:'adjust',field:'life',delta:-1},400);
+await call(b,'action',{type:'claimTitle',version:0},400);
 await call(a,'action',{type:'start'});
 for(let i=0;i<30;i++){
  const {state}=await call(a,'read');if(state.firstPlayer.winner)break;
  await Promise.all([[a,host.playerId],[b,guest.playerId]].filter(([,id])=>state.firstPlayer.eligible.includes(id)).map(([token])=>call(token,'action',{type:'roll',round:state.firstPlayer.round})));
 }
 assert.ok((await call(a,'read')).state.firstPlayer.winner);
+await call(a,'action',{type:'claimTitle',version:0});
+await call(b,'action',{type:'claimTitle',version:1});
+await call(a,'action',{type:'claimTitle',version:1},400);
+await call(b,'action',{type:'configureTitle',version:2,label:'Objective',reminder:''},400);
+await call(a,'action',{type:'configureTitle',version:2,label:'Objective',reminder:'Check your benefit'});
+await call(b,'action',{type:'releaseTitle',version:3});
+const claimId=randomUUID();await call(b,'action',{type:'claimTitle',version:4},200,claimId);await call(b,'action',{type:'claimTitle',version:4},200,claimId);
+assert.equal((await call(a,'read')).state.tableTitle.holder,guest.playerId);
 const id=randomUUID();await call(b,'action',{type:'adjust',field:'counter',key:'Energy',delta:4,playerId:host.playerId},200,id);await call(b,'action',{type:'adjust',field:'counter',key:'Energy',delta:4},200,id);
 let {state}=await call(a,'read');assert.equal(state.players[0].counters.Energy,3);assert.equal(state.players[1].counters.Energy,7);
 await call(b,'action',{type:'adjust',field:'damage',key:`${host.playerId}:0`,delta:12,loseLife:true});
 state=(await call(a,'read')).state;assert.equal(state.players[1].life,23);assert.match(state.log[0].text,/eliminated.*Host wins/);
+assert.equal(state.tableTitle.holder,undefined);
 await call(b,'action',{type:'adjust',field:'damage',key:`${host.playerId}:0`,delta:-1});
 state=(await call(a,'read')).state;assert.match(state.log[0].text,/restored after correction/);
 await call(b,'action',{type:'adjust',field:'counter',key:'Corruption',delta:6});state=(await call(a,'read')).state;assert.match(state.log[0].text,/6\+ Corruption/);
 await call(b,'action',{type:'reset'},400);await call(a,'action',{type:'reset'});state=(await call(b,'read')).state;
 assert.deepEqual(state.profile,profile);assert.deepEqual(state.players.map(p=>p.life),[35,35]);assert.deepEqual(state.players[1].counters,{Energy:3,Corruption:0});assert.equal(state.started,false);
-console.log('PASS: portable profiles, validation, unchanged join settings, ready gate, authenticated own-seat edits, idempotency, linked damage, custom defeat/correction and reset ('+code+').');
+assert.equal(state.tableTitle.label,'Objective');assert.equal(state.tableTitle.holder,undefined);
+console.log('PASS: profiles, ready gate, authenticated edits, idempotency, damage, defeat/correction, reset and exclusive shared-title transfer ('+code+').');

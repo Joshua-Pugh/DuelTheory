@@ -2,12 +2,15 @@ import {DUEL_PROFILE,validateTableProfile,type TableProfile} from './profiles';
 /** Manual multiplayer scorekeeping; this does not adjudicate card effects. */
 export type TablePlayer={id:string;name:string;sources?:string[];commanders:string[];life:number;poison:number;damage:Record<string,number>;counters:Record<string,number>;conceded:boolean};
 export type FirstPlayerRoll={round:number;eligible:string[];rolls:Record<string,number>;winner?:string};
-export type TableRoomState={profile?:TableProfile;code:string;title:string;host:string;capacity:number;started:boolean;revision:number;players:TablePlayer[];firstPlayer?:FirstPlayerRoll;turnOrder?:string[];turn?:number;log:{id:string;at:number;player:string;text:string}[]};
+export type TableTitle={label:string;reminder:string;version:number;holder?:string};
+export type TableRoomState={tableTitle?:TableTitle;profile?:TableProfile;code:string;title:string;host:string;capacity:number;started:boolean;revision:number;players:TablePlayer[];firstPlayer?:FirstPlayerRoll;turnOrder?:string[];turn?:number;log:{id:string;at:number;player:string;text:string}[]};
+export const sharedTableTitle=(s:TableRoomState):TableTitle=>s.tableTitle??{label:'Table Title',reminder:'',version:0};
 export type RoomCommand=
  |{type:'join';name:string;sources?:string[];commanders?:string[]}
  |{type:'adjust';field:'life'|'poison'|'damage'|'counter';delta:number;key?:string;loseLife?:boolean}
  |{type:'concede';value:boolean}
  |{type:'roll';round:number}|{type:'endTurn';turn:number}
+ |{type:'claimTitle'|'releaseTitle';version:number}|{type:'configureTitle';version:number;label:string;reminder:string}
  |{type:'start'}|{type:'reset'};
 export class RoomError extends Error{}
 const label=(value:unknown,max:number)=>{if(typeof value!=='string'||!value.trim()||value.trim().length>max)throw new RoomError(`Enter text between 1 and ${max} characters.`);return value.trim();};
@@ -52,8 +55,27 @@ export function applyRoomCommand(original:TableRoomState,actor:string,input:Room
   player={id:actor,name,commanders:names.map(n=>label(n,80)),...(s.profile?{sources:names.map(n=>label(n,80))}:{}),life:roomProfile(s).health.start,poison:0,damage:{},counters:Object.fromEntries((s.profile?.counters??[]).map(c=>[c.label,c.start])),conceded:false};s.players.push(player);text='joined the table';
  }else{
   if(!player)throw new RoomError('Join this room before changing values.');
-  if((input.type==='adjust'||input.type==='concede')&&!tableGameReady(s))throw new RoomError('Wait for everyone to join, the host to lock seats, and the first-player roll to finish.');
-  if(input.type==='start'){if(actor!==s.host)throw new RoomError('Only the host can start the game.');if(s.started&&s.firstPlayer)throw new RoomError('The game has already started.');if(s.players.length!==s.capacity)throw new RoomError('Wait for all '+s.capacity+' players to join.');s.started=true;s.firstPlayer={round:1,eligible:s.players.map(p=>p.id),rolls:{}};delete s.turnOrder;delete s.turn;text='locked seats; everyone rolls to see who goes first';}
+  if(input.type==='claimTitle'||input.type==='releaseTitle'||input.type==='configureTitle'){
+   const marker=sharedTableTitle(s);
+   if(input.version!==marker.version)throw new RoomError('The table title changed. Check the current holder and try again.');
+   if(input.type==='configureTitle'){
+    if(actor!==s.host)throw new RoomError('Only the host can configure the table title.');
+    if(typeof input.reminder!=='string'||input.reminder.trim().length>120)throw new RoomError('Use a reminder up to 120 characters.');
+    s.tableTitle={...marker,label:label(input.label,24),reminder:input.reminder.trim(),version:marker.version+1};text=`configured shared title: ${s.tableTitle.label}`;
+   }else{
+    if(!tableGameReady(s))throw new RoomError('Finish the first-player roll before changing the table title.');
+    if(input.type==='claimTitle'){
+     if(tableEliminated(player,s))throw new RoomError('Eliminated players cannot hold the table title.');
+     if(marker.holder===actor)throw new RoomError('You already hold this title.');
+     s.tableTitle={...marker,holder:actor,version:marker.version+1};text=`claimed ${marker.label}${marker.holder?` from ${s.players.find(p=>p.id===marker.holder)?.name}`:''}`;
+    }else{
+     if(actor!==marker.holder&&actor!==s.host)throw new RoomError('Only the holder or host can clear the title.');
+     s.tableTitle={...marker,holder:undefined,version:marker.version+1};text=`cleared ${marker.label}`;
+    }
+   }
+  }
+  else if((input.type==='adjust'||input.type==='concede')&&!tableGameReady(s))throw new RoomError('Wait for everyone to join, the host to lock seats, and the first-player roll to finish.');
+  else if(input.type==='start'){if(actor!==s.host)throw new RoomError('Only the host can start the game.');if(s.started&&s.firstPlayer)throw new RoomError('The game has already started.');if(s.players.length!==s.capacity)throw new RoomError('Wait for all '+s.capacity+' players to join.');s.started=true;s.firstPlayer={round:1,eligible:s.players.map(p=>p.id),rolls:{}};delete s.turnOrder;delete s.turn;text='locked seats; everyone rolls to see who goes first';}
   else if(input.type==='roll'){
    const roll=s.firstPlayer;if(!s.started||!roll||roll.winner||tableGameOver(s)||tableEliminated(player,s))throw new RoomError('First-player rolling is not open.');
    if(input.round!==roll.round||!roll.eligible.includes(actor)||Object.hasOwn(roll.rolls,actor))throw new RoomError('Wait for the other players or the next tie-break round.');
@@ -63,9 +85,10 @@ export function applyRoomCommand(original:TableRoomState,actor:string,input:Room
    if(!s.turnOrder?.length||!s.turn||input.turn!==s.turn)throw new RoomError('The turn has changed or rolling is not finished.');
    if(actor!==currentTurnPlayer(s)&&actor!==s.host)throw new RoomError('Only the current player or host can advance the turn.');
    if(activeTablePlayers(s).length<2)throw new RoomError('At least two active players are needed to advance turns.');
-   do{s.turn++;}while(s.players.some(p=>p.id===currentTurnPlayer(s)&&tableEliminated(p,s)));text=`ended the turn · turn ${s.turn}: ${s.players.find(p=>p.id===currentTurnPlayer(s))?.name}`;
+   const ending=currentTurnPlayer(s),marker=sharedTableTitle(s);
+   do{s.turn++;}while(s.players.some(p=>p.id===currentTurnPlayer(s)&&tableEliminated(p,s)));text=`ended the turn${marker.holder===ending&&marker.reminder?` · ${marker.label} reminder: ${marker.reminder}`:''} · turn ${s.turn}: ${s.players.find(p=>p.id===currentTurnPlayer(s))?.name}`;
   }
-  else if(input.type==='reset'){if(actor!==s.host)throw new RoomError('Only the host can reset the game.');for(const p of s.players){p.life=roomProfile(s).health.start;p.poison=0;p.damage={};p.counters=Object.fromEntries((s.profile?.counters??[]).map(c=>[c.label,c.start]));p.conceded=false;}s.started=false;delete s.firstPlayer;delete s.turnOrder;delete s.turn;text=`reset the table to ${roomProfile(s).health.start} ${roomProfile(s).health.label}; seats are open`;}
+  else if(input.type==='reset'){if(actor!==s.host)throw new RoomError('Only the host can reset the game.');for(const p of s.players){p.life=roomProfile(s).health.start;p.poison=0;p.damage={};p.counters=Object.fromEntries((s.profile?.counters??[]).map(c=>[c.label,c.start]));p.conceded=false;}if(s.tableTitle)s.tableTitle={...s.tableTitle,holder:undefined,version:s.tableTitle.version+1};s.started=false;delete s.firstPlayer;delete s.turnOrder;delete s.turn;text=`reset the table to ${roomProfile(s).health.start} ${roomProfile(s).health.label}; seats are open`;}
   else if(input.type==='concede'){if(typeof input.value!=='boolean')throw new RoomError('Invalid concession.');player.conceded=input.value;text=input.value?'conceded':'returned to the game';}
   else if(input.type==='adjust'){
    const n=input.delta;if(!Number.isInteger(n)||n===0||Math.abs(n)>999)throw new RoomError('Use a whole-number change from 1 to 999.');
@@ -86,6 +109,7 @@ export function applyRoomCommand(original:TableRoomState,actor:string,input:Room
   }else throw new RoomError('Unknown action.');
  }
  for(const p of s.players){const was=original.players.find(old=>old.id===p.id);if(was&&!tableEliminated(was,original)&&tableEliminated(p,s))text+=` · ${p.name} eliminated (${p.conceded?'conceded':tableWarnings(p,s).join(', ')})`;else if(was&&tableEliminated(was,original)&&!tableEliminated(p,s)&&input.type!=='reset')text+=` · ${p.name} restored after correction`;}
+ if(s.tableTitle?.holder&&s.players.some(p=>p.id===s.tableTitle!.holder&&tableEliminated(p,s))){text+=` · ${s.tableTitle.label} cleared; choose a new holder manually`;s.tableTitle={...s.tableTitle,holder:undefined,version:s.tableTitle.version+1};}
  text+=settleFirstPlayer(s);
  if(s.turnOrder?.length&&s.turn&&activeTablePlayers(s).length>=2&&s.players.some(p=>p.id===currentTurnPlayer(s)&&tableEliminated(p,s))){do{s.turn++;}while(s.players.some(p=>p.id===currentTurnPlayer(s)&&tableEliminated(p,s)));text+=` · turn ${s.turn}: ${s.players.find(p=>p.id===currentTurnPlayer(s))?.name}`;}
  if(tableGameOver(s)&&!tableGameOver(original)){const winner=activeTablePlayers(s)[0];text+=winner?` · ${winner.name} wins; game over`:' · no active players remain; game over';}
