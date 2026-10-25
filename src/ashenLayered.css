@@ -73,3 +73,7 @@
 .ashen-frame-card.layered-frame .ashen-frame-title h3{font-size:var(--fit-title-size,4.6cqi);white-space:nowrap;overflow:visible;text-overflow:clip;max-width:none;min-width:0;flex:1 1 auto;margin:0;line-height:1.04}
 
 .ashen-frame-customize>p{grid-column:1/-1;font-size:11px;line-height:1.4;margin:0 0 4px;color:#cdbd98}
+
+/* Card ink must remain readable inside dark page containers. */
+.ashen-frame-card.layered-frame .ashen-frame-effect p{color:#241c12}
+
