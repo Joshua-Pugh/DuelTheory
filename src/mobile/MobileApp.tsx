@@ -154,13 +154,13 @@ export default function MobileApp() {
         <button aria-label="DuelTheory home" onClick={() => navigate("home")}>
           <img
             className="mobile-crest"
-            src="/branding/dueltheory-crest.png"
+            src="/branding/dt-forge-crest.svg"
             alt=""
           />
           <img
             className="mobile-wordmark"
-            src="/branding/dueltheory-wordmark.png"
-            alt="DuelTheory — Build. Simulate. Master."
+            src="/branding/dt-wordmark.svg"
+            alt="DuelTheory"
           />
         </button>
         <small>PREVIEW</small>

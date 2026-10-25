@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="DuelTheory spaced Forge Crest app icon"><rect x="1" y="1" width="126" height="126" rx="25" fill="#14382b" stroke="#36533d"/><svg x="21" y="17" width="86" height="94" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 108" role="img" aria-label="DuelTheory spaced Forge Crest"><defs>
+<linearGradient id="spaced-crest-gold" x1="0" y1="0" x2=".25" y2="1" gradientUnits="objectBoundingBox">
+ <stop stop-color="#e0c57f"/><stop offset=".43" stop-color="#c9a650"/><stop offset="1" stop-color="#b38a3e"/>
+</linearGradient>
+<filter id="spaced-crest-bevel" x="-8%" y="-8%" width="116%" height="120%" color-interpolation-filters="sRGB">
+ <feOffset in="SourceAlpha" dx="0" dy="0.85" result="down"/>
+ <feComposite in="SourceAlpha" in2="down" operator="out" result="topEdge"/>
+ <feFlood flood-color="#fff0bb" flood-opacity=".8"/>
+ <feComposite in2="topEdge" operator="in" result="light"/>
+ <feOffset in="SourceAlpha" dx="0" dy="-0.85" result="up"/>
+ <feComposite in="SourceAlpha" in2="up" operator="out" result="bottomEdge"/>
+ <feFlood flood-color="#61451d" flood-opacity=".75"/>
+ <feComposite in2="bottomEdge" operator="in" result="shade"/>
+ <feMerge><feMergeNode in="SourceGraphic"/><feMergeNode in="light"/><feMergeNode in="shade"/></feMerge>
+</filter></defs><g fill="#5c4525" transform="translate(0 1.1)"><path fill-rule="evenodd" d="M50 4L91 18V54C91 75 73 91 50 101C27 91 9 75 9 54V18ZM50 12L17 24V54C17 70 31 84 50 93C69 84 83 70 83 54V24Z"/><g transform="translate(7.2 7) scale(.8)"><path transform="translate(-3 0)" fill-rule="evenodd" d="M22 30H36C51 30 58 39 58 53S51 76 36 76H22V71H27V35H22ZM36 37V69C44 69 49 63 49 53S44 37 36 37Z"/><path transform="translate(5 0)" d="M56 30H83V43H78L76 37H74V71H80V76H60V71H66V37H63L61 43H56Z"/></g></g><g fill="url(#spaced-crest-gold)" stroke="#7b5a28" stroke-width=".35" stroke-linejoin="round" paint-order="stroke" filter="url(#spaced-crest-bevel)"><path fill-rule="evenodd" d="M50 4L91 18V54C91 75 73 91 50 101C27 91 9 75 9 54V18ZM50 12L17 24V54C17 70 31 84 50 93C69 84 83 70 83 54V24Z"/><g transform="translate(7.2 7) scale(.8)"><path transform="translate(-3 0)" fill-rule="evenodd" d="M22 30H36C51 30 58 39 58 53S51 76 36 76H22V71H27V35H22ZM36 37V69C44 69 49 63 49 53S44 37 36 37Z"/><path transform="translate(5 0)" d="M56 30H83V43H78L76 37H74V71H80V76H60V71H66V37H63L61 43H56Z"/></g></g></svg></svg>

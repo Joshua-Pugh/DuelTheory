@@ -23,5 +23,5 @@ export default function DrawAnimations({state}:{state:DuelState}){
   setFlights(next);
 
  },[state]);
- return <CardMotionLayer flights={flights.map(f=>({...f,content:<span className="dt-card-back"><span className="dt-back-orbit"/><img src="/branding/dueltheory-crest.png" alt=""/></span>}))}><style>{flights.map(f=>`.dt-field-hand [data-instance="${f.id}"]{animation:dt-card-arrival ${f.delay+600}ms ease-out}`).join("\n")}</style></CardMotionLayer>;
+ return <CardMotionLayer flights={flights.map(f=>({...f,content:<span className="dt-card-back"><span className="dt-back-orbit"/><img src="/branding/dt-forge-crest.svg" alt=""/></span>}))}><style>{flights.map(f=>`.dt-field-hand [data-instance="${f.id}"]{animation:dt-card-arrival ${f.delay+600}ms ease-out}`).join("\n")}</style></CardMotionLayer>;
 }
