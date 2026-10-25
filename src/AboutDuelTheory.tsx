@@ -27,6 +27,7 @@ export default function AboutDuelTheory(){
   <p>For gameplay issues, the most useful reports include the cards involved, what occurred, and what should have happened under the applicable rules.</p>
   <p>Our objective is to build something that players and creators can rely on. Achieving that will take time, testing, and feedback from people who understand the games they play.</p>
   <p>We appreciate everyone who takes the time to explore DuelTheory and contribute to its development.</p>
+  <p>Send feedback to <a href="mailto:designteam@ashenforgegames.com">designteam@ashenforgegames.com</a>.</p>
   <p className="dt-byline">Ashen Forge Games<br/>Creators of DuelTheory and Ashen Throne</p>
  </article>;
 }
