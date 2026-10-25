@@ -1,0 +1,116 @@
+/* DuelTheory: ivory play desk, forest-green cabinetry, stamped gold controls.
+   Scope the public shell so in-game overlays keep their own contrast rules. */
+.dt-public-site{--dt-ink:#25352d;--dt-paper:#eee6d2;--dt-sheet:#f7f1e3;--dt-gold:#b58a36;--dt-forest:#112d24;color:var(--dt-ink);background:var(--dt-paper);font-family:"Segoe UI",Arial,sans-serif}
+.dt-public-site .global-header:has(.dt-navigation){background:#102c23;border-bottom:3px solid #ad8539;padding:12px 28px;gap:22px;box-shadow:none}
+.dt-public-site .main{max-width:1480px;padding:0 28px 20px;background:var(--dt-paper)}
+.dt-public-site .top{height:36px;border-bottom:1px solid #8e856d55;font:11px Consolas,monospace;letter-spacing:0;color:#665d48;gap:10px}
+.dt-public-site .top .dim{color:#665d48}
+.dt-public-site .top>span:first-child{display:none}
+.dt-public-site .top>span:last-child{margin-left:auto}
+.dt-public-site .eyebrow,.dt-kicker{font:600 10px Consolas,monospace;letter-spacing:1.4px;color:#726039}
+.dt-public-site :is(button,a.primary,a.secondary){border-radius:3px;box-shadow:none;text-decoration:none}
+.dt-public-site .primary{display:inline-flex;align-items:center;justify-content:center;background:#c6a24c;color:#17271d;border:1px solid #795b20;padding:10px 16px;font-weight:700;min-height:42px}
+.dt-public-site .secondary{display:inline-flex;align-items:center;justify-content:center;background:#f5efdf;color:#25382c;border:1px solid #8b8068;padding:9px 14px;min-height:40px}
+.dt-public-site .primary:hover{background:#d7b661}.dt-public-site .secondary:hover{background:#e2d9c1}
+.dt-public-site button:focus-visible,.dt-public-site a:focus-visible{outline:2px solid #42674a;outline-offset:3px}
+.dt-public-site .dt-desktop-nav>button,.dt-public-site .dt-nav-group>button{color:#e5d9b8;border-radius:2px;font-size:13px}
+.dt-public-site .dt-desktop-nav button.active,.dt-public-site .dt-desktop-nav button[aria-current=page],.dt-public-site .dt-desktop-nav button[aria-expanded=true]{background:#294435;color:#f4d47e}
+.dt-public-site .dt-desktop-nav button:hover{background:#294435;color:#fff1c7}
+.dt-public-site .dt-nav-dropdown{border-radius:3px;background:#17372a;border-color:#a5823d;box-shadow:3px 5px 0 #14251e33}
+.dt-public-site .dt-nav-dropdown button{color:#f1e7cc;border-radius:2px}
+.dt-public-site .dt-nav-dropdown small{color:#c2c4ac}
+.dt-public-site .dt-nav-dropdown .eyebrow{color:#d2b56c}
+.dt-public-site .page-heading{margin:22px 0 18px}.dt-public-site .page-heading h1{font:700 30px Georgia,serif;letter-spacing:-.5px;color:#18372a;margin:7px 0}
+.dt-public-site .page-heading p{color:#5b604f;font-size:14px;line-height:1.5}
+.dt-public-site .panel,.dt-public-site .stats>div{background:#f6efdf;border:1px solid #ada184;border-radius:3px;box-shadow:none}
+.dt-public-site .panel-heading{background:#e2d9c2;border-color:#b5a98b;color:#25382c}
+.dt-public-site .panel :is(h2,h3,h4),.dt-public-site .data-line{color:#25382c}
+.dt-public-site .muted,.dt-public-site .panel>p,.dt-public-site .stats small{color:#62634f}
+.dt-public-site :is(input,select,textarea){border-radius:3px;border-color:#a89b7c;background:#fff9e9;color:#24392c;max-width:100%}
+.dt-public-site :is(input,textarea)::placeholder{color:#757562}
+.dt-public-site .search{background:#fff9e9;border-color:#a89b7c;border-radius:3px;color:#52604c}
+.dt-public-site .search input{color:#24392c;background:transparent}
+.dt-public-site .filters button{color:#46583f;background:#eee5ce;border-color:#b0a483;border-radius:3px}
+.dt-public-site .filters button.chosen{color:#18372a;background:#d7c28e;border-color:#8c7335}
+.dt-public-site .card-line{color:#25382c;border-color:#d0c5a9}.dt-public-site .card-line small{color:#606a55}
+.dt-public-site .card-line:hover,.dt-public-site .card-line.picked{background:#dedcc1}
+.dt-public-site :is(.list-heading,.subheading){color:#5e624b;border-color:#c9bfa4}
+.dt-public-site .deck-group{background:#e9e0ca;border-color:#b5a88b}.dt-public-site .deck-section{color:#4b5941}.dt-public-site .deck-row{color:#26392d;border-color:#d1c5a8}
+.dt-public-site .tag{border-radius:2px;background:#e8dfc6;color:#555c3f;border-color:#b4a47d}
+.dt-public-site .effect{color:#2d3c30}.dt-public-site .empty{color:#66705a}
+.dt-public-site .main>footer{margin:28px 0 0;padding:14px 0;border-color:#b1a587;color:#6f705c;font:11px Consolas,monospace;letter-spacing:0}
+.dt-public-site .dt-match-desk{padding:24px 0 0}
+.dt-desk-heading{display:flex;justify-content:space-between;gap:24px;align-items:end;margin:0 0 22px}
+.dt-desk-heading h1{font:700 clamp(27px,3.1vw,42px) Georgia,serif;letter-spacing:-1px;margin:8px 0 0;color:#163a29}
+.dt-desk-heading>p{max-width:245px;line-height:1.5;font-size:14px;color:#62634e;margin:0}
+.dt-desk-layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:30px;align-items:start}
+.dt-game-register{border-top:3px solid #31513b}
+.dt-game-entry{display:grid;grid-template-columns:170px minmax(0,1fr);gap:22px;padding:24px 0;border-bottom:1px solid #aaa084;min-width:0}
+.dt-game-entry h2{font:700 29px Georgia,serif;color:#173c2b;margin:5px 0 10px}.dt-game-entry p{font-size:14px;line-height:1.6;margin:0 0 16px;max-width:440px;color:#43513d}
+.dt-game-entry small{display:block;font-size:12px;line-height:1.5;color:#65664f;margin-top:12px}
+.dt-desk-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.dt-card-pair{display:flex;align-items:center;justify-content:center;min-width:0;gap:0;padding:8px 0;background:#d2c4a0;border:1px solid #a18c5e}
+.dt-card-pair img{width:75px;height:auto;box-shadow:2px 3px 0 #14251e33;transform:rotate(-7deg)}
+.dt-card-pair img+img{margin-left:-17px;transform:translateY(10px) rotate(8deg)}
+.dt-ashen-cover{min-height:178px;overflow:hidden;border:1px solid #8a7649;background:#193829}
+.dt-ashen-cover img{width:100%;height:100%;max-height:220px;object-fit:cover;object-position:44% 50%;display:block}
+.dt-desk-sidebar{border:1px solid #9b8c64;background:#e0d7bb}
+.dt-desk-sidebar section{padding:18px}.dt-desk-sidebar section+section{border-top:1px solid #b8aa87}
+.dt-desk-sidebar h2{font:700 20px Georgia,serif;margin:6px 0 9px;color:#213d2a}
+.dt-desk-sidebar p{font-size:13px;line-height:1.6;color:#505b43;margin:0 0 14px}
+.dt-desk-sidebar .dt-desk-actions{gap:6px}.dt-desk-sidebar button{font-size:12px}
+.dt-public-site .dt-desk-note{display:flex;justify-content:space-between;align-items:center;gap:12px;border-top:1px solid #a79c7a;margin-top:22px;padding:13px 0}
+.dt-desk-note p{font-size:12px;color:#686950;margin:0}.dt-desk-note button{font-size:12px;color:#244d33;text-decoration:underline;background:none;border:0;padding:8px 0;white-space:nowrap}
+.dt-reading-page{max-width:780px;margin:28px auto 40px;padding:0 28px 24px;border-left:3px solid #aa8336;line-height:1.7}
+.dt-reading-page h1{font:700 clamp(28px,4vw,42px)/1.15 Georgia,serif;color:#173c2b;margin:12px 0 22px;max-width:640px}
+.dt-reading-page h2{font:700 21px Georgia,serif;color:#243f2c;margin:26px 0 8px}
+.dt-reading-page p{font-size:15px;color:#4a5540;margin:0 0 16px}.dt-reading-page section{border-top:1px solid #c1b595;padding:5px 0 15px}.dt-reading-page section button+button{margin-left:8px}
+.dt-reading-page .dt-byline{font:12px Consolas,monospace;margin-top:26px;color:#6f694f}
+.dt-tool-register{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 22px;border-top:2px solid #8b753e}
+.dt-public-site .dt-tool-register>.panel{padding:20px 0;border-radius:0;border:0;border-bottom:1px solid #b6aa8a;background:none}
+.dt-tool-register h2{font:700 22px Georgia,serif;margin:0 0 8px}.dt-tool-register p{line-height:1.5;font-size:14px;margin:0 0 14px}
+.dt-public-site .ashen-hero{background:none;border:0;border-bottom:2px solid #ac8a42;border-radius:0;padding:20px 0 24px;box-shadow:none;margin-top:8px}
+.dt-public-site .ashen-hero h1{font-size:clamp(32px,4.2vw,54px);color:#183c2a;letter-spacing:-1px;margin:10px 0}
+.dt-public-site .ashen-hero h1 span{color:#8a661c}.dt-public-site .ashen-hero p{max-width:650px;color:#596046;font-size:15px;line-height:1.55;margin:0 0 16px}
+.dt-public-site .ashen-section-nav{gap:6px;margin:16px 0;flex-wrap:wrap}.dt-public-site .ashen-section-nav button{background:#e2d7b9;border:1px solid #a49874;border-radius:3px;color:#465339;padding:10px 14px;font-size:13px}
+.dt-public-site .ashen-section-nav button.active{background:#284b35;color:#f8edc9;border-color:#284b35}
+.dt-public-site .ashen-panel,.dt-public-site .ashen-inspector,.dt-public-site .ashen-card-browser{border-radius:3px}
+.dt-public-site .ct-heading p{color:#596046}.dt-public-site .ct-heading h1{color:#173c2b}
+@media(max-width:1050px){.dt-desk-layout{grid-template-columns:minmax(0,1fr) 260px;gap:20px}.dt-game-entry{grid-template-columns:125px minmax(0,1fr);gap:16px}.dt-card-pair img{width:63px}.dt-public-site .global-header:has(.dt-navigation){padding:12px 18px;gap:12px}}
+@media(max-width:760px){.dt-public-site .global-header:has(.dt-navigation){padding:10px 14px;min-height:64px}.dt-public-site .main{padding:0 16px 24px}.dt-public-site .top{height:26px;font-size:10px}.dt-public-site .dt-bottom-nav{background:#102e23;border-color:#b58a36;border-top-width:2px;backdrop-filter:none}.dt-public-site .dt-bottom-nav button{color:#c9c8ad;border-radius:2px}.dt-public-site .dt-bottom-nav button.active{background:#34513a;color:#f4d479}.dt-public-site .dt-mobile-header-more{background:#243e2f;color:#ead7a4;border-color:#8d794b;padding:8px}.dt-public-site .dt-mobile-more-panel{background:#17372a;border-radius:3px;border-color:#a98741;box-shadow:none}.dt-public-site .dt-mobile-more-panel button{color:#f4e8ca}.dt-public-site .dt-match-desk{padding-top:18px}.dt-desk-heading{display:block;margin-bottom:18px}.dt-desk-heading h1{font-size:31px}.dt-desk-heading>p{max-width:none;font-size:13px;margin-top:10px}.dt-desk-layout{grid-template-columns:1fr;gap:22px}.dt-game-entry{grid-template-columns:105px minmax(0,1fr);gap:14px;padding:20px 0}.dt-game-entry h2{font-size:24px}.dt-game-entry p{font-size:13px;line-height:1.5;margin-bottom:12px}.dt-game-entry small{font-size:11px}.dt-card-pair img{width:59px}.dt-ashen-cover{min-height:160px}.dt-desk-actions{gap:6px}.dt-game-entry .dt-desk-actions>*{font-size:12px;min-height:42px;padding:8px 10px}.dt-desk-sidebar{display:block}.dt-desk-sidebar section{padding:17px}.dt-public-site .dt-desk-note{align-items:start;flex-direction:column;gap:2px}.dt-reading-page{margin:22px 0;padding:0 0 12px 16px}.dt-reading-page h1{font-size:30px}.dt-reading-page p{font-size:14px}.dt-reading-page h2{font-size:20px}.dt-tool-register{grid-template-columns:1fr}.dt-public-site .page-heading h1{font-size:29px}.dt-public-site .ashen-hero{padding-top:12px}.dt-public-site .ashen-hero h1{font-size:37px}.dt-public-site .ashen-hero p{font-size:14px}.dt-public-site .ashen-section-nav button{padding:9px 11px;font-size:12px;min-height:42px}.dt-public-site .main>footer span{display:block;margin-top:7px}}
+@media(max-width:370px){.dt-game-entry{grid-template-columns:86px minmax(0,1fr);gap:10px}.dt-card-pair img{width:51px}.dt-game-entry h2{font-size:22px}}
+
+.dt-public-site .dt-navigation>.dt-mobile-header-more{display:none}
+@media(max-width:760px){.dt-public-site .dt-navigation>.dt-mobile-header-more{display:inline-flex}}
+
+.dt-public-site .ashen-hero h1,.dt-public-site .ashen-hero h1 span{text-shadow:none}
+.dt-public-site .ashen-facts{gap:0;border-top:1px solid #aaa080;border-bottom:1px solid #aaa080;margin:18px 0}
+.dt-public-site .ashen-facts>div{border:0;border-right:1px solid #bfb391;border-radius:0;background:#e2d7b9;padding:12px 14px;min-height:0}
+.dt-public-site .ashen-facts strong{font:700 24px Consolas,monospace;color:#24432e}
+.dt-public-site .ashen-facts small{font:9px/1.5 Consolas,monospace;letter-spacing:.3px;color:#66664b}
+.dt-public-site .ashen-block{padding:20px;border-radius:3px}
+.dt-public-site .ashen-block p,.dt-public-site .ashen-block li{color:#4c583f}
+.dt-public-site .ashen-block strong,.dt-public-site .ashen-block h2{color:#24432e}
+.dt-public-site .ashen-deck,.dt-public-site .ashen-keywords>div{background:#e6dec7;border-color:#b8ac88;border-radius:2px}
+.dt-public-site .ashen-deck span{color:#746437}
+.dt-public-site .ashen-footnote{color:#696b50}
+@media(max-width:760px){.dt-public-site .ashen-facts>div{padding:9px 12px}.dt-public-site .ashen-facts strong{font-size:22px}.dt-public-site .ashen-block{padding:16px}}
+
+.dt-public-site .deck-section{background:#d7cba9;color:#344b33;border-color:#b3a47e}
+.dt-public-site .deck-section span{color:#59664b}
+.dt-public-site .stats>div{min-height:72px;padding:13px 17px}
+.dt-public-site .stats strong{margin-top:7px;font-family:Consolas,monospace;font-size:24px}
+.dt-public-site .dt-inline-count{font:12px Consolas,monospace;color:#6a6d51;margin:0 20px 16px}
+.dt-public-site .icon-btn{background:#e3dbc5;color:#344832;border-color:#a79e80}
+.dt-public-site .panel .success{color:#2a633d}
+.dt-public-site .panel .error{color:#982d29}
+/* Shared table controls retain a dark, high-contrast surface in the DT greens. */
+.dt-public-site .ct-panel{background:#17382b;border-color:#8d7d4f;border-radius:4px;padding:20px}
+.dt-public-site .ct-panel>p,.dt-public-site .ct-shell label,.dt-public-site .ct-footnote,.dt-public-site .ct-hint{color:#c9cfba}
+.dt-public-site .ct-shell button{background:#294c36;color:#f0e5bb;border-color:#8b8255;border-radius:3px}
+.dt-public-site .ct-shell .ct-primary{background:#c6a24c;color:#17271d;border-color:#795b20}
+.dt-public-site .ct-shell button:hover:not(:disabled){background:#3a5d43}
+.dt-public-site .ct-shell .ct-primary:hover:not(:disabled){background:#d7b661}
+.dt-public-site .mode-choice{background:#e6dec8;color:#2d4433;border-color:#a99d7d;border-radius:3px}
+.dt-public-site .mode-choice span{color:#606b51}
+.dt-public-site .mode-choice.selected{background:#d5c28d;border-color:#8b702e}
