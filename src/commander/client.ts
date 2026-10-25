@@ -1,3 +1,5 @@
+import {requestSignal} from '../platform/polling';
+import {publicInviteBase} from '../platform/publicUrl';
 import type {CommanderRoomState,RoomCommand} from './model';
 export type RoomSeat={code:string;token:string;playerId:string;api:string};
 export type RoomReply={state:CommanderRoomState;playerId:string;serverNow?:number};
@@ -8,14 +10,14 @@ export function savedRoomSeat(code?:string):RoomSeat|null{try{const s=JSON.parse
 export const saveRoomSeat=(s:RoomSeat|null)=>{if(s){localStorage.setItem(storageKey,JSON.stringify(s));localStorage.setItem(storageKey+':'+s.code,JSON.stringify(s));}else localStorage.removeItem(storageKey);};
 export function newRoomCode(){const alphabet='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';return Array.from(crypto.getRandomValues(new Uint8Array(8)),b=>alphabet[b%alphabet.length]).join('');}
 export const newSeatToken=()=>crypto.randomUUID().replaceAll('-','')+crypto.randomUUID().replaceAll('-','');
-export async function roomRequest(api:string,code:string,token:string,method:'create'|'join'|'read'|'action',input:unknown={},requestId=crypto.randomUUID()):Promise<RoomReply>{
+export async function roomRequest(api:string,code:string,token:string,method:'create'|'join'|'read'|'action',input:unknown={},requestId=crypto.randomUUID(),signal?:AbortSignal):Promise<RoomReply>{
  if(!api)throw Error('The shared room service has not been configured.');
  for(let attempt=0;attempt<2;attempt++){
-  let response:Response;
-  try{response=await fetch(`${api.replace(/\/$/,'')}/rooms/${code}/${method}`,{method:method==='read'?'GET':'POST',headers:{Authorization:`Bearer ${token}`,...(method==='read'?{}:{'Content-Type':'application/json','X-Request-ID':requestId})},...(method==='read'?{}:{body:JSON.stringify(input)}),signal:AbortSignal.timeout(10000)});}catch{if(attempt===0)continue;throw Error('Connection lost. Check your refreshed totals before entering that change again.');}
+  let response:Response;const timeout=requestSignal(10000,signal);
+  try{response=await fetch(`${api.replace(/\/$/,'')}/rooms/${code}/${method}`,{method:method==='read'?'GET':'POST',headers:{Authorization:`Bearer ${token}`,...(method==='read'?{}:{'Content-Type':'application/json','X-Request-ID':requestId})},...(method==='read'?{}:{body:JSON.stringify(input)}),signal:timeout.signal});}catch{if(signal?.aborted)throw new DOMException('Request cancelled','AbortError');if(attempt===0)continue;throw Error('Connection lost. Check your refreshed totals before entering that change again.');}finally{timeout.dispose();}
   const body=await response.json();if(response.status>=500&&attempt===0)continue;if(!response.ok)throw Error(body.error||'Unable to update this room.');return body as RoomReply;
  }
  throw Error('Unable to confirm the room update.');
 }
-export function roomInvite(code:string){const url=new URL(location.href);url.search='';url.searchParams.set('table',code);url.hash='';return url.toString();}
+export function roomInvite(code:string){const url=publicInviteBase();url.search='';url.searchParams.set('table',code);url.hash='';return url.toString();}
 export type CounterCommand=Extract<RoomCommand,{type:'adjust'}>;

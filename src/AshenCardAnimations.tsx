@@ -1,3 +1,4 @@
+import CardBack from './duelUi/CardBack';
 import {useEffect,useLayoutEffect,useRef,useState,type RefObject} from 'react';
 import type {Battlefield} from './ashenBattlefieldState';
 import CardMotionLayer,{motionBetween,type CardMotion,type MotionRect} from './duelUi/CardMotionLayer';
@@ -20,7 +21,7 @@ export default function AshenCardAnimations({state,seat,board}:{state:Battlefiel
     const id=event.id!,card=state.table.cards[id],to=event.kind==='ossuary'?find(`[data-ashen-pile="${event.seat}:graveyard"]`):find(`[data-ashen-card="${id}"]`);
     const from=event.kind==='draw'&&deck&&to?{x:deck.x,y:deck.y,width:to.width,height:to.height}:positions.current.get(id)||(prior?.table.cards[id]?.zone==='graveyard'?find(`[data-ashen-pile="${event.seat}:graveyard"]`):undefined);
     if(!from||!to)continue;const data=ashenData(state,id),face=event.kind!=='draw'&&data&&!card.faceDown&&(card.zone!=='hand'||card.controller===seat);
-    next.push({...motionBetween(from,to),key:`${key}-${id}`,delay:!prior?350+(next.length%6)*70:event.kind==='draw'?(next.length%5)*70:0,content:face?<AshenCardFrame card={data!} size="mini"/>:<span className="ab-card-back"><b>AT</b></span>});
+    next.push({...motionBetween(from,to),key:`${key}-${id}`,delay:!prior?350+(next.length%6)*70:event.kind==='draw'?(next.length%5)*70:0,content:face?<AshenCardFrame card={data!} size="mini"/>:<span className="ab-card-back"><CardBack/></span>});
    }
    if(next.length||mix.length){setFlights(old=>[...old,...next].slice(-24));setShuffles(old=>[...old,...mix].slice(-4));const keys=new Set(next.map(f=>f.key)),shuffleKeys=new Set(mix.map(f=>f.key));timers.current.push(window.setTimeout(()=>{setFlights(old=>old.filter(f=>!keys.has(f.key)));setShuffles(old=>old.filter(f=>!shuffleKeys.has(f.key)));},1500));}
   }

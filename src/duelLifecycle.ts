@@ -1,4 +1,5 @@
-import {seededShuffle,type DuelState,type Seat} from './engine/model';
+import {seededShuffle} from './framework/random';
+import type {DuelState,Seat} from './engine/model';
 
 /** A uniform crypto-generated 32-bit session seed gives an unbiased toss.
  * XOR and the shuffle's odd-multiplier LCG are permutations of uint32 values:

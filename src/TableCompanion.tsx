@@ -1,3 +1,4 @@
+import {startVisiblePolling} from './platform/polling';
 import HostTableQr from './HostTableQr';
 import TableTurnTimer from './TableTurnTimer';
 import TableNumberInput from './TableNumberInput';
@@ -33,7 +34,7 @@ export default function TableCompanion(){
  const customValue=me&&Object.hasOwn(me.counters,custom.trim())?me.counters[custom.trim()]:0;
  const syncClock=(reply:RoomReply)=>{if(typeof reply.serverNow==='number'&&Number.isFinite(reply.serverNow))setServerOffset(reply.serverNow-Date.now());};
  const accept=(next:TableRoomState)=>setState(current=>!current||current.code!==next.code||next.revision>=current.revision?next:current);
- useEffect(()=>{if(!seat)return;let cancelled=false,timer:ReturnType<typeof setTimeout>;const poll=async()=>{try{const reply=await roomRequest(seat.api,seat.code,seat.token,'read');if(!cancelled){syncClock(reply);accept(reply.state);setConnected(true);setError('');}}catch(e){if(!cancelled){setConnected(false);setError(e instanceof Error?e.message:'Connection interrupted.');}}finally{if(!cancelled)timer=setTimeout(poll,document.hidden?10000:2000);}};void poll();return()=>{cancelled=true;clearTimeout(timer);};},[seat]);
+ useEffect(()=>{if(!seat)return;return startVisiblePolling({read:signal=>roomRequest(seat.api,seat.code,seat.token,'read',{},crypto.randomUUID(),signal),onValue:reply=>{syncClock(reply);accept(reply.state);setConnected(true);setError('');},onError:e=>{setConnected(false);setError(e instanceof Error?e.message:'Connection interrupted.');}});},[seat]);
  const enter=async(create:boolean)=>{setBusy(true);setError('');const roomCode=create?newRoomCode():code.toUpperCase().replace(/\s/g,'');try{
   if(!/^[A-Z2-9]{8}$/.test(roomCode))throw Error('Enter the eight-character room code.');
   const remembered=create?null:savedRoomSeat(roomCode),token=remembered?.token||newSeatToken(),api=remembered?.api||TABLE_API;

@@ -2,6 +2,10 @@
 
 See [GitHub Pages setup](docs/github-pages.md) to deploy this application without running a local development server.
 
+## Android development preview
+
+The Android app bundles Table Companion and Ashen Throne. See [Android app setup and validation](docs/android-app.md) for the Android Studio project, APK build commands, architecture, and remaining device checks.
+
 ## v3.9.3 — Dependency security update
 
 - Set Vite to `^6.4.3` to avoid the vulnerable Vite 6.4.2-and-earlier range.

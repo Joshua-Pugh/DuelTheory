@@ -1,3 +1,4 @@
+import CardBack from './duelUi/CardBack';
 import PhaseSelector from './duelUi/PhaseSelector';
 import EffectTargetIndicator from './EffectTargetIndicator';
 import {effectTargets} from './effectTargetPresentation';
@@ -29,7 +30,6 @@ type Props={practiceControls?:ReactNode;aiOpponent?:boolean;aiName?:string;onCho
 const PHASES:Phase[]=['DRAW','STANDBY','MAIN_1','BATTLE','MAIN_2','END'],LABELS=['DP','SP','M1','BP','M2','EP'];
 const other=(s:Seat):Seat=>s===0?1:0;
 type Flow={label:string;options:LegalAction[];done:ChoiceField[];step:ChoiceStep};
-function CardBack(){return <span className="dt-card-back" aria-hidden="true"><span className="dt-back-orbit"/><img src="/branding/dueltheory-crest.png" alt=""/><span className="dt-back-word">DUELTHEORY</span></span>;}
 export function Dialog({title,onClose,children,canClose=true}:{title:string;onClose:()=>void;children:ReactNode;canClose?:boolean}){
  const ref=useRef<HTMLDivElement>(null);
  useEffect(()=>{const prior=document.activeElement as HTMLElement|null;(ref.current?.querySelector<HTMLElement>('header button:not(:disabled)')??ref.current)?.focus({preventScroll:true});return()=>{if(prior?.isConnected)prior.focus({preventScroll:true});};},[]);

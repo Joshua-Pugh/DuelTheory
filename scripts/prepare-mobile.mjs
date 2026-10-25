@@ -1,0 +1,30 @@
+import { cp, mkdir, rename, readFile, stat } from "node:fs/promises";
+import assert from "node:assert/strict";
+await rename("dist-mobile/mobile/index.html", "dist-mobile/index.html");
+for (const dir of ["ashen/layers", "ashen/costs", "branding"]) {
+  await mkdir(`dist-mobile/${dir}`, { recursive: true });
+  if (dir === "branding") {
+    for (const name of [
+      "dueltheory-crest.png",
+      "dueltheory-wordmark.png",
+      "icon-512.png",
+      "favicon.svg",
+    ])
+      await cp(`public/${dir}/${name}`, `dist-mobile/${dir}/${name}`);
+  } else await cp(`public/${dir}`, `dist-mobile/${dir}`, { recursive: true });
+}
+await mkdir("dist-mobile/icons", { recursive: true });
+await cp(
+  "public/icons/ashen-broken-crown.png",
+  "dist-mobile/icons/ashen-broken-crown.png",
+);
+const manifest = JSON.parse(
+  await readFile("dist-mobile/.vite/manifest.json", "utf8"),
+);
+const entry = manifest["mobile/index.html"];
+assert.ok(entry);
+const bytes = (await stat("dist-mobile/" + entry.file)).size;
+assert.ok(bytes < 250000, `Startup JS exceeds 250 KB: ${bytes}`);
+console.log(
+  `Mobile startup JS: ${bytes} bytes. Original game assets only; large game screens load on demand.`,
+);

@@ -8,3 +8,5 @@ export function seededCoinTosses(count:number,seed:number):boolean[]{
   return ((value^(value>>>14))>>>0)>=0x80000000;
  });
 }
+
+export function freshRandomSeed(){return globalThis.crypto.getRandomValues(new Uint32Array(1))[0];}
