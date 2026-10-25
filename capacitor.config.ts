@@ -6,7 +6,6 @@ const config: CapacitorConfig = {
   backgroundColor: "#0d191c",
   android: {
     minWebViewVersion: 120,
-    webContentsDebuggingEnabled: false,
     allowMixedContent: false,
   },
   server: { androidScheme: "https", cleartext: false },

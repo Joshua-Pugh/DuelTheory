@@ -390,6 +390,7 @@ export default function MobilePrivateRoom() {
       {room?.phase === "playing" && room.ashen && (
         <>
           <AshenBattlefield
+            mobile
             remote={{
               state: room.ashen,
               choosing,

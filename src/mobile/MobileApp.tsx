@@ -1,3 +1,4 @@
+import { DUEL_VIEW_EVENT } from "../duelUi/useDuelViewport";
 import {
   Component,
   Suspense,
@@ -6,7 +7,10 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { keepNativeScreenAwake } from "../platform/nativeAwake";
+import {
+  keepNativeScreenAwake,
+  setNativeDuelMode,
+} from "../platform/nativeAwake";
 import { Capacitor } from "@capacitor/core";
 import { mobileRoute, mobileInvite, type MobileRoute } from "./routes";
 import { loadDisplayName, saveDisplayName } from "../playerProfile";
@@ -66,6 +70,19 @@ export default function MobileApp() {
       window.removeEventListener("hashchange", change);
       window.removeEventListener("online", connection);
       window.removeEventListener("offline", connection);
+    };
+  }, []);
+  useEffect(() => {
+    const mode = (event: Event) => {
+      const active = Boolean((event as CustomEvent<boolean>).detail);
+      document.documentElement.classList.toggle("dt-in-duel", active);
+      void setNativeDuelMode(active).catch(() => {});
+    };
+    window.addEventListener(DUEL_VIEW_EVENT, mode);
+    return () => {
+      window.removeEventListener(DUEL_VIEW_EVENT, mode);
+      document.documentElement.classList.remove("dt-in-duel");
+      void setNativeDuelMode(false).catch(() => {});
     };
   }, []);
   useEffect(() => {
@@ -204,7 +221,7 @@ export default function MobileApp() {
               </>
             )}
             {route === "table" && <Table key={inviteKey} />}
-            {route === "at" && <Arena allowResume />}
+            {route === "at" && <Arena allowResume mobile />}
             {route === "cards" && <Cards />}
             {route === "private" && <Room key={inviteKey} />}
             {route === "more" && (

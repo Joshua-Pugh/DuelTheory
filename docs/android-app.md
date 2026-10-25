@@ -4,7 +4,7 @@ The app contains Table Companion, local Ashen Throne Brute/Noble duels, AT priva
 
 ## Open and run
 
-Open `C:/Users/joshu/AndroidStudioProjects/DuelTheory` in Android Studio **2025.2.1 or newer**, sync Gradle, and run the `app` configuration. This machine currently has an older Android Studio installed; update it before using the IDE Run button. The command-line build uses the installed JDK 21 and works without upgrading the IDE.
+Open `C:/Users/joshu/AndroidStudioProjects/DuelTheory` in Android Studio **2025.2.1 or newer**, sync Gradle, and run the `app` configuration. The updated Studio installation has synced this project successfully. Both the IDE's local Java setting and Gradle point to the installed JDK 21; use that JDK rather than the new IDE's bundled Java 25 for this Gradle version.
 
 Minimum Android: 9 / API 28. Compile/target SDK: 36. Keep Android System WebView/Chrome updated (version 120 or later).
 
@@ -15,6 +15,8 @@ From the Android Studio project directory:
 ```
 
 Install `app/build/outputs/apk/debug/app-debug.apk` on a test Android phone. The debug APK is signed for development. The optimized release APK is deliberately unsigned: store signing credentials have not been created or embedded.
+
+AT duels request sensor landscape orientation and hide system bars while active. Exiting restores normal app orientation and navigation. The mobile board uses unlimited Frontline, Rune/Relic and Font lanes, a compact basin and piles, and a side control rail. Tap a card for actions, then choose **View card** for the large reading overlay. Help opens on demand instead of consuming board space. Browser previews show a rotate-to-landscape message when native orientation locking is unavailable.
 
 ## Where the code lives
 
@@ -44,9 +46,9 @@ The sync script backs up the previous Android project, excludes build caches, an
 ## Validation and remaining work
 
 - Mobile and website production builds pass.
-- Full existing suite: 873 tests passed; focused mobile/transport/wake tests: 27 passed. An additional saved-duel resume check passed; the three mobile UI checks cover table navigation, AT startup and preserving saved hands on resume.
+- Full suite: 877 tests passed across 129 files. Four mobile UI checks cover table navigation, AT startup, preserving saved hands on resume, and duel-mode entry/exit restoring the app viewport.
 - Native debug and optimized unsigned release builds passed directly in the supplied Android Studio project. The debug APK signature, API 28 minimum, API 36 target and launcher activity were verified.
 - Live Android-origin table create/join/read and AT ready/coin/start/chat/leave checks passed.
-- The existing Pixel emulator repeatedly reported Android System UI ANRs, including on the Android home screen. APK installation succeeded, but responsive visual/device QA remains incomplete. Test on a physical phone or healthy emulator before release.
+- Android 15 emulator checks passed for table creation, second-player synchronization, the ready gate and tied-dice reroll, life adjustment, undo, QR generation and an active native wake lock. AT checks confirmed coin/start/resume, Font placement, an on-screen card action menu, landscape/fullscreen entry, the reading overlay, and portrait/navigation restoration on exit. The earlier Android 14 emulator had System UI ANRs; a clean Android 15 test device with hardware graphics was used instead. Physical-phone QA is still required before store release.
 
-No accounts, billing, paid entitlements, cloud artwork sync, push notifications or print-and-play purchasing are included. Native keep-awake is scoped to visible table/AT screens and cleared on backgrounding. Polling pauses in the background and aborts stale reads. Game screens load lazily; the mobile startup JS is about 242 KB before compression. Performance on a physical device has not been measured.
+No accounts, billing, paid entitlements, cloud artwork sync, push notifications or print-and-play purchasing are included. Native keep-awake is scoped to visible table/AT screens and cleared on backgrounding. Polling pauses in the background and aborts stale reads. Game screens load lazily; the mobile startup JS is about 243 KB before compression. WebView inspection follows Capacitor's debug-build flag and remains disabled in release builds. Performance on a physical device has not been measured.

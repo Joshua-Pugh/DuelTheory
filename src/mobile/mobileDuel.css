@@ -1,0 +1,510 @@
+/* Original AT arena: landscape board, unlimited lanes and an independent reading overlay. */
+.dt-in-duel .mobile-nav,
+.dt-in-duel .mobile-brand {
+  display: none;
+}
+.dt-in-duel,
+.dt-in-duel body {
+  overflow: hidden;
+}
+.dt-mobile-app .ab-mobile-duel.ab-duel {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100dvh;
+  box-sizing: border-box;
+  min-width: 0;
+  margin: 0;
+  padding: 4px;
+  gap: 4px;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 48px;
+  grid-template-rows: minmax(0, 1fr) 92px;
+  grid-template-areas: "board tools" "hand tools";
+  background: radial-gradient(ellipse at 45% 45%, #23352c, #0c151a 75%);
+  color: #e9dfc7;
+}
+.dt-mobile-app .ab-mobile-duel .ab-toolbar {
+  grid-area: tools;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  overflow: hidden;
+}
+.dt-mobile-app .ab-mobile-duel .ab-toolbar > div:first-child {
+  display: none;
+}
+.dt-mobile-app .ab-mobile-duel .ab-tools {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 4px;
+  min-width: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  padding: 0;
+  max-height: 100%;
+}
+.dt-mobile-app .ab-mobile-duel .ab-tools button {
+  flex: 0 0 auto;
+  width: 100%;
+  min-height: 36px;
+  padding: 4px 2px;
+  font-size: 9px;
+  line-height: 1.15;
+  white-space: normal;
+  border-color: #9b865b77;
+  background: #18282b;
+}
+.dt-mobile-app .ab-mobile-duel[data-remote="true"] .ab-tools > button:disabled {
+  display: none;
+}
+.dt-mobile-app .ab-mobile-duel .ab-workspace {
+  grid-area: board;
+  display: block;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+.dt-mobile-app .ab-mobile-duel .ab-table {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  box-sizing: border-box;
+  padding: 4px;
+  display: grid;
+  grid-template-rows: 14px minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 3px;
+  border: 1px solid #a58e5e88;
+  border-radius: 9px;
+  background:
+    repeating-linear-gradient(0deg, #81907c08 0 1px, transparent 1px 32px),
+    radial-gradient(ellipse at center, #263e36, #101f23 75%);
+  box-shadow: inset 0 0 40px #0006;
+}
+.dt-mobile-app .ab-mobile-duel .ab-half {
+  min-height: 0;
+  min-width: 0;
+  gap: 1px;
+}
+.dt-mobile-app .ab-mobile-duel .ab-player {
+  flex: 0 0 11px;
+  min-height: 0;
+  height: 11px;
+  padding: 0 3px;
+  gap: 5px;
+}
+.dt-mobile-app .ab-mobile-duel .ab-player > span {
+  font-size: 7px;
+  letter-spacing: 0.7px;
+}
+.dt-mobile-app .ab-mobile-duel .ab-player strong,
+.dt-mobile-app .ab-mobile-duel .ab-player em {
+  display: none;
+}
+.dt-mobile-app .ab-mobile-duel .ab-command-marks {
+  font-size: 8px;
+  margin-left: auto;
+}
+.dt-mobile-app .ab-mobile-duel .ab-half-grid {
+  min-height: 0;
+  min-width: 0;
+  grid-template-columns: 54px minmax(0, 1.3fr) minmax(0, 1fr) 46px;
+  grid-template-areas: "basin support ley piles" "command unit unit piles";
+  grid-template-rows: minmax(0, 0.32fr) minmax(0, 0.68fr);
+  gap: 3px;
+}
+.dt-mobile-app .ab-mobile-duel .ab-you .ab-half-grid {
+  grid-template-areas: "command unit unit piles" "basin support ley piles";
+  grid-template-rows: minmax(0, 0.68fr) minmax(0, 0.32fr);
+}
+.dt-mobile-app .ab-mobile-duel .ab-zone {
+  min-height: 0;
+  min-width: 0;
+  padding: 2px 3px;
+  border-radius: 5px;
+  background: #09171bc9;
+}
+.dt-mobile-app .ab-mobile-duel .ab-noble .ab-zone {
+  border-color: #ac955c6b;
+}
+.dt-mobile-app .ab-mobile-duel .ab-brute .ab-zone {
+  border-color: #a967526b;
+}
+.dt-mobile-app .ab-mobile-duel .ab-zone header {
+  height: 9px;
+  margin: 0;
+  line-height: 9px;
+  font-size: 7px;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+.dt-mobile-app .ab-mobile-duel .ab-zone header small {
+  display: none;
+}
+.dt-mobile-app .ab-mobile-duel .ab-card-row {
+  height: calc(100% - 9px);
+  padding: 1px 0;
+  gap: 4px;
+  min-height: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  align-items: flex-start;
+}
+.dt-mobile-app .ab-mobile-duel .ab-zone .ab-card {
+  width: clamp(12px, calc((100cqh - 15px) * 0.714), 66px) !important;
+}
+.dt-mobile-app .ab-mobile-duel .ab-zone-empty {
+  font-size: 8px;
+  line-height: 1.1;
+  white-space: nowrap;
+  opacity: 0.65;
+}
+.dt-mobile-app .ab-mobile-duel .ab-stat-chip {
+  font-size: 10px;
+  padding: 1px 3px;
+  line-height: 12px;
+}
+.dt-mobile-app .ab-mobile-duel .ab-counter {
+  font-size: 10px;
+  height: 16px;
+  min-width: 16px;
+}
+.dt-mobile-app .ab-mobile-duel .ab-command {
+  position: relative;
+  padding: 2px;
+}
+.dt-mobile-app .ab-mobile-duel .ab-command header {
+  font-size: 6px;
+  letter-spacing: 0;
+  text-align: center;
+}
+.dt-mobile-app .ab-mobile-duel .ab-command .ab-card-row {
+  height: calc(100% - 9px);
+  justify-content: center;
+}
+.dt-mobile-app .ab-mobile-duel .ab-command .ab-card {
+  width: clamp(12px, calc((100cqh - 14px) * 0.714), 44px) !important;
+}
+.dt-mobile-app .ab-mobile-duel .ab-hp {
+  position: absolute;
+  left: 1px;
+  right: 1px;
+  bottom: 2px;
+  margin: 0;
+  height: auto;
+  pointer-events: none;
+  justify-content: center;
+}
+.dt-mobile-app .ab-mobile-duel .ab-hp strong {
+  font-size: 17px;
+  line-height: 20px;
+  background: #0d1c20ed;
+  padding: 0 4px;
+  border-radius: 4px;
+  color: #efd18b;
+}
+.dt-mobile-app .ab-mobile-duel .ab-hp small {
+  font-size: 8px;
+}
+.dt-mobile-app .ab-mobile-duel .ab-piles {
+  gap: 3px;
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+}
+.dt-mobile-app .ab-mobile-duel .ab-deck {
+  padding: 1px;
+  min-height: 0;
+}
+.dt-mobile-app .ab-mobile-duel .ab-deck > .ab-card-back {
+  width: 20px;
+  height: 100%;
+  max-height: 32px;
+  min-height: 0;
+}
+.dt-mobile-app .ab-mobile-duel .ab-deck strong {
+  font-size: 11px;
+  line-height: 13px;
+  bottom: 1px;
+  right: 2px;
+  background: #0e1f24e8;
+}
+.dt-mobile-app .ab-mobile-duel .ab-pile-button {
+  padding: 1px;
+  gap: 0;
+  font-size: 7px;
+  line-height: 9px;
+  border-radius: 4px;
+}
+.dt-mobile-app .ab-mobile-duel .ab-pile-button b {
+  font-size: 11px;
+  bottom: 1px;
+  right: 2px;
+  line-height: 12px;
+}
+.dt-mobile-app .ab-mobile-duel .ab-pile-thumb {
+  width: 16px;
+  max-height: calc(100% - 9px);
+}
+.dt-mobile-app .ab-mobile-duel .ab-opponent-hand {
+  height: 14px;
+  min-height: 0;
+  gap: 2px;
+  justify-content: center;
+}
+.dt-mobile-app .ab-mobile-duel .ab-opponent-hand > .ab-card-back {
+  width: 9px;
+  height: 13px;
+}
+.dt-mobile-app .ab-mobile-duel .ab-basin {
+  min-height: 0;
+  padding: 1px 2px;
+  gap: 0;
+  border-radius: 5px;
+}
+.dt-mobile-app .ab-mobile-duel .ab-basin header {
+  line-height: 8px;
+  height: 8px;
+  margin: 0;
+}
+.dt-mobile-app .ab-mobile-duel .ab-basin header > span {
+  font-size: 6px;
+  letter-spacing: 0.5px;
+}
+.dt-mobile-app .ab-mobile-duel .ab-basin .dt-pool-contents {
+  max-height: calc(100cqh - 9px);
+  overflow: auto;
+  gap: 1px;
+}
+.dt-mobile-app .ab-mobile-duel .ab-basin .dt-pool-resource {
+  flex-basis: 14px;
+  gap: 1px;
+  font-size: 9px;
+}
+.dt-mobile-app .ab-mobile-duel .dt-pool-resource img {
+  width: 11px;
+  height: 11px;
+}
+.dt-mobile-app .ab-mobile-duel .ab-font-burn {
+  display: none;
+}
+.dt-mobile-app .ab-mobile-duel .ab-center {
+  height: auto;
+  min-height: 30px;
+  max-height: 76px;
+  padding: 2px 3px;
+  gap: 5px;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  overflow: auto;
+  border-color: #b99b5e88;
+}
+.dt-mobile-app .ab-mobile-duel .ab-center > small {
+  flex: 0 0 95px;
+  font-size: 9px;
+  line-height: 11px;
+}
+.dt-mobile-app .ab-mobile-duel .ab-phase-controls {
+  flex: 1;
+  min-width: 0;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 5px;
+  align-items: center;
+}
+.dt-mobile-app .ab-mobile-duel .dt-phase-selector {
+  flex: 0 0 auto;
+  flex-wrap: nowrap;
+  gap: 3px;
+}
+.dt-mobile-app .ab-mobile-duel .ab-center .dt-phase-selector button {
+  min-width: 28px;
+  min-height: 28px;
+  padding: 3px 5px;
+  font-size: 9px;
+}
+.dt-mobile-app .ab-mobile-duel .ab-step-actions {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  max-height: 68px;
+  overflow: auto;
+  gap: 4px;
+}
+.dt-mobile-app .ab-mobile-duel .ab-step-actions > span {
+  font-size: 9px;
+  line-height: 11px;
+}
+.dt-mobile-app .ab-mobile-duel .ab-step-actions button {
+  min-height: 28px;
+  padding: 4px 7px;
+  font-size: 9px;
+  line-height: 12px;
+}
+.dt-mobile-app .ab-mobile-duel .ab-hand {
+  grid-area: hand;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 3px 8px 11px;
+  box-sizing: border-box;
+  border-color: #ac955c88;
+  border-radius: 8px;
+  background: linear-gradient(#1d302b, #0f2024);
+}
+.dt-mobile-app .ab-mobile-duel .ab-hand header {
+  flex: 0 0 10px;
+  font-size: 8px;
+  line-height: 10px;
+}
+.dt-mobile-app .ab-mobile-duel .ab-hand header small {
+  font-size: 8px;
+}
+.dt-mobile-app .ab-mobile-duel .ab-hand-cards {
+  padding: 2px 0 0;
+  gap: 6px;
+  justify-content: flex-start;
+  min-width: 0;
+}
+.dt-mobile-app .ab-mobile-duel .ab-hand-cards>.ab-card-wrap:first-child{margin-left:auto}
+.dt-mobile-app .ab-mobile-duel .ab-hand-cards>.ab-card-wrap:last-child{margin-right:auto}
+.dt-mobile-app .ab-mobile-duel .ab-hand .ab-card {
+  width: clamp(30px, calc((100cqh - 12px) * 0.714), 70px) !important;
+}
+.dt-mobile-app .ab-mobile-duel .ab-notice {
+  position: absolute;
+  bottom: 1px;
+  left: 12px;
+  right: 60px;
+  font-size: 8px;
+  line-height: 10px;
+  max-height: 10px;
+  pointer-events: none;
+  opacity: 0.8;
+}
+.dt-mobile-app .ab-mobile-duel .ab-learning {
+  position: fixed;
+  z-index: 105;
+  top: 8px;
+  right: 60px;
+  width: min(380px, calc(100vw - 80px));
+  max-height: calc(100dvh - 24px);
+  padding: 12px;
+  box-sizing: border-box;
+  font-size: 13px;
+  line-height: 1.5;
+  display: block;
+  overflow: auto;
+  box-shadow: 0 12px 40px #000a;
+}
+.dt-mobile-app .ab-mobile-duel .ab-learning strong {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+.dt-mobile-app .ab-mobile-duel.ab-viewer-open .ab-inspector {
+  position: fixed;
+  inset: 6px;
+  z-index: 102;
+  width: auto;
+  max-width: none;
+  max-height: none;
+  padding: 10px;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: minmax(120px, 0.65fr) minmax(0, 1fr);
+  gap: 6px 16px;
+  align-content: start;
+  overflow: auto;
+  background: #11242afc;
+  border-color: #bca36c;
+}
+.dt-mobile-app .ab-mobile-duel.ab-viewer-open .ab-inspector > * {
+  grid-column: 2;
+  min-width: 0;
+}
+.dt-mobile-app .ab-mobile-duel.ab-viewer-open .ab-inspector > .ab-viewer-close {
+  grid-column: 1/-1;
+  position: sticky;
+  top: 0;
+  min-height: 36px;
+  justify-self: end;
+}
+.dt-mobile-app .ab-mobile-duel.ab-viewer-open .ab-view-art {
+  grid-column: 1;
+  grid-row: 2 / span 12;
+  position: sticky;
+  top: 42px;
+  align-self: start;
+}
+.dt-mobile-app .ab-mobile-duel.ab-viewer-open .ab-view-art > .ashen-frame-card {
+  width: min(100%, calc(77dvh * 0.714));
+  margin: 0 auto;
+}
+.dt-mobile-app .ab-mobile-duel .ab-inspector > h3 {
+  font-size: 20px;
+  line-height: 1.2;
+  margin: 3px 0;
+  color: #ecd49a;
+}
+.dt-mobile-app .ab-mobile-duel .ab-inspector .ab-rules {
+  font-size: 14px;
+  line-height: 1.55;
+  margin: 8px 0;
+}
+.dt-in-duel .pm-match-overlay {
+  right: 5px;
+  bottom: 5px;
+  max-width: 48px;
+  z-index: 1300;
+}
+.dt-in-duel .pm-match-overlay > button {
+  font-size: 9px;
+  min-height: 34px;
+  padding: 4px;
+  max-width: 48px;
+}
+.dt-in-duel .pm-opponent-activity {
+  right: 52px;
+  bottom: 0;
+  max-width: 300px;
+  padding: 6px 9px;
+  font-size: 11px;
+}
+.dt-in-duel .pm-floating-chat {
+  right: 60px;
+  top: 8px;
+  bottom: 8px;
+  width: 340px;
+  max-width: calc(100vw - 76px);
+  padding: 10px;
+}
+.dt-in-duel .pm-messages {
+  min-height: 0;
+}
+@media (orientation: portrait) {
+  .dt-mobile-app .ab-mobile-duel:after {
+    content: "Rotate your phone to landscape to enter the battlefield.";
+    position: fixed;
+    inset: 0;
+    z-index: 1500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    background: #102326;
+    color: #efdaa5;
+    font: 20px/1.5 system-ui;
+    text-align: center;
+  }
+}

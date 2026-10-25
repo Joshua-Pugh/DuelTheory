@@ -2,8 +2,12 @@ import { Capacitor, registerPlugin } from "@capacitor/core";
 import type { ScreenLock } from "../commander/wakeLock";
 const ScreenAwake = registerPlugin<{
   setEnabled(options: { enabled: boolean }): Promise<void>;
+  setDuelMode(options: { enabled: boolean }): Promise<void>;
 }>("ScreenAwake");
 export const nativeScreen = Capacitor.isNativePlatform();
+export async function setNativeDuelMode(enabled: boolean) {
+  if (nativeScreen) await ScreenAwake.setDuelMode({ enabled });
+}
 export async function requestScreenAwake(): Promise<ScreenLock> {
   if (!nativeScreen) return navigator.wakeLock.request("screen");
   await ScreenAwake.setEnabled({ enabled: true });

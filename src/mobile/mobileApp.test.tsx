@@ -67,16 +67,37 @@ it("starts the bundled Brute/Noble duel after the coin flip and draws both hands
   expect(document.body.textContent).toContain("Ossuary");
   expect(document.body.textContent).not.toContain("could not open");
 });
-import {newAshenDuel} from '../games/ashen/duel';
-import {BATTLEFIELD_KEY} from '../ashenBattlefieldState';
-it('resumes a saved local duel without dealing a second opening hand',async()=>{
- const state=newAshenDuel(['Noble','Brute'],42,0);
- localStorage.setItem(BATTLEFIELD_KEY,JSON.stringify(state));
- await act(async()=>root.render(<AshenDuelArena allowResume/>));
- expect(button('Resume local duel')).toBeTruthy();
- act(()=>button('Resume local duel')!.click());
- const restored=JSON.parse(localStorage.getItem(BATTLEFIELD_KEY)!);
- expect(restored.table.piles['0:hand']).toEqual(state.table.piles['0:hand']);
- expect(restored.table.piles['1:hand']).toEqual(state.table.piles['1:hand']);
- expect(document.querySelector('.ab-table')).toBeTruthy();expect(button('Begin duel')).toBeUndefined();
+import { newAshenDuel } from "../games/ashen/duel";
+import { BATTLEFIELD_KEY } from "../ashenBattlefieldState";
+it("resumes a saved local duel without dealing a second opening hand", async () => {
+  const state = newAshenDuel(["Noble", "Brute"], 42, 0);
+  localStorage.setItem(BATTLEFIELD_KEY, JSON.stringify(state));
+  await act(async () => root.render(<AshenDuelArena allowResume />));
+  expect(button("Resume local duel")).toBeTruthy();
+  act(() => button("Resume local duel")!.click());
+  const restored = JSON.parse(localStorage.getItem(BATTLEFIELD_KEY)!);
+  expect(restored.table.piles["0:hand"]).toEqual(state.table.piles["0:hand"]);
+  expect(restored.table.piles["1:hand"]).toEqual(state.table.piles["1:hand"]);
+  expect(document.querySelector(".ab-table")).toBeTruthy();
+  expect(button("Begin duel")).toBeUndefined();
+});
+import * as nativeViewport from "../platform/nativeAwake";
+it("locks the duel viewport on entry and restores normal app mode on exit", async () => {
+  vi.useFakeTimers();
+  const nativeMode = vi
+    .spyOn(nativeViewport, "setNativeDuelMode")
+    .mockResolvedValue();
+  history.replaceState(null, "", "/#/at");
+  await act(async () => root.render(<MobileApp />));
+  act(() => button("Flip coin & start AT duel")!.click());
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(1300);
+  });
+  act(() => button("Begin duel")!.click());
+  expect(nativeMode).toHaveBeenCalledWith(true);
+  expect(document.documentElement.classList.contains("dt-in-duel")).toBe(true);
+  act(() => button("Exit AT duel")!.click());
+  expect(nativeMode).toHaveBeenLastCalledWith(false);
+  expect(document.documentElement.classList.contains("dt-in-duel")).toBe(false);
+  nativeMode.mockRestore();
 });
