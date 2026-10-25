@@ -77,3 +77,5 @@
 /* Card ink must remain readable inside dark page containers. */
 .ashen-frame-card.layered-frame .ashen-frame-effect p{color:#241c12}
 
+/* Printed titles must keep their ink color inside dark catalog and deck panels. */
+.ashen-frame-card.layered-frame .ashen-frame-title h3{color:#241c12;text-shadow:none}

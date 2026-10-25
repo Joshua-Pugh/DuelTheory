@@ -114,3 +114,31 @@
 .dt-public-site .mode-choice{background:#e6dec8;color:#2d4433;border-color:#a99d7d;border-radius:3px}
 .dt-public-site .mode-choice span{color:#606b51}
 .dt-public-site .mode-choice.selected{background:#d5c28d;border-color:#8b702e}
+/* Essence labels sit on paper, so use dark ink rather than the dark-theme gold. */
+.dt-public-site .ashen-essences span{color:#294332;background:#e5dcc2;border-color:#98845b}
+/* Public pages use paper for the page and explicit dark surfaces for live tools. */
+.dt-public-site .ct-shell{color:#25352d}
+.dt-public-site .ct-shell>.ct-footnote,.dt-public-site .ct-shell>.ct-hint{color:#4b5945}
+.dt-public-site .ct-shell>.ct-status{color:#245c35}
+.dt-public-site .ct-undo-entry{background:#f7f1e3;border-color:#9b8c6c;color:#25352d}
+.dt-public-site .ct-undo-entry small{color:#4b5945}
+.dt-public-site :is(.ct-panel,.ct-room-bar,.ct-player,.ct-qr-card,.ct-turn-timer,.ct-incoming-damage,.ct-title-tracker,.ct-awake,.ct-rule-note){color:#f3eddb}
+.dt-public-site .ct-shell :is(input,select,textarea){background:#fff9e9;color:#24392c}
+.dt-public-site .ct-shell button:disabled{opacity:1;background:#ddd5c0;color:#605e50;border-color:#aaa08a;cursor:not-allowed}
+.dt-public-site .ct-shell :is(.ct-panel,.ct-player,.ct-room-bar,.ct-turn-timer,.ct-incoming-damage,.ct-title-tracker,.ct-awake) :is(.ct-hint,.ct-footnote,label){color:#d0d6c5}
+.dt-public-site .ct-shell .ct-panel>p{color:#d0d6c5}
+.dt-public-site .ct-shell>.ct-heading p{color:#4b5945}
+.dt-public-site .ct-shell .ct-divider{color:#cad2bf}
+.dt-public-site .ashen-builder :is(small,.muted){color:#c4cbb9}
+.dt-public-site :is(.pm-chat,.pm-ready-bar,.pm-error,.ct-shared-title){color:#f3eddb}
+.dt-public-site :is(.pm-chat,.pm-ready-bar) .muted{color:#d0d6c5}
+.dt-public-site .pm-chat h2{color:#f3eddb}
+.dt-public-site .ct-shared-title label{color:#d0d6c5}
+.dt-public-site .stats strong{color:#25382c}
+.dt-public-site .panel :is(.inspector-meta,.period-note,.game-log){color:#4b5945}
+.dt-public-site .panel :is(.inspector-rule-label,.inspector-rule-text){color:#344832}
+.dt-public-site :is(.dt-guide-hero,.dt-guide-list-panel){background:#17382b;color:#f3eddb}
+.dt-public-site .dt-guide-prose dt{color:#315338}
+.dt-public-site .dt-guide-prose section{border-color:#b1a587}
+.dt-public-site .dt-guide-contents button{background:#e2d7b9;color:#294332;border-color:#98845b}
+.dt-public-site .dt-guide-list-panel .muted{color:#d0d6c5}
