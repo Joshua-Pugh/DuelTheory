@@ -1,7 +1,7 @@
 import { cp, mkdir, rename, readFile, stat } from "node:fs/promises";
 import assert from "node:assert/strict";
 await rename("dist-mobile/mobile/index.html", "dist-mobile/index.html");
-for (const dir of ["ashen/layers", "ashen/costs", "branding"]) {
+for (const dir of ["ashen/layers", "ashen/costs", "ashen/artwork", "branding"]) {
   await mkdir(`dist-mobile/${dir}`, { recursive: true });
   if (dir === "branding") {
     for (const name of [

@@ -1,0 +1,148 @@
+{
+  "ashen-noble-archivist-of-the-crown": {
+    "name": "Archivist of the Crown",
+    "image": "/ashen/artwork/ashen-noble-archivist-of-the-crown.webp",
+    "source": "The Crown Archivist’s Golden Ledger.png",
+    "crop": {
+      "zoom": 1,
+      "panX": 50,
+      "panY": 50
+    }
+  },
+  "ashen-brute-bonecrusher-catapult": {
+    "name": "Bonecrusher Catapult",
+    "image": "/ashen/artwork/ashen-brute-bonecrusher-catapult.webp",
+    "source": "Skullbound Trebuchet Assault.png",
+    "crop": {
+      "zoom": 1,
+      "panX": 50,
+      "panY": 50
+    }
+  },
+  "ashen-brute-skarn-the-unchained": {
+    "name": "Skarn the Unchained",
+    "image": "/ashen/artwork/ashen-brute-skarn-the-unchained.webp",
+    "source": "Skarn the Unchained at Sunset.png",
+    "crop": {
+      "zoom": 1,
+      "panX": 50,
+      "panY": 50
+    }
+  },
+  "ashen-brute-siegebreaker-ram": {
+    "name": "Siegebreaker Ram",
+    "image": "/ashen/artwork/ashen-brute-siegebreaker-ram.webp",
+    "source": "Siege Ram Shatters the Fortress Gate.png",
+    "crop": {
+      "zoom": 1,
+      "panX": 50,
+      "panY": 50
+    }
+  },
+  "ashen-noble-seraphine-royal-advisor": {
+    "name": "Seraphine, Royal Advisor",
+    "image": "/ashen/artwork/ashen-noble-seraphine-royal-advisor.webp",
+    "source": "Seraphine, Advisor.png",
+    "crop": {
+      "zoom": 1,
+      "panX": 50,
+      "panY": 50
+    }
+  },
+  "ashen-noble-oath-sanctum": {
+    "name": "Oath Sanctum",
+    "image": "/ashen/artwork/ashen-noble-oath-sanctum.webp",
+    "source": "Radiant Rift Sanctuary at Golden Hour.png",
+    "crop": {
+      "zoom": 1,
+      "panX": 50,
+      "panY": 50
+    }
+  },
+  "ashen-noble-oath-forge": {
+    "name": "Oath Forge",
+    "image": "/ashen/artwork/ashen-noble-oath-forge.webp",
+    "source": "Noble Forge of the Essence Fissure.png",
+    "crop": {
+      "zoom": 1,
+      "panX": 50,
+      "panY": 50
+    }
+  },
+  "ashen-brute-ring-of-the-ley": {
+    "name": "Ring of the Ley",
+    "image": "/ashen/artwork/ashen-brute-ring-of-the-ley.webp",
+    "source": "Luminous Cracks in a Forged Ring.png",
+    "crop": {
+      "zoom": 1,
+      "panX": 50,
+      "panY": 50
+    }
+  },
+  "ashen-brute-fury-pit": {
+    "name": "Fury Pit",
+    "image": "/ashen/artwork/ashen-brute-fury-pit.webp",
+    "source": "Inferno Arena_ Charge of the Bloodied Brutes.png",
+    "crop": {
+      "zoom": 1,
+      "panX": 50,
+      "panY": 50
+    }
+  },
+  "ashen-brute-fury-font": {
+    "name": "Fury Font",
+    "image": "/ashen/artwork/ashen-brute-fury-font.webp",
+    "source": "Molten Rift in the Ashen Wasteland.png",
+    "crop": {
+      "zoom": 1,
+      "panX": 50,
+      "panY": 50
+    }
+  },
+  "ashen-noble-garrett-of-ashenfield": {
+    "name": "Garrett of Ashenfield",
+    "image": "/ashen/artwork/ashen-noble-garrett-of-ashenfield.webp",
+    "source": "Garrett.png",
+    "crop": {
+      "zoom": 1,
+      "panX": 50,
+      "panY": 50
+    }
+  },
+  "ashen-noble-oath-font": {
+    "name": "Oath Font",
+    "image": "/ashen/artwork/ashen-noble-oath-font.webp",
+    "source": "Golden Rift in the Alpine Valley.png",
+    "crop": {
+      "zoom": 1,
+      "panX": 50,
+      "panY": 50
+    }
+  },
+  "ashen-noble-ashenfield-lance": {
+    "name": "Ashenfield Lance",
+    "image": "/ashen/artwork/ashen-noble-ashenfield-lance.webp",
+    "source": "Ashen Field Lance.png",
+    "crop": {
+      "zoom": 1,
+      "panX": 50,
+      "panY": 50
+    }
+  },
+  "ashen-brute-korgath-lord-of-ruin": {
+    "name": "Korgath, Lord of Ruin",
+    "image": "/ashen/artwork/ashen-brute-korgath-lord-of-ruin.webp",
+    "source": "Warlord at the Bloodfire Pit.png",
+    "crop": {
+      "zoom": 1,
+      "panX": 50,
+      "panY": 50
+    },
+    "alternates": [
+      {
+        "image": "/ashen/artwork/ashen-brute-korgath-lord-of-ruin-crimson-banners.webp",
+        "source": "Warlord Beneath the Crimson Banners.png"
+      }
+    ]
+  }
+}

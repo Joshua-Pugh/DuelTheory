@@ -12,5 +12,5 @@ export function saveLook(look:FrameLook){try{localStorage.setItem(STORAGE,JSON.s
 
 const cardLookKey=(id:string)=>`dueltheory-card-look-v1:${encodeURIComponent(id)}`;
 /** Legacy shared preferences are deliberately not applied to unrelated cards. */
-export function loadCardLook(id:string):FrameLook{try{return normalizeLook(JSON.parse(localStorage.getItem(cardLookKey(id))||'null'));}catch{return {...DEFAULT_LOOK};}}
+export function loadCardLook(id:string,defaults:Partial<FrameLook>={}):FrameLook{try{return normalizeLook({...defaults,...JSON.parse(localStorage.getItem(cardLookKey(id))||'null')});}catch{return normalizeLook(defaults);}}
 export function saveCardLook(id:string,look:FrameLook){try{localStorage.setItem(cardLookKey(id),JSON.stringify(normalizeLook(look)));window.dispatchEvent(new CustomEvent('dueltheory-card-look',{detail:id}));return true;}catch{return false;}}
