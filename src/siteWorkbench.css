@@ -145,3 +145,9 @@
 .dt-public-site .mode-choice strong{color:#294332}
 .dt-public-site .preference-option{background:#e6dec8;border-color:#a99d7d;color:#25352d}
 .dt-public-site .preference-option small{color:#4b5945}
+.dt-public-site :is(.dt-matchup-selectors,.dt-preset-card,.dt-supported-decks){background:#e6dec8;color:#25352d;border-color:#a99d7d}
+.dt-public-site .dt-preset-card h4{color:#294332}
+.dt-public-site .dt-preset-card small{color:#4b5945}
+.dt-public-site .dt-preset-links a{color:#5d4518}
+.dt-public-site .input-row,.dt-public-site .markers label{color:#344832}
+.dt-public-site .empty p{color:#4b5945}
