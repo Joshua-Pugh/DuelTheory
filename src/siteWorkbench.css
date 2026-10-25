@@ -152,3 +152,4 @@
 .dt-public-site .input-row,.dt-public-site .markers label{color:#344832}
 .dt-public-site .empty p{color:#4b5945}
 .dt-public-site .stats em,.dt-public-site .empty-zone,.dt-public-site .panel-heading small{color:#505b43}
+.dt-public-site :is(.ct-room-bar,.ct-panel,.dt-nav-dropdown,.dt-guide-hero) .eyebrow{color:#e0c582}
