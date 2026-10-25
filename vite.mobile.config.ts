@@ -25,7 +25,7 @@ export default defineConfig({
   publicDir: false,
   define: {
     "import.meta.env.VITE_PUBLIC_WEB_URL": JSON.stringify(
-      "https://joshua-pugh.github.io/DuelTheory/",
+      "https://dueltheory.com/",
     ),
   },
   build: {

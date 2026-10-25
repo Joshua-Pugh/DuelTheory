@@ -10,7 +10,7 @@
     "sync:cards": "node scripts/sync-cards.mjs",
     "test": "vitest run",
     "sync:all-images": "node scripts/sync-cards.mjs --all-images",
-    "build:pages": "npm run build -- --base=/DuelTheory/ && node scripts/prepare-pages.mjs",
+    "build:pages": "npm run build -- --base=/ && node scripts/prepare-pages.mjs",
     "dev:mobile": "vite --config vite.mobile.config.ts --host 127.0.0.1 --port 5199 --open /mobile/index.html",
     "build:mobile": "tsc -b && vite build --config vite.mobile.config.ts && node scripts/prepare-mobile.mjs",
     "android:sync": "npm run build:mobile && cap sync android",

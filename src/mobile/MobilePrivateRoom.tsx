@@ -1,3 +1,4 @@
+import RematchControls from '../matches/RematchControls';
 import { keepNativeScreenAwake } from "../platform/nativeAwake";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { MatchView, MatchPoll, MatchCommand } from "../matches/model";
@@ -116,7 +117,7 @@ export default function MobilePrivateRoom() {
   }, []);
   useEffect(() => {
     const guard = (e: Event) => {
-      if (current.current && current.current.phase !== "complete") {
+      if (current.current && !current.current.members[current.current.seat]?.left) {
         e.preventDefault();
         destination.current = (e as CustomEvent<{ hash: string }>).detail.hash;
         setConfirmLeave(true);
@@ -370,7 +371,7 @@ export default function MobilePrivateRoom() {
                 </p>
               </>
             )}
-            {room.phase === "complete" && <p>Match complete.</p>}
+            {room.phase === "complete" && <><p>Match complete.</p><RematchControls room={room} busy={busy} send={send}/></>}
             {room.phase !== "playing" && chatBox}
           </>
         )}

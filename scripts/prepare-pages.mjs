@@ -3,7 +3,7 @@ import path from 'node:path';
 
 // Vite handles bundled assets; catalog records and dynamic public-image URLs
 // also need the project path when hosted on GitHub Pages.
-const base='/DuelTheory/';
+const base='/';
 const roots=(await readdir('public')).concat('assets');
 const escaped=roots.map(name=>name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'));
 const pattern=new RegExp('(["\'`])/('+escaped.join('|')+')(?=[/"\'`?#])','g');

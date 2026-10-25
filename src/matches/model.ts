@@ -16,8 +16,8 @@ export type Pick={deck:Deck}|{faction:AshenFaction};
 export type Member={name:string;pick:Pick;ready:boolean;begun:boolean;left?:boolean};
 export type ChatMessage={id:string;seat:0|1;text:string;at:number};
 export type MatchReveal={id:string;controller:0|1;cardId:number;cardIds?:number[];kind?:'effect';message?:string;expiresAt?:number};
-export type Match={revealQueue?:MatchReveal[];code:string;game:Game;revision:number;members:[Member,Member|null];phase:'lobby'|'coin'|'playing'|'sideboarding'|'turnChoice'|'complete';series?:{mode:'single'|'best3';wins:[number,number];results:(0|1|'draw')[];registered?:[Deck,Deck];ready:[boolean,boolean];chooser?:0|1;forfeited?:0|1};seed?:number;goat?:DuelState;ashen?:Battlefield;manual?:boolean;chat:ChatMessage[];choosing?:{seat:0|1;until:number};reveal?:MatchReveal};
-export type MatchCommand={type:'leave'}|{type:'sideboard';deck?:Deck}|{type:'chooseFirst';first:0|1}|{type:'concede'}|{type:'choosing';value:boolean}|{type:'ackReveal';id:string}|{type:'pick';pick:Pick}|{type:'ready';value:boolean;pick?:Pick}|{type:'begin'}|{type:'chat';text:string}|{type:'goat';action:SessionAction}|{type:'goatPhase';destination:import('../engine/model').Phase|'NEXT'}|{type:'ashen';action:AshenCommand};
+export type Match={rematch?:{accepted:[boolean,boolean];expiresAt:number};revealQueue?:MatchReveal[];code:string;game:Game;revision:number;members:[Member,Member|null];phase:'lobby'|'coin'|'playing'|'sideboarding'|'turnChoice'|'complete';series?:{mode:'single'|'best3';wins:[number,number];results:(0|1|'draw')[];registered?:[Deck,Deck];ready:[boolean,boolean];chooser?:0|1;forfeited?:0|1};seed?:number;goat?:DuelState;ashen?:Battlefield;manual?:boolean;chat:ChatMessage[];choosing?:{seat:0|1;until:number};reveal?:MatchReveal};
+export type MatchCommand={type:'rematch';accept:boolean}|{type:'leave'}|{type:'sideboard';deck?:Deck}|{type:'chooseFirst';first:0|1}|{type:'concede'}|{type:'choosing';value:boolean}|{type:'ackReveal';id:string}|{type:'pick';pick:Pick}|{type:'ready';value:boolean;pick?:Pick}|{type:'begin'}|{type:'chat';text:string}|{type:'goat';action:SessionAction}|{type:'goatPhase';destination:import('../engine/model').Phase|'NEXT'}|{type:'ashen';action:AshenCommand};
 export function validPick(game:Game,input:unknown,catalog:readonly Card[]):Pick{
  const p=input as Pick;if(!p||typeof p!=='object')throw Error('Choose your deck.');
  if(game==='ashen'){if(!('faction'in p)||!['Brute','Noble'].includes(p.faction))throw Error('Choose Brutes or Nobles.');return {faction:p.faction};}
@@ -30,7 +30,19 @@ export function startMatch(s:Match,catalog:readonly Card[],seed:number,firstSeat
 export function applyMatchCommand(original:Match,seat:0|1,c:MatchCommand,catalog:readonly Card[],seed:number):Match{
  const s=structuredClone(original);releaseExpiredReveal(s);const m=s.members[seat];if(!m)throw Error('Join a seat first.');
  if(m.left)throw Error('You have left this room. Create or join a new match.');
- if(c.type==='leave'){m.left=true;m.ready=false;delete s.choosing;delete s.reveal;delete s.revealQueue;const series=s.series??={mode:'single',wins:[0,0],results:[],ready:[false,false]};series.forfeited=seat;if(s.phase==='playing'){if(s.goat)s.goat.winner=seat===0?1:0;else if(s.ashen?.rules?.duel)s.ashen.rules.duel.winner=seat===0?1:0;settleMatchResult(s);}s.phase='complete';}
+ if(c.type==='leave'){delete s.rematch;m.left=true;m.ready=false;delete s.choosing;delete s.reveal;delete s.revealQueue;const series=s.series??={mode:'single',wins:[0,0],results:[],ready:[false,false]};if(s.phase!=='complete')series.forfeited=seat;if(s.phase==='playing'){if(s.goat)s.goat.winner=seat===0?1:0;else if(s.ashen?.rules?.duel)s.ashen.rules.duel.winner=seat===0?1:0;settleMatchResult(s);}s.phase='complete';}
+ else if(c.type==='rematch'){
+  if(s.phase!=='complete'||!s.members.every(p=>p&&!p.left)||typeof c.accept!=='boolean')throw Error('A rematch requires both players to remain in the room after the match.');
+  if(!s.rematch||s.rematch.expiresAt<=Date.now())s.rematch={accepted:[false,false],expiresAt:Date.now()+60000};
+  s.rematch.accepted[seat]=c.accept;
+  if(s.rematch.accepted.every(Boolean)){
+   const mode=s.series?.mode??'single';
+   if(s.game==='goat'&&s.series?.registered)s.members.forEach((p,i)=>{p!.pick={deck:structuredClone(s.series!.registered![i])};});
+   s.series={mode,wins:[0,0],results:[],ready:[false,false]};
+   s.phase='lobby';s.members.forEach(p=>{p!.ready=false;p!.begun=false;});
+   delete s.rematch;delete s.goat;delete s.ashen;delete s.seed;delete s.manual;delete s.reveal;delete s.revealQueue;delete s.choosing;
+  }
+ }
  else if(c.type==='sideboard'){if(s.phase!=='sideboarding'||!s.series)throw Error('Sideboarding is only available between games.');if(s.series.ready[seat])throw Error('Your next-game deck is already locked.');if(s.game==='goat'){const d=validPick('goat',{deck:c.deck},catalog) as {deck:Deck};validateSideboard(s.series.registered![seat],d.deck);const errors=validateDeck(d.deck,new Map(catalog.map(c=>[c.id,c]))).filter(i=>i.kind==='error');if(errors.length)throw Error(errors.map(i=>i.message).join(' '));m.pick=d;}s.series.ready[seat]=true;if(s.series.ready.every(Boolean))s.phase='turnChoice';}
  else if(c.type==='chooseFirst'){if(s.phase!=='turnChoice'||s.series?.chooser!==seat||![0,1].includes(c.first))throw Error('The previous game’s loser chooses who goes first.');startMatch(s,catalog,seed,c.first);}
  else if(c.type==='concede'){if(s.phase!=='playing')throw Error('No active game to concede.');if(s.goat)s.goat.winner=seat===0?1:0;else if(s.ashen?.rules)s.ashen.rules.duel!.winner=seat===0?1:0;}

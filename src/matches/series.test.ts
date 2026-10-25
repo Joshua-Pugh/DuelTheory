@@ -21,4 +21,23 @@ describe('private match series',()=>{
  it('leaving immediately forfeits the entire series, clears waiting pauses and rejects future moves',()=>{let s=started();s.choosing={seat:0,until:Date.now()+20000};s.reveal={id:'pending',controller:0,cardId:71413901,expiresAt:Date.now()+15000};s=act(s,0,{type:'leave'});expect(s.phase).toBe('complete');expect(s.members[0].left).toBe(true);expect(s.series?.forfeited).toBe(0);expect(s.goat?.winner).toBe(1);expect(s.reveal).toBeUndefined();expect(s.choosing).toBeUndefined();expect(()=>act(s,0,{type:'chat',text:'late action'})).toThrow('left this room');});
  it('leaving during siding closes the match immediately',()=>{let s=act(started(),1,{type:'concede'});s=act(s,0,{type:'leave'});expect(s.phase).toBe('complete');expect(s.series?.forfeited).toBe(0);expect(()=>act(s,1,{type:'sideboard',deck:MATT_MONARCHS})).toThrow();});
 
+ it.each(['goat','ashen'] as const)('requires two rematch accepts and returns %s to deck selection in the same room',game=>{
+  let s=act(started(game,'single'),1,{type:'concede'});const code=s.code;s.chat=[{id:'gg',seat:0,text:'gg',at:1}];
+  s=act(s,0,{type:'rematch',accept:true});expect(s.phase).toBe('complete');expect(s.rematch?.accepted).toEqual([true,false]);
+  s=act(s,0,{type:'rematch',accept:false});expect(s.rematch?.accepted).toEqual([false,false]);
+  s=act(s,0,{type:'rematch',accept:true});s=act(s,1,{type:'rematch',accept:true});
+  expect(s.code).toBe(code);expect(s.phase).toBe('lobby');expect(s.series?.wins).toEqual([0,0]);expect(s.series?.results).toEqual([]);expect(s.chat).toHaveLength(1);expect(s.goat).toBeUndefined();expect(s.ashen).toBeUndefined();expect(s.members.every(m=>!m?.ready&&!m?.begun)).toBe(true);
+  s=act(s,0,{type:'ready',value:true});expect(s.phase).toBe('lobby');s=act(s,1,{type:'ready',value:true});expect(s.phase).toBe('coin');
+ });
+ it('clears rematch requests on leaving and rejects a restart with a departed player',()=>{
+  let s=act(started('goat','single'),1,{type:'concede'});s=act(s,0,{type:'rematch',accept:true});s=act(s,0,{type:'leave'});expect(s.rematch).toBeUndefined();expect(()=>act(s,1,{type:'rematch',accept:true})).toThrow('both players');
+ });
+ it('expires old rematch consent and rejects rematches during active games',()=>{
+  expect(()=>act(started(),0,{type:'rematch',accept:true})).toThrow();let s=act(started('ashen','single'),1,{type:'concede'});s=act(s,0,{type:'rematch',accept:true});s.rematch!.expiresAt=0;s=act(s,1,{type:'rematch',accept:true});expect(s.phase).toBe('complete');expect(s.rematch?.accepted).toEqual([false,true]);
+ });
+
+ it('preserves the completed result when the winner leaves after the match',()=>{
+  let s=act(started('goat','single'),1,{type:'concede'});s=act(s,0,{type:'leave'});expect(s.series?.wins).toEqual([1,0]);expect(s.series?.forfeited).toBeUndefined();
+ });
+
 });

@@ -38,7 +38,7 @@
     }
   ],
   "vars": {
-    "ALLOWED_ORIGINS": "https://joshua-pugh.github.io,http://localhost:5173,http://127.0.0.1:5197,https://localhost,http://127.0.0.1:5199"
+    "ALLOWED_ORIGINS": "https://joshua-pugh.github.io,https://dueltheory.com,https://www.dueltheory.com,http://localhost:5173,http://127.0.0.1:5197,https://localhost,http://127.0.0.1:5199"
   },
   "observability": {
     "enabled": true,
