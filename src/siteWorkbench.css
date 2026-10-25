@@ -142,3 +142,6 @@
 .dt-public-site .dt-guide-prose section{border-color:#b1a587}
 .dt-public-site .dt-guide-contents button{background:#e2d7b9;color:#294332;border-color:#98845b}
 .dt-public-site .dt-guide-list-panel .muted{color:#d0d6c5}
+.dt-public-site .mode-choice strong{color:#294332}
+.dt-public-site .preference-option{background:#e6dec8;border-color:#a99d7d;color:#25352d}
+.dt-public-site .preference-option small{color:#4b5945}
