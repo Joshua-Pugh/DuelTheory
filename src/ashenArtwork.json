@@ -81,8 +81,8 @@
   },
   "ashen-brute-fury-pit": {
     "name": "Fury Pit",
-    "image": "/ashen/artwork/ashen-brute-fury-pit.webp",
-    "source": "Inferno Arena_ Charge of the Bloodied Brutes.png",
+    "image": "/ashen/artwork/ashen-brute-fury-pit-bloodfire.webp",
+    "source": "Warlord at the Bloodfire Pit.png",
     "crop": {
       "zoom": 1,
       "panX": 50,
@@ -129,20 +129,24 @@
       "panY": 50
     }
   },
-  "ashen-brute-korgath-lord-of-ruin": {
-    "name": "Korgath, Lord of Ruin",
-    "image": "/ashen/artwork/ashen-brute-korgath-lord-of-ruin.webp",
-    "source": "Warlord at the Bloodfire Pit.png",
+  "ashen-brute-pit-of-the-frenzied": {
+    "name": "Pit of the Frenzied",
+    "image": "/ashen/artwork/ashen-brute-pit-of-the-frenzied.webp",
+    "source": "Inferno Arena_ Charge of the Bloodied Brutes.png",
     "crop": {
       "zoom": 1,
       "panX": 50,
       "panY": 50
-    },
-    "alternates": [
-      {
-        "image": "/ashen/artwork/ashen-brute-korgath-lord-of-ruin-crimson-banners.webp",
-        "source": "Warlord Beneath the Crimson Banners.png"
-      }
-    ]
+    }
+  },
+  "ashen-noble-ring-of-the-ley": {
+    "name": "Ring of the Ley",
+    "image": "/ashen/artwork/ashen-brute-ring-of-the-ley.webp",
+    "source": "Luminous Cracks in a Forged Ring.png",
+    "crop": {
+      "zoom": 1,
+      "panX": 50,
+      "panY": 50
+    }
   }
 }
