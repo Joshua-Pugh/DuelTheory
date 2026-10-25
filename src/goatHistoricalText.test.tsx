@@ -32,9 +32,9 @@ describe('GOAT historical presentation',()=>{
  it('distinguishes reviewed overlays from unverified catalog text and links provenance',()=>{
   const reviewed=withGoatHistoricalText(catalog.find(c=>c.id===26202165)!);
   const markup=renderToStaticMarkup(<HistoricalTextNote card={reviewed}/>);
-  expect(markup).toContain('reconstructed rules-box overlay');
+  expect(markup).toContain('2005 wording added over the card image');
   expect(markup).toContain('https://www.goatformat.com/rulings7.html');
   expect(markup).toContain('/cards/full/26202165.jpg');
-  expect(renderToStaticMarkup(<HistoricalTextNote card={catalog[0]}/>)).toContain('not yet verified');
+  expect(renderToStaticMarkup(<HistoricalTextNote card={catalog[0]}/>)).toContain('not been checked yet');
  });
 });

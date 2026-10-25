@@ -182,10 +182,10 @@ export default function MobileApp() {
             {route === "home" && (
               <>
                 <section className="mobile-intro">
-                  <span className="eyebrow">YOUR TABLE. YOUR GAME.</span>
+                  <span className="eyebrow">DUELTHEORY</span>
                   <h1>Build. Simulate. Master.</h1>
                   <p>
-                    Bring everyone to the table, then discover Ashen Throne.
+                    Keep score at the table or play Ashen Throne.
                   </p>
                 </section>
                 <div className="mobile-home-grid">
@@ -211,7 +211,7 @@ export default function MobileApp() {
                       Play the Brute and Noble prototype decks locally or invite
                       a friend.
                     </p>
-                    <b>Enter the duel arena →</b>
+                    <b>Play Ashen Throne →</b>
                   </button>
                 </div>
                 <p className="mobile-caption">
@@ -226,7 +226,7 @@ export default function MobileApp() {
             {route === "private" && <Room key={inviteKey} />}
             {route === "more" && (
               <section className="mobile-card">
-                <h1>Your DuelTheory</h1>
+                <h1>Settings & rules</h1>
                 <label>
                   Display name
                   <input
@@ -250,10 +250,9 @@ export default function MobileApp() {
                   and display name.
                 </p>
                 <p>
-                  Reduced-motion settings are respected. Purchases and DT
-                  account synchronization will be added separately.
+                  The app follows your device’s reduced-motion setting. Accounts and purchases are not available yet.
                 </p>
-                <a href="https://joshua-pugh.github.io/DuelTheory/">
+                <a href="https://dueltheory.com/">
                   Visit DuelTheory
                 </a>
               </section>
