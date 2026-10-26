@@ -1,0 +1,21 @@
+/* Match the website's ivory desk and forest/gold branding; duel portals retain
+   their dark board palette and independent viewport sizing. */
+.dt-mobile-app,.dt-mobile-app body,.dt-mobile-app #root{background:#eee6d2;color:#25352d}
+.mobile-shell{font-family:"Segoe UI",Arial,sans-serif}
+.mobile-brand{background:#102c23;border-bottom:3px solid #ad8539;margin:-10px -14px 18px;padding:12px 14px;padding-top:calc(12px + env(safe-area-inset-top,0px))}
+.mobile-brand>small{color:#e0c582;font-family:Consolas,monospace}
+.mobile-intro{border-bottom:2px solid #8b753e;padding:8px 0 18px;margin-bottom:18px}
+.mobile-intro h1{font-family:Georgia,serif;color:#173c2b}.mobile-intro p{color:#43513d;line-height:1.5}.mobile-intro .eyebrow{color:#66552d}
+.mobile-feature,.mobile-card{background:#f7f1e3;border-color:#ada184;border-radius:3px;box-shadow:none;color:#25352d}
+.mobile-feature{border-top:3px solid #31513b;padding:20px}.mobile-feature h2{color:#173c2b;margin:10px 0}.mobile-feature p,.mobile-card p{color:#4a5540;line-height:1.6}.mobile-feature small{color:#66552d;font-family:Consolas,monospace}.mobile-feature b{color:#234f36}
+.mobile-caption,.mobile-loading{color:#586047}.mobile-card :is(h1,h2,h3){color:#173c2b}
+.mobile-nav{background:#102c23;border-top:2px solid #ad8539}.mobile-nav button{border-radius:3px;color:#e1dcc9}.mobile-nav button[aria-current=page]{background:#294435;color:#f4d47e}
+.mobile-card :is(input,select),.mobile-shell .builder-actions select{background:#fff9e9;color:#24392c;border-color:#a89b7c;border-radius:3px}
+.mobile-card>button,.mobile-pages button{background:#294c36;color:#f0e5bb;border-color:#8b8255;border-radius:3px}
+.mobile-card-list button{color:#25352d;border-color:#d0c5a9}.mobile-card-list button[aria-pressed=true]{background:#dedcc1}.mobile-card-list small{color:#57634d}.mobile-card a{color:#245c35}
+.mobile-shell :is(button,a):focus-visible{outline:2px solid #a17a29;outline-offset:3px}
+.mobile-shell .ct-shell{color:#25352d}.mobile-shell .ct-heading p,.mobile-shell .ct-shell>.ct-footnote,.mobile-shell .ct-shell>.ct-hint{color:#4b5945}.mobile-shell .ct-shell>.ct-status{color:#245c35}
+.mobile-shell :is(.ct-panel,.ct-room-bar,.ct-player,.ct-qr-card,.ct-turn-timer,.ct-incoming-damage,.ct-title-tracker,.ct-awake,.ct-rule-note){color:#f3eddb;background:#18372b;border-color:#727657;border-radius:3px}
+.mobile-shell .ct-shell :is(input,select,textarea){background:#fff9e9;color:#24392c;border-color:#a89b7c;border-radius:3px}.mobile-shell .ct-shell button{border-radius:3px}.mobile-shell .ct-shell button:disabled{opacity:1;background:#ddd5c0;color:#605e50;border-color:#aaa08a}
+.mobile-shell .ct-undo-entry{background:#f7f1e3;color:#25352d}.mobile-shell .ct-undo-entry small{color:#4b5945}.mobile-shell .ct-shell :is(.ct-panel,.ct-player,.ct-awake) :is(label,.ct-hint,.ct-footnote){color:#d0d6c5}
+@media(max-width:480px){.mobile-brand{margin-left:-10px;margin-right:-10px}}
