@@ -156,3 +156,5 @@
 
 .dt-public-site .dt-desk-note .dt-site-tagline{font:600 12px Georgia,serif;color:#294332;margin-bottom:7px}
 .dt-public-site .dt-lifecycle-dialog h2{color:#efd29a}
+
+.dt-at-socials{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px}.dt-at-socials a{color:#245535;text-decoration:underline;text-underline-offset:3px}
