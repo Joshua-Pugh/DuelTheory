@@ -17,12 +17,12 @@ describe('shared AT rules layout',()=>{
   expect(renderToStaticMarkup(<AshenBattlefield initialState={state}/>)).toContain('aria-label="1 Fatigue counter">F</span>');
  });
  it('uses the expanded art and rules geometry for every catalog card',()=>{
-  for(const card of catalog.cards){const html=renderToStaticMarkup(<AshenCardFrame card={card}/>);expect(html).toContain('rules-expanded');expect(html).toContain('viewBox="0 220 1060 580"');}
+  for(const card of catalog.cards){const html=renderToStaticMarkup(<AshenCardFrame card={card}/>);expect(html).toContain('rules-expanded');expect(html).toContain(card.type==='Unit'||card.type==='Command Station'?'viewBox="0 220 1060 580"':'inner-frame-statless.svg');}
  });
  it('keeps stat rings only for units and stations, moving station HP out of the rules',()=>{
   for(const type of ['Relic','Rune','Tactic','Strategy','Ley Font']){
    const html=renderToStaticMarkup(<AshenCardFrame card={{name:'Test',type,attack:4,defense:5,effectText:'An effect.'}}/>);
-   expect(html).toContain('statless-frame');expect(html).not.toContain('class="ashen-frame-stats');expect(html).toContain('viewBox="0 855 1060 110"');
+   expect(html).toContain('statless-frame');expect(html).not.toContain('class="ashen-frame-stats');expect(html).toContain('inner-frame-statless.svg');expect(html).toContain('parchment-statless.svg');expect(html).not.toContain('scale(-1 1)');
   }
   for(const card of catalog.cards.filter(c=>c.type==='Command Station')){const html=renderToStaticMarkup(<AshenCardFrame card={card}/>);expect(html).toContain('<strong>HP 20</strong>');expect(html).not.toContain('HP: 20');expect(html).not.toContain('>STATION<');}
   expect(renderToStaticMarkup(<AshenCardFrame card={{name:'Unit',type:'Unit',attack:2,defense:3}}/>)).toContain('<strong>A2 / D3</strong>');
