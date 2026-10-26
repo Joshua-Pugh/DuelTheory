@@ -1,6 +1,7 @@
+import {readyAshenDuel as newAshenDuel} from '../../test/ashenReady';
 import {describe,it,expect} from 'vitest';
 import {ASHEN_TABLETOP,GOAT_TABLETOP,tabletopZoneLabel,tabletopDispatch} from '../../services/CreatorTabletop';
-import {newAshenDuel} from './duel';
+
 import {ashenCardMap} from '../../ashenDecks';
 describe('AT Ossuary terminology',()=>{
  it('renames only the AT pile, including existing definitions without label metadata',()=>{

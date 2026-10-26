@@ -1,6 +1,7 @@
+import {readyAshenDuel as newAshenDuel} from '../../test/ashenReady';
 import {expect,it} from 'vitest';
 import {renderToStaticMarkup} from 'react-dom/server';
-import {newAshenDuel,submitAshenAction,resumeBruteDuel,passAshenPriority,advanceAshenTo,declareAshenAttackers,settleAshenDuel} from './duel';
+import {submitAshenAction,resumeBruteDuel,passAshenPriority,advanceAshenTo,declareAshenAttackers,settleAshenDuel} from './duel';
 import {moveAshenCard,ashenStats,drainTriggers,ashenAdapter} from './adapter';
 import {executeProgram} from '../../framework';
 import AshenStatBreakdown from '../../AshenStatBreakdown';

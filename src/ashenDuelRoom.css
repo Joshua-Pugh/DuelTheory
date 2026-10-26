@@ -38,3 +38,44 @@
 .ab-stat-breakdown{border:1px solid #637b65;border-radius:5px;padding:8px;font-size:11px;color:#d8dfcb;line-height:1.4}.ab-stat-breakdown p{margin:4px 0}.ab-stat-breakdown strong,.ab-stat-breakdown b{color:#efd79f}
 
 .ab-card-back:has(>.dt-card-back){border:0;background:none;box-shadow:none;gap:0}.ab-card-back:has(>.dt-card-back):before,.ab-card-back:has(>.dt-card-back):after{display:none}.ab-card-back>.dt-card-back{height:100%;width:100%;margin:0;aspect-ratio:auto}
+/* Opening hands remain inside the visible viewport on phones and desktop. */
+.ab-opening-backdrop{z-index:1200;background:#06120fed}
+.ab-opening-dialog>p{line-height:1.5;color:#d6dfcc}
+.ab-opening-dialog .ab-opening-cards{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;overflow:visible}
+.ab-opening-cards figure{margin:0;min-width:0}
+.ab-opening-cards .ashen-frame-card{width:100%;min-width:0;max-width:100%;margin:0}
+.ab-opening-cards figcaption{font-size:11px;line-height:1.3;color:#f1e8d0;margin-top:5px;overflow-wrap:anywhere}
+.ab-opening-dialog>footer{position:sticky;bottom:-20px;background:#18251f;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;padding:14px 0 0;margin-top:14px;border-color:#697a5c}
+.ab-shell .ab-opening-keep{background:#c6a24c;color:#17271d;font-weight:700}
+.ab-opening-dialog button{min-height:44px}
+@media(max-width:650px){.ab-opening-dialog .ab-opening-cards{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:420px){.ab-opening-dialog .ab-opening-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-height:500px) and (min-width:651px){.ab-opening-dialog{max-width:850px}.ab-opening-cards .ashen-frame-card{max-height:42dvh;width:auto;max-width:100%;margin:auto}.ab-opening-cards figcaption{font-size:10px}}
+/* Spend available board height on cards, not a tall phase-control gap. */
+.ab-shell.ab-duel{grid-template-rows:auto minmax(0,1fr) clamp(120px,19dvh,185px) 22px}
+.ab-shell.ab-duel.ab-learning-mode{grid-template-rows:auto auto minmax(0,1fr) clamp(120px,19dvh,185px) 22px}
+.ab-duel .ab-table{grid-template-rows:clamp(36px,6dvh,62px) minmax(0,1fr) auto minmax(0,1fr)}
+.ab-duel .ab-opponent-hand{height:100%;align-items:center;gap:6px;overflow:hidden}
+.ab-duel .ab-opponent-hand>.ab-card-back{height:clamp(32px,5.7dvh,58px);width:auto;aspect-ratio:5/7;flex:0 1 auto;min-width:16px}
+.ab-duel .ab-half-grid,.ab-duel .ab-you .ab-half-grid{grid-template-rows:repeat(2,minmax(0,1fr))}
+.ab-duel .ab-center{height:auto;min-height:56px;overflow:visible;padding:4px 8px}
+.ab-phase-controls{flex-direction:row;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.ab-duel .ab-zone .ab-card,.ab-duel .ab-ley .ab-card{width:clamp(32px,calc((100cqh - 22px)*.714),110px)!important}
+.ab-duel .ab-command .ab-card{width:clamp(28px,calc((100cqh - 42px)*.714),92px)!important}
+.ab-duel .ab-card-row{padding:0 1px;gap:8px}
+.ab-duel .ab-hand{padding:3px 12px 1px}
+.ab-duel .ab-hand-cards{align-items:flex-end;padding:0;gap:9px}
+.ab-duel .ab-hand .ab-card{width:clamp(44px,calc((100cqh - 23px)*.714),118px)!important}
+.ab-shell .ab-card.ab-font-spent .ab-card-face{opacity:.55;filter:saturate(.35)}
+.ab-shell .ab-card.ab-font-spent{box-shadow:0 1px 4px #0008}
+.ab-shell .ab-card.ab-font-spent.ab-selected{outline:1px solid #b4c79d;box-shadow:0 0 0 2px #385c49}
+.ab-shell .ab-spent{left:0;right:0;bottom:0;display:block;box-sizing:border-box;padding:2px 0;font:600 9px/1.2 system-ui,sans-serif;letter-spacing:.2px;text-align:center;background:#162b23f5;color:#f2dfae;border:1px solid #a08b5b;border-radius:0 0 3px 3px;pointer-events:none}
+@media(max-width:500px){.ab-shell.ab-duel{grid-template-rows:auto minmax(0,1fr) 128px 20px}.ab-shell.ab-duel.ab-learning-mode{grid-template-rows:auto auto minmax(0,1fr) 128px 20px}.ab-duel .ab-opponent-hand>.ab-card-back{height:34px}.ab-duel .ab-card-row{gap:4px}.ab-duel .ab-center{min-height:68px}}
+@media(max-height:500px){.ab-shell.ab-duel{grid-template-rows:auto minmax(0,1fr) 82px 16px}.ab-shell.ab-duel.ab-learning-mode{grid-template-rows:auto auto minmax(0,1fr) 82px 16px}.ab-duel .ab-table{grid-template-rows:24px minmax(0,1fr) auto minmax(0,1fr)}.ab-duel .ab-opponent-hand>.ab-card-back{height:24px}.ab-duel .ab-center{min-height:42px}.ab-duel .ab-hand .ab-card{width:clamp(35px,calc((100cqh - 21px)*.714),70px)!important}.ab-shell .ab-spent{font-size:7px;padding:1px 0}.ab-duel .ab-zone .ab-card{min-width:22px}}
+.ab-opening-dialog{max-width:950px;width:min(950px,calc(100vw - 24px))}
+.ab-player-hp{display:none}
+.ab-duel .ab-player-hp{display:inline;color:#f0d394;font:bold 13px Georgia,serif;white-space:nowrap;margin-left:auto}
+.ab-duel .ab-player em{margin-left:5px}
+.ab-duel .ab-command .ab-hp{display:none}
+.ab-duel .ab-command .ab-card-row{height:calc(100% - 16px)}
+.ab-duel .ab-command .ab-card{width:clamp(28px,calc((100cqh - 22px)*.714),100px)!important}

@@ -1,3 +1,4 @@
+import {openingHandSize,canRedrawOpeningHand} from '../../framework/openingHand';
 import {continueProgram,candidates,matches,executeProgram,openPriority,passPriority,type Priority,type EffectProgram,type EffectContext,type EffectEvent,type EffectStackEntry} from '../../framework';
 import {newBattlefield,emptyBasin,fontEssence,type Battlefield} from '../../ashenBattlefieldState';
 import type {AshenFaction} from '../../ashenDecks';
@@ -7,18 +8,44 @@ import {ashenEffects} from './effectPacks';
 export type Phase='start'|'main1'|'combat'|'main2'|'end';
 export type ClashEntry=EffectStackEntry&{kind:'action'|'ability'|'trigger';bonus?:boolean;key?:string;notified?:boolean};
 type Job={kind:'program';program:EffectProgram;context:EffectContext}|{kind:'ready'|'draw'|'main'|'newTurn'|'endCleanup'}|{kind:'combatDamage';first?:boolean};
-export type AshenDuel={phase:Phase;stack:ClashEntry[];priority:Priority|null;responseWindow?:boolean;ordering?:boolean;jobs:Job[];sacrificed:[number,number];combat?:{stage:'attack'|'block'|'damage'|'finished';attackers:string[];blockers:Record<string,string[]>;blocked:string[]};winner?:0|1|'draw';first:0|1;callPermission?:string;damagePackets?:{source:string;target:string;amount:number}[]};
+export type AshenDuel={phase:Phase;stack:ClashEntry[];priority:Priority|null;responseWindow?:boolean;ordering?:boolean;jobs:Job[];sacrificed:[number,number];combat?:{stage:'attack'|'block'|'damage'|'finished';attackers:string[];blockers:Record<string,string[]>;blocked:string[]};winner?:0|1|'draw';first:0|1;opening?:{redraws:[number,number];kept:[boolean,boolean]};callPermission?:string;damagePackets?:{source:string;target:string;amount:number}[]};
 const duel=(s:Battlefield)=>{const d=s.rules?.duel;if(!d)throw Error('Start a Brute duel first.');return d;};
 const active=(s:Battlefield)=>String(s.table.active);
 const fieldEvent=(s:Battlefield,id:string,kind:string):EffectEvent=>({kind,source:id,player:String(s.table.cards[id].controller),entity:ashenAdapter.entities(s).find(e=>e.id===id),observers:ashenAdapter.entities(s)});
 const program=(id:string,label:string,steps:EffectProgram['steps']):EffectProgram=>({version:1,id,label,steps});
 const alive=(s:Battlefield,id:string)=>s.table.cards[id]?.zone==='unit';
-export function newBruteDuel(random:()=>number=Math.random){const s=newBattlefield(false,random,true);s.table.definition.zones.push({id:'clash',label:'The Clash',slots:0});s.table.piles['0:clash']=[];s.table.piles['1:clash']=[];s.table.active=random()<.5?0:1;s.rules!.duel={phase:'main1',stack:[],priority:null,jobs:[],sacrificed:[0,0],first:s.table.active};s.table.events=[`Brute duel: Player ${s.table.active+1} goes first; first draw skipped.`];return s;}
-export function newAshenDuel(decks:[AshenFaction,AshenFaction],seed:number,first:0|1){let value=seed>>>0;const random=()=>{value=(Math.imul(value,1664525)+1013904223)>>>0;return value/4294967296;};const s=newBattlefield(false,random,decks);s.table.definition.zones.push({id:'clash',label:'The Clash',slots:0});s.table.piles['0:clash']=[];s.table.piles['1:clash']=[];s.table.active=first;s.rules!.duel={phase:'main1',stack:[],priority:null,jobs:[],sacrificed:[0,0],first};s.table.events=[`${decks[0]} versus ${decks[1]}. Coin toss: Player ${first+1} goes first; first draw skipped.`];return s;}
+export function newBruteDuel(random:()=>number=Math.random){const s=newBattlefield(false,random,true);s.table.definition.zones.push({id:'clash',label:'The Clash',slots:0});s.table.piles['0:clash']=[];s.table.piles['1:clash']=[];s.table.active=random()<.5?0:1;s.rules!.duel={phase:'main1',stack:[],priority:null,jobs:[],sacrificed:[0,0],first:s.table.active,opening:{redraws:[0,0],kept:[false,false]}};s.table.events=[`Brute duel: Player ${s.table.active+1} goes first; first draw skipped.`];return s;}
+export function newAshenDuel(decks:[AshenFaction,AshenFaction],seed:number,first:0|1){let value=seed>>>0;const random=()=>{value=(Math.imul(value,1664525)+1013904223)>>>0;return value/4294967296;};const s=newBattlefield(false,random,decks);s.table.definition.zones.push({id:'clash',label:'The Clash',slots:0});s.table.piles['0:clash']=[];s.table.piles['1:clash']=[];s.table.active=first;s.rules!.duel={phase:'main1',stack:[],priority:null,jobs:[],sacrificed:[0,0],first,opening:{redraws:[0,0],kept:[false,false]}};s.table.events=[`${decks[0]} versus ${decks[1]}. Coin toss: Player ${first+1} goes first; first draw skipped.`];return s;}
+export const ASHEN_OPENING_HAND={size:6,freeRedraws:1,minimum:1} as const;
+/** Missing opening data is an older, already-started duel; never restart it on load. */
+export function ashenOpeningPlayer(s:Battlefield):0|1|null{
+ const d=s.rules?.duel;if(!d?.opening)return null;
+ return ([d.first,d.first===0?1:0] as (0|1)[]).find(seat=>!d.opening!.kept[seat])??null;
+}
+export function chooseAshenOpening(original:Battlefield,seat:0|1,choice:'keep'|'redraw'){
+ if(!['keep','redraw'].includes(choice)||![0,1].includes(seat)||ashenOpeningPlayer(original)!==seat||duel(original).winner!==undefined)throw Error('Wait for your opening-hand choice.');
+ const s=structuredClone(original),opening=duel(s).opening!;
+ if(choice==='keep'){
+  opening.kept[seat]=true;s.table.events.push(`Opening hand: Player ${seat+1} kept ${s.table.piles[`${seat}:hand`].length} cards.`);
+  if(ashenOpeningPlayer(s)===null)s.table.events.push(`Opening hands kept. Player ${s.table.active+1} begins; first draw skipped.`);
+  return s;
+ }
+ const redraws=opening.redraws[seat];if(!canRedrawOpeningHand(ASHEN_OPENING_HAND,redraws))throw Error('The opening hand cannot be reduced below one card.');
+ const hand=s.table.piles[`${seat}:hand`],deck=s.table.piles[`${seat}:deck`];
+ // Setup movements bypass game effects and card-name logs, including draw triggers.
+ for(const id of hand){s.table.cards[id].zone='deck';deck.push(id);}
+ hand.length=0;ashenAdapter.shuffle!(s,String(seat),'deck');
+ opening.redraws[seat]++;const size=openingHandSize(ASHEN_OPENING_HAND,opening.redraws[seat]);
+ const drawn=s.table.piles[`${seat}:deck`].splice(0,size);
+ for(const id of drawn)s.table.cards[id].zone='hand';s.table.piles[`${seat}:hand`]=drawn;
+ s.table.events.push(`Opening hand: Player ${seat+1} ${redraws===0?'used the free redraw':'redrew'}; drew ${size} card${size===1?'':'s'}.`);
+ return s;
+}
+function requireOpeningKept(s:Battlefield){if(ashenOpeningPlayer(s)!==null)throw Error('Both players must keep their opening hands first.');}
 export function checkAshenVictory(s:Battlefield){const d=duel(s);if(s.table.health[0]<=0||s.table.health[1]<=0)d.winner=s.table.health[0]<=0&&s.table.health[1]<=0?'draw':s.table.health[0]<=0?1:0;else if(!s.table.piles['0:deck'].length&&!s.table.piles['1:deck'].length)d.winner=s.table.health[0]===s.table.health[1]?'draw':s.table.health[0]>s.table.health[1]?0:1;return s;}
-function requireIdle(s:Battlefield){if(s.rules?.pending||s.rules?.resumeAfterTriggers?.length||duel(s).stack.length||duel(s).jobs.length||duel(s).callPermission||duel(s).responseWindow||duel(s).ordering)throw Error('Finish the current Clash or choice first.');if(duel(s).winner!==undefined)throw Error('This duel is over.');}
+function requireIdle(s:Battlefield){requireOpeningKept(s);if(s.rules?.pending||s.rules?.resumeAfterTriggers?.length||duel(s).stack.length||duel(s).jobs.length||duel(s).callPermission||duel(s).responseWindow||duel(s).ordering)throw Error('Finish the current Clash or choice first.');if(duel(s).winner!==undefined)throw Error('This duel is over.');}
 function reactive(s:Battlefield,id:string,p?:EffectProgram){const c=s.table.cards[id];return p?!!p.cost&&!['rig-outfit','lance-outfit'].includes(p.id):c?.type==='Tactic';}
-function ensureTiming(s:Battlefield,id:string,context:EffectContext,ability?:EffectProgram){const d=duel(s),c=s.table.cards[id];if(d.winner!==undefined||s.rules?.pending||d.ordering)throw Error('Resolve the current choice first.');if(!c||String(c.controller)!==context.player)throw Error('You do not control this card.');if(d.priority){if(d.priority.holder!==context.player)throw Error('Another player has priority.');if(!reactive(s,id,ability))throw Error('Only Tactics and reactive abilities may join the Clash.');}else if((context.player!==active(s)&&!(d.phase==='combat'&&d.combat?.stage==='block'&&reactive(s,id,ability)))||!['main1','main2','combat'].includes(d.phase)||(!reactive(s,id,ability)&&!['main1','main2'].includes(d.phase)))throw Error('This action is not legal in this phase.');}
+function ensureTiming(s:Battlefield,id:string,context:EffectContext,ability?:EffectProgram){requireOpeningKept(s);const d=duel(s),c=s.table.cards[id];if(d.winner!==undefined||s.rules?.pending||d.ordering)throw Error('Resolve the current choice first.');if(!c||String(c.controller)!==context.player)throw Error('You do not control this card.');if(d.priority){if(d.priority.holder!==context.player)throw Error('Another player has priority.');if(!reactive(s,id,ability))throw Error('Only Tactics and reactive abilities may join the Clash.');}else if((context.player!==active(s)&&!(d.phase==='combat'&&d.combat?.stage==='block'&&reactive(s,id,ability)))||!['main1','main2','combat'].includes(d.phase)||(!reactive(s,id,ability)&&!['main1','main2'].includes(d.phase)))throw Error('This action is not legal in this phase.');}
 function prepareAshenAction(s:Battlefield,id:string,context:EffectContext,abilityId?:string){
  const d=duel(s),card=s.table.cards[id];let p:EffectProgram;
  const ability=abilityId?availableAshenAbilities(s,id).find(p=>p.id===abilityId):undefined;
@@ -53,6 +80,7 @@ export function submitAshenAction(original:Battlefield,id:string,context:EffectC
  s.table.events.push(`Clash: ${card.name}${ability?' — '+p.label:''}. Costs paid.`);return settleAshenDuel(s);
 }
 export function ashenResponseOptions(s:Battlefield,who:string){
+ if(ashenOpeningPlayer(s)!==null)return [];
  const options:{source:string;label:string}[]=[];
  const affordable=structuredClone(s);
  for(const c of Object.values(s.table.cards).filter(c=>String(c.controller)===who&&c.zone==='ley'&&!c.faceDown&&!c.rotated)){
@@ -106,7 +134,7 @@ export function resumeBruteDuel(original:Battlefield,ids:string[]){
  }
  return settleAshenDuel(resumeAshenEffect(original,ids));
 }
-export function burnInBruteDuel(original:Battlefield,id:string,who:0|1){let s=structuredClone(original);const d=duel(s),c=s.table.cards[id];if(d.winner!==undefined||s.rules?.pending||d.ordering||d.callPermission||c?.controller!==who||c.zone!=='ley'||c.faceDown||c.rotated)throw Error('This Font cannot be burned.');if(d.priority?d.priority.holder!==String(who):s.table.active!==who)throw Error('You do not have priority.');s.table.cards[id].faceDown=true;s.basins[who][fontEssence(c.cardId)]++;const p=ashenEffects[c.cardId]?.onBurn;if(p){d.stack.push({kind:'ability',program:p,context:{player:String(who),source:id}});d.priority=openPriority(['0','1'],String(who));}return settleAshenDuel(s);}
+export function burnInBruteDuel(original:Battlefield,id:string,who:0|1){requireOpeningKept(original);let s=structuredClone(original);const d=duel(s),c=s.table.cards[id];if(d.winner!==undefined||s.rules?.pending||d.ordering||d.callPermission||c?.controller!==who||c.zone!=='ley'||c.faceDown||c.rotated)throw Error('This Font cannot be burned.');if(d.priority?d.priority.holder!==String(who):s.table.active!==who)throw Error('You do not have priority.');s.table.cards[id].faceDown=true;s.basins[who][fontEssence(c.cardId)]++;const p=ashenEffects[c.cardId]?.onBurn;if(p){d.stack.push({kind:'ability',program:p,context:{player:String(who),source:id}});d.priority=openPriority(['0','1'],String(who));}return settleAshenDuel(s);}
 export function nextAshenPhase(original:Battlefield){let s=structuredClone(original);requireIdle(s);const d=duel(s);
  if(d.phase==='main1'){d.phase='combat';d.combat={stage:'attack',attackers:[],blockers:{},blocked:[]};}
  else if(d.phase==='combat'){if(d.combat?.stage!=='finished')throw Error('Finish or skip the Skirmish first.');d.phase='main2';}
@@ -135,6 +163,7 @@ export function advanceAshenTo(original:Battlefield,target:Phase){
  throw Error('Unable to reach that phase.');
 }
 export function settleAshenDuel(initial:Battlefield):Battlefield{
+ if(ashenOpeningPlayer(initial)!==null)return initial;
  let s=initial,budget=512;
  while(budget--){const d=duel(s);for(const entry of d.stack)entry.key??=`clash-${++s.rules!.serial}`;checkAshenVictory(s);if(d.winner!==undefined||s.rules?.pending||d.callPermission==='choose'||d.ordering)return s;
   if(d.stack.length||d.responseWindow){if(d.stack.at(-1)?.program.steps[0]?.op==='select'){resolveTopEntry(s);continue;}if(!d.priority)d.priority=openPriority(['0','1'],d.stack.at(-1)?.context.player||active(s));if(canReact(s,d.priority.holder))return s;const pass=passPriority(d.priority,d.priority.holder);d.priority=pass.done?null:pass.priority;if(pass.done){if(d.stack.length)resolveTopEntry(s);else d.responseWindow=false;}continue;}

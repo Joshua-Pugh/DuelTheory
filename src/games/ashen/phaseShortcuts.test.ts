@@ -1,5 +1,6 @@
+import {readyBruteDuel as newBruteDuel} from '../../test/ashenReady';
 import {expect,it} from 'vitest';
-import {advanceAshenTo,newBruteDuel,nextAshenPhase,declareAshenAttackers,resolveAshenCombat,passAshenPriority,resumeBruteDuel} from './duel';
+import {advanceAshenTo,nextAshenPhase,declareAshenAttackers,resolveAshenCombat,passAshenPriority,resumeBruteDuel} from './duel';
 import {moveAshenCard,ashenAdapter} from './adapter';
 import {applyAshenCommand} from '../../matches/ashenCommands';
 function setup(){const s=newBruteDuel(()=>.4);s.table.active=0;return s;}

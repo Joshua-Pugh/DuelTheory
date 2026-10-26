@@ -1,3 +1,4 @@
+import {readyAshenDuel as newAshenDuel} from '../test/ashenReady';
 // @vitest-environment happy-dom
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
@@ -67,7 +68,7 @@ it("starts the bundled Brute/Noble duel after the coin flip and draws both hands
   expect(document.body.textContent).toContain("Ossuary");
   expect(document.body.textContent).not.toContain("could not open");
 });
-import { newAshenDuel } from "../games/ashen/duel";
+
 import { BATTLEFIELD_KEY } from "../ashenBattlefieldState";
 it("resumes a saved local duel without dealing a second opening hand", async () => {
   const state = newAshenDuel(["Noble", "Brute"], 42, 0);

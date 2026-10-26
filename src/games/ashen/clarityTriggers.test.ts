@@ -1,6 +1,7 @@
+import {readyAshenDuel as newAshenDuel} from '../../test/ashenReady';
 import {expect,it} from 'vitest';
 import {ashenActionCost,moveAshenCard} from './adapter';
-import {newAshenDuel,submitAshenAction,passAshenPriority,resumeBruteDuel,advanceAshenTo} from './duel';
+import {submitAshenAction,passAshenPriority,resumeBruteDuel,advanceAshenTo} from './duel';
 function setup(seat:0|1=0){const s=newAshenDuel(['Noble','Noble'],42,seat);for(const c of Object.values(s.table.cards))if(c.zone==='command')moveAshenCard(s,c.instanceId,'graveyard');s.basins[seat].oath=99;const rune=Object.values(s.table.cards).find(c=>c.controller===seat&&c.cardId==='ashen-noble-rune-of-clarity')!;moveAshenCard(s,rune.instanceId,'support');return {s,id:rune.instanceId};}
 it('resolves one Clarity trigger per Refine draw before returning to bottom-deck selection in either seat',()=>{
  for(const seat of [0,1] as const){

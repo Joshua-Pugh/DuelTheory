@@ -1,3 +1,4 @@
+import {readyBruteDuel as newBruteDuel,readyAshenDuel as newAshenDuel} from './test/ashenReady';
 // @vitest-environment happy-dom
 import {act} from 'react';
 import {createRoot,type Root} from 'react-dom/client';
@@ -6,13 +7,13 @@ import {afterEach,expect,it,vi} from 'vitest';
 import AshenBattlefield from './AshenBattlefield';
 import AshenPhaseControls from './AshenPhaseControls';
 import ResourcePool from './duelUi/ResourcePool';
-import {newBruteDuel,inspectAshenAction,submitAshenAction,nextAshenPhase} from './games/ashen/duel';
+import {inspectAshenAction,submitAshenAction,nextAshenPhase} from './games/ashen/duel';
 import {ashenTurnNumber} from './ashenBattlefieldState';
 import {executeProgram} from './framework';
 import {ashenAdapter} from './games/ashen/adapter';
 import {moveAshenCard} from './games/ashen/adapter';
 import {rulesForCard,RESOURCES} from './ashenPresentation';
-import {newAshenDuel} from './games/ashen/duel';
+
 import AshenEffectNotices from './AshenEffectNotices';
 vi.mock('./useFittedRules',()=>({default:()=>{}}));
 (globalThis as Record<string,unknown>).IS_REACT_ACT_ENVIRONMENT=true;

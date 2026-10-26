@@ -1,5 +1,6 @@
+import {readyAshenDuel as newAshenDuel} from '../../test/ashenReady';
 import {describe,it,expect} from 'vitest';
-import {newAshenDuel,submitAshenAction,resumeBruteDuel,passAshenPriority,settleAshenDuel,burnInBruteDuel,nextAshenPhase,declareAshenAttackers} from './duel';
+import {submitAshenAction,resumeBruteDuel,passAshenPriority,settleAshenDuel,burnInBruteDuel,nextAshenPhase,declareAshenAttackers} from './duel';
 import {ashenAdapter,ashenStats,moveAshenCard,drainTriggers,playProgram} from './adapter';
 import {nobleEffects} from './nobleEffects';
 import {ashenCardMap} from '../../ashenDecks';

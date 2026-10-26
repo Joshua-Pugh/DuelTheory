@@ -1,6 +1,7 @@
+import {readyBruteDuel as newBruteDuel} from './test/ashenReady';
 import {expect,it} from 'vitest';
 import {renderToStaticMarkup} from 'react-dom/server';
-import {newBruteDuel} from './games/ashen/duel';
+
 import {ashenAdapter,moveAshenCard} from './games/ashen/adapter';
 import {ashenVisualEvents} from './ashenVisualEvents';
 import CardMotionLayer,{motionBetween} from './duelUi/CardMotionLayer';

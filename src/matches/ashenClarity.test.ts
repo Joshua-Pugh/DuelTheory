@@ -1,6 +1,7 @@
+import {readyAshenDuel as newAshenDuel} from '../test/ashenReady';
 import {expect,it} from 'vitest';
 import {applyMatchCommand,matchView,member,type Match} from './model';
-import {newAshenDuel} from '../games/ashen/duel';
+
 import {moveAshenCard} from '../games/ashen/adapter';
 it('keeps interrupted Refine server-only and authenticates each private Clarity target',()=>{
  const b=newAshenDuel(['Noble','Noble'],42,0),rune=Object.values(b.table.cards).find(c=>c.controller===0&&c.cardId==='ashen-noble-rune-of-clarity')!;moveAshenCard(b,rune.instanceId,'support');b.basins[0].oath=20;for(const c of Object.values(b.table.cards))if(c.controller===0&&c.zone==='command')moveAshenCard(b,c.instanceId,'graveyard');

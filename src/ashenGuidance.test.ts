@@ -1,6 +1,7 @@
+import {readyAshenDuel as newAshenDuel} from './test/ashenReady';
 import {it,expect} from 'vitest';
 import {ashenGuidance} from './ashenGuidance';
-import {newAshenDuel} from './games/ashen/duel';
+
 it('guides the attacker and defender separately through combat',()=>{
  const s=newAshenDuel(['Brute','Noble'],42,0);
  expect(ashenGuidance(s).title).toContain('First main phase');

@@ -1,5 +1,6 @@
+import {readyBruteDuel as newBruteDuel} from '../../test/ashenReady';
 import {describe,it,expect} from 'vitest';
-import {ashenResponseOptions,newBruteDuel,submitAshenAction,passAshenPriority,nextAshenPhase,declareAshenAttackers,assignAshenBlocker,resolveAshenCombat,canBlockAshen,resumeBruteDuel,chooseKorgathForCall,settleAshenDuel,korgathCallChoices,confirmAshenTriggerOrder,orderAshenTrigger,burnInBruteDuel} from './duel';
+import {ashenResponseOptions,submitAshenAction,passAshenPriority,nextAshenPhase,declareAshenAttackers,assignAshenBlocker,resolveAshenCombat,canBlockAshen,resumeBruteDuel,chooseKorgathForCall,settleAshenDuel,korgathCallChoices,confirmAshenTriggerOrder,orderAshenTrigger,burnInBruteDuel} from './duel';
 import {moveAshenCard,ashenStats,ashenAdapter,playProgram} from './adapter';
 import {bruteEffects} from './bruteEffects';
 import {ashenCardMap} from '../../ashenDecks';

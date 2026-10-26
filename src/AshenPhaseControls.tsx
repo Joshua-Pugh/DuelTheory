@@ -1,8 +1,9 @@
+import {ashenOpeningPlayer} from './games/ashen/duel';
 import {assertAshenPhaseAdvance} from './games/ashen/duel';
 import PhaseSelector from './duelUi/PhaseSelector';
 import type {Battlefield} from './ashenBattlefieldState';
 export default function AshenPhaseControls({state,seat,attackIds,blockAttack,onNext,onAdvance,onPass,onSeat,onSelectAll,onAttack,onClearBlockers,onCombat,onOrder,onConfirmOrder}:{state:Battlefield;seat:0|1;attackIds:string[];blockAttack:string|null;onNext:()=>void;onAdvance?:(phase:'combat'|'main2'|'end')=>void;onPass:()=>void;onSeat?:((seat:0|1)=>void);onSelectAll:()=>void;onAttack:()=>void;onClearBlockers:()=>void;onCombat:()=>void;onOrder:(index:number)=>void;onConfirmOrder:()=>void}){
- const d=state.rules!.duel!,active=state.table.active===seat,locked=!!(state.rules?.pending||d.stack.length||d.jobs.length||d.priority||d.responseWindow||d.ordering||d.callPermission||d.winner!==undefined),combat=d.phase==='combat',stage=d.combat?.stage;
+ const d=state.rules!.duel!,active=state.table.active===seat,locked=!!(ashenOpeningPlayer(state)!==null||state.rules?.pending||d.stack.length||d.jobs.length||d.priority||d.responseWindow||d.ordering||d.callPermission||d.winner!==undefined),combat=d.phase==='combat',stage=d.combat?.stage;
  const canGo=(phase:'combat'|'main2'|'end')=>{if(!active||locked)return false;try{assertAshenPhaseAdvance(state,phase);return true;}catch{return false;}};
  const go=(phase:'combat'|'main2'|'end')=>onAdvance?onAdvance(phase):onNext();
  const steps=combat?[{id:'attack',label:'ATK',title:'Declare Siege · attacking Units gain Fatigue',active:stage==='attack',disabled:true,onSelect:()=>{}},{id:'block',label:'BLK',title:'Establish Defense · assign blockers',active:stage==='block',disabled:true,onSelect:()=>{}},{id:'damage',label:'DMG',title:'Damage Exchange and Damage Application',active:stage==='damage',disabled:locked||active||stage!=='block',onSelect:onCombat},{id:'main2',label:'M2',title:'Second main phase',disabled:!canGo('main2'),onSelect:()=>go('main2')},{id:'end',label:'EP',title:'End Phase · finish required combat first',disabled:!canGo('end'),onSelect:()=>go('end')}]:[

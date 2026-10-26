@@ -1,10 +1,12 @@
 import type {Battlefield} from '../ashenBattlefieldState';
 import type {EffectContext} from '../framework';
-import {advanceAshenTo,submitAshenAction,resumeBruteDuel,burnInBruteDuel,nextAshenPhase,passAshenPriority,declareAshenAttackers,assignAshenBlocker,clearAshenBlockers,resolveAshenCombat,orderAshenTrigger,confirmAshenTriggerOrder,chooseKorgathForCall} from '../games/ashen/duel';
+import {chooseAshenOpening,ashenOpeningPlayer,advanceAshenTo,submitAshenAction,resumeBruteDuel,burnInBruteDuel,nextAshenPhase,passAshenPriority,declareAshenAttackers,assignAshenBlocker,clearAshenBlockers,resolveAshenCombat,orderAshenTrigger,confirmAshenTriggerOrder,chooseKorgathForCall} from '../games/ashen/duel';
 import {pendingAshenChoices} from '../games/ashen/adapter';
-export type AshenCommand={type:'phase';phase:'combat'|'main2'|'end'}|{type:'play';source:string;context:EffectContext;ability?:string}|{type:'choice';ids:string[]}|{type:'burn';id:string}|{type:'next'|'pass'|'clearBlockers'|'combat'|'confirmOrder'}|{type:'attack';ids:string[]}|{type:'block';attacker:string;blocker:string}|{type:'order';index:number}|{type:'call';id:string|null};
+export type AshenCommand={type:'opening';choice:'keep'|'redraw'}|{type:'phase';phase:'combat'|'main2'|'end'}|{type:'play';source:string;context:EffectContext;ability?:string}|{type:'choice';ids:string[]}|{type:'burn';id:string}|{type:'next'|'pass'|'clearBlockers'|'combat'|'confirmOrder'}|{type:'attack';ids:string[]}|{type:'block';attacker:string;blocker:string}|{type:'order';index:number}|{type:'call';id:string|null};
 export function applyAshenCommand(s:Battlefield,seat:0|1,c:AshenCommand){
  const d=s.rules?.duel;if(!d||d.winner!==undefined)throw Error('The duel is not active.');
+ if(c.type==='opening')return chooseAshenOpening(s,seat,c.choice);
+ if(ashenOpeningPlayer(s)!==null)throw Error('Both players must keep their opening hands first.');
  const active=()=>{if(s.table.active!==seat)throw Error('Wait for your turn.');};
  if(c.type==='play'){if(c.context.player!==String(seat)||c.context.source!==c.source||s.table.cards[c.source]?.controller!==seat)throw Error('Use your own cards.');return submitAshenAction(s,c.source,c.context,c.ability);}
  if(c.type==='choice'){if(pendingAshenChoices(s)?.context.player!==String(seat))throw Error('This choice belongs to the other player.');return resumeBruteDuel(s,c.ids);}

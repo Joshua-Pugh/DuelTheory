@@ -7,7 +7,8 @@ export function ashenVisualEvents(before:Battlefield|undefined,after:Battlefield
  const events:AshenVisualEvent[]=[];
  for(const seat of [0,1] as const){
   if(!before||(after.rules?.shuffleCounts?.[seat]||0)>(before.rules?.shuffleCounts?.[seat]||0))events.push({kind:'shuffle',seat});
-  for(const id of after.table.piles[`${seat}:hand`])if(!before||before.table.cards[id]?.zone==='deck')events.push({kind:'draw',seat,id});
+  const redrawn=!!before&&(after.rules?.duel?.opening?.redraws[seat]||0)>(before.rules?.duel?.opening?.redraws[seat]||0);
+  for(const id of after.table.piles[`${seat}:hand`])if(!before||redrawn||before.table.cards[id]?.zone==='deck')events.push({kind:'draw',seat,id});
  }
  if(before)for(const card of Object.values(after.table.cards)){
   const old=before.table.cards[card.instanceId];if(!old||old.zone===card.zone)continue;

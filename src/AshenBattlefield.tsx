@@ -1,3 +1,4 @@
+import AshenOpeningHands from './AshenOpeningHands';
 import {useDuelViewport} from './duelUi/useDuelViewport';
 import CardBack from './duelUi/CardBack';
 import AshenStatBreakdown from './AshenStatBreakdown';
@@ -22,7 +23,7 @@ import './ashenBattlefield.css';
 import './ashenDuelRoom.css';
 import {ashenEffects,ASHEN_EFFECT_PACK} from './games/ashen/effectPacks';
 import {ashenData,ashenStats,effectChoices,playProgram,resolveAshenEffect,resolveBurnEffect,availableAshenAbilities,pendingAshenChoices,resumeAshenEffect} from './games/ashen/adapter';
-import {advanceAshenTo,inspectAshenAction,canBlockAshen,confirmAshenTriggerOrder,orderAshenTrigger,newBruteDuel,submitAshenAction,resumeBruteDuel,burnInBruteDuel,nextAshenPhase,passAshenPriority,declareAshenAttackers,assignAshenBlocker,clearAshenBlockers,resolveAshenCombat,korgathCallChoices,chooseKorgathForCall} from './games/ashen/duel';
+import {chooseAshenOpening,advanceAshenTo,inspectAshenAction,canBlockAshen,confirmAshenTriggerOrder,orderAshenTrigger,newBruteDuel,submitAshenAction,resumeBruteDuel,burnInBruteDuel,nextAshenPhase,passAshenPriority,declareAshenAttackers,assignAshenBlocker,clearAshenBlockers,resolveAshenCombat,korgathCallChoices,chooseKorgathForCall} from './games/ashen/duel';
 import type {EffectProgram,EffectContext} from './framework';
 
 const NAMES:Record<Resource,string>={untuned:'Untuned',oath:'Oath',fury:'Fury',ash:'Ash',veil:'Veil'};
@@ -86,11 +87,11 @@ export default function AshenBattlefield({remote,initialState,onAgain,onExit,lea
   const c=st.cards[id],known=c.controller===seat||(c.zone!=='hand'&&!c.faceDown),face=known&&!c.faceDown;
   const d=ashenData(state,id),label=known?c.name:'Face-down card';
   return <div className="ab-card-wrap" key={id}>
-   <button type="button" className={`ab-card ${c.controller!==seat&&!hand?'ab-opposing':''} ${c.rotated?'ab-fatigued':''} ${selected===id||attackIds.includes(id)?'ab-selected':''}`} data-ashen-card={id} aria-label={`${label}${c.zone==='ley'&&c.faceDown?' · spent':''}`} title={label} draggable={!guided&&c.controller===seat} onDragStart={e=>e.dataTransfer.setData('application/x-ashen-card',id)} onMouseEnter={()=>setHovered(id)} onMouseLeave={()=>setHovered(null)} onFocus={()=>setHovered(id)} onBlur={()=>setHovered(null)} onClick={()=>clickCard(id)} onContextMenu={e=>{e.preventDefault();clickCard(id);}}>
+   <button type="button" className={`ab-card ${c.controller!==seat&&!hand?'ab-opposing':''} ${c.rotated?'ab-fatigued':''} ${c.zone==='ley'&&c.faceDown?'ab-font-spent':''} ${selected===id||attackIds.includes(id)?'ab-selected':''}`} data-ashen-card={id} aria-label={`${label}${c.zone==='ley'&&c.faceDown?' · spent':''}`} title={label} draggable={!guided&&c.controller===seat} onDragStart={e=>e.dataTransfer.setData('application/x-ashen-card',id)} onMouseEnter={()=>setHovered(id)} onMouseLeave={()=>setHovered(null)} onFocus={()=>setHovered(id)} onBlur={()=>setHovered(null)} onClick={()=>clickCard(id)} onContextMenu={e=>{e.preventDefault();clickCard(id);}}>
     <span className="ab-card-face">{face&&d?<AshenCardFrame card={d} size="mini"/>:<span className="ab-card-back"><CardBack/></span>}</span>
     {['unit','support'].includes(c.zone)&&c.rotated&&<span className="ab-fatigue-counter" aria-label="1 Fatigue counter">F</span>}{c.counters>0&&<span className="ab-counter">+{c.counters}</span>}{Object.entries(state.rules?.counters?.[id]||{}).filter(([,n])=>n>0).map(([name,n])=><span className="ab-counter" key={name}>{name}: {n}</span>)}
     {c.zone==='unit'&&known&&<span className="ab-stat-chip">{ashenStats(state,id).attack}/{ashenStats(state,id).defense}{ashenStats(state,id).damage?` · ${ashenStats(state,id).damage} dmg`:''}</span>}
-    {c.zone==='ley'&&c.faceDown&&<span className="ab-spent">SPENT</span>}
+    {c.zone==='ley'&&c.faceDown&&<span className="ab-spent">Spent</span>}
    </button>
 
    {hand&&c.controller===seat&&<AshenCommandCost state={state} id={id} compact/>}
@@ -116,7 +117,7 @@ export default function AshenBattlefield({remote,initialState,onAgain,onExit,lea
   {['graveyard','banished'].map(z=><button key={z} data-ashen-pile={`${who}:${z}`} className="ab-pile-button" onClick={()=>setPile({seat:who,zone:z})} onDragOver={e=>e.preventDefault()} onDrop={e=>drop(e,who,z)}><span>{z==='graveyard'?'Ossuary':'Banished'}</span><span className="ab-pile-thumb">{(()=>{const top=st.piles[`${who}:${z}`].at(-1),data=top?ashenData(state,top):undefined;return data&&top&&(!st.cards[top].faceDown||st.cards[top].controller===seat)?<AshenCardFrame card={data} size="mini"/>:<span aria-hidden="true">◇</span>;})()}</span><b>{st.piles[`${who}:${z}`].length}</b></button>)}
  </div>;
  const half=(who:0|1)=><section className={`ab-half ${who!==seat?'ab-opponent':'ab-you'} ${ashenData(state,st.piles[`${who}:command`][0])?.faction==='Brute'?'ab-brute':'ab-noble'}`} aria-label={`Player ${who+1} battlefield`}>
-  <div className="ab-player"><span>{who===seat?'YOU':'OPPONENT'} · PLAYER {who+1}</span><strong>{ashenData(state,st.piles[`${who}:command`][0])?.faction==='Brute'?'Clan of the Broken Fist':'The Crown’s Might'}</strong><small className="ab-command-marks">Plan {state.rules?.nobleMarks?.[who]?.planned||0} · Refine {state.rules?.nobleMarks?.[who]?.refined||0}</small><em>{st.active===who?'Active player':''}</em></div>
+  <div className="ab-player"><span>{who===seat?'YOU':'OPPONENT'} · PLAYER {who+1}</span><strong>{ashenData(state,st.piles[`${who}:command`][0])?.faction==='Brute'?'Clan of the Broken Fist':'The Crown’s Might'}</strong><small className="ab-command-marks">Plan {state.rules?.nobleMarks?.[who]?.planned||0} · Refine {state.rules?.nobleMarks?.[who]?.refined||0}</small><b className="ab-player-hp">{st.health[who]} HP</b><em>{st.active===who?'Active player':''}</em></div>
   <div className="ab-half-grid">{zone(who,'command','Command Station')}{zone(who,'support','Runes & Relics')}{zone(who,'ley','Ley Fonts')}{piles(who)}{zone(who,'unit','Frontline')}{basin(who)}</div>
  </section>;
  const cardActions:CardMenuAction[]=[{id:'view',label:'View card',run:()=>setViewerOpen(true)}];
@@ -167,6 +168,7 @@ export default function AshenBattlefield({remote,initialState,onAgain,onExit,lea
   {viewerOpen&&<button className="ab-viewer-scrim" aria-label="Close card viewer" onClick={()=>setViewerOpen(false)}/>}
   <p className="ab-notice" role="status">{notice}</p><p className="ab-footnote">Saves in this browser. Manual controls bypass rules. Start a New AT duel for phases, Clash responses and combat. Manual table controls bypass rules.</p>
   {assisted&&!guided&&<p className="ab-effect-banner">Effects sandbox: click a card and choose its play action for cards in the first AT prototype. Printed essence costs and deployment fatigue are applied. Manual moves bypass rules. Clash timing, combat, and unlisted effects are not automated.</p>}
+  {guided&&<AshenOpeningHands state={state} seat={seat} onSeat={remote?undefined:setSeat} onChoice={choice=>{if(runGuided(s=>chooseAshenOpening(s,seat,choice),{type:'opening',choice})){setHistory([]);setSelected(null);setHovered(null);setMenuOpen(false);}}}/>}
   <AshenEffectNotices events={st.events}/>
   <AshenCardAnimations key={`motions-${seat}`} state={state} seat={seat} board={board}/>
   {menuOpen&&card&&<CardActionMenu details={<AshenCommandCost state={state} id={card.instanceId}/>} title={visible?card.name:'Face-down card'} actions={cardActions} onClose={()=>setMenuOpen(false)}/>}

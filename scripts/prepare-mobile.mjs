@@ -7,6 +7,7 @@ for (const dir of ["ashen/layers", "ashen/costs", "ashen/artwork", "branding"]) 
     for (const name of [
       "dueltheory-crest.png",
       "dt-forge-crest.svg",
+      "dt-coin-crest.svg",
       "dt-wordmark.svg",
       "dt-forge-icon.svg",
       "dueltheory-wordmark.png",
