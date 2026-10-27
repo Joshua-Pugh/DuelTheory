@@ -13,12 +13,12 @@ import type {AshenCommand} from './matches/ashenCommands';
 import {createPortal} from 'react-dom';
 import AshenReference from './AshenReference';
 import {ashenGuidance,ashenPhaseName} from './ashenGuidance';
-import {useEffect,useRef,useState,type CSSProperties,type DragEvent} from 'react';
+import {useEffect,useRef,useState,type CSSProperties,type DragEvent,type ReactNode} from 'react';
 import {Eye,ChevronRight,Undo2,Swords} from 'lucide-react';
 import AshenCardFrame from './AshenCardFrame';
 import AshenEffectDecision from './AshenEffectDecision';
 import {RESOURCES,rulesForCard,type Resource} from './ashenPresentation';
-import {BATTLEFIELD_KEY,ashenTurnNumber,battlefieldDispatch,fontEssence,newBattlefield,readBattlefield,type Battlefield,type BattlefieldAction} from './ashenBattlefieldState';
+import {BATTLEFIELD_KEY,ashenFaceVisible,ashenTurnNumber,battlefieldDispatch,fontEssence,newBattlefield,readBattlefield,type Battlefield,type BattlefieldAction} from './ashenBattlefieldState';
 import './ashenBattlefield.css';
 import './ashenDuelRoom.css';
 import {ashenEffects,ASHEN_EFFECT_PACK} from './games/ashen/effectPacks';
@@ -28,7 +28,7 @@ import type {EffectProgram,EffectContext} from './framework';
 
 const NAMES:Record<Resource,string>={untuned:'Untuned',oath:'Oath',fury:'Fury',ash:'Ash',veil:'Veil'};
 type Flight={id:number;x:number;y:number;dx:number;dy:number;resource:Resource};
-export default function AshenBattlefield({remote,initialState,onAgain,onExit,learning=true,mobile=false}:{remote?:{choosing?:(value:boolean)=>void;state:Battlefield;seat:0|1;send:(c:AshenCommand)=>void};learning?:boolean;mobile?:boolean;initialState?:Battlefield;onAgain?:()=>void;onExit?:()=>void}={}){
+export default function AshenBattlefield({remote,initialState,onAgain,onExit,learning=true,mobile=false,practice}:{practice?:{panel:ReactNode;onChange:(s:Battlefield)=>void};remote?:{choosing?:(value:boolean)=>void;state:Battlefield;seat:0|1;send:(c:AshenCommand)=>void};learning?:boolean;mobile?:boolean;initialState?:Battlefield;onAgain?:()=>void;onExit?:()=>void}={}){
  const [localState,setState]=useState<Battlefield>(()=>initialState||readBattlefield()||newBattlefield(true));
  const state=remote?.state??localState;
  const [localSeat,setLocalSeat]=useState<0|1>(initialState?.table.active||0),[selected,setSelected]=useState<string|null>(null);
@@ -38,11 +38,12 @@ export default function AshenBattlefield({remote,initialState,onAgain,onExit,lea
  const [attackIds,setAttackIds]=useState<string[]>([]),[blockAttack,setBlockAttack]=useState<string|null>(null);
  const [pendingIds,setPendingIds]=useState<string[]>([]);
  const [expanded,setExpanded]=useState(false),[menuOpen,setMenuOpen]=useState(false);
- const [hovered,setHovered]=useState<string|null>(null),[reference,setReference]=useState<'rules'|'keywords'|'walkthrough'|null>(null),[viewerOpen,setViewerOpen]=useState(false);
+ const [hovered,setHovered]=useState<string|null>(null),[reference,setReference]=useState<'rules'|'keywords'|null>(null),[viewerOpen,setViewerOpen]=useState(false);
  const [fades,setFades]=useState<{seat:0|1;resources:Resource[]}[]>([]);
  const [assisted,setAssisted]=useState(!!state.rules?.duel);
  const [effectFlow,setEffectFlow]=useState<{program:EffectProgram;context:EffectContext;deploy:boolean;step:number}|null>(null);
  useEffect(()=>{remote?.choosing?.(!!effectFlow);},[Boolean(effectFlow),remote?.choosing]);
+ useEffect(()=>{practice?.onChange(state);},[state,practice?.onChange]);
  const board=useRef<HTMLDivElement>(null),flightId=useRef(0);
  const [learningMode,setLearningMode]=useState(learning);
  const guided=state.rules?.duel;
@@ -57,7 +58,7 @@ export default function AshenBattlefield({remote,initialState,onAgain,onExit,lea
  const viewVisible=viewCard&&(viewCard.controller===seat||(!['hand','deck'].includes(viewCard.zone)&&!viewCard.faceDown));
  const effectDefinition=card?ashenEffects[card.cardId]:undefined;
  const visible=card&&(card.controller===seat||(card.zone!=='hand'&&card.zone!=='deck'&&!card.faceDown));
- useEffect(()=>{if(remote)return;try{localStorage.setItem(BATTLEFIELD_KEY,JSON.stringify(state));}catch{setNotice('Browser storage unavailable. Keep this tab open or export the table.');}},[state]);
+ useEffect(()=>{if(remote||practice)return;try{localStorage.setItem(BATTLEFIELD_KEY,JSON.stringify(state));}catch{setNotice('Browser storage unavailable. Keep this tab open or export the table.');}},[state,!!practice]);
  useEffect(()=>{if(!fullscreen)return;const previous=document.body.style.overflow;document.body.style.overflow='hidden';return()=>{document.body.style.overflow=previous;};},[fullscreen]);
  useEffect(()=>{const escape=(event:KeyboardEvent)=>{if(event.key==='Escape'){if(reference)setReference(null);else if(menuOpen)setMenuOpen(false);else if(viewerOpen)setViewerOpen(false);else if(effectFlow)setEffectFlow(null);else if(pile)setPile(null);else if(!guided)setExpanded(false);}};window.addEventListener('keydown',escape);return()=>window.removeEventListener('keydown',escape);},[pile,effectFlow,reference,viewerOpen,guided,menuOpen]);
  const choicePlayer=state.rules?.pending?.flow.context.player;
@@ -84,7 +85,7 @@ export default function AshenBattlefield({remote,initialState,onAgain,onExit,lea
  };
  const clickCard=(id:string)=>{setSelected(id);setMenuOpen(true);};
  const renderCard=(id:string,hand=false)=>{
-  const c=st.cards[id],known=c.controller===seat||(c.zone!=='hand'&&!c.faceDown),face=known&&!c.faceDown;
+  const c=st.cards[id],known=c.controller===seat||(c.zone!=='hand'&&!c.faceDown),face=ashenFaceVisible(c,seat);
   const d=ashenData(state,id),label=known?c.name:'Face-down card';
   return <div className="ab-card-wrap" key={id}>
    <button type="button" className={`ab-card ${c.controller!==seat&&!hand?'ab-opposing':''} ${c.rotated?'ab-fatigued':''} ${c.zone==='ley'&&c.faceDown?'ab-font-spent':''} ${selected===id||attackIds.includes(id)?'ab-selected':''}`} data-ashen-card={id} aria-label={`${label}${c.zone==='ley'&&c.faceDown?' · spent':''}`} title={label} draggable={!guided&&c.controller===seat} onDragStart={e=>e.dataTransfer.setData('application/x-ashen-card',id)} onMouseEnter={()=>setHovered(id)} onMouseLeave={()=>setHovered(null)} onFocus={()=>setHovered(id)} onBlur={()=>setHovered(null)} onClick={()=>clickCard(id)} onContextMenu={e=>{e.preventDefault();clickCard(id);}}>
@@ -146,16 +147,16 @@ export default function AshenBattlefield({remote,initialState,onAgain,onExit,lea
  }
  if(menuOpen&&card&&guided?.combat?.stage==='block'&&seat!==st.active&&card.controller===st.active&&guided.combat.attackers.includes(card.instanceId))cardActions.push({id:'block-target',label:'Choose this attacker to block',run:()=>setBlockAttack(card.instanceId)});
  const toolbarActions=<div className="ab-tools">
-   <button disabled={!!remote} onClick={()=>{if(onAgain){onAgain();return;}setState(newBruteDuel());setAssisted(true);setSelected(null);setAttackIds([]);setHistory([]);}}>New AT duel</button>{(onExit||guided)&&<button onClick={()=>onExit?onExit():replace(true)}>Exit AT duel</button>}{!guided&&<><button disabled={!!guided} onClick={()=>setAssisted(a=>!a)} aria-pressed={assisted}>{assisted?'AT effects: ON':'AT effects: OFF'}</button><button onClick={()=>setExpanded(e=>!e)}>{expanded?'Exit full screen':'Expand table'}</button><button onClick={()=>replace(false)}>New table</button><button onClick={()=>replace(true)}>Layout preview</button></>}<button disabled={!!remote} onClick={()=>{setSeat(opponent);setSelected(null);setHovered(null);setPile(null);}}><Eye size={14}/> View P{opponent+1}</button>
+   <button disabled={!!remote} onClick={()=>{if(onAgain){onAgain();return;}setState(newBruteDuel());setAssisted(true);setSelected(null);setAttackIds([]);setHistory([]);}}>{practice?'Reset lesson':'New AT duel'}</button>{(onExit||guided)&&<button onClick={()=>onExit?onExit():replace(true)}>{practice?'Exit practice':'Exit AT duel'}</button>}{!guided&&<><button disabled={!!guided} onClick={()=>setAssisted(a=>!a)} aria-pressed={assisted}>{assisted?'AT effects: ON':'AT effects: OFF'}</button><button onClick={()=>setExpanded(e=>!e)}>{expanded?'Exit full screen':'Expand table'}</button><button onClick={()=>replace(false)}>New table</button><button onClick={()=>replace(true)}>Layout preview</button></>}<button disabled={!!remote} onClick={()=>{setSeat(opponent);setSelected(null);setHovered(null);setPile(null);}}><Eye size={14}/> View P{opponent+1}</button>
    <button disabled={!!remote||!history.length} onClick={()=>{setState(history[history.length-1]);setHistory(h=>h.slice(0,-1));setFlights([]);setSelected(null);setNotice('Previous table restored.');}}><Undo2 size={14}/> Undo</button>
    {!guided&&<><button onClick={()=>{const url=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='ashen-throne-table.json';a.click();URL.revokeObjectURL(url);}}>Export</button>
-   <button onClick={()=>{const url=URL.createObjectURL(new Blob([JSON.stringify(ASHEN_EFFECT_PACK,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='ashen-prototype-effects-v1.json';a.click();URL.revokeObjectURL(url);}}>Export AT rules</button></>}{guided&&<button aria-pressed={mobile?mobileHelp:learningMode} onClick={()=>mobile?setMobileHelp(v=>!v):setLearningMode(v=>!v)}>{mobile?'Help':learningMode?'Guided: ON':'Guided: OFF'}</button>}<button onClick={()=>setReference('walkthrough')}>Walkthrough</button><button onClick={()=>setReference('rules')}>Rules</button><button onClick={()=>setReference('keywords')}>Keywords</button><button className="ab-viewer-toggle" onClick={()=>setViewerOpen(open=>!open)}>Card viewer</button>
+   <button onClick={()=>{const url=URL.createObjectURL(new Blob([JSON.stringify(ASHEN_EFFECT_PACK,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='ashen-prototype-effects-v1.json';a.click();URL.revokeObjectURL(url);}}>Export AT rules</button></>}{guided&&!practice&&<button aria-pressed={mobile?mobileHelp:learningMode} onClick={()=>mobile?setMobileHelp(v=>!v):setLearningMode(v=>!v)}>{mobile?'Help':learningMode?'Guided: ON':'Guided: OFF'}</button>}<button onClick={()=>setReference('rules')}>Rules</button><button onClick={()=>setReference('keywords')}>Keywords</button><button className="ab-viewer-toggle" onClick={()=>setViewerOpen(open=>!open)}>Card viewer</button>
   </div>;
- const battlefield=<div className={`ab-shell ${fullscreen?'ab-expanded':''} ${guided?'ab-duel':''} ${guided&&learningMode?'ab-learning-mode':''} ${viewerOpen?'ab-viewer-open':''} ${mobile?'ab-mobile-duel':''}`} data-remote={!!remote} role={guided?'region':undefined} aria-label={guided?'Ashen Throne duel room':undefined}>
+ const battlefield=<div className={`ab-shell ${fullscreen?'ab-expanded':''} ${practice?'ab-practice':''} ${guided?'ab-duel':''} ${practice||guided&&learningMode?'ab-learning-mode':''} ${viewerOpen?'ab-viewer-open':''} ${mobile?'ab-mobile-duel':''}`} data-remote={!!remote} role={guided?'region':undefined} aria-label={practice?'Ashen Throne practice battlefield':guided?'Ashen Throne duel room':undefined}>
   {mobile?<details className="ab-mobile-menu" onKeyDown={event=>{if(event.key==='Escape'){event.currentTarget.open=false;event.currentTarget.querySelector('summary')?.focus();}}}>
    <summary aria-label="Duel menu">☰</summary><div className="ab-mobile-menu-panel" onClick={event=>{if((event.target as HTMLElement).closest('button')){const details=event.currentTarget.closest('details');if(details)details.open=false;}}}>{toolbarActions}</div>
-  </details>:  <header className="ab-toolbar"><div><span className="eyebrow">ASHEN THRONE · COMMAND SIEGE</span><h2>The battlefield</h2><small>{state.preview?'Populated layout preview':'Playtest table'} · {guided?'AT duel · Command Siege rules':assisted?'AT effects sandbox':'Manual effects & costs'}</small></div>{toolbarActions}</header>}
-  {guided&&learningMode&&(!mobile||mobileHelp)&&<section className="ab-learning" aria-label="Duel guide" aria-live="polite"><strong>{ashenGuidance(state).title}</strong><span>{ashenGuidance(state).text}</span></section>}
+  </details>:  <header className="ab-toolbar"><div><span className="eyebrow">{practice?'ASHEN THRONE · PRACTICE':'ASHEN THRONE · COMMAND SIEGE'}</span><h2>The battlefield</h2><small>{state.preview?'Populated layout preview':'Playtest table'} · {guided?'AT duel · Command Siege rules':assisted?'AT effects sandbox':'Manual effects & costs'}</small></div>{toolbarActions}</header>}
+  {practice?<section className="ab-practice-panel">{practice.panel}</section>:guided&&learningMode&&(!mobile||mobileHelp)&&<section className="ab-learning" aria-label="Duel guide" aria-live="polite"><strong>{ashenGuidance(state).title}</strong><span>{ashenGuidance(state).text}</span></section>}
   <div className="ab-workspace"><div className="ab-table" ref={board}>
    <div className="ab-opponent-hand" aria-label={`Opponent hand · ${st.piles[`${opponent}:hand`].length} cards`}>{st.piles[`${opponent}:hand`].map(id=><span className="ab-card-back" data-ashen-card={id} key={id}><CardBack/></span>)}</div>
    {half(opponent)}<div className="ab-center"><small>Turn {ashenTurnNumber(state)} · Player {st.active+1}{guided?` · ${ashenPhaseName(guided.phase)}`:''}</small>{guided?<AshenPhaseControls state={state} seat={seat} attackIds={attackIds} blockAttack={blockAttack} onSeat={remote?undefined:setSeat} onAdvance={phase=>{if(phase==='end')setFades(([0,1] as const).map(who=>({seat:who,resources:RESOURCES.filter(r=>state.basins[who][r]>0)})));runGuided(s=>advanceAshenTo(s,phase),{type:'phase',phase});}} onNext={()=>{if(guided.phase==='main2')setFades(([0,1] as const).map(who=>({seat:who,resources:RESOURCES.filter(r=>state.basins[who][r]>0)})));runGuided(nextAshenPhase,{type:'next'});}} onPass={()=>runGuided(s=>passAshenPriority(s,seat),{type:'pass'})} onSelectAll={()=>setAttackIds(st.piles[`${st.active}:unit`].filter(id=>!st.cards[id].rotated&&!st.cards[id].faceDown))} onAttack={()=>{if(runGuided(s=>declareAshenAttackers(s,attackIds),{type:'attack',ids:attackIds}))setAttackIds([]);}} onClearBlockers={()=>runGuided(clearAshenBlockers,{type:'clearBlockers'})} onCombat={()=>runGuided(resolveAshenCombat,{type:'combat'})} onOrder={index=>runGuided(s=>orderAshenTrigger(s,index),{type:'order',index})} onConfirmOrder={()=>runGuided(confirmAshenTriggerOrder,{type:'confirmOrder'})}/>:<button onClick={()=>{act({type:'END_TURN'});setSelected(null);}}>End turn <ChevronRight size={14}/></button>}</div>{half(seat)}

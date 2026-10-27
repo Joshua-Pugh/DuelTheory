@@ -78,3 +78,6 @@ export function readBattlefield():Battlefield|null{
 
 /** Public turn number counts a full cycle; rules.turn remains an individual-turn serial for limits and triggers. */
 export function ashenTurnNumber(state:Battlefield){return state.rules?.duel?Math.ceil((state.rules.turn||1)/2):state.table.turn;}
+
+/** Private hand visibility is independent of the face-down state used by field cards. */
+export function ashenFaceVisible(card:TabletopState['cards'][string],seat:0|1){return card.zone==='hand'?card.controller===seat:card.zone!=='deck'&&!card.faceDown;}

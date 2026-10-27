@@ -21,3 +21,9 @@ This records verification work, not a declaration that the paid starter is ready
 - Freeze and version the rules and both starter lists after those checks, then verify the print-and-play uses the same wording and costs.
 
 The remaining gates require observed match results and beginner feedback; passing tests alone does not substitute for them.
+
+## Interactive practice update
+
+The initial question-and-answer reference has been replaced in the public UI by a separate practice workspace, entered from AT setup. Four prepared engine-backed situations cover the first Brute attack, Refine and Bastion choices, the two Rune trigger chains, and Command payment/Fortify. Completion is checked against actual game state. Practice disables the normal local-duel save effect. All four goals complete in automated engine tests.
+
+Opening redraws now clear the face-down flag on dealt cards. The renderer also displays a player’s own hand independently of stale field-facing flags, preserving opponent-hand and face-down battlefield concealment. The regression suite passes 902 tests across 135 files.

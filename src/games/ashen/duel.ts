@@ -37,7 +37,7 @@ export function chooseAshenOpening(original:Battlefield,seat:0|1,choice:'keep'|'
  hand.length=0;ashenAdapter.shuffle!(s,String(seat),'deck');
  opening.redraws[seat]++;const size=openingHandSize(ASHEN_OPENING_HAND,opening.redraws[seat]);
  const drawn=s.table.piles[`${seat}:deck`].splice(0,size);
- for(const id of drawn)s.table.cards[id].zone='hand';s.table.piles[`${seat}:hand`]=drawn;
+ for(const id of drawn){s.table.cards[id].zone='hand';s.table.cards[id].faceDown=false;}s.table.piles[`${seat}:hand`]=drawn;
  s.table.events.push(`Opening hand: Player ${seat+1} ${redraws===0?'used the free redraw':'redrew'}; drew ${size} card${size===1?'':'s'}.`);
  return s;
 }
