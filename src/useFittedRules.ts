@@ -4,7 +4,7 @@ export default function useFittedRules(ref:RefObject<HTMLDivElement|null>,conten
  useLayoutEffect(()=>{
   const box=ref.current;if(!box)return;
   const fit=()=>{
-   let size=4.2;
+   let size=parseFloat(getComputedStyle(box).getPropertyValue('--rules-max-size'))||4.2;
    const needed=()=>{
     const style=getComputedStyle(box);
     const children=Array.from(box.children) as HTMLElement[];

@@ -63,7 +63,7 @@
 .layered-frame .ashen-keyword-block.has-effect{margin-bottom:.5em}
 .layered-frame .ashen-outfit-cost{justify-content:flex-start;font-weight:400}
 .layered-frame .ashen-outfit-cost>span{font-weight:700}
-.layered-frame.statless-frame .ashen-frame-effect{height:32%;padding-bottom:2%}
+.layered-frame.statless-frame .ashen-frame-effect{--rules-max-size:3.6;height:29.5%;padding-top:2.4%;padding-bottom:2%;gap:1.2%}
 .layered-frame.statless-frame .ashen-frame-footer{bottom:5.5%;height:6.2%;width:74%;max-width:74%}
 
 /* Keep decorative rules ornaments out of readable card text. */
