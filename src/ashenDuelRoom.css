@@ -79,3 +79,5 @@
 .ab-duel .ab-command .ab-hp{display:none}
 .ab-duel .ab-command .ab-card-row{height:calc(100% - 16px)}
 .ab-duel .ab-command .ab-card{width:clamp(28px,calc((100cqh - 22px)*.714),100px)!important}
+
+.ab-walkthrough{max-width:850px}.ab-walkthrough fieldset{display:grid;gap:10px;padding:16px;border:1px solid #8f805a}.ab-walkthrough fieldset button{text-align:left;white-space:normal}.ab-walkthrough [aria-pressed="true"]{outline:2px solid #d8bb70}.ab-walkthrough [role="status"]{border-left:3px solid #d8bb70;padding:0 18px;margin:20px 0}.ab-walkthrough progress{width:100%;height:8px;accent-color:#d8bb70}.ab-walkthrough nav{display:flex;flex-wrap:wrap;gap:12px}.ab-walkthrough select{margin-left:12px}

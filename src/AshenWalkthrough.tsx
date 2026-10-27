@@ -1,0 +1,10 @@
+import {useEffect,useState} from 'react';
+import {sharedLessons,deckLessons} from './ashenWalkthroughLessons';
+const saved=()=>{try{return JSON.parse(sessionStorage.getItem('dt-at-walkthrough')||'{}');}catch{return {};}};
+export default function AshenWalkthrough(){
+ const [deck,setDeck]=useState<'Brute'|'Noble'>(()=>saved().deck==='Noble'?'Noble':'Brute'),[step,setStep]=useState(()=>{const n=saved().step;return Number.isInteger(n)&&n>=0&&n<(saved().deck==='Noble'?8:7)?n:0;}),[answer,setAnswer]=useState<number|null>(null);
+ useEffect(()=>{try{sessionStorage.setItem('dt-at-walkthrough',JSON.stringify({deck,step}));}catch{}},[deck,step]);
+ const lessons=[...sharedLessons,...deckLessons[deck]],lesson=lessons[step];
+ const move=(n:number)=>{setStep(n);setAnswer(null);};
+ return <section className="ab-walkthrough"><p>Choose a deck and work through its decisions. Each lesson explains the result, then gives you something to try in your duel. Close this reference to play; your place is saved on this browser tab.</p><label>Deck <select value={deck} onChange={e=>{setDeck(e.target.value as 'Brute'|'Noble');move(0);}}><option value="Brute">Brutes · Broken Fist</option><option value="Noble">Nobles · Crown’s Bastion</option></select></label><p>Lesson {step+1} of {lessons.length}</p><progress aria-label="Walkthrough progress" value={step+1} max={lessons.length}/><h3>{lesson.title}</h3><p>{lesson.situation}</p><fieldset><legend>{lesson.question}</legend>{lesson.answers.map((text,i)=><button key={text} aria-pressed={answer===i} onClick={()=>setAnswer(i)}>{text}</button>)}</fieldset>{answer!==null&&<div role="status"><h4>{answer===lesson.correct?'That follows the rule.':'Check the consequence.'}</h4><p>{lesson.why}</p><h4>Try it in your duel</h4><p>{lesson.tryIt}</p></div>}<nav aria-label="Walkthrough lessons"><button disabled={!step} onClick={()=>move(step-1)}>Previous</button><button disabled={answer===null||step===lessons.length-1} onClick={()=>move(step+1)}>Next lesson</button>{step===lessons.length-1&&answer!==null&&<span>Review any lesson, then close the reference to continue playing.</span>}</nav></section>;
+}
