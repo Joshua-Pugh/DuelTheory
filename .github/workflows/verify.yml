@@ -1,0 +1,36 @@
+name: Verify web and Android web bundle
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      # Verification never activates production sign-in or the AT app preview.
+      VITE_ACCOUNTS_ENABLED: 'false'
+      VITE_MOBILE_AT_PREVIEW: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Unit and interaction tests
+        run: npm test -- --maxWorkers=2
+      - name: Typecheck and build website
+        run: npm run build:pages
+      - name: Typecheck and build Android web bundle
+        run: npm run build:mobile

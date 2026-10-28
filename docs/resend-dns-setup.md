@@ -1,6 +1,6 @@
 # Account email sender setup
 
-Prepared October 28, 2026 in the owner's signed-in Resend account. No domains were configured before this setup. `auth.ashenforgegames.com` is now registered in Resend but is not yet verified. The owner approved all three DNS additions; GoDaddy saved them successfully. Resend verification has started and is pending DNS propagation.
+Prepared October 28, 2026 in the owner's signed-in Resend account. No domains were configured before this setup. `auth.ashenforgegames.com` is now verified in Resend. The owner approved all three DNS additions; GoDaddy saved them successfully. Resend confirmed the domain and all three records as Verified; sending is enabled and receiving remains disabled.
 
 Resend identifies GoDaddy as the DNS host. Add these records in the **ashenforgegames.com** zone. GoDaddy saved the records with a 1-hour TTL.
 

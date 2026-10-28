@@ -6,11 +6,11 @@
 - Startup uses the Forge Crest/wordmark, staggered Build / Simulate / Master animation, an indeterminate loader tied to module readiness, a 15-second failure timeout, and retry. Reduced motion removes the animation and minimum intro duration.
 - Current-domain table invites are accepted alongside the older GitHub Pages links. Other hosts are rejected.
 - Privacy notice is bundled offline at `/table-privacy.html` and included in the website's public files. Review it against the production provider's retention settings before submitting Data safety.
-- No accounts, billing or paid access are implemented. This is a free internal-test candidate, not a completed paid release.
+- Shared account UI, private profile database and account-deletion endpoint are prepared, but public sign-in is disabled pending SMTP, end-to-end tests and privacy updates. Billing and ad SDKs are not implemented. This is a free internal-test candidate.
 
 ## Before uploading
 
-1. Owner creates a Play Console developer account, completes identity/contact verification, accepts agreements and pays the registration fee. Choose personal or organization based on the actual publishing entity and Google's eligibility requirements.
+1. Play Console now shows the Ashen Forge Games personal developer account. The first app form is prepared as DuelTheory: Table Companion (free app, com.dueltheory available). Owner review of legal declarations and app creation remains pending.
 2. Create and securely back up an upload signing key; use Play App Signing. Do not commit keys or passwords. The generated release AAB remains unsigned until this is configured. Do not upload the debug APK as a production release.
 3. Add title, descriptions, support email, launcher icon, feature graphic, real phone screenshots, content rating, target audience, ads declaration and Data safety answers. Do not advertise AT or purchases in the initial listing.
 4. Verify privacy URL `https://dueltheory.com/table-privacy.html` works publicly after deployment. Confirm Cloudflare operational log settings/retention. Disclose actual room data, nickname and identifiers; do not claim no collection simply because there are no accounts.
