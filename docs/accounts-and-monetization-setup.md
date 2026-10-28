@@ -1,6 +1,6 @@
 # Accounts and initial ad-removal rollout
 
-Status: account database and deletion endpoint deployed October 28, 2026; public sign-in remains disabled. The tracker_profiles migration succeeded in the hosted SQL editor. Transactional two-user database isolation checks and four public-key rejection probes passed. Custom SMTP is not configured; email templates cannot currently be edited without it. Resend is awaiting owner sign-in. Successful end-user email sign-in and account deletion remain unverified. No ad SDK or Play Billing SDK has been installed and no purchase UI or live ad requests are enabled.
+Status: account database and deletion endpoint deployed October 28, 2026; public sign-in remains disabled. The tracker_profiles migration succeeded in the hosted SQL editor. Transactional two-user database isolation checks and four public-key rejection probes passed. Custom SMTP is not configured; email templates cannot currently be edited without it. Resend is signed in; auth.ashenforgegames.com is registered there and has its three approved DNS records saved in GoDaddy and awaits verification. See docs/resend-dns-setup.md. Successful end-user email sign-in and account deletion remain unverified. No ad SDK or Play Billing SDK has been installed and no purchase UI or live ad requests are enabled.
 
 ## Decisions
 
