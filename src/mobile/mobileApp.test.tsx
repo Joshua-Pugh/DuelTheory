@@ -38,7 +38,7 @@ afterEach(() => {
 });
 it("opens the real Table Companion from the mobile navigation", async () => {
   await import("../TableCompanion");
-  await act(async () => root.render(<MobileApp />));
+  await act(async () => root.render(<MobileApp previewAT />));
   await act(async () => {
     button("Table")!.click();
     window.dispatchEvent(new HashChangeEvent("hashchange"));
@@ -89,7 +89,7 @@ it("locks the duel viewport on entry and restores normal app mode on exit", asyn
     .spyOn(nativeViewport, "setNativeDuelMode")
     .mockResolvedValue();
   history.replaceState(null, "", "/#/at");
-  await act(async () => root.render(<MobileApp />));
+  await act(async () => root.render(<MobileApp previewAT />));
   act(() => button("Flip coin & start AT duel")!.click());
   await act(async () => {
     await vi.advanceTimersByTimeAsync(1300);
@@ -101,4 +101,9 @@ it("locks the duel viewport on entry and restores normal app mode on exit", asyn
   expect(nativeMode).toHaveBeenLastCalledWith(false);
   expect(document.documentElement.classList.contains("dt-in-duel")).toBe(false);
   nativeMode.mockRestore();
+});
+
+it("keeps the initial store build focused on tables, even with a saved AT route",async()=>{
+ history.replaceState(null,'','/#/at');await act(async()=>root.render(<MobileApp/>));
+ expect(button('Play AT')).toBeUndefined();expect(button('Cards')).toBeUndefined();expect(document.body.textContent).toContain('Table Companion');expect(document.querySelector('.ab-shell')).toBeNull();
 });

@@ -22,3 +22,10 @@ it("accepts supported room invites and rejects unrelated hosts and schemes", () 
   expect(mobileRoute("#/private/ABCDEFGH")).toBe("private");
   expect(mobileRoute("#/goat")).toBe("home");
 });
+
+it('accepts the current DuelTheory domain while refusing lookalike hosts',()=>{
+ expect(mobileInvite('https://dueltheory.com/?table=ABCDEFGH')).toEqual({kind:'table',code:'ABCDEFGH'});
+ expect(mobileInvite('https://www.dueltheory.com/?table=ABCDEFGH')).toEqual({kind:'table',code:'ABCDEFGH'});
+ expect(mobileInvite('https://dueltheory.com.evil.test/?table=ABCDEFGH')).toBeNull();
+ expect(mobileInvite('https://dueltheory.com/unrelated?table=ABCDEFGH')).toBeNull();
+});

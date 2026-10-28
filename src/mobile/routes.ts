@@ -25,8 +25,7 @@ export function mobileInvite(raw: string) {
     }
     if (
       url.protocol !== "https:" ||
-      url.hostname !== "joshua-pugh.github.io" ||
-      !url.pathname.startsWith("/DuelTheory/")
+      !((url.hostname === "dueltheory.com" || url.hostname === "www.dueltheory.com") && url.pathname === "/" || url.hostname === "joshua-pugh.github.io" && url.pathname.startsWith("/DuelTheory/"))
     )
       return null;
     const table =

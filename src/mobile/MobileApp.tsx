@@ -41,8 +41,8 @@ class ScreenBoundary extends Component<
     );
   }
 }
-export default function MobileApp() {
-  const [route, setRoute] = useState<MobileRoute>(() =>
+export default function MobileApp({previewAT=import.meta.env.VITE_MOBILE_AT_PREVIEW==="true"}:{previewAT?:boolean}={}) {
+  const [requestedRoute, setRoute] = useState<MobileRoute>(() =>
       new URLSearchParams(location.search).has("table")
         ? "table"
         : mobileRoute(location.hash),
@@ -50,6 +50,7 @@ export default function MobileApp() {
     [online, setOnline] = useState(navigator.onLine),
     [reference, setReference] = useState<"rules" | "keywords" | null>(null),
     [name, setName] = useState(loadDisplayName);
+  const route=previewAT||!["at","cards","private"].includes(requestedRoute)?requestedRoute:"home";
   const [inviteKey, setInviteKey] = useState(location.href);
   const navigate = (next: MobileRoute) => {
     const hash = "#/" + next,
@@ -111,7 +112,7 @@ export default function MobileApp() {
       const open = (raw: string) => {
         if (disposed) return;
         const invite = mobileInvite(raw);
-        if (!invite) return;
+        if (!invite || !previewAT && invite.kind === "private") return;
         const hash =
           invite.kind === "table" ? "#/table" : "#/private/" + invite.code;
         const event = new CustomEvent("dt-before-route", {
@@ -167,7 +168,7 @@ export default function MobileApp() {
       </header>
       {!online && (
         <p className="mobile-offline" role="status">
-          Offline · local AT works. Shared tables need a connection.
+          Offline · shared tables need a connection. Your saved room details are kept on this device.
         </p>
       )}
       <main>
@@ -185,7 +186,7 @@ export default function MobileApp() {
                   <span className="eyebrow">DUELTHEORY</span>
                   <h1>Build. Simulate. Master.</h1>
                   <p>
-                    Keep score at the table or play Ashen Throne.
+                    Life, counters and turn order on your own phones.
                   </p>
                 </section>
                 <div className="mobile-home-grid">
@@ -201,7 +202,7 @@ export default function MobileApp() {
                     </p>
                     <b>Join or create a table →</b>
                   </button>
-                  <button
+                  {previewAT&&<button
                     className="mobile-feature"
                     onClick={() => navigate("at")}
                   >
@@ -212,11 +213,10 @@ export default function MobileApp() {
                       a friend.
                     </p>
                     <b>Play Ashen Throne →</b>
-                  </button>
+                  </button>}
                 </div>
                 <p className="mobile-caption">
-                  Development preview · purchases and account sign-in are not
-                  enabled.
+                  Free table tools · friends can join from the app or a phone browser.
                 </p>
               </>
             )}
@@ -226,7 +226,7 @@ export default function MobileApp() {
             {route === "private" && <Room key={inviteKey} />}
             {route === "more" && (
               <section className="mobile-card">
-                <h1>Settings & rules</h1>
+                <h1>Settings & support</h1>
                 <label>
                   Display name
                   <input
@@ -238,20 +238,20 @@ export default function MobileApp() {
                     }}
                   />
                 </label>
-                <button onClick={() => setReference("rules")}>
+                {previewAT&&<><button onClick={() => setReference("rules")}>
                   AT prototype rules
                 </button>
                 <button onClick={() => setReference("keywords")}>
                   AT keyword reference
-                </button>
+                </button></>}
                 <p>
-                  Local duels, rules and cards are bundled with this app. Shared
-                  rooms require internet. Your device stores your decks, artwork
-                  and display name.
+                  Shared tables require internet. Your device keeps your display name and room reconnection details. You can join a friend’s table without an account.
                 </p>
                 <p>
-                  The app follows your device’s reduced-motion setting. Accounts and purchases are not available yet.
+                  The app follows your device’s reduced-motion setting. Purchases are not enabled in this test build.
                 </p>
+                <a href="/table-privacy.html">Privacy & data</a>
+                <a href="mailto:designteam@ashenforgegames.com">Contact support</a>
                 <a href="https://dueltheory.com/">
                   Visit DuelTheory
                 </a>
@@ -260,8 +260,8 @@ export default function MobileApp() {
           </Suspense>
         </ScreenBoundary>
       </main>
-      <nav className="mobile-nav" aria-label="Main navigation">
-        {(["home", "table", "at", "cards", "more"] as const).map((id) => (
+      <nav className="mobile-nav" aria-label="Main navigation" style={{gridTemplateColumns:`repeat(${previewAT?5:3},1fr)`}}>
+        {(["home", "table", ...(previewAT?["at", "cards"] as const:[]), "more"] as const).map((id) => (
           <button
             key={id}
             aria-current={route === id ? "page" : undefined}
