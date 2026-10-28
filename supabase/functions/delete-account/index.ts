@@ -10,7 +10,9 @@ Deno.serve(async(request:Request)=>{
  if(request.method!=='POST')return reply({error:'Method not allowed'},405);
  const auth=request.headers.get('Authorization')||'';if(!auth.startsWith('Bearer '))return reply({error:'Sign in again'},401);
  try{
-  const admin=createClient(Deno.env.get('SUPABASE_URL')!,Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,{auth:{persistSession:false,autoRefreshToken:false}});
+  const serverKeys=JSON.parse(Deno.env.get('SUPABASE_SECRET_KEYS')||'{}');
+  if(typeof serverKeys.default!=='string')return reply({error:'Account service is not configured'},503);
+  const admin=createClient(Deno.env.get('SUPABASE_URL')!,serverKeys.default,{auth:{persistSession:false,autoRefreshToken:false}});
   const {data,error}=await admin.auth.getUser(auth.slice(7));if(error||!data.user)return reply({error:'Sign in again'},401);
   // Deletion is deliberately explicit; this endpoint never accepts a user id.
   const reader=request.body?.getReader();let body='';
