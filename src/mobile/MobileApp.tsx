@@ -14,6 +14,7 @@ import {
 import { Capacitor } from "@capacitor/core";
 import { mobileRoute, mobileInvite, type MobileRoute } from "./routes";
 import { loadDisplayName, saveDisplayName } from "../playerProfile";
+const AccountPanel=lazy(()=>import("../account/AccountPanel"));
 const AshenReference = lazy(() => import("../AshenReference"));
 const Table = lazy(() => import("../TableCompanion")),
   Arena = lazy(() => import("../AshenDuelArena")),
@@ -227,6 +228,7 @@ export default function MobileApp({previewAT=import.meta.env.VITE_MOBILE_AT_PREV
             {route === "more" && (
               <section className="mobile-card">
                 <h1>Settings & support</h1>
+                <AccountPanel/>
                 <label>
                   Display name
                   <input

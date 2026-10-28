@@ -1,11 +1,18 @@
-import { defineConfig } from "vite";
+import { defineConfig,loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
-export default defineConfig({
+export default defineConfig(({mode})=>({
   plugins: [
     react(),
     {
       name: "original-games-only",
       enforce: "pre",
+      transformIndexHtml(html){
+        const url=loadEnv(mode,process.cwd(),"VITE_").VITE_SUPABASE_URL;
+        if(!url)return html;
+        const origin=new URL(url);
+        if(origin.protocol!=="https:"||!origin.hostname.endsWith(".supabase.co")||origin.pathname!=="/"||origin.username||origin.password)throw Error("Invalid public Supabase URL");
+        return html.replace("connect-src 'self'",`connect-src 'self' ${origin.origin}`);
+      },
       transform(code, id) {
         if (id.endsWith(".css"))
           return code
@@ -36,4 +43,4 @@ export default defineConfig({
     manifest: true,
     rollupOptions: { input: "mobile/index.html" },
   },
-});
+}));
