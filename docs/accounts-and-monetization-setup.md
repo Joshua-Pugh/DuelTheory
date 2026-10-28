@@ -1,6 +1,6 @@
 # Accounts and initial ad-removal rollout
 
-Status: implementation scaffold, not a live authentication/ad/billing deployment. The owner reports Supabase setup is done; its public project configuration has been supplied and Auth settings accepted it. The tracker_profiles table was not found during a read-only API check. Mail delivery, migration/function deployment and AdMob setup are still unverified. No ad SDK or Play Billing SDK has been installed and no purchase UI or live ad requests are enabled.
+Status: account database and deletion endpoint deployed October 28, 2026; public sign-in remains disabled. The tracker_profiles migration succeeded in the hosted SQL editor. Transactional two-user database isolation checks and four public-key rejection probes passed. Custom SMTP is not configured; email templates cannot currently be edited without it. Resend is awaiting owner sign-in. Successful end-user email sign-in and account deletion remain unverified. No ad SDK or Play Billing SDK has been installed and no purchase UI or live ad requests are enabled.
 
 ## Decisions
 
@@ -15,20 +15,24 @@ Status: implementation scaffold, not a live authentication/ad/billing deployment
 1. Create a free Supabase project for DuelTheory. Store its database password privately; do not send it or put it in the app.
 2. The frontend needs only the Project URL and **publishable key** (`sb_publishable_...`). Never use a service-role/secret key in `VITE_` values.
 3. Apply `supabase/migrations/202610280001_tracker_profiles.sql`. It creates private profiles with owner-scoped RLS, no anonymous access, no direct client insert/update, max 40 cloud profiles per account, bounded documents and atomic revision checks.
-4. Enable email authentication. Change the Magic Link email template to include `{{ .Token }}` so the UI can verify an email code. Set the site URL to `https://dueltheory.com/`. Configure expiry/rate limits appropriately. Before public signup, configure supported CAPTCHA/bot protection and perform sign-in abuse testing.
+4. Enable email authentication. Configure sign-in OTP and first-signup confirmation templates to include `{{ .Token }}` so both new and returning users receive a code the UI can verify. Set the site URL to `https://dueltheory.com/`. Configure expiry/rate limits appropriately. Before public signup, configure supported CAPTCHA/bot protection and perform sign-in abuse testing.
 5. Configure production SMTP and verify the sender domain. Supabase's built-in mail is restricted to project-team addresses and is not a production email service. Send codes through a transactional mail service; do not add all testers as project administrators to work around this restriction.
 6. Deploy `supabase/functions/delete-account` with its supplied config. It verifies the bearer token with Auth.getUser and deletes only that user, with profile cascade deletion. It reads Supabase’s server-provided `SUPABASE_SECRET_KEYS` dictionary; that admin value never enters the web/mobile build. JWT signing private keys remain inside Supabase Auth and are not needed by our frontend. No user id is accepted from the request.
 7. Set public values locally in `.env.local` and as GitHub repository **variables** `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`, then rebuild both releases. Keep `VITE_ACCOUNTS_ENABLED=false` until the hosted checks below pass; set it to true locally and in repository variables only when activation is verified. Mobile CSP adds only the validated project origin, not a wildcard.
 8. Update the privacy notice/Data safety for account email, cloud profiles, retention, SMTP provider and deletion BEFORE making accounts public. Current notice correctly describes the still-unconfigured build.
 
-## Required hosted security checks (not yet run)
+## Hosted checks and remaining validation
+
+Passed October 28: `supabase/tests/tracker_profiles.sql` ran inside a rolled-back transaction using two temporary auth identities. Owner reads/saves worked; cross-user reads/deletion/save, direct updates, stale revisions, anonymous reads and anonymous RPC execution were denied. No test identities or setups remain. This proves database role behavior, not the full email/JWT/device flow.
+
+Passed: `node scripts/check-account-deployment.mjs` checked anonymous REST reads/RPC saves and missing/invalid bearer calls to delete-account. All four returned HTTP 401. The hosted function uses its own Auth.getUser verification; the legacy-secret-only gateway check is off to support current Auth tokens. Successful account deletion still requires a disposable authenticated end-to-end test.
 
 - Run migration in a disposable development project first. With two ordinary users, verify A cannot read/delete/update B's profile even by directly calling the REST API or RPC with B's UUID. An anonymous client must see no private data and cannot call the save function.
 - Verify quota, oversized/malformed data, concurrent stale saves and same-UUID collisions. The client validates full game/player schemas; server provides auth, ownership, bounds and revision checks. Treat stored/imported documents as untrusted data.
 - Verify sign-in, refresh, sign-out, device-switch behavior and deletion end-to-end on website and Android. Clearing local state is not server account deletion.
 - Cloud downloads are explicit imports; a same-name local profile requires confirmation. No active-room values or host rules are changed when logging in. Saved player appearance currently stores name/accent only; backgrounds and shared seat identity remain subsequent work. No automatic room takeover or cross-device live editing is implemented in this pass.
 - Verify account deletion removes auth user/profiles, fails with an invalid bearer, and cannot target another account. Test failure recovery; do not offer this publicly until function deployment works.
-- Browser visual QA remains blocked by local browser-use settings; perform physical-device and accessibility checks.
+- Supabase dashboard access now works. Product UI still needs physical-device and accessibility checks after email delivery and activation are ready.
 
 ## Owner setup: AdMob and Play
 
