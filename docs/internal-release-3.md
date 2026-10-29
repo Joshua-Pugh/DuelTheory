@@ -1,6 +1,6 @@
 # Internal release 3 — host lifecycle
 
-Prepared Android version 1.0.2 / code 3; not signed or uploaded yet. Accounts remain enabled for this internal build. Android Studio sync backup: android-starter-backup-20261029-175327. Native assembleDebug passed.
+Published Android version 1.0.2 / code 3 to internal testing on October 29, 2026 at 6:17 PM Eastern. Play Console confirms Active and Available to internal testers; the release preview showed Ready to release with no warnings. Accounts remain enabled for this internal build. Android Studio sync backup: android-starter-backup-20261029-175327. Native assembleDebug passed. The signed AAB verified with jarsigner and all 69 public assets matched the canonical build. Preserved at ../releases/table-companion-20261028/DuelTheory-internal-v3-signed.aab (20,081,071 bytes; SHA256 e7ec329ee576eab98ee6a7f0eb3f7113ef3ca542eaf9e9dae2f0ba128920e515).
 
 Removed PREVIEW from the app banner. Shared web/app table UI now offers Close table & leave for the host, and a host-only transfer selector. Transfers use the authenticated current host, an existing target seat and an expected room revision. The former host immediately loses host-only authority. Closing a room marks it closed, pauses its timer and rejects later joins, resets or mutations. Existing seats can read the closure; updated clients clear their reconnection entries and return to join/create. A failed close leaves the host connected. Guest disconnect preserves its reconnectable seat.
 
