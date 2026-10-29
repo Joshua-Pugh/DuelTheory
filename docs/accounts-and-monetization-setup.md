@@ -1,6 +1,6 @@
 # Accounts and initial ad-removal rollout
 
-Status: account database and deletion endpoint deployed October 28, 2026; public sign-in remains disabled. The tracker_profiles migration succeeded in the hosted SQL editor. Transactional two-user database isolation checks and four public-key rejection probes passed. Custom SMTP is not configured; email templates cannot currently be edited without it. Resend is signed in; auth.ashenforgegames.com is registered there and has all three approved DNS records saved in GoDaddy and verified by Resend. See docs/resend-dns-setup.md. Successful end-user email sign-in and account deletion remain unverified. No ad SDK or Play Billing SDK has been installed and no purchase UI or live ad requests are enabled.
+Status (October 28, 2026): hosted database isolation/rejection checks, Resend email-code delivery, sign-in, cloud saving and authorized test-account deletion passed. Android internal release 1.0.1 includes accounts. Website activation is configured through public GitHub repository variables and is being deployed. Privacy and deletion pages are live. No ad SDK, billing SDK, purchase UI or live ad requests are enabled.
 
 ## Decisions
 
@@ -19,13 +19,13 @@ Status: account database and deletion endpoint deployed October 28, 2026; public
 5. Configure production SMTP and verify the sender domain. Supabase's built-in mail is restricted to project-team addresses and is not a production email service. Send codes through a transactional mail service; do not add all testers as project administrators to work around this restriction.
 6. Deploy `supabase/functions/delete-account` with its supplied config. It verifies the bearer token with Auth.getUser and deletes only that user, with profile cascade deletion. It reads Supabase’s server-provided `SUPABASE_SECRET_KEYS` dictionary; that admin value never enters the web/mobile build. JWT signing private keys remain inside Supabase Auth and are not needed by our frontend. No user id is accepted from the request.
 7. Set public values locally in `.env.local` and as GitHub repository **variables** `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`, then rebuild both releases. Keep `VITE_ACCOUNTS_ENABLED=false` until the hosted checks below pass; set it to true locally and in repository variables only when activation is verified. Mobile CSP adds only the validated project origin, not a wildcard.
-8. Update the privacy notice/Data safety for account email, cloud profiles, retention, SMTP provider and deletion BEFORE making accounts public. Current notice correctly describes the still-unconfigured build.
+8. Update the privacy notice/Data safety for account email, cloud profiles, retention, SMTP provider and deletion BEFORE making accounts public. The notice and account-deletion page were updated and published before web activation.
 
 ## Hosted checks and remaining validation
 
 Passed October 28: `supabase/tests/tracker_profiles.sql` ran inside a rolled-back transaction using two temporary auth identities. Owner reads/saves worked; cross-user reads/deletion/save, direct updates, stale revisions, anonymous reads and anonymous RPC execution were denied. No test identities or setups remain. This proves database role behavior, not the full email/JWT/device flow.
 
-Passed: `node scripts/check-account-deployment.mjs` checked anonymous REST reads/RPC saves and missing/invalid bearer calls to delete-account. All four returned HTTP 401. The hosted function uses its own Auth.getUser verification; the legacy-secret-only gateway check is off to support current Auth tokens. Successful account deletion still requires a disposable authenticated end-to-end test.
+Passed: `node scripts/check-account-deployment.mjs` checked anonymous REST reads/RPC saves and missing/invalid bearer calls to delete-account. All four returned HTTP 401. The hosted function uses its own Auth.getUser verification; the legacy-secret-only gateway check is off to support current Auth tokens. The disposable authenticated end-to-end deletion test also passed; Supabase confirmed the test user was removed.
 
 - Run migration in a disposable development project first. With two ordinary users, verify A cannot read/delete/update B's profile even by directly calling the REST API or RPC with B's UUID. An anonymous client must see no private data and cannot call the save function.
 - Verify quota, oversized/malformed data, concurrent stale saves and same-UUID collisions. The client validates full game/player schemas; server provides auth, ownership, bounds and revision checks. Treat stored/imported documents as untrusted data.
