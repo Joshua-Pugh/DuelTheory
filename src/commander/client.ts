@@ -8,6 +8,11 @@ export const COMMANDER_API=TABLE_API; // Original endpoint alias for existing cl
 const storageKey='dueltheory-commander-seat-v1';
 export function savedRoomSeat(code?:string):RoomSeat|null{try{const s=JSON.parse(localStorage.getItem(code?storageKey+':'+code:storageKey)||'null');return s&&typeof s.code==='string'&&typeof s.token==='string'&&typeof s.playerId==='string'&&typeof s.api==='string'?s:null;}catch{return null;}}
 export const saveRoomSeat=(s:RoomSeat|null)=>{if(s){localStorage.setItem(storageKey,JSON.stringify(s));localStorage.setItem(storageKey+':'+s.code,JSON.stringify(s));}else localStorage.removeItem(storageKey);};
+/** Forget only this closed room; keep unrelated saved seats intact. */
+export function forgetRoomSeat(code:string){
+ localStorage.removeItem(storageKey+':'+code);
+ if(savedRoomSeat()?.code===code)localStorage.removeItem(storageKey);
+}
 export function newRoomCode(){const alphabet='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';return Array.from(crypto.getRandomValues(new Uint8Array(8)),b=>alphabet[b%alphabet.length]).join('');}
 export const newSeatToken=()=>crypto.randomUUID().replaceAll('-','')+crypto.randomUUID().replaceAll('-','');
 export async function roomRequest(api:string,code:string,token:string,method:'create'|'join'|'read'|'action',input:unknown={},requestId=crypto.randomUUID(),signal?:AbortSignal):Promise<RoomReply>{

@@ -165,7 +165,7 @@ export default function MobileApp({previewAT=import.meta.env.VITE_MOBILE_AT_PREV
             alt="DuelTheory"
           />
         </button>
-        <small>PREVIEW</small>
+
       </header>
       {!online && (
         <p className="mobile-offline" role="status">

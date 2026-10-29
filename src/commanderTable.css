@@ -27,3 +27,5 @@
 .ct-notice:empty{display:none}
 .ct-notice{padding:10px 16px;margin:8px 0;border-left:4px solid #d8bb70;background:#203d30;color:#fff5d9}
 .ct-notice p{margin:4px 0}
+
+.ct-host-settings{padding:12px 16px;margin-bottom:10px}.ct-host-settings label{max-width:420px}

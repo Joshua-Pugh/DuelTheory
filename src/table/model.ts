@@ -6,7 +6,7 @@ export type LastTableEntry={id:string;text:string;before:TotalsSnapshot};
 export type TablePlayer={lastEntry?:LastTableEntry;id:string;name:string;sources?:string[];commanders:string[];life:number;poison:number;damage:Record<string,number>;counters:Record<string,number>;conceded:boolean};
 export type FirstPlayerRoll={round:number;eligible:string[];rolls:Record<string,number>;winner?:string};
 export type TableTitle={label:string;reminder:string;version:number;holder?:string};
-export type TableRoomState={turnTracking?:boolean;timer?:TurnTimer;tableTitle?:TableTitle;profile?:TableProfile;code:string;title:string;host:string;capacity:number;started:boolean;revision:number;players:TablePlayer[];firstPlayer?:FirstPlayerRoll;turnOrder?:string[];turn?:number;log:{id:string;at:number;player:string;text:string}[]};
+export type TableRoomState={closedAt?:number;turnTracking?:boolean;timer?:TurnTimer;tableTitle?:TableTitle;profile?:TableProfile;code:string;title:string;host:string;capacity:number;started:boolean;revision:number;players:TablePlayer[];firstPlayer?:FirstPlayerRoll;turnOrder?:string[];turn?:number;log:{id:string;at:number;player:string;text:string}[]};
 export const sharedTableTitle=(s:TableRoomState):TableTitle=>s.tableTitle??{label:'Table Title',reminder:'',version:0};
 export type RoomCommand=
  |{type:'join';name:string;sources?:string[];commanders?:string[]}
@@ -17,6 +17,7 @@ export type RoomCommand=
  |{type:'undo';entryId:string}
  |{type:'configureTimer';version:number;durationSeconds:number}|{type:'timer';version:number;turn:number;mode:'pause'|'resume'|'restart'}
  |{type:'configureTurns';enabled:boolean;revision:number}
+ |{type:'transferHost';playerId:string;revision:number}|{type:'closeRoom';revision:number}
  |{type:'start'}|{type:'reset'};
 export class RoomError extends Error{}
 const label=(value:unknown,max:number)=>{if(typeof value!=='string'||!value.trim()||value.trim().length>max)throw new RoomError(`Enter text between 1 and ${max} characters.`);return value.trim();};
@@ -35,7 +36,7 @@ export function tableWarnings(p:TablePlayer,s?:TableRoomState){const profile=s?r
 export function tableEliminated(p:TablePlayer,s?:TableRoomState){return p.conceded||tableWarnings(p,s).length>0;}
 export function activeTablePlayers(s:TableRoomState){return s.players.filter(p=>!tableEliminated(p,s));}
 export function tableGameOver(s:TableRoomState){return s.started&&s.players.length>=2&&activeTablePlayers(s).length<2;}
-export function tableGameReady(s:TableRoomState){return s.started&&Boolean(s.firstPlayer?.winner);}
+export function tableGameReady(s:TableRoomState){return s.closedAt===undefined&&s.started&&Boolean(s.firstPlayer?.winner);}
 function settleFirstPlayer(s:TableRoomState){
  const roll=s.firstPlayer;if(!roll||roll.winner||tableGameOver(s))return '';
  roll.eligible=roll.eligible.filter(id=>s.players.some(p=>p.id===id&&!tableEliminated(p,s)));
@@ -51,6 +52,7 @@ export const tableTurnsEnabled=(s:TableRoomState)=>s.turnTracking!==false;
 export function currentTurnPlayer(s:TableRoomState){return tableTurnsEnabled(s)&&s.turnOrder?.length&&s.turn?s.turnOrder[(s.turn-1)%s.turnOrder.length]:undefined;}
 export function applyRoomCommand(original:TableRoomState,actor:string,input:RoomCommand,requestId:string,now=Date.now(),die=rollSixSidedDie):TableRoomState{
  if(!input||typeof input!=='object'||typeof input.type!=='string')throw new RoomError('Invalid action.');
+ if(original.closedAt!==undefined)throw new RoomError('This table has been closed by its host.');
  const s=structuredClone(original);let text='';let player=s.players.find(p=>p.id===actor);
  if(input.type==='join'){
   if(player)return s;
@@ -63,7 +65,20 @@ export function applyRoomCommand(original:TableRoomState,actor:string,input:Room
   player={id:actor,name,commanders:names.map(n=>label(n,80)),...(s.profile?{sources:names.map(n=>label(n,80))}:{}),life:roomProfile(s).health.start,poison:0,damage:{},counters:Object.fromEntries((s.profile?.counters??[]).map(c=>[c.label,c.start])),conceded:false};s.players.push(player);text='joined the table';
  }else{
   if(!player)throw new RoomError('Join this room before changing values.');
-  if(input.type==='undo'){
+  if(input.type==='transferHost'||input.type==='closeRoom'){
+   if(actor!==s.host)throw new RoomError('Only the current host can transfer hosting or close the table.');
+   if(input.revision!==s.revision)throw new RoomError('The table changed. Refresh and try again.');
+   if(input.type==='transferHost'){
+    const next=s.players.find(p=>p.id===input.playerId);
+    if(!next||next.id===actor)throw new RoomError('Choose another player at this table.');
+    s.host=next.id;text=`passed hosting to ${next.name}`;
+   }else{
+    s.closedAt=now;
+    if(s.timer)s.timer={...s.timer,remainingMs:turnTimeRemaining(s.timer,now),runningSince:undefined,version:s.timer.version+1};
+    text='closed the table; all players are disconnected';
+   }
+  }
+  else if(input.type==='undo'){
    const entry=player.lastEntry;if(!tableGameReady(s)||!entry||entry.id!==input.entryId)throw new RoomError('That entry is no longer available to undo.');
    Object.assign(player,structuredClone(entry.before));delete player.lastEntry;text=`undid last entry: ${entry.text}`;
   }
@@ -159,7 +174,8 @@ export function applyRoomCommand(original:TableRoomState,actor:string,input:Room
  if(s.turnOrder?.length&&s.turn&&activeTablePlayers(s).length>=2&&s.players.some(p=>p.id===currentTurnPlayer(s)&&tableEliminated(p,s))){do{s.turn++;}while(s.players.some(p=>p.id===currentTurnPlayer(s)&&tableEliminated(p,s)));text+=` · turn ${s.turn}: ${s.players.find(p=>p.id===currentTurnPlayer(s))?.name}`;}
  if(tableGameOver(s)&&!tableGameOver(original)){const winner=activeTablePlayers(s)[0];text+=winner?` · ${winner.name} wins; game over`:' · no active players remain; game over';}
  if(s.timer?.durationSeconds){
-  if(input.type==='reset')s.timer={...s.timer,remainingMs:s.timer.durationSeconds*1000,runningSince:undefined,turn:undefined,version:s.timer.version+1};
+  if(s.closedAt!==undefined)s.timer={...s.timer,runningSince:undefined};
+  else if(input.type==='reset')s.timer={...s.timer,remainingMs:s.timer.durationSeconds*1000,runningSince:undefined,turn:undefined,version:s.timer.version+1};
   else if(tableGameOver(s)&&s.timer.runningSince!==undefined)s.timer={...s.timer,remainingMs:turnTimeRemaining(s.timer,now),runningSince:undefined,version:s.timer.version+1};
   else if(s.turn&&original.turn!==s.turn)s.timer={...s.timer,remainingMs:s.timer.durationSeconds*1000,runningSince:now,turn:s.turn,version:s.timer.version+1};
  }
