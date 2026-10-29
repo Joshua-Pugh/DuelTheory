@@ -2,7 +2,7 @@
 
 Not submitted. Describe only features available in the build being uploaded.
 
-App name: DuelTheory: Table Companion
+App name: DuelTheory
 
 Package: com.dueltheory
 
@@ -12,7 +12,7 @@ Distribution: Free download. Ads and purchases are not implemented in the curren
 
 Short description:
 
-Track life, resources and custom counters for your tabletop card games.
+Customizable tabletop life tracker.
 
 Full description:
 

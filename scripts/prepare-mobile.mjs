@@ -23,6 +23,7 @@ await cp(
   "dist-mobile/icons/ashen-broken-crown.png",
 );
 await cp("public/table-privacy.html", "dist-mobile/table-privacy.html");
+await cp("public/account-deletion.html", "dist-mobile/account-deletion.html");
 const manifest = JSON.parse(
   await readFile("dist-mobile/.vite/manifest.json", "utf8"),
 );

@@ -6,7 +6,7 @@ export type LastTableEntry={id:string;text:string;before:TotalsSnapshot};
 export type TablePlayer={lastEntry?:LastTableEntry;id:string;name:string;sources?:string[];commanders:string[];life:number;poison:number;damage:Record<string,number>;counters:Record<string,number>;conceded:boolean};
 export type FirstPlayerRoll={round:number;eligible:string[];rolls:Record<string,number>;winner?:string};
 export type TableTitle={label:string;reminder:string;version:number;holder?:string};
-export type TableRoomState={timer?:TurnTimer;tableTitle?:TableTitle;profile?:TableProfile;code:string;title:string;host:string;capacity:number;started:boolean;revision:number;players:TablePlayer[];firstPlayer?:FirstPlayerRoll;turnOrder?:string[];turn?:number;log:{id:string;at:number;player:string;text:string}[]};
+export type TableRoomState={turnTracking?:boolean;timer?:TurnTimer;tableTitle?:TableTitle;profile?:TableProfile;code:string;title:string;host:string;capacity:number;started:boolean;revision:number;players:TablePlayer[];firstPlayer?:FirstPlayerRoll;turnOrder?:string[];turn?:number;log:{id:string;at:number;player:string;text:string}[]};
 export const sharedTableTitle=(s:TableRoomState):TableTitle=>s.tableTitle??{label:'Table Title',reminder:'',version:0};
 export type RoomCommand=
  |{type:'join';name:string;sources?:string[];commanders?:string[]}
@@ -16,13 +16,14 @@ export type RoomCommand=
  |{type:'claimTitle'|'releaseTitle';version:number}|{type:'configureTitle';version:number;label:string;reminder:string}
  |{type:'undo';entryId:string}
  |{type:'configureTimer';version:number;durationSeconds:number}|{type:'timer';version:number;turn:number;mode:'pause'|'resume'|'restart'}
+ |{type:'configureTurns';enabled:boolean;revision:number}
  |{type:'start'}|{type:'reset'};
 export class RoomError extends Error{}
 const label=(value:unknown,max:number)=>{if(typeof value!=='string'||!value.trim()||value.trim().length>max)throw new RoomError(`Enter text between 1 and ${max} characters.`);return value.trim();};
 export function newTableRoom(code:string,title:unknown,capacity:unknown,host:string,profile:unknown=DUEL_PROFILE):TableRoomState{
  if(!Number.isInteger(capacity)||Number(capacity)<2||Number(capacity)>8)throw new RoomError('Choose 2–8 players.');
  let settings:TableProfile;try{settings=validateTableProfile(profile);}catch(e){throw new RoomError(e instanceof Error?e.message:String(e));}
- return {profile:settings,code,title:label(title,50),host,capacity:Number(capacity),started:false,revision:0,players:[],log:[]};
+ return {turnTracking:false,profile:settings,code,title:label(title,50),host,capacity:Number(capacity),started:false,revision:0,players:[],log:[]};
 }
 export const sourceKey=(playerId:string,index:number)=>`${playerId}:${index}`;
 export function tableSources(s:TableRoomState){return s.players.flatMap(p=>(p.sources??p.commanders).map((name,i)=>({key:sourceKey(p.id,i),name,owner:p.name,ownerId:p.id})));}
@@ -45,7 +46,9 @@ function settleFirstPlayer(s:TableRoomState){
  roll.winner=tied[0];const index=s.players.findIndex(p=>p.id===roll.winner);s.turnOrder=[...s.players.slice(index),...s.players.slice(0,index)].map(p=>p.id);s.turn=1;return ` · ${s.players[index].name} goes first`;
 }
 export function rollSixSidedDie(){const limit=4294967292;let value:number;do{value=crypto.getRandomValues(new Uint32Array(1))[0];}while(value>=limit);return value%6+1;}
-export function currentTurnPlayer(s:TableRoomState){return s.turnOrder?.length&&s.turn?s.turnOrder[(s.turn-1)%s.turnOrder.length]:undefined;}
+// Missing flag preserves the behavior of rooms created by earlier clients.
+export const tableTurnsEnabled=(s:TableRoomState)=>s.turnTracking!==false;
+export function currentTurnPlayer(s:TableRoomState){return tableTurnsEnabled(s)&&s.turnOrder?.length&&s.turn?s.turnOrder[(s.turn-1)%s.turnOrder.length]:undefined;}
 export function applyRoomCommand(original:TableRoomState,actor:string,input:RoomCommand,requestId:string,now=Date.now(),die=rollSixSidedDie):TableRoomState{
  if(!input||typeof input!=='object'||typeof input.type!=='string')throw new RoomError('Invalid action.');
  const s=structuredClone(original);let text='';let player=s.players.find(p=>p.id===actor);
@@ -64,7 +67,16 @@ export function applyRoomCommand(original:TableRoomState,actor:string,input:Room
    const entry=player.lastEntry;if(!tableGameReady(s)||!entry||entry.id!==input.entryId)throw new RoomError('That entry is no longer available to undo.');
    Object.assign(player,structuredClone(entry.before));delete player.lastEntry;text=`undid last entry: ${entry.text}`;
   }
+  else if(input.type==='configureTurns'){
+   if(actor!==s.host)throw new RoomError('Only the host can configure turn passing.');
+   if(typeof input.enabled!=='boolean')throw new RoomError('Choose whether turn passing is enabled.');
+   if(input.revision!==s.revision)throw new RoomError('The table changed. Refresh and try again.');
+   s.turnTracking=input.enabled;
+   if(s.timer)s.timer={...s.timer,durationSeconds:0,remainingMs:0,runningSince:undefined,version:s.timer.version+1};
+   text=input.enabled?'enabled turn passing':'disabled turn passing';
+  }
   else if(input.type==='configureTimer'||input.type==='timer'){
+   if(!tableTurnsEnabled(s))throw new RoomError('Enable turn passing before using a turn timer.');
    const timer=s.timer??defaultTurnTimer();
    if(input.version!==timer.version)throw new RoomError('The timer changed. Refresh its current state and try again.');
    if(input.type==='configureTimer'){
@@ -112,6 +124,7 @@ export function applyRoomCommand(original:TableRoomState,actor:string,input:Room
    const result=die();if(!Number.isInteger(result)||result<1||result>6)throw new RoomError('Invalid die result.');roll.rolls[actor]=result;text=`rolled ${result} on a six-sided die (round ${roll.round})`;
   }
   else if(input.type==='endTurn'){
+   if(!tableTurnsEnabled(s))throw new RoomError('Turn passing is disabled by the host.');
    if(!s.turnOrder?.length||!s.turn||input.turn!==s.turn)throw new RoomError('The turn has changed or rolling is not finished.');
    if(actor!==currentTurnPlayer(s)&&actor!==s.host)throw new RoomError('Only the current player or host can advance the turn.');
    if(activeTablePlayers(s).length<2)throw new RoomError('At least two active players are needed to advance turns.');

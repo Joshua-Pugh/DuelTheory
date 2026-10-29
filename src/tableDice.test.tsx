@@ -8,7 +8,7 @@ import {newTableRoom,applyRoomCommand} from './table/model';
 it('requests one authoritative roll, shows results on the die, and retains them after turn order starts',async()=>{
  let state=newTableRoom('ABCDEFGH','Dice test',2,'a');
  for(const id of ['a','b'])state=applyRoomCommand(state,id,{type:'join',name:id,sources:[id]},'join-'+id);
- state=applyRoomCommand(state,'a',{type:'start'},'start');
+ state=applyRoomCommand(state,'a',{type:'configureTurns',enabled:true,revision:state.revision},'turns');state=applyRoomCommand(state,'a',{type:'start'},'start');
  const host=document.createElement('div');document.body.append(host);const root=createRoot(host),change=vi.fn();
  const render=()=>act(()=>root.render(<TableTurnControls state={state} playerId="a" busy={false} onChange={change}/>));
  try{

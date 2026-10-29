@@ -20,6 +20,12 @@ for(let i=0;i<30;i++){
  await Promise.all([[a,host.playerId],[b,guest.playerId]].filter(([,id])=>state.firstPlayer.eligible.includes(id)).map(([token])=>call(token,'action',{type:'roll',round:state.firstPlayer.round})));
 }
 assert.ok((await call(a,'read')).state.firstPlayer.winner);
+let turnSettings=(await call(a,'read')).state;
+assert.equal(turnSettings.turnTracking,false);
+await call(a,'action',{type:'endTurn',turn:turnSettings.turn},400);
+await call(b,'action',{type:'configureTurns',enabled:true,revision:turnSettings.revision},400);
+await call(a,'action',{type:'configureTurns',enabled:true,revision:turnSettings.revision});
+await call(a,'action',{type:'configureTurns',enabled:false,revision:turnSettings.revision},400);
 await call(b,'action',{type:'configureTimer',version:0,durationSeconds:120},400);
 await call(a,'action',{type:'configureTimer',version:0,durationSeconds:120});
 let timing=await call(a,'read');assert.equal(typeof timing.serverNow,'number');assert.equal(timing.state.timer.durationSeconds,120);assert.ok(timing.state.timer.runningSince<=timing.serverNow);

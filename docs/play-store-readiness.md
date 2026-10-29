@@ -10,7 +10,7 @@
 
 ## Before uploading
 
-1. Play Console now shows the Ashen Forge Games personal developer account. The first app form is prepared as DuelTheory: Table Companion (free app, com.dueltheory available). Owner review of legal declarations and app creation remains pending.
+1. Play Console now shows the Ashen Forge Games personal developer account. The owner created DuelTheory (free app, com.dueltheory), app ID 4972911437566920042. Privacy URL and public support email/HTTPS website are saved as Console drafts. No build has been uploaded.
 2. Create and securely back up an upload signing key; use Play App Signing. Do not commit keys or passwords. The generated release AAB remains unsigned until this is configured. Do not upload the debug APK as a production release.
 3. Add title, descriptions, support email, launcher icon, feature graphic, real phone screenshots, content rating, target audience, ads declaration and Data safety answers. Do not advertise AT or purchases in the initial listing.
 4. Verify privacy URL `https://dueltheory.com/table-privacy.html` works publicly after deployment. Confirm Cloudflare operational log settings/retention. Disclose actual room data, nickname and identifiers; do not claim no collection simply because there are no accounts.

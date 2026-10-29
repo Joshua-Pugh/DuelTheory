@@ -11,7 +11,7 @@ import {newTableRoom,applyRoomCommand} from './table/model';
 import {MULTIPLAYER_PROFILE} from './table/profiles';
 let root:Root|undefined;
 afterEach(()=>{if(root)act(()=>root!.unmount());root=undefined;document.body.innerHTML='';vi.useRealTimers();});
-function ready(){let s=newTableRoom('ABCDEFGH','Tools',2,'a',MULTIPLAYER_PROFILE);for(const id of ['a','b'])s=applyRoomCommand(s,id,{type:'join',name:id,sources:['Unit']},'j'+id);s=applyRoomCommand(s,'a',{type:'start'},'start');for(const id of ['a','b'])s=applyRoomCommand(s,id,{type:'roll',round:1},'r'+id,0,()=>id==='a'?6:1);return s;}
+function ready(){let s=newTableRoom('ABCDEFGH','Tools',2,'a',MULTIPLAYER_PROFILE);for(const id of ['a','b'])s=applyRoomCommand(s,id,{type:'join',name:id,sources:['Unit']},'j'+id);s=applyRoomCommand(s,'a',{type:'configureTurns',enabled:true,revision:s.revision},'turns');s=applyRoomCommand(s,'a',{type:'start'},'start');for(const id of ['a','b'])s=applyRoomCommand(s,id,{type:'roll',round:1},'r'+id,0,()=>id==='a'?6:1);return s;}
 it('displays QR invite controls exclusively on the host seat',()=>{expect(renderToStaticMarkup(<HostTableQr hostId="a" playerId="a" code="ABCDEFGH"/>)).toContain('Show QR invite');expect(renderToStaticMarkup(<HostTableQr hostId="a" playerId="b" code="ABCDEFGH"/>)).toBe('');});
 it('uses the selected counter for compact +/- and makes linked damage explicit',async()=>{
  Object.assign(globalThis,{IS_REACT_ACT_ENVIRONMENT:true});const onAdjust=vi.fn(),state=ready(),el=document.createElement('div');document.body.append(el);root=createRoot(el);await act(async()=>root!.render(<CompactCounterControls state={state} playerId="a" busy={false} onAdjust={onAdjust}/>));

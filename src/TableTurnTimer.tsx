@@ -1,12 +1,12 @@
 import {useEffect,useState} from 'react';
 import TableNumberInput from './TableNumberInput';
-import {currentTurnPlayer,tableGameOver,tableGameReady,type RoomCommand,type TableRoomState} from './table/model';
+import {currentTurnPlayer,tableGameOver,tableGameReady,tableTurnsEnabled,type RoomCommand,type TableRoomState} from './table/model';
 import {defaultTurnTimer,timerText,turnTimeRemaining} from './table/timer';
 export default function TableTurnTimer({state,playerId,busy,serverOffset=0,onChange}:{state:TableRoomState;playerId:string;busy:boolean;serverOffset?:number;onChange:(command:RoomCommand)=>void}){
  const timer=state.timer??defaultTurnTimer(),host=state.host===playerId,active=tableGameReady(state)&&!tableGameOver(state);
  const [minutes,setMinutes]=useState<number|null>(()=>timer.durationSeconds?timer.durationSeconds/60:3),[now,setNow]=useState(()=>Date.now());
  useEffect(()=>{if(!timer.durationSeconds)return;setNow(Date.now());const id=setInterval(()=>setNow(Date.now()),1000);return()=>clearInterval(id);},[timer.durationSeconds]);
- if(!timer.durationSeconds&&!host)return null;
+ if(!tableTurnsEnabled(state)||(!timer.durationSeconds&&!host))return null;
  const remaining=turnTimeRemaining(timer,now+serverOffset),expired=active&&remaining===0,canControl=active&&(host||currentTurnPlayer(state)===playerId);
  const send=(mode:'pause'|'resume'|'restart')=>onChange({type:'timer',version:timer.version,turn:state.turn!,mode});
  return <section className={`ct-turn-timer${expired?' ct-time-up':''}`} aria-label="Optional turn timer">

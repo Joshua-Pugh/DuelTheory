@@ -1,10 +1,11 @@
 import TableFirstPlayerDice from './TableFirstPlayerDice';
-import {currentTurnPlayer,tableEliminated,tableGameOver,activeTablePlayers,type TableRoomState,type RoomCommand} from './table/model';
+import {currentTurnPlayer,tableEliminated,tableGameOver,activeTablePlayers,tableTurnsEnabled,type TableRoomState,type RoomCommand} from './table/model';
 
 export default function TableTurnControls({state,playerId,busy,onChange}:{state:TableRoomState;playerId:string;busy:boolean;onChange:(command:RoomCommand)=>void}){
  const roll=state.firstPlayer,current=currentTurnPlayer(state),name=(id:string)=>state.players.find(p=>p.id===id)?.name||'Player';
  const over=tableGameOver(state),active=activeTablePlayers(state),me=state.players.find(p=>p.id===playerId);
 
+ if(roll?.winner&&!over&&!tableTurnsEnabled(state))return <TableFirstPlayerDice state={state} playerId={playerId} busy={busy} onChange={onChange}/>;
  if(roll?.winner&&!over)return <><TableFirstPlayerDice state={state} playerId={playerId} busy={busy} onChange={onChange}/><section className="ct-turn-strip" aria-label="Turn order"><strong>Turn {state.turn} · {current?name(current):'Waiting'}</strong><button className="ct-primary" disabled={busy||(current!==playerId&&state.host!==playerId)} onClick={()=>onChange({type:'endTurn',turn:state.turn!})}>{current===playerId?'End my turn':'Next turn (host)'}</button><details><summary>Seat order</summary><ol className="ct-turn-order">{state.turnOrder?.map(id=><li key={id} className={state.players.some(p=>p.id===id&&tableEliminated(p,state))?'ct-out-turn':id===current?'ct-current-turn':''}>{name(id)}{id===current?' · current turn':''}</li>)}</ol></details></section></>;
  return <section className="ct-panel ct-turns" aria-label="First player and turn order">
  <h2>{over?(active[0]?`${active[0].name} wins!`:'Game over · no active players remain'):current?`Turn ${state.turn} · ${name(current)}`:'Roll to see who goes first'}</h2>
