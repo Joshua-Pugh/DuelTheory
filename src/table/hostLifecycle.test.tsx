@@ -9,7 +9,7 @@ vi.mock('./client',async importOriginal=>({...await importOriginal<typeof import
 vi.mock('../TableNotifications',()=>({default:()=>null}));
 import TableCompanion from '../TableCompanion';
 import {newTableRoom,applyRoomCommand} from './model';
-import {saveRoomSeat,savedRoomSeat} from './client';
+import {RoomRequestError,saveRoomSeat,savedRoomSeat} from './client';
 let root:Root,element:HTMLDivElement;
 function room(){let s=newTableRoom('ABCDEFGH','Lifecycle test',2,'a');for(const id of ['a','b'])s=applyRoomCommand(s,id,{type:'join',name:id,sources:[id]},'j'+id);return s;}
 beforeEach(()=>{Object.assign(globalThis,{IS_REACT_ACT_ENVIRONMENT:true});localStorage.clear();history.replaceState(null,'','/#/companion');mocks.send.mockReset();Object.assign(window,{confirm:vi.fn(()=>true)});element=document.createElement('div');document.body.append(element);root=createRoot(element);});
@@ -34,6 +34,12 @@ it('allows cancellation before closing and keeps guest disconnect separate',asyn
  await mount();vi.mocked(window.confirm).mockReturnValue(false);
  await act(async()=>[...element.querySelectorAll('button')].find(b=>b.textContent?.includes('Close table & leave'))!.click());expect(mocks.send).not.toHaveBeenCalled();expect(savedRoomSeat()).not.toBeNull();
 });
-it('disconnects a guest locally without closing the room or erasing their reconnectable seat',async()=>{
- await mount('b');await act(async()=>[...element.querySelectorAll('button')].find(b=>b.textContent?.trim()==='Disconnect')!.click());expect(mocks.send).not.toHaveBeenCalled();expect(savedRoomSeat()).toBeNull();expect(savedRoomSeat('ABCDEFGH')?.playerId).toBe('b');
+it('removes a guest on the server before forgetting the freed seat',async()=>{
+ await mount('b');mocks.send.mockResolvedValueOnce({state:applyRoomCommand(room(),'b',{type:'leave'},'leave'),playerId:'b'});
+ await act(async()=>[...element.querySelectorAll('button')].find(b=>b.textContent?.trim()==='Leave table')!.click());expect(mocks.send).toHaveBeenCalled();expect(savedRoomSeat()).toBeNull();expect(savedRoomSeat('ABCDEFGH')).toBeNull();expect(element.textContent).toContain('seat is now available');
 });
+it('keeps the guest seat when leaving cannot be confirmed',async()=>{
+ await mount('b');mocks.send.mockRejectedValueOnce(Error('Offline'));await act(async()=>[...element.querySelectorAll('button')].find(b=>b.textContent?.trim()==='Leave table')!.click());expect(savedRoomSeat()?.playerId).toBe('b');expect(element.textContent).toContain('Offline');
+});
+
+it('releases a stale local seat after the server confirms the room expired',async()=>{await mount('b');await act(async()=>mocks.poll!.onError(new RoomRequestError('Room not found',404)));expect(savedRoomSeat()).toBeNull();expect(element.textContent).toContain('This table expired');expect(element.textContent).toContain('Join a room');});

@@ -154,7 +154,7 @@ export default function MobileApp({previewAT=import.meta.env.VITE_MOBILE_AT_PREV
     <div className="mobile-shell">
       <header className="mobile-brand">
         <button aria-label="DuelTheory home" onClick={() => navigate("home")}>
-          <img
+          <span className="mobile-home-label">Home</span><img
             className="mobile-crest"
             src="/branding/dt-forge-crest.svg"
             alt=""
@@ -225,10 +225,11 @@ export default function MobileApp({previewAT=import.meta.env.VITE_MOBILE_AT_PREV
             {route === "at" && <Arena allowResume mobile />}
             {route === "cards" && <Cards />}
             {route === "private" && <Room key={inviteKey} />}
+            {route === "account" && <section className="mobile-card"><h1>Account</h1><AccountPanel/></section>}
             {route === "more" && (
               <section className="mobile-card">
                 <h1>Settings & support</h1>
-                <AccountPanel/>
+
                 <label>
                   Display name
                   <input
@@ -262,8 +263,8 @@ export default function MobileApp({previewAT=import.meta.env.VITE_MOBILE_AT_PREV
           </Suspense>
         </ScreenBoundary>
       </main>
-      <nav className="mobile-nav" aria-label="Main navigation" style={{gridTemplateColumns:`repeat(${previewAT?5:3},1fr)`}}>
-        {(["home", "table", ...(previewAT?["at", "cards"] as const:[]), "more"] as const).map((id) => (
+      <nav className="mobile-nav" aria-label="Main navigation" style={{gridTemplateColumns:`repeat(${previewAT?6:4},1fr)`}}>
+        {(["home", "table", ...(previewAT?["at", "cards"] as const:[]), "account", "more"] as const).map((id) => (
           <button
             key={id}
             aria-current={route === id ? "page" : undefined}
@@ -275,7 +276,8 @@ export default function MobileApp({previewAT=import.meta.env.VITE_MOBILE_AT_PREV
                 table: "Table",
                 at: "Play AT",
                 cards: "Cards",
-                more: "More",
+                account: "Account",
+                more: "Settings",
               }[id]
             }
           </button>

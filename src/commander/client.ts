@@ -1,6 +1,7 @@
 import {requestSignal} from '../platform/polling';
 import {publicInviteBase} from '../platform/publicUrl';
 import type {CommanderRoomState,RoomCommand} from './model';
+export class RoomRequestError extends Error{constructor(message:string,public status:number){super(message);}}
 export type RoomSeat={code:string;token:string;playerId:string;api:string};
 export type RoomReply={state:CommanderRoomState;playerId:string;serverNow?:number};
 export const TABLE_API=(import.meta as ImportMeta & {env:Record<string,string>}).env.VITE_TABLE_API_URL||(import.meta as ImportMeta & {env:Record<string,string>}).env.VITE_COMMANDER_API_URL||'https://dueltheory-commander.cfpadvantage.workers.dev';
@@ -20,7 +21,7 @@ export async function roomRequest(api:string,code:string,token:string,method:'cr
  for(let attempt=0;attempt<2;attempt++){
   let response:Response;const timeout=requestSignal(10000,signal);
   try{response=await fetch(`${api.replace(/\/$/,'')}/rooms/${code}/${method}`,{method:method==='read'?'GET':'POST',headers:{Authorization:`Bearer ${token}`,...(method==='read'?{}:{'Content-Type':'application/json','X-Request-ID':requestId})},...(method==='read'?{}:{body:JSON.stringify(input)}),signal:timeout.signal});}catch{if(signal?.aborted)throw new DOMException('Request cancelled','AbortError');if(attempt===0)continue;throw Error('Connection lost. Check your refreshed totals before entering that change again.');}finally{timeout.dispose();}
-  const body=await response.json();if(response.status>=500&&attempt===0)continue;if(!response.ok)throw Error(body.error||'Unable to update this room.');return body as RoomReply;
+  const body=await response.json();if(response.status>=500&&attempt===0)continue;if(!response.ok)throw new RoomRequestError(body.error||'Unable to update this room.',response.status);return body as RoomReply;
  }
  throw Error('Unable to confirm the room update.');
 }

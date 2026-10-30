@@ -1,6 +1,6 @@
 import type {Card} from '../core/types';
 import type {DuelState} from '../engine/model';
-export type SoundEvent='draw'|'place'|'special'|'set'|'flip'|'spell'|'trap'|'attack'|'destroy'|'damage'|'turn'|'victory'|'defeat'|'chain'|'resolve'|'tableTitle'|'tableEliminated';
+export type SoundEvent='draw'|'place'|'special'|'set'|'flip'|'spell'|'trap'|'attack'|'destroy'|'damage'|'turn'|'victory'|'defeat'|'chain'|'resolve'|'tableTitle'|'tableEliminated'|'tableDice'|'tableLifeUp'|'tableLifeDown';
 export type SoundCue={event:SoundEvent;intensity?:number};
 /** Baseline on mount/reconnect. Only an appended event history represents new play. */
 export function duelSounds(before:DuelState|null,after:DuelState,viewer?:0|1,catalog:readonly Card[]=[]):SoundCue[]{

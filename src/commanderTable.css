@@ -29,3 +29,11 @@
 .ct-notice p{margin:4px 0}
 
 .ct-host-settings{padding:12px 16px;margin-bottom:10px}.ct-host-settings label{max-width:420px}
+.ct-appearance{padding:12px 16px;margin-bottom:10px}.ct-appearance label{max-width:420px}.ct-appearance input[type=color]{padding:4px;width:90px}.ct-appearance button{margin:4px 8px 4px 0}
+.ct-shell.ct-theme-obsidian,.ct-shell.ct-theme-wine,.ct-shell.ct-theme-ocean{background:var(--table-surface);padding:12px;border-radius:12px}
+.ct-shell .ct-player{isolation:isolate;overflow:hidden;background:var(--player-surface,#183529)}
+.ct-panel-background{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
+.ct-shell .ct-player.ct-has-background::before{content:'';position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,#07100de0,#07100dc9)}
+.ct-shell .ct-player h2,.ct-shell .ct-player header>span,.ct-shell .ct-player .ct-life span,.ct-shell .ct-player .ct-tile-note{color:#fff6dd;text-shadow:0 1px 3px #000}
+
+.ct-shell[class*='ct-theme-'] .ct-panel,.ct-shell[class*='ct-theme-'] .ct-room-bar{background:var(--table-surface,#183529)}.ct-shell:not(.ct-theme-forge) .ct-footnote,.ct-shell:not(.ct-theme-forge)>.ct-status{color:#fff1cf}

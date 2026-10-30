@@ -2,6 +2,12 @@
 import {afterEach,expect,it,vi} from 'vitest';
 import {SoundManager} from './SoundManager';
 afterEach(()=>{vi.unstubAllGlobals();vi.useRealTimers();localStorage.clear();});
+it('decodes bundled recorded table sounds, reuses decoded audio, and respects mute',async()=>{
+ const start=vi.fn(),decode=vi.fn(async()=>({duration:0.4}));
+ class Context{state='running';currentTime=1;destination={};createGain(){return {gain:{value:0,setTargetAtTime(){}},connect(){}};}decodeAudioData=decode;createBufferSource(){return {buffer:null,connect(){},disconnect(){},start,onended:null};}}
+ vi.stubGlobal('AudioContext',Context);const fetcher=vi.fn(async()=>new Response(new Uint8Array([1,2,3])));vi.stubGlobal('fetch',fetcher);
+ const manager=new SoundManager();await manager.unlock();manager.play([{event:'tableDice'}]);await vi.waitFor(()=>expect(start).toHaveBeenCalledTimes(1));expect(fetcher).toHaveBeenCalledWith('/audio/table/dice.mp3');manager.play([{event:'tableDice'}]);await vi.waitFor(()=>expect(start).toHaveBeenCalledTimes(2));expect(decode).toHaveBeenCalledTimes(1);manager.update({enabled:false});manager.play([{event:'tableLifeUp'}]);expect(fetcher).toHaveBeenCalledTimes(1);
+});
 it.each(['suspended','interrupted'])('resumes %s audio and primes output before resume finishes',async state=>{
  const calls:string[]=[];
  class Context{

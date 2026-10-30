@@ -21,7 +21,7 @@ export default function TableFirstPlayerDice({state,playerId,busy,onChange}:{sta
    <Die value={roll.rolls[p.id]}/><strong>{p.name}</strong><small>{roll.rolls[p.id]?`${roll.rolls[p.id]}${p.id===roll.winner?' · goes first':''}`:roll.eligible.includes(p.id)?'Waiting to roll':'Outside this tie-break'}</small>
   </div>)}</div>
   {!roll.winner&&<button className="ct-primary" disabled={busy||!canRoll} onClick={()=>onChange({type:'roll',round:roll.round})}>{busy?'Rolling…':canRoll?'Roll die · d6':'Waiting for other players'}</button>}
-  <span className="ct-dice-announcement" role="status">{roll.winner?`${state.players.find(p=>p.id===roll.winner)?.name} goes first.`:Object.entries(roll.rolls).map(([id,n])=>`${state.players.find(p=>p.id===id)?.name} rolled ${n}.`).join(' ')}</span>
+  <span className="ct-dice-announcement" role="status">{roll.winner?(state.players.some(p=>p.id===roll.winner)?`${state.players.find(p=>p.id===roll.winner)?.name} goes first.`:'Opening roll complete.'):Object.entries(roll.rolls).map(([id,n])=>`${state.players.find(p=>p.id===id)?.name} rolled ${n}.`).join(' ')}</span>
  </section>;
 }
 

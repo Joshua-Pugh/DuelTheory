@@ -1,4 +1,5 @@
 export type MobileRoute =
+  | "account"
   | "home"
   | "table"
   | "at"
@@ -9,7 +10,7 @@ const codePattern = /^[A-Z2-9]{8}$/;
 export function mobileRoute(hash: string): MobileRoute {
   const path = hash.replace(/^#\//, "");
   if (path.startsWith("private")) return "private";
-  return ["home", "table", "at", "cards", "more"].includes(path)
+  return ["home", "table", "at", "cards", "more", "account"].includes(path)
     ? (path as MobileRoute)
     : "home";
 }

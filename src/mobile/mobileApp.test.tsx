@@ -50,6 +50,12 @@ it("opens the real Table Companion from the mobile navigation", async () => {
   expect(document.body.textContent).toContain("Join");
   expect(document.body.textContent).not.toContain("GOAT");
 });
+it('makes Home, Account and Settings explicit and opens email account creation',async()=>{
+ await import('../account/AccountPanel');await act(async()=>root.render(<MobileApp/>));
+ for(const label of ['Home','Table','Account','Settings'])expect(button(label)).toBeDefined();
+ await act(async()=>{button('Account')!.click();window.dispatchEvent(new HashChangeEvent('hashchange'));});expect(location.hash).toBe('#/account');expect(document.querySelector('h1')?.textContent).toBe('Account');
+ await act(async()=>{button('Home')!.click();window.dispatchEvent(new HashChangeEvent('hashchange'));});expect(location.hash).toBe('#/home');expect(document.body.textContent).toContain('Join or create a table');
+});
 it("starts the bundled Brute/Noble duel after the coin flip and draws both hands", async () => {
   vi.useFakeTimers();
   await act(async () => root.render(<AshenDuelArena />));

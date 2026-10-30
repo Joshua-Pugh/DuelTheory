@@ -9,6 +9,10 @@ export function tableNotifications(before:TableRoomState|null,after:TableRoomSta
  // A new game may already have started between two polls. Never announce old eliminations.
  if(after.log.filter(e=>!before.log.some(old=>old.id===e.id)).some(e=>e.text.startsWith('reset the table')))return empty;
  const messages:string[]=[],cues:SoundCue[]=[];
+ const added=after.log.filter(e=>!before.log.some(old=>old.id===e.id));
+ if(added.some(e=>e.text.startsWith('rolled ')))cues.push({event:'tableDice'});
+ const changes=after.players.map(p=>({p,old:before.players.find(o=>o.id===p.id)})).filter(v=>v.old&&v.p.life!==v.old.life);
+ if(changes.length)cues.push({event:changes.reduce((total,v)=>total+v.p.life-v.old!.life,0)>0?'tableLifeUp':'tableLifeDown'});
  const oldTitle=sharedTableTitle(before),title=sharedTableTitle(after);
  if(oldTitle.holder!==title.holder){
   messages.push(title.holder?`${after.players.find(p=>p.id===title.holder)?.name??'A player'} holds ${title.label}.`:`${title.label} is now unclaimed.`);

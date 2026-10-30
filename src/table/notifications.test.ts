@@ -4,7 +4,7 @@ import {tableNotifications} from './notifications';
 function ready(){let s=newTableRoom('ABCDEFGH','Alerts',3,'a');for(const id of ['a','b','c'])s=applyRoomCommand(s,id,{type:'join',name:id,sources:[id]},'join-'+id);s=applyRoomCommand(s,'a',{type:'start'},'start');for(const id of ['a','b','c'])s=applyRoomCommand(s,id,{type:'roll',round:1},'roll-'+id,0,()=>id==='a'?6:1);return s;}
 it('does not announce initial snapshots, duplicate/older polls, new rooms or ordinary total changes',()=>{
  const s=ready(),next=applyRoomCommand(s,'a',{type:'adjust',field:'life',delta:-1},'life');
- for(const [before,after] of [[null,s],[s,s],[next,s],[s,{...next,code:'DIFFERENT'}],[s,next]] as const)expect(tableNotifications(before,after)).toEqual({messages:[],cues:[]});
+ for(const [before,after] of [[null,s],[s,s],[next,s],[s,{...next,code:'DIFFERENT'}]] as const)expect(tableNotifications(before,after)).toEqual({messages:[],cues:[]});
 });
 it('announces title claims, transfers and release without making a sound for label edits',()=>{
  const s=ready(),claimed=applyRoomCommand(s,'a',{type:'claimTitle',version:0},'claim'),moved=applyRoomCommand(claimed,'b',{type:'claimTitle',version:1},'move');
@@ -24,3 +24,5 @@ it('does not replay detached or reset histories after reconnecting',()=>{
  expect(tableNotifications(s,{...out,log:[out.log[0]]}).cues).toEqual([]);
  let next=applyRoomCommand(out,'a',{type:'reset'},'reset');next=applyRoomCommand(next,'a',{type:'start'},'start-again');expect(tableNotifications(out,next).cues).toEqual([]);
 });
+
+it('plays one life-change sound per confirmed batch without noisy text announcements',()=>{const s=ready(),down=applyRoomCommand(s,'a',{type:'adjust',field:'life',delta:-1},'life');expect(tableNotifications(s,down)).toEqual({messages:[],cues:[{event:'tableLifeDown'}]});const up=applyRoomCommand(down,'a',{type:'adjust',field:'life',delta:2},'gain');expect(tableNotifications(down,up).cues).toEqual([{event:'tableLifeUp'}]);});

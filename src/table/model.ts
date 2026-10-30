@@ -1,12 +1,13 @@
+import {validTheme,validAccent,type TableTheme} from './appearance';
 import {DUEL_PROFILE,validateTableProfile,type TableProfile} from './profiles';
 import {defaultTurnTimer,turnTimeRemaining,type TurnTimer} from './timer';
 /** Manual multiplayer scorekeeping; this does not adjudicate card effects. */
 export type TotalsSnapshot={life:number;poison:number;damage:Record<string,number>;counters:Record<string,number>};
 export type LastTableEntry={id:string;text:string;before:TotalsSnapshot};
-export type TablePlayer={lastEntry?:LastTableEntry;id:string;name:string;sources?:string[];commanders:string[];life:number;poison:number;damage:Record<string,number>;counters:Record<string,number>;conceded:boolean};
+export type TablePlayer={theme?:TableTheme;accent?:string;backgroundVersion?:string;lastEntry?:LastTableEntry;id:string;name:string;sources?:string[];commanders:string[];life:number;poison:number;damage:Record<string,number>;counters:Record<string,number>;conceded:boolean};
 export type FirstPlayerRoll={round:number;eligible:string[];rolls:Record<string,number>;winner?:string};
 export type TableTitle={label:string;reminder:string;version:number;holder?:string};
-export type TableRoomState={closedAt?:number;turnTracking?:boolean;timer?:TurnTimer;tableTitle?:TableTitle;profile?:TableProfile;code:string;title:string;host:string;capacity:number;started:boolean;revision:number;players:TablePlayer[];firstPlayer?:FirstPlayerRoll;turnOrder?:string[];turn?:number;log:{id:string;at:number;player:string;text:string}[]};
+export type TableRoomState={theme?:TableTheme;closedAt?:number;turnTracking?:boolean;timer?:TurnTimer;tableTitle?:TableTitle;profile?:TableProfile;code:string;title:string;host:string;capacity:number;started:boolean;revision:number;players:TablePlayer[];firstPlayer?:FirstPlayerRoll;turnOrder?:string[];turn?:number;log:{id:string;at:number;player:string;text:string}[]};
 export const sharedTableTitle=(s:TableRoomState):TableTitle=>s.tableTitle??{label:'Table Title',reminder:'',version:0};
 export type RoomCommand=
  |{type:'join';name:string;sources?:string[];commanders?:string[]}
@@ -18,6 +19,7 @@ export type RoomCommand=
  |{type:'configureTimer';version:number;durationSeconds:number}|{type:'timer';version:number;turn:number;mode:'pause'|'resume'|'restart'}
  |{type:'configureTurns';enabled:boolean;revision:number}
  |{type:'transferHost';playerId:string;revision:number}|{type:'closeRoom';revision:number}
+ |{type:'leave'}|{type:'appearance';accent:string;theme:TableTheme}|{type:'tableTheme';theme:TableTheme}
  |{type:'start'}|{type:'reset'};
 export class RoomError extends Error{}
 const label=(value:unknown,max:number)=>{if(typeof value!=='string'||!value.trim()||value.trim().length>max)throw new RoomError(`Enter text between 1 and ${max} characters.`);return value.trim();};
@@ -56,16 +58,39 @@ export function applyRoomCommand(original:TableRoomState,actor:string,input:Room
  const s=structuredClone(original);let text='';let player=s.players.find(p=>p.id===actor);
  if(input.type==='join'){
   if(player)return s;
-  if(s.started)throw new RoomError('This game has started; new seats are locked.');
+
   if(s.players.length>=s.capacity)throw new RoomError('This room is full.');
   const name=label(input.name,24);
   if(s.players.some(p=>p.name.toLowerCase()===name.toLowerCase()))throw new RoomError('That player name is already taken.');
   const names=input.sources??input.commanders;
   if(!Array.isArray(names)||names.length<1||names.length>(s.profile?8:2))throw new RoomError('Enter up to eight named damage sources.');
-  player={id:actor,name,commanders:names.map(n=>label(n,80)),...(s.profile?{sources:names.map(n=>label(n,80))}:{}),life:roomProfile(s).health.start,poison:0,damage:{},counters:Object.fromEntries((s.profile?.counters??[]).map(c=>[c.label,c.start])),conceded:false};s.players.push(player);text='joined the table';
+  player={id:actor,name,commanders:names.map(n=>label(n,80)),...(s.profile?{sources:names.map(n=>label(n,80))}:{}),life:roomProfile(s).health.start,poison:0,damage:{},counters:Object.fromEntries((s.profile?.counters??[]).map(c=>[c.label,c.start])),conceded:false};s.players.push(player);if(s.firstPlayer&&!s.firstPlayer.winner)s.firstPlayer.eligible.push(actor);if(s.firstPlayer?.winner&&s.turnOrder)s.turnOrder.push(actor);text='joined the table';
  }else{
   if(!player)throw new RoomError('Join this room before changing values.');
-  if(input.type==='transferHost'||input.type==='closeRoom'){
+  if(input.type==='leave'){
+   if(actor===s.host)throw new RoomError('Pass hosting or close the table before leaving.');
+   const current=currentTurnPlayer(s),oldOrder=s.turnOrder??[],oldIndex=oldOrder.indexOf(actor);
+   s.players=s.players.filter(p=>p.id!==actor);
+   if(s.firstPlayer){s.firstPlayer.eligible=s.firstPlayer.eligible.filter(id=>id!==actor);delete s.firstPlayer.rolls[actor];}
+   if(s.turnOrder&&s.turn){
+    const order=s.turnOrder.filter(id=>id!==actor);
+    const desired=current===actor?[...oldOrder.slice(oldIndex+1),...oldOrder.slice(0,oldIndex)].find(id=>s.players.some(p=>p.id===id&&!tableEliminated(p,s))):current;
+    if(current===actor)s.turn++;
+    const index=order.indexOf(desired??'');if(order.length&&index>=0){const rotate=(index-(s.turn-1)%order.length+order.length)%order.length;s.turnOrder=[...order.slice(rotate),...order.slice(0,rotate)];}else s.turnOrder=order;
+   }
+   if(s.tableTitle?.holder===actor)s.tableTitle={...s.tableTitle,holder:undefined,version:s.tableTitle.version+1};
+   text='left the table; seat is available';
+  }
+  else if(input.type==='appearance'){
+   if(!validTheme(input.theme)||!validAccent(input.accent))throw new RoomError('Choose a supported theme and six-digit color.');
+   player.theme=input.theme;player.accent=input.accent;text='updated their player theme';
+  }
+  else if(input.type==='tableTheme'){
+   if(actor!==s.host)throw new RoomError('Only the host can change the table theme.');
+   if(!validTheme(input.theme))throw new RoomError('Choose a supported table theme.');
+   s.theme=input.theme;text='updated the table theme';
+  }
+  else if(input.type==='transferHost'||input.type==='closeRoom'){
    if(actor!==s.host)throw new RoomError('Only the current host can transfer hosting or close the table.');
    if(input.revision!==s.revision)throw new RoomError('The table changed. Refresh and try again.');
    if(input.type==='transferHost'){

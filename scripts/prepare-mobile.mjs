@@ -24,6 +24,7 @@ await cp(
 );
 await cp("public/table-privacy.html", "dist-mobile/table-privacy.html");
 await cp("public/account-deletion.html", "dist-mobile/account-deletion.html");
+await cp("public/audio", "dist-mobile/audio", { recursive: true });
 const manifest = JSON.parse(
   await readFile("dist-mobile/.vite/manifest.json", "utf8"),
 );
