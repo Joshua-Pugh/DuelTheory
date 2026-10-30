@@ -11,3 +11,5 @@ The crest uses separated DT initials and a shallow gold bevel. The wordmark is C
 - public/branding/dt-forge-icon-512.png — raster icon master.
 
 Forest #14382B; gold face ranges from #E0C57F through #C9A650 to #B38A3E. Vector artwork was developed with AI-assisted coding and reviewed at desktop and phone header sizes.
+
+Android launcher revision October 30: native vector foreground replaces the cropped 344px bitmap. Approved crest paths retain their aspect ratio inside the adaptive safe zone, with explicit gradient/bevel edges and a full-bleed forest background. Density PNG fallbacks are rendered directly from public/branding/dt-android-icon.svg. Android version 1.0.4 / code 5.
