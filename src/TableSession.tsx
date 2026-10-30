@@ -20,7 +20,7 @@ export default function TableSession({state,seat,connected,busy,serverOffset=0,c
  const adjust=(field:'life'|'poison'|'counter',delta:number,key?:string)=>void change({type:'adjust',field,delta,...(key?{key}:{})});
  const current=currentTurnPlayer(state),host=seat.playerId===state.host;
  return <>
- <TableNotifications state={state} connected={connected} settingsContainer={soundSlot}/> 
+ <TableNotifications state={state} connected={connected} settingsContainer={soundSlot}/>
  <header className="ct-session-header"><div><h2>{state.title}</h2><small>{connected?'Connected':'Reconnecting · changes unavailable'} · {state.players.length}/{state.capacity} players</small></div>
  <div className="ct-session-actions">{!controlsLocked&&<button onClick={()=>setInvite(!invite)} aria-expanded={invite}>Invite</button>}<button ref={menuButton} aria-expanded={menuOpen} aria-controls="ct-table-menu" onClick={()=>setMenuOpen(!menuOpen)}>Table menu</button></div></header>
  {!controlsLocked&&invite&&<TableInvite code={state.code} copy={copy} leave={leave} host={host} practice={practice}/>}
