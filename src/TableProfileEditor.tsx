@@ -1,8 +1,8 @@
 import TableNumberInput from './TableNumberInput';
 import type {TableProfile} from './table/profiles';
-export default function TableProfileEditor({profile,onChange}:{profile:TableProfile;onChange:(p:TableProfile)=>void}){
+export default function TableProfileEditor({profile,onChange,expanded=false}:{profile:TableProfile;onChange:(p:TableProfile)=>void;expanded?:boolean}){
  const health=(patch:Partial<TableProfile['health']>)=>onChange({...profile,health:{...profile.health,...patch}});
- return <details className="ct-profile-editor"><summary>Customize {profile.name} · {Number.isFinite(profile.health.start)?profile.health.start:'—'} {profile.health.label}</summary><p className="ct-hint">The host sets these before creating a room. Everyone joins with the same settings. Blank defeat thresholds disable automatic elimination for that tracker.</p>
+ return <details className="ct-profile-editor" open={expanded||undefined}><summary>Customize {profile.name} · {Number.isFinite(profile.health.start)?profile.health.start:'—'} {profile.health.label}</summary><p className="ct-hint">The host sets these before creating a room. Everyone joins with the same settings. Blank defeat thresholds disable automatic elimination for that tracker.</p>
  <label>Profile name<input maxLength={50} value={profile.name} onChange={e=>onChange({...profile,name:e.target.value})}/></label>
  <div className="ct-entry"><label>Primary total label<input maxLength={24} value={profile.health.label} onChange={e=>health({label:e.target.value})}/></label><label>Starting total<TableNumberInput min={1} max={99999} value={profile.health.start} onChange={n=>health({start:n??NaN})}/></label></div>
  <label>Defeat at or below<TableNumberInput min={0} max={99999} placeholder="Disabled" value={profile.health.defeatAt} onChange={n=>health({defeatAt:n})}/></label>

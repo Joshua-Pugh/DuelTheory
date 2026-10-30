@@ -59,3 +59,14 @@ Room history is shared with room participants, not a permanent account history. 
 ## Commercial scope
 
 This change creates the configurable product foundation; it does not add subscriptions, accounts, payment processing or access restrictions. Pricing and entitlements need a separate implementation. A rebrand is not legal clearance: review the actual branding, third-party references/content, commercial terms and platform structure with an IP attorney before charging. Wizards' fan-content permission is not a paid-content license: https://company.wizards.com/en/legal/fancontentpolicy
+
+
+## October 30 usability update
+
+Room setup has separate Create and Join tabs and a reusable profile editor. MTG Commander is available as a starting profile. Save changes updates the selected local profile; Save as new requires a separate name. Existing rooms retain their original rules. Import/export and Creator Studio profiles remain supported; account cloud setup management remains on the Account screen.
+
+Before the first-player roll completes, the lobby shows the invite QR, URL, copy action, leave action, seat list and the next host/player action. The live player cards are hidden. Once the authoritative state reports a completed roll, the local player's card shows life and every configured counter with direct controls. Opponents show compact life totals and expandable read-only details. Invite and Table menu remain available at the top; settings, hosting, timer, title, advanced corrections and history live in the menu. Sounds and major-event notices keep running while the menu is closed. Menu closes with its close button or Escape.
+
+Guided Commander practice is separate from network rooms and uses the same editor, table controls and command reducer. It requires choosing four seats, configuring Poison (0 / 10), an optional Energy resource (0 / no defeat threshold), and commander-source damage (21). The user must save, edit and select the saved profile before creating a local practice room. Simulated seats and explicitly scripted dice avoid needing friends or getting stuck on ties. Life loss/gain, separate counters, linked source damage, atomic Undo, opponent inspection and menu discovery require their corresponding successful actions. The practice edit uses Energy starting at 1 as an explicitly labelled house setup; ordinary Energy starts at 0. Practice profiles persist locally; practice room totals do not. No fake public room or invite is created. The lesson can be exited at any point and replayed from setup or the table menu.
+
+Rule references: https://magic.wizards.com/en/formats/commander and https://magic.wizards.com/en/news/feature/phyrexia-all-will-be-one-mechanics . This is a manual tracker, not an adjudicator of card effects.

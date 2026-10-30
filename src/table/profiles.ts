@@ -2,6 +2,7 @@
 export type TrackerDefinition={label:string;start:number;defeatAt:number|null};
 export type TableProfile={schemaVersion:1;name:string;health:{label:string;start:number;defeatAt:number|null};counters:TrackerDefinition[];sourceDamage:{enabled:boolean;label:string;defeatAt:number|null};};
 export const DUEL_PROFILE:TableProfile={schemaVersion:1,name:'Classic Duel',health:{label:'Life',start:20,defeatAt:0},counters:[],sourceDamage:{enabled:false,label:'Source damage',defeatAt:null}};
+export const COMMANDER_PROFILE:TableProfile={schemaVersion:1,name:'MTG Commander',health:{label:'Life',start:40,defeatAt:0},counters:[{label:'Poison',start:0,defeatAt:10}],sourceDamage:{enabled:true,label:'Commander combat damage',defeatAt:21}};
 export const MULTIPLAYER_PROFILE:TableProfile={schemaVersion:1,name:'Multiplayer Table',health:{label:'Vitality',start:30,defeatAt:0},counters:[{label:'Energy',start:0,defeatAt:null}],sourceDamage:{enabled:true,label:'Source damage',defeatAt:null}};
 const reserved=['__proto__','prototype','constructor'];
 export function validateTableProfile(input:unknown):TableProfile{
@@ -19,4 +20,5 @@ export function validateTableProfile(input:unknown):TableProfile{
 const key='dueltheory.table.profiles.v1';
 export function savedTableProfiles():TableProfile[]{try{const raw=JSON.parse(localStorage.getItem(key)||'[]');return Array.isArray(raw)?raw.slice(0,20).flatMap(p=>{try{return [validateTableProfile(p)];}catch{return [];}}):[];}catch{return [];}}
 export function saveTableProfile(profile:TableProfile){const p=validateTableProfile(profile),all=savedTableProfiles().filter(x=>x.name.toLowerCase()!==p.name.toLowerCase());localStorage.setItem(key,JSON.stringify([...all,p].slice(-20)));}
+export function updateTableProfile(previousName:string,profile:TableProfile){const p=validateTableProfile(profile),all=savedTableProfiles();const index=all.findIndex(x=>x.name===previousName);if(index<0)throw Error('This saved profile is no longer on this device. Save it as new.');if(all.some((x,i)=>i!==index&&x.name.toLowerCase()===p.name.toLowerCase()))throw Error('A different saved profile already has this name. Choose another name.');all[index]=p;localStorage.setItem(key,JSON.stringify(all));}
 export function profileFromGame(definition:{name:string;healthLabel:string;startingHealth:number}):TableProfile{return validateTableProfile({...DUEL_PROFILE,name:definition.name.slice(0,50),health:{label:definition.healthLabel.slice(0,24),start:definition.startingHealth,defeatAt:0}});}
