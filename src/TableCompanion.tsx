@@ -1,4 +1,5 @@
 import TablePractice from './TablePractice';
+import {applySavedAppearanceToRoom} from './table/defaultAppearance';
 import {PRACTICE_COMPLETE} from './table/practice';
 import TableSession from './TableSession';
 import {TABLE_THEMES} from './table/appearance';
@@ -38,6 +39,7 @@ export default function TableCompanion(){
   const remembered=create?null:savedRoomSeat(roomCode),token=remembered?.token||newSeatToken(),api=remembered?.api||TABLE_API;
   const reply=await roomRequest(api,roomCode,token,remembered?'read':create?'create':'join',{name,sources:[sourceName||name||'Source 1',...extraSources.split('\n').map(x=>x.trim()).filter(Boolean)],title,capacity,...(create?{profile:validateTableProfile(profile)}:{})});
   const next={api,code:roomCode,token,playerId:reply.playerId};saveRoomSeat(next);rememberSeatName(reply.state.players.find(p=>p.id===reply.playerId)?.name);setSeat(next);liveSeat.current=next;syncClock(reply);if(!accept(reply.state))return;setConnected(true);setStatus(create?'Room created. Share the code with your table.':'You joined the table.');
+  if(!remembered){try{await applySavedAppearanceToRoom(next,accept,()=>liveSeat.current?.token===next.token);}catch{if(liveSeat.current?.token===next.token)setStatus('You joined the table. Your saved look could not be fully applied. Retry from Appearance in the table menu.');}}
  }catch(e){setError(e instanceof Error?e.message:String(e));}finally{setBusy(false);}};
  const change=async(command:RoomCommand):Promise<boolean>=>{if(!seat||sending.current)return false;sending.current=true;setBusy(true);setError('');try{const reply=await roomRequest(seat.api,seat.code,seat.token,'action',command);if(liveSeat.current?.token!==seat.token)return false;syncClock(reply);if(accept(reply.state)){setConnected(true);setStatus('Saved to the table.');}return true;}catch(e){if(e instanceof RoomRequestError&&e.status===410){left();return command.type==='leave';}setConnected(false);setError(e instanceof Error?e.message:String(e));return false;}finally{sending.current=false;setBusy(false);}};
  const leave=()=>{

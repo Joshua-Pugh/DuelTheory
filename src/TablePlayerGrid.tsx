@@ -8,14 +8,14 @@ import HoldAdjustButton from './HoldAdjustButton';
 import {compactTrackers,trackerCommand} from './table/compactTrackers';
 import {Flag} from 'lucide-react';
 import {currentTurnPlayer,roomProfile,sharedTableTitle,tableEliminated,tableWarnings,tableGameReady,type RoomCommand,type TableRoomState} from './table/model';
-export default function TablePlayerGrid({seat,state,playerId,busy,onAdjust}:{seat?:RoomSeat;state:TableRoomState;playerId:string;busy:boolean;onAdjust:(command:Extract<RoomCommand,{type:'adjust'}>)=>void|boolean|Promise<void|boolean>}){
+export default function TablePlayerGrid({seat,state,playerId,busy,onAdjust,previewBackground}:{seat?:RoomSeat;state:TableRoomState;playerId:string;busy:boolean;onAdjust:(command:Extract<RoomCommand,{type:'adjust'}>)=>void|boolean|Promise<void|boolean>;previewBackground?:string|null}){
  const [damageSelection,setDamageSelection]=useState<DamageSelection|null>(null),[expanded,setExpanded]=useState<string|null>(null);
  const settings=roomProfile(state),marker=sharedTableTitle(state),current=currentTurnPlayer(state);
  const players=[...state.players].sort((a,b)=>Number(b.id===playerId)-Number(a.id===playerId));
  return <div className="ct-table ct-dashboard-grid ct-focused-grid" aria-label="All players">{players.map(p=>{
   const mine=p.id===playerId,out=tableEliminated(p,state),holds=marker.holder===p.id,trackers=compactTrackers(state,p.id).filter(t=>t.field!=='damage');
   return <article key={p.id} style={{'--seat':p.accent,'--player-surface':TABLE_THEMES[p.theme??state.theme??'forge'].background} as CSSProperties} className={`ct-player${mine?' ct-mine':' ct-opponent'}${out?' ct-conceded':''}${p.backgroundVersion?' ct-has-background':''}${current===p.id?' ct-taking-turn':''}`}>
-   {seat&&<TablePlayerBackground seat={seat} playerId={p.id} version={p.backgroundVersion}/>}<header><h2>{p.name}</h2><span>{mine?'YOU':current===p.id?'CURRENT TURN':'READ ONLY'}</span></header>
+   {mine&&previewBackground?<img className="ct-panel-background" src={previewBackground} alt=""/>:seat&&<TablePlayerBackground seat={seat} playerId={p.id} version={p.backgroundVersion}/>}<header><h2>{p.name}</h2><span>{mine?'YOU':current===p.id?'CURRENT TURN':'READ ONLY'}</span></header>
    {holds&&<div className="ct-title-badge"><Flag size={15}/>{marker.label}</div>}
    {mine?<div className="ct-direct-trackers">{trackers.map(t=>{
     const step=(direction:number,n:number)=>{const amount=Math.min(n,direction<0?t.value-t.min:t.max-t.value);return amount>0?onAdjust(trackerCommand(t,direction*amount,false)):false;};

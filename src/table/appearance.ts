@@ -5,6 +5,8 @@ export function validAccent(value:unknown):value is string{return typeof value==
 export const MAX_BACKGROUND_BYTES=128*1024;
 export function savedAppearance():{theme:TableTheme;accent:string}{try{const value=JSON.parse(localStorage.getItem('dueltheory.table.appearance.v1')||'null');if(validTheme(value?.theme)&&validAccent(value?.accent))return value;}catch{}return {theme:'forge',accent:'#ddc57a'};}
 export function saveAppearance(value:{theme:TableTheme;accent:string}){if(!validTheme(value.theme)||!validAccent(value.accent))throw Error('Invalid appearance.');localStorage.setItem('dueltheory.table.appearance.v1',JSON.stringify(value));}
+export function autoAppearanceEnabled(){try{return localStorage.getItem('dueltheory.table.auto-appearance.v1')==='true';}catch{return false;}}
+export function saveAutoAppearance(enabled:boolean){localStorage.setItem('dueltheory.table.auto-appearance.v1',String(enabled));}
 /** Only bounded raster files; served through authenticated room access, never as HTML/SVG. */
 export function backgroundMime(data:Uint8Array):'image/jpeg'|'image/png'|'image/webp'|null{
  if(data.length<12||data.length>MAX_BACKGROUND_BYTES)return null;
