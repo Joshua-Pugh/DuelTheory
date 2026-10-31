@@ -20,7 +20,7 @@ export default function TableProfileSetup({profile,onChange}:{profile:TableProfi
   if(owner){
    const existing=newCopy?undefined:cloud.find(r=>'cloud:'+r.id===selected);
    if(!newCopy&&!existing)throw Error('Load your account template again before saving changes.');
-   if(cloud.some(r=>r.id!==existing?.id&&r.name.toLowerCase()===p.name.toLowerCase()))throw Error('That template name is already in your account. Choose another name.');
+   if((!existing||existing.name.toLowerCase()!==p.name.toLowerCase())&&cloud.some(r=>r.id!==existing?.id&&r.name.toLowerCase()===p.name.toLowerCase()))throw Error('That template name is already in your account. Choose another name.');
    if(!existing&&cloud.length>=FREE_CLOUD_TEMPLATES)throw Error('Your five account template slots are full. Edit an existing template or delete one from Load saved template.');
    const row=await saveCloudSetup({kind:'game',name:p.name,data:p,...(existing?{id:existing.id,revision:existing.revision}:{})});
    if(identity.current!==owner)return;setCloud(rows=>[row,...rows.filter(r=>r.id!==row.id)]);setSelected('cloud:'+row.id);setMessage('Template saved to your account. Load it on the website or app next time.');
