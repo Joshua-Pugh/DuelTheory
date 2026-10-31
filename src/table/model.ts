@@ -17,6 +17,8 @@ export type RoomCommand=
  |{type:'claimTitle'|'releaseTitle';version:number}|{type:'configureTitle';version:number;label:string;reminder:string}
  |{type:'undo';entryId:string}
  |{type:'configureTimer';version:number;durationSeconds:number}|{type:'timer';version:number;turn:number;mode:'pause'|'resume'|'restart'}
+ |{type:'configureSteps';tapAmount:number;holdAmount:number;revision:number}
+ |{type:'configureCounter';label:string;remove?:boolean;revision:number}
  |{type:'configureTurns';enabled:boolean;revision:number}
  |{type:'transferHost';playerId:string;revision:number}|{type:'closeRoom';revision:number}
  |{type:'leave'}|{type:'appearance';accent:string;theme:TableTheme}|{type:'tableTheme';theme:TableTheme}
@@ -107,6 +109,23 @@ export function applyRoomCommand(original:TableRoomState,actor:string,input:Room
    const entry=player.lastEntry;if(!tableGameReady(s)||!entry||entry.id!==input.entryId)throw new RoomError('That entry is no longer available to undo.');
    Object.assign(player,structuredClone(entry.before));delete player.lastEntry;text=`undid last entry: ${entry.text}`;
   }
+  else if(input.type==='configureSteps'){
+   if(actor!==s.host)throw new RoomError('Only the host can change adjustment amounts.');
+   if(input.revision!==s.revision)throw new RoomError('The table changed. Try again.');
+   if(![input.tapAmount,input.holdAmount].every(n=>Number.isInteger(n)&&n>=1&&n<=99999))throw new RoomError('Choose whole-number amounts from 1 to 99999.');
+   if(!s.profile)for(const p of s.players)p.counters.Poison=p.poison;
+   s.profile=validateTableProfile({...roomProfile(s),health:{...roomProfile(s).health,tapAmount:input.tapAmount,holdAmount:input.holdAmount}});text=`set life adjustments: tap ${input.tapAmount}, hold ${input.holdAmount}`;
+  }
+  else if(input.type==='configureCounter'){
+   if(actor!==s.host)throw new RoomError('Only the host can add or remove table counters.');
+   if(input.revision!==s.revision)throw new RoomError('The table changed. Try again.');
+   const key=label(input.label,24);if(['__proto__','constructor','prototype'].includes(key.toLowerCase()))throw new RoomError('Choose a different counter name.');
+   if(input.remove!==undefined&&typeof input.remove!=='boolean')throw new RoomError('Invalid counter action.');
+   if(!s.profile)for(const p of s.players)p.counters.Poison=p.poison;
+   const profile=roomProfile(s),exists=profile.counters.some(c=>c.label.toLowerCase()===key.toLowerCase());
+   if(input.remove){s.profile=validateTableProfile({...profile,counters:profile.counters.filter(c=>c.label!==key)});for(const p of s.players){delete p.counters[key];delete p.lastEntry;}text=`removed counter ${key}`;}
+   else{if(exists)throw new RoomError('That counter already exists.');if(profile.counters.length>=8)throw new RoomError('Use up to 8 table counters.');s.profile=validateTableProfile({...profile,counters:[...profile.counters,{label:key,start:0,defeatAt:null}]});for(const p of s.players){p.counters[key]=0;delete p.lastEntry;}text=`added counter ${key}`;}
+  }
   else if(input.type==='configureTurns'){
    if(actor!==s.host)throw new RoomError('Only the host can configure turn passing.');
    if(typeof input.enabled!=='boolean')throw new RoomError('Choose whether turn passing is enabled.');
@@ -174,7 +193,7 @@ export function applyRoomCommand(original:TableRoomState,actor:string,input:Room
   else if(input.type==='reset'){if(actor!==s.host)throw new RoomError('Only the host can reset the game.');for(const p of s.players){p.life=roomProfile(s).health.start;p.poison=0;p.damage={};p.counters=Object.fromEntries((s.profile?.counters??[]).map(c=>[c.label,c.start]));p.conceded=false;delete p.lastEntry;}if(s.tableTitle)s.tableTitle={...s.tableTitle,holder:undefined,version:s.tableTitle.version+1};s.started=false;delete s.firstPlayer;delete s.turnOrder;delete s.turn;text=`reset the table to ${roomProfile(s).health.start} ${roomProfile(s).health.label}; seats are open`;}
   else if(input.type==='concede'){if(typeof input.value!=='boolean')throw new RoomError('Invalid concession.');player.conceded=input.value;delete player.lastEntry;text=input.value?'conceded':'returned to the game';}
   else if(input.type==='adjust'){
-   const n=input.delta;if(!Number.isInteger(n)||n===0||Math.abs(n)>999)throw new RoomError('Use a whole-number change from 1 to 999.');
+   const n=input.delta;if(!Number.isInteger(n)||n===0||Math.abs(n)>(input.field==='life'?99999:999))throw new RoomError('Use a whole-number change within this tracker’s range.');
    if(input.field==='life'){const next=player.life+n;if(Math.abs(next)>99999)throw new RoomError('Primary total is out of range.');player.life=next;text=`${n>0?'+':''}${n} ${roomProfile(s).health.label} → ${next}`;}
    else if(input.field==='poison'){if(s.profile)throw new RoomError('Use a configured counter.');const next=player.poison+n;if(next<0||next>999)throw new RoomError('Poison cannot go below 0 or above 999.');player.poison=next;text=`${n>0?'+':''}${n} poison → ${next}`;}
    else if(input.field==='damage'){
@@ -186,6 +205,7 @@ export function applyRoomCommand(original:TableRoomState,actor:string,input:Room
     text=`${n>0?'+':''}${n} damage from ${source.name} (${source.owner})${input.loseLife?' · life adjusted':''}`;
    }else if(input.field==='counter'){
     const key=label(input.key,24);if(['__proto__','constructor','prototype'].includes(key.toLowerCase()))throw new RoomError('Choose a different counter name.');
+    if(!Object.hasOwn(player.counters,key)&&actor!==s.host)throw new RoomError('Ask the host to add this counter to the table.');
     if(!Object.hasOwn(player.counters,key)&&Object.keys(player.counters).length>=8)throw new RoomError('Use up to 8 custom counters.');
     const next=(Object.hasOwn(player.counters,key)?player.counters[key]:0)+n;if(next<0||next>9999)throw new RoomError('Counter is out of range.');player.counters[key]=next;text=`${n>0?'+':''}${n} ${key} → ${next}`;
    }else throw new RoomError('Unknown counter.');

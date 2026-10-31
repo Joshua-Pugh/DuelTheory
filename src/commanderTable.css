@@ -33,7 +33,7 @@
 .ct-shell.ct-theme-obsidian,.ct-shell.ct-theme-wine,.ct-shell.ct-theme-ocean{background:var(--table-surface);padding:12px;border-radius:12px}
 .ct-shell .ct-player{isolation:isolate;overflow:hidden;background:var(--player-surface,#183529)}
 .ct-panel-background{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
-.ct-shell .ct-player.ct-has-background::before{content:'';position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,#07100de0,#07100dc9)}
+.ct-shell .ct-player.ct-has-background::before{content:'';position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,#07100d45,#07100d70)}
 .ct-shell .ct-player h2,.ct-shell .ct-player header>span,.ct-shell .ct-player .ct-life span,.ct-shell .ct-player .ct-tile-note{color:#fff6dd;text-shadow:0 1px 3px #000}
 
 .ct-shell[class*='ct-theme-'] .ct-panel,.ct-shell[class*='ct-theme-'] .ct-room-bar{background:var(--table-surface,#183529)}.ct-shell:not(.ct-theme-forge) .ct-footnote,.ct-shell:not(.ct-theme-forge)>.ct-status{color:#fff1cf}
@@ -45,3 +45,7 @@
 .ct-in-session .ct-session-header{position:sticky;top:0;z-index:25;background:#eee8d2;padding:8px 0;border-bottom:1px solid #929779}.ct-practice .ct-session-header{position:static}.ct-in-session:not(.ct-theme-forge) .ct-session-header{background:var(--table-surface)}.ct-entry-identity summary{color:#294532}.ct-practice .ct-profile-editor>summary{pointer-events:auto}.ct-menu-body .ct-notice:empty{display:none}
 .ct-heading{margin-bottom:12px}.ct-heading h1{font-size:26px;margin:8px 0}.ct-heading p{font-size:13px;margin:6px 0}.ct-learn-banner{padding:12px}.ct-shell .ct-entry-identity label{margin:12px 0}.ct-source-identity{margin:4px 0 8px}.ct-source-identity>summary{padding:8px 0}.ct-learn-complete{flex-direction:row;align-items:center}.ct-learn-complete p{display:none}.ct-learn-complete button{width:auto;font-size:12px;min-height:40px;padding:6px 10px}
 .ct-menu-lesson{padding:12px;margin-bottom:16px;border:1px solid #d5b976;background:#f7f0db;color:#203d2d;border-radius:8px}.ct-menu-lesson h3{margin:0 0 8px}.ct-menu-lesson p{font-size:13px;line-height:1.5;margin:6px 0}
+
+.ct-has-background .ct-direct-tracker{background:#081a133b;backdrop-filter:blur(1px)}
+.ct-has-background output,.ct-has-background .ct-life strong{color:#fff9e7;text-shadow:0 2px 4px #000,0 0 12px #000}
+.ct-has-background .ct-hold-hint,.ct-has-background .ct-player-options>summary{background:#081a1399;border-radius:6px;padding:8px;text-shadow:0 1px 2px #000}
