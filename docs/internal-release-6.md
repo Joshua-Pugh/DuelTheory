@@ -1,6 +1,6 @@
 # Internal release 1.0.5 / code 6 — lesson refinements
 
-Prepared October 30, 2026. Signed bundle and Play upload pending.
+Published October 30, 2026 at 8:21 PM Eastern. Play Console confirms Active and Available to internal testers, version 1.0.5 / code 6. Website deployment of af21a8b passed and the live preset list and 21-step lesson were verified. Signed AAB verified with jarsigner and all 75 web assets matched the tested build. Preserved copy: ../releases/table-companion-20261028/DuelTheory-internal-v6-signed.aab; 19,995,509 bytes; SHA256 6c5290a93d56089c3bbf284f54e2a58c8b5c5d2334915deab96a0f594dc946ba. Publication proof: ../internal-release-1-0-5.png.
 
 - The reuse step says: No friends or other accounts are needed for this lesson.
 - Removed MTG Commander from built-in profile choices and moved lesson data out of the preset module. Commander remains a teaching example; user-saved profiles are preserved.
