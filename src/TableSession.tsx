@@ -1,4 +1,4 @@
-import {useState,useRef,useEffect} from 'react';
+import {useState,useRef,useEffect,type ReactNode} from 'react';
 import {Shield,RefreshCcw} from 'lucide-react';
 import TableNumberInput from './TableNumberInput';
 import TablePlayerGrid from './TablePlayerGrid';
@@ -13,7 +13,7 @@ import TableAppearance from './TableAppearance';
 import TableInvite from './TableInvite';
 import {roomProfile,tableGameReady,counterValue,currentTurnPlayer,tableTurnsEnabled,tableGameOver,type TableRoomState,type RoomCommand} from './table/model';
 import type {RoomSeat} from './table/client';
-export default function TableSession({state,seat,connected,busy,serverOffset=0,change,leave,copy,onState,download,practice=false,onPractice}:{state:TableRoomState;seat:RoomSeat;connected:boolean;busy:boolean;serverOffset?:number;change:(command:RoomCommand)=>Promise<boolean>;leave:()=>void;copy:()=>void;onState:(s:TableRoomState)=>void;download:(v:unknown,n:string)=>void;practice?:boolean;onPractice?:()=>void}){
+export default function TableSession({state,seat,connected,busy,serverOffset=0,change,leave,copy,onState,download,practice=false,onPractice,menuHelp}:{state:TableRoomState;seat:RoomSeat;connected:boolean;busy:boolean;serverOffset?:number;change:(command:RoomCommand)=>Promise<boolean>;leave:()=>void;copy:()=>void;onState:(s:TableRoomState)=>void;download:(v:unknown,n:string)=>void;practice?:boolean;onPractice?:()=>void;menuHelp?:ReactNode}){
  const [amount,setAmount]=useState(1),[custom,setCustom]=useState('Energy'),[invite,setInvite]=useState(false),[menuOpen,setMenuOpen]=useState(false),[soundSlot,setSoundSlot]=useState<HTMLDivElement|null>(null);const menu=useRef<HTMLDetailsElement>(null),menuButton=useRef<HTMLButtonElement>(null);
  useEffect(()=>{if(!menuOpen)return;menu.current?.querySelector('button')?.focus();const key=(e:KeyboardEvent)=>{if(e.key==='Escape'){setMenuOpen(false);menuButton.current?.focus();}};document.addEventListener('keydown',key);return()=>document.removeEventListener('keydown',key);},[menuOpen]);
  const settings=roomProfile(state),me=state.players.find(p=>p.id===seat.playerId),controlsLocked=!tableGameReady(state),validAmount=Number.isInteger(amount)&&amount>=1&&amount<=999,customValue=me&&Object.hasOwn(me.counters,custom.trim())?me.counters[custom.trim()]:0;
@@ -32,7 +32,7 @@ export default function TableSession({state,seat,connected,busy,serverOffset=0,c
  <section className="ct-play-strip" aria-label="Game status"><strong>{tableGameOver(state)?'Game finished':`First player: ${state.players.find(p=>p.id===state.firstPlayer?.winner)?.name??'Opening roll complete'}`}</strong>{tableTurnsEnabled(state)&&<><span>Turn {state.turn} · {state.players.find(p=>p.id===current)?.name}</span><button disabled={busy||!connected||tableGameOver(state)||(current!==seat.playerId&&!host)} onClick={()=>void change({type:'endTurn',turn:state.turn!})}>{current===seat.playerId?'Pass turn':'Next turn (host)'}</button></>}</section>
  <TablePlayerGrid seat={practice?undefined:seat} state={state} playerId={seat.playerId} busy={busy||!connected} onAdjust={change}/>
  {me&&<div className="ct-quick-undo"><button disabled={busy||!connected||!me.lastEntry} title={me.lastEntry?.text} onClick={()=>{if(me.lastEntry)void change({type:'undo',entryId:me.lastEntry.id});}}>Undo last entry</button><small>{me.lastEntry?.text??'Your life and counter changes appear here.'}</small></div>}</>}
- <details id="ct-table-menu" ref={menu} open={menuOpen} className="ct-session-menu"><summary className="ct-visually-hidden">Table options menu</summary><div className="ct-menu-body"><header><h2>Table menu</h2><button onClick={()=>{setMenuOpen(false);menuButton.current?.focus();}}>Close menu</button></header>
+ <details id="ct-table-menu" ref={menu} open={menuOpen} className="ct-session-menu"><summary className="ct-visually-hidden">Table options menu</summary><div className="ct-menu-body"><header><h2>Table menu</h2><button onClick={()=>{setMenuOpen(false);menuButton.current?.focus();}}>Close menu</button></header>{menuHelp}
  {!practice&&<TableWakeLock/>}<div ref={setSoundSlot}/>
  {!practice&&<TableAppearance state={state} seat={seat} busy={busy||!connected} onChange={change} onState={onState}/>}
  <TableTurnSettings state={state} playerId={seat.playerId} busy={busy||!connected} onChange={command=>void change(command)}/>

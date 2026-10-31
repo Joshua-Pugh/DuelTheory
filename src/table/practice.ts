@@ -1,7 +1,8 @@
-import {COMMANDER_PROFILE,validateTableProfile,type TableProfile} from './profiles';
+import {validateTableProfile,type TableProfile} from './profiles';
 import {applyRoomCommand,newTableRoom,type TableRoomState,type RoomCommand} from './model';
+export const PRACTICE_PROFILE:TableProfile={schemaVersion:1,name:'Lesson example',health:{label:'Life',start:40,defeatAt:0},counters:[{label:'Poison',start:0,defeatAt:10}],sourceDamage:{enabled:true,label:'Commander combat damage',defeatAt:21}};
 export const PRACTICE_COMPLETE='dueltheory.table.lesson.v1';
-export function practiceDraft():TableProfile{return {...structuredClone(COMMANDER_PROFILE),name:'My Commander table',counters:[],sourceDamage:{enabled:false,label:'Commander combat damage',defeatAt:21}};}
+export function practiceDraft():TableProfile{return {...structuredClone(PRACTICE_PROFILE),name:'My Commander table',counters:[],sourceDamage:{enabled:false,label:'Commander combat damage',defeatAt:21}};}
 export function practiceSetupReady(profile:TableProfile){try{const p=validateTableProfile(profile);return p.health.start===40&&p.health.defeatAt===0&&p.counters.some(c=>c.label==='Poison'&&c.start===0&&c.defeatAt===10)&&p.counters.some(c=>c.label==='Energy'&&c.start===0&&c.defeatAt===null)&&p.sourceDamage.enabled&&p.sourceDamage.defeatAt===21;}catch{return false;}}
 export function createPractice(profile:TableProfile){const s=newTableRoom('PRACTICE','Commander practice',4,'you',profile);return applyRoomCommand(s,'you',{type:'join',name:'You',sources:['Your commander']},'practice-you');}
 export function addPracticePlayers(s:TableRoomState){return ['Mara','Theo','Ada'].reduce((room,name)=>applyRoomCommand(room,name.toLowerCase(),{type:'join',name,sources:[name+"’s commander"]},'practice-'+name),s);}
@@ -12,5 +13,9 @@ export function lessonActionAllowed(step:number,command:RoomCommand){
  if(step===8||step===9)return command.type==='adjust'&&command.field==='life'&&command.delta===(step===8?-1:1);
  if(step===10||step===11)return command.type==='adjust'&&command.field==='counter'&&command.key===(step===10?'Poison':'Energy')&&command.delta===1;
  if(step===12)return command.type==='adjust'&&command.field==='damage'&&command.key==='mara:0'&&command.delta===1&&command.loseLife===true;
- if(step===13)return command.type==='undo';return false;
+ if(step===13)return command.type==='undo';
+ if(step===16)return command.type==='configureTitle'&&command.label.trim()==='Scout'&&command.reminder.trim()==='Review your title benefit.';
+ if(step===17)return command.type==='claimTitle';if(step===19)return command.type==='releaseTitle';return false;
 }
+
+export function practiceTitleTransfer(s:TableRoomState){if(s.tableTitle?.holder!=='you')throw Error('Claim the title first.');return applyRoomCommand(s,'mara',{type:'claimTitle',version:s.tableTitle.version},crypto.randomUUID());}

@@ -2,7 +2,6 @@
 export type TrackerDefinition={label:string;start:number;defeatAt:number|null};
 export type TableProfile={schemaVersion:1;name:string;health:{label:string;start:number;defeatAt:number|null};counters:TrackerDefinition[];sourceDamage:{enabled:boolean;label:string;defeatAt:number|null};};
 export const DUEL_PROFILE:TableProfile={schemaVersion:1,name:'Classic Duel',health:{label:'Life',start:20,defeatAt:0},counters:[],sourceDamage:{enabled:false,label:'Source damage',defeatAt:null}};
-export const COMMANDER_PROFILE:TableProfile={schemaVersion:1,name:'MTG Commander',health:{label:'Life',start:40,defeatAt:0},counters:[{label:'Poison',start:0,defeatAt:10}],sourceDamage:{enabled:true,label:'Commander combat damage',defeatAt:21}};
 export const MULTIPLAYER_PROFILE:TableProfile={schemaVersion:1,name:'Multiplayer Table',health:{label:'Vitality',start:30,defeatAt:0},counters:[{label:'Energy',start:0,defeatAt:null}],sourceDamage:{enabled:true,label:'Source damage',defeatAt:null}};
 const reserved=['__proto__','prototype','constructor'];
 export function validateTableProfile(input:unknown):TableProfile{

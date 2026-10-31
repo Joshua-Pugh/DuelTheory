@@ -8,8 +8,8 @@ it('does not announce initial snapshots, duplicate/older polls, new rooms or ord
 });
 it('announces title claims, transfers and release without making a sound for label edits',()=>{
  const s=ready(),claimed=applyRoomCommand(s,'a',{type:'claimTitle',version:0},'claim'),moved=applyRoomCommand(claimed,'b',{type:'claimTitle',version:1},'move');
- expect(tableNotifications(s,claimed)).toEqual({messages:['a holds Table Title.'],cues:[{event:'tableTitle'}]});
- expect(tableNotifications(claimed,moved).messages).toEqual(['b holds Table Title.']);
+ expect(tableNotifications(s,claimed)).toEqual({messages:['Table Title is now held by a.'],cues:[{event:'tableTitle'}]});
+ expect(tableNotifications(claimed,moved).messages).toEqual(['Table Title is now held by b.']);
  const renamed=applyRoomCommand(moved,'a',{type:'configureTitle',version:2,label:'Crown',reminder:''},'rename');expect(tableNotifications(moved,renamed).cues).toEqual([]);
  expect(tableNotifications(renamed,applyRoomCommand(renamed,'b',{type:'releaseTitle',version:3},'release')).messages).toEqual(['Crown is now unclaimed.']);
 });
