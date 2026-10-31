@@ -35,6 +35,7 @@ export default function TableSession({state,seat,connected,busy,serverOffset=0,c
  <details id="ct-table-menu" ref={menu} open={menuOpen} className="ct-session-menu"><summary className="ct-visually-hidden">Table options menu</summary><div className="ct-menu-body"><header><h2>Table menu</h2><button onClick={()=>{setMenuOpen(false);menuButton.current?.focus();}}>Close menu</button></header>{menuHelp}
  {!practice&&<TableWakeLock/>}<div ref={setSoundSlot}/>
  {!practice&&<TableAppearance state={state} seat={seat} busy={busy||!connected} onChange={change} onState={onState}/>}
+ {state.firstPlayer?.winner&&<details className="ct-panel"><summary>Seat order</summary><ol className="ct-turn-order">{state.turnOrder?.map(id=><li key={id}>{state.players.find(p=>p.id===id)?.name??'Player'}{id===state.firstPlayer?.winner?' · first player':''}</li>)}</ol></details>}
  <TableTurnSettings state={state} playerId={seat.playerId} busy={busy||!connected} onChange={command=>void change(command)}/>
  <TableHostControls state={state} playerId={seat.playerId} busy={busy||!connected} onChange={command=>void change(command)}/>
  <TableTurnTimer state={state} playerId={seat.playerId} busy={busy||!connected} serverOffset={serverOffset} onChange={command=>void change(command)}/>

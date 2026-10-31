@@ -14,7 +14,7 @@ function Die({value}:{value?:number}){
  </span>;
 }
 export default function TableFirstPlayerDice({state,playerId,busy,onChange}:{state:TableRoomState;playerId:string;busy:boolean;onChange:(command:RoomCommand)=>void}){
- const roll=state.firstPlayer;if(!roll)return null;
+ const roll=state.firstPlayer;if(!roll||roll.winner)return null;
  const canRoll=!roll.winner&&roll.eligible.includes(playerId)&&!Object.hasOwn(roll.rolls,playerId);
  return <section className={`ct-first-dice${roll.winner?' ct-first-dice-complete':''}`} aria-label="First-player dice">
   <div className="ct-roll-results">{state.players.map(p=><div key={p.id} className={p.id===roll.winner?'ct-roll-winner':''}>
