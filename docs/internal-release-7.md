@@ -1,6 +1,6 @@
 # Internal release 1.0.6 / code 7 — dice and account appearance
 
-Prepared October 30, 2026; signing/publication pending.
+Published October 30, 2026 at 8:58 PM Eastern. Play Console confirms Active and Available to internal testers, version 1.0.6 / code 7. Release review showed Ready to release. Signed bundle verified with jarsigner and all 78 public assets matched the tested build. Preserved copy: ../releases/table-companion-20261028/DuelTheory-internal-v7-signed.aab; 19,999,969 bytes; SHA256 f7cfcdd039a43a3daff084596f85270d6dd53f9b3c87e99de0fd5906d48f2cf5. Publication proof: ../internal-release-1-0-6.png.
 
 The dice component returns no display after the opening roll has a winner. Completed-roll views show compact turn information instead. Seat order is available in Table menu. A new game clears the previous roll; dice appear again after seats are locked. Tie-break rounds remain visible until resolved.
 
@@ -12,6 +12,6 @@ Account now includes local player appearance settings and a live preview built w
 An explicit, off-by-default setting applies this look when creating/joining a fresh seat. It uses the existing authenticated appearance command and bounded background endpoint. Reconnecting seats are not overwritten, active rooms are not changed by saving Account settings, and an appearance upload failure does not prevent a successful join. Stale-seat checks stop uploads if the user leaves during the request.
 
 
-Final validation: 954 tests across 150 files passed; production web/mobile builds passed; native assembleDebug passed after final sync. Android Studio backup: android-starter-backup-20261030-203653. Browser verified a real image upload and live preview, persistence after reload, and opted-in application of theme/background to a disposable new seat against the deployed service. The room was closed after verification. Preview screenshot: ../account-appearance-preview.png. Signed release remains pending.
+Final validation: 954 tests across 150 files passed; production web/mobile builds passed; native assembleDebug passed after final sync. Android Studio backup: android-starter-backup-20261030-203653. Browser verified a real image upload and live preview, persistence after reload, and opted-in application of theme/background to a disposable new seat against the deployed service. The room was closed after verification. Preview screenshot: ../account-appearance-preview.png. Signed release verified and published.
 
-Website deployment of 6b833b1 passed; live Account & settings page verified with upload/theme controls and player-card preview. Screenshot: ../account-appearance-live.png. Android signing/publication is still pending.
+Website deployment of 6b833b1 passed; live Account & settings page verified with upload/theme controls and player-card preview. Screenshot: ../account-appearance-live.png. Android signing and internal publication completed.
