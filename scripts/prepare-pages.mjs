@@ -1,5 +1,6 @@
 import {readdir,readFile,writeFile} from 'node:fs/promises';
 import path from 'node:path';
+import './build-public-pages.mjs';
 
 // Vite handles bundled assets; catalog records and dynamic public-image URLs
 // also need the project path when hosted on GitHub Pages.
