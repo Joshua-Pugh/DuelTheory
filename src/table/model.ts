@@ -54,10 +54,12 @@ export function rollSixSidedDie(){const limit=4294967292;let value:number;do{val
 // Missing flag preserves the behavior of rooms created by earlier clients.
 export const tableTurnsEnabled=(s:TableRoomState)=>s.turnTracking!==false;
 export function currentTurnPlayer(s:TableRoomState){return tableTurnsEnabled(s)&&s.turnOrder?.length&&s.turn?s.turnOrder[(s.turn-1)%s.turnOrder.length]:undefined;}
-export function applyRoomCommand(original:TableRoomState,actor:string,input:RoomCommand,requestId:string,now=Date.now(),die=rollSixSidedDie):TableRoomState{
+export function applyRoomCommand(original:TableRoomState,actor:string,input:RoomCommand,requestId:string,now=Date.now(),die=rollSixSidedDie,unseatedHost=false):TableRoomState{
  if(!input||typeof input!=='object'||typeof input.type!=='string')throw new RoomError('Invalid action.');
  if(original.closedAt!==undefined)throw new RoomError('This table has been closed by its host.');
  const s=structuredClone(original);let text='';let player=s.players.find(p=>p.id===actor);
+ // Event organizers are authenticated separately by the event service, never player seats.
+ if(!player&&unseatedHost&&actor===s.host&&['start','reset','configureSteps','configureCounter','configureTurns','configureTimer','timer','configureTitle','releaseTitle','tableTheme','endTurn'].includes(input.type))player={id:actor,name:'Organizer',commanders:[],life:0,poison:0,damage:{},counters:{},conceded:false};
  if(input.type==='join'){
   if(player)return s;
 

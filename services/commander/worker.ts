@@ -1,4 +1,5 @@
 import {backgroundMime,MAX_BACKGROUND_BYTES} from '../../src/table/appearance';
+export {EventHub} from './events';
 import {newCommanderRoom} from '../../src/commander/model';
 import {DurableObject} from 'cloudflare:workers';
 import {applyRoomCommand,newTableRoom,RoomError,type TableRoomState,type RoomCommand} from '../../src/table/model';
@@ -64,6 +65,21 @@ export default {
   if(origin&&!allowed.includes(origin))return reply({error:'Origin is not allowed.'},403);
   if(request.method==='OPTIONS')return new Response(null,{status:204,headers});
   const url=new URL(request.url);if(url.pathname==='/health')return reply({ok:true,service:'DuelTheory Table Companion'});
+  const eventMatch=url.pathname.match(/^\/events\/([A-Z2-9]{8})\/(create|read|action)$/);
+  if(eventMatch){
+   const [,code,method]=eventMatch;
+   if(request.method!==(method==='read'?'GET':'POST'))return reply({error:'Method not allowed.'},405);
+   const token=request.headers.get('Authorization')?.replace(/^Bearer /,'')||'';
+   if(!/^[a-zA-Z0-9_-]{32,128}$/.test(token))return reply({error:'A valid device token is required.'},401);
+   const requestId=request.headers.get('X-Request-ID')||'';
+   if(method!=='read'&&!/^[a-zA-Z0-9-]{16,80}$/.test(requestId))return reply({error:'A request ID is required.'},400);
+   try{
+    if(method==='create'){const limit=await env.ROOM_LIMITER.limit({key:request.headers.get('CF-Connecting-IP')||'unknown'});if(!limit.success)return reply({error:'Too many attempts. Try again in a minute.'},429);}
+    const input=method==='read'?{}:await boundedJson(request);
+    const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(token))),b=>b.toString(16).padStart(2,'0')).join('');
+    const result=await env.EVENT_HUBS.getByName(code).operate(code,hash,method,input,requestId);return reply({...result.body,serverNow:Date.now()},result.status);
+   }catch(e){if(e instanceof RoomError)return reply({error:e.message},400);console.error(JSON.stringify({event:'event-hub-failure',method}));return reply({error:'Event service is unavailable. Your last confirmed values are unchanged.'},503);}
+  }
   const match=url.pathname.match(/^\/rooms\/([A-Z2-9]{8})\/(create|join|read|action|background)$/);if(!match)return reply({error:'Unknown endpoint.'},404);
   const [,code,method]=match;if(method==='background'?!['GET','POST'].includes(request.method):request.method!==(method==='read'?'GET':'POST'))return reply({error:'Method not allowed.'},405);
   const token=request.headers.get('Authorization')?.replace(/^Bearer /,'')||'';if(!/^[a-zA-Z0-9_-]{32,128}$/.test(token))return reply({error:'A valid device seat token is required.'},401);
