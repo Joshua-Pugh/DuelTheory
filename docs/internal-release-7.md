@@ -13,3 +13,5 @@ An explicit, off-by-default setting applies this look when creating/joining a fr
 
 
 Final validation: 954 tests across 150 files passed; production web/mobile builds passed; native assembleDebug passed after final sync. Android Studio backup: android-starter-backup-20261030-203653. Browser verified a real image upload and live preview, persistence after reload, and opted-in application of theme/background to a disposable new seat against the deployed service. The room was closed after verification. Preview screenshot: ../account-appearance-preview.png. Signed release remains pending.
+
+Website deployment of 6b833b1 passed; live Account & settings page verified with upload/theme controls and player-card preview. Screenshot: ../account-appearance-live.png. Android signing/publication is still pending.
