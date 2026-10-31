@@ -31,7 +31,7 @@ const lessons=[
  ],
  [
   "Lock the seats",
-  "All four players have joined. Choose Lock seats & roll for first. Life cards stay hidden until everyone finishes rolling."
+  "All four players have joined. Choose Start Game to lock the seats and open the first-player roll. Life cards stay hidden until everyone finishes rolling."
  ],
  [
   "Roll for first player",
@@ -47,7 +47,7 @@ const lessons=[
  ],
  [
   "Add poison",
-  "Tap the plus beside Poison once. Poison is separate from life. With this setup, reaching 10 poison counters marks you eliminated."
+  "Open Counters & commander / source damage on your card, then tap the plus beside Poison once. Poison is separate from life. With this setup, reaching 10 poison counters marks you eliminated."
  ],
  [
   "Track a resource",
@@ -55,7 +55,7 @@ const lessons=[
  ],
  [
   "Record commander combat damage",
-  "Open Commander / source damage & other amounts. Under Adjust, choose Damage · Mara · Mara’s commander. Leave Also adjust Life checked, then add 1 damage. Your life drops to 39 and Mara’s commander tally becomes 1. Each commander has its own tally."
+  "In Counters & commander / source damage, open the Adjust selector. Choose Damage · Mara · Mara’s commander. Leave Also adjust Life checked, then add 1 damage. Your life drops to 39 and Mara’s commander tally becomes 1. Each commander has its own tally."
  ],
  [
   "Undo a mistake",
@@ -67,7 +67,7 @@ const lessons=[
  ],
  [
   "Open the table menu",
-  "Open Table menu at the top. It holds sounds, appearance, hosting, turn options and history. Next, we’ll try the shared table title."
+  "Open Table menu at the top, then choose Game tools. Table holds the new-game and leave controls; Players shows seats and hosting; Appearance holds colors and sounds; History shows recent changes. Next, we’ll try the shared table title."
  ],
  [
   "Give the table title a purpose",
@@ -97,7 +97,7 @@ export default function TablePractice({onExit}:{onExit:()=>void}){
  const next=()=>{setError('');setStep(s=>s+1);};
  const save=()=>{try{if(savedTableProfiles().some(p=>p.name.toLowerCase()===profile.name.trim().toLowerCase()))throw Error('Choose a different name to keep your existing profile.');saveTableProfile(profile);setSavedName(profile.name.trim());next();}catch(e){setError(e instanceof Error?e.message:String(e));}};
  const change=async(command:RoomCommand)=>{if(!room)return false;if(!lessonActionAllowed(step,command)){setError('Follow the current lesson step before trying another action. You can leave practice at any time.');return false;}try{const updated=practiceAction(room,command);setRoom(updated);next();return true;}catch(e){setError(e instanceof Error?e.message:String(e));return false;}};
- const inspect=(target:EventTarget|null)=>{const label=target instanceof Element?target.closest('button')?.textContent:'';if((step===14&&label==='Inspect Mara')||(step===15&&label==='Table menu'))next();};
+ const inspect=(target:EventTarget|null)=>{const label=target instanceof Element?target.closest('button')?.textContent:'';if((step===14&&label==='Inspect Mara')||(step===15&&label==='Game tools'))next();};
  return <section className="ct-practice" aria-label="Commander guided practice" onClick={e=>inspect(e.target)}><header className="ct-practice-toolbar"><strong>Guided practice · {Math.min(step+1,lessons.length)} / {lessons.length}</strong><button onClick={onExit}>Exit practice</button></header>
  <section ref={instruction} tabIndex={-1} className="ct-lesson-instruction" role="region" aria-label="Current lesson"><progress max={lessons.length-1} value={step}/><h2>{lessons[step][0]}</h2><p>{lessons[step][1]}</p>{error&&<p className="ct-error" role="alert">{error}</p>}</section>
  {step===0&&<><label>Format<select value={format} onChange={e=>{setFormat(e.target.value);if(e.target.value==='commander')setProfile(practiceDraft());}}><option value="" disabled>Choose the lesson example</option><option value="commander">MTG Commander · lesson example</option></select></label><label>Practice seats<select value={seats} onChange={e=>setSeats(Number(e.target.value))}>{[2,3,4,5,6,7,8].map(n=><option key={n} value={n}>{n} players</option>)}</select></label><button className="ct-primary" disabled={format!=='commander'||seats!==4} onClick={next}>Start four-player example</button><p>Choose the lesson example and four seats to continue. Real tables support two to eight seats.</p></>}

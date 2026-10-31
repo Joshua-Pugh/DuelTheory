@@ -21,7 +21,7 @@ async function mount(playerId='a'){
 it('automatically leaves and forgets the guest seat when a confirmed closure arrives',async()=>{
  await mount('b');const closed=applyRoomCommand(room(),'a',{type:'closeRoom',revision:room().revision},'close');
  await act(async()=>mocks.poll!.onValue({state:closed,playerId:'b'}));
- expect(element.textContent).toContain('The host closed this table');expect(element.textContent).toContain('Join a room');expect(savedRoomSeat()).toBeNull();expect(savedRoomSeat('ABCDEFGH')).toBeNull();
+ expect(element.textContent).toContain('The host closed this table');expect(element.textContent).toContain('Join Table');expect(savedRoomSeat()).toBeNull();expect(savedRoomSeat('ABCDEFGH')).toBeNull();
 });
 it('does not silently abandon the host seat on a failed closure, and leaves on confirmed success',async()=>{
  await mount();mocks.send.mockRejectedValueOnce(Error('Offline'));
@@ -42,4 +42,4 @@ it('keeps the guest seat when leaving cannot be confirmed',async()=>{
  await mount('b');mocks.send.mockRejectedValueOnce(Error('Offline'));await act(async()=>[...element.querySelectorAll('button')].find(b=>b.textContent?.trim()==='Leave table')!.click());expect(savedRoomSeat()?.playerId).toBe('b');expect(element.textContent).toContain('Offline');
 });
 
-it('releases a stale local seat after the server confirms the room expired',async()=>{await mount('b');await act(async()=>mocks.poll!.onError(new RoomRequestError('Room not found',404)));expect(savedRoomSeat()).toBeNull();expect(element.textContent).toContain('This table expired');expect(element.textContent).toContain('Join a room');});
+it('releases a stale local seat after the server confirms the room expired',async()=>{await mount('b');await act(async()=>mocks.poll!.onError(new RoomRequestError('Room not found',404)));expect(savedRoomSeat()).toBeNull();expect(element.textContent).toContain('This table expired');expect(element.textContent).toContain('Join Table');});

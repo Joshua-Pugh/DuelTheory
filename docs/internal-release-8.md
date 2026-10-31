@@ -12,3 +12,9 @@ Prepared October 31, 2026. Version code 8. Signed user bundle still required.
 Validation: 959 full-suite tests passed, then an additional UI regression verified custom 2400 deduction and guest settings visibility. Website/mobile builds and native assembleDebug passed. Live disposable 8000-life table verified 1900/2400 deductions, host settings, shared counter add/remove and guest rejection, and was closed afterward.
 
 Table service deployed version 7f6790ff-5d3c-4cbc-b7d4-39dceb8109af.
+
+## Presentation pass before signing
+
+The same pending 1.0.7 bundle also groups the menu into Table, Players, Game tools, Appearance and History. One panel is visible at a time; drafts remain mounted and keyboard navigation/Escape are supported. Two- and three-player desktop grids use all available columns, with a compact two-player opponent strip on phones. Entry and Android Home emphasize shared tables and reusable profiles. The guided lesson now teaches Start Game, the counter dropdown and the Game tools tab. No analytics, promotional posts or new major features were added.
+
+Presentation verification: complete guided lesson, menu category/keyboard/draft tests and guest restrictions passed. Full suite had 959 passing tests and two timing failures in the mobile file while production builds ran concurrently; rerunning that entire mobile file alone passed all six tests. Website/mobile production builds succeeded. A live disposable two-player table was joined through the browser; reconnect and opening dice worked. Phone viewport 390 had 375px document/scroll width with no horizontal overflow. Final screenshots: table-layout-polish-phone.png and table-menu-polish-phone.png (workspace artifacts).

@@ -185,9 +185,9 @@ export default function MobileApp({previewAT=import.meta.env.VITE_MOBILE_AT_PREV
               <>
                 <section className="mobile-intro">
                   <span className="eyebrow">DUELTHEORY</span>
-                  <h1>Build. Simulate. Master.</h1>
+                  <h1>Your game. Your way.</h1>
                   <p>
-                    Life, counters and turn order on your own phones.
+                    One shared table, on every player’s device.
                   </p>
                 </section>
                 <div className="mobile-home-grid">
@@ -198,10 +198,10 @@ export default function MobileApp({previewAT=import.meta.env.VITE_MOBILE_AT_PREV
                     <small>PLAY TOGETHER</small>
                     <h2>Table Companion</h2>
                     <p>
-                      Shared totals, counters, source damage, dice and turn
-                      tracking on your own phones.
+                      Set your starting totals and counters, save a game profile,
+                      and invite friends by QR code or link.
                     </p>
-                    <b>Join or create a table →</b>
+                    <b>Create or join a table →</b>
                   </button>
                   {previewAT&&<button
                     className="mobile-feature"

@@ -13,7 +13,7 @@ export default function TablePlayerGrid({seat,state,playerId,busy,onAdjust,previ
  const [damageSelection,setDamageSelection]=useState<DamageSelection|null>(null),[expanded,setExpanded]=useState<string|null>(null),[customAmount,setCustomAmount]=useState<number|null>(null);
  const settings=roomProfile(state),marker=sharedTableTitle(state),current=currentTurnPlayer(state);
  const players=[...state.players].sort((a,b)=>Number(b.id===playerId)-Number(a.id===playerId));
- return <div className="ct-table ct-dashboard-grid ct-focused-grid" aria-label="All players">{players.map(p=>{
+ return <div className={`ct-table ct-dashboard-grid ct-focused-grid ct-player-count-${state.players.length}`} aria-label="All players">{players.map(p=>{
   const mine=p.id===playerId,out=tableEliminated(p,state),holds=marker.holder===p.id,trackers=compactTrackers(state,p.id).filter(t=>t.field!=='damage');
   const renderTracker=(t:typeof trackers[number])=>{
     const step=(direction:number,n:number)=>{const amount=Math.min(n,direction<0?t.value-t.min:t.max-t.value);return amount>0?onAdjust(trackerCommand(t,direction*amount,false)):false;};
