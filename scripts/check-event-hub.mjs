@@ -44,4 +44,16 @@ r=await request(owner,'action',{type:'prepareRound',revision:r.body.state.revisi
 for(let i=0;i<13;i++){state=r.body.state;const t=state.tables[0];r=await request(owner,'action',{type:'newGroup',table:1,round:t.round,revision:t.state.revision});assert.equal(r.status,200);}
 let cursor=0,history=[];for(let i=0;i<10;i++){const page=await request(owner,'history',{cursor});assert.equal(page.status,200);history.push(...page.body.history);if(page.body.nextCursor===undefined)break;cursor=page.body.nextCursor;}
 assert.equal(history.length,16);assert.equal(history.find(h=>h.table===1&&h.game.round===1).game.state.players.length,2);assert.equal(history.some(h=>h.game.state.log.some(l=>l.player==='Organizer'&&l.text.includes('Corrected an accidental gain.'))),true);
-console.log('Event API end-to-end passed: isolated tables, guest joins, dice, tracking, corrections, targeted messages, two rounds, retained/released seats, stale-action rejection and paginated durable history beyond the recent-game limit.');
+// Simulated seats can coexist with an authenticated human, and deleted tables recover safely.
+state=(await request(owner,'read')).body.state;
+r=await request(owner,'action',{type:'fillDemoTables',revision:state.revision});assert.equal(r.status,200);assert.equal(r.body.event.tables[0].demoPlayers,2);
+r=await request(alice,'action',{type:'join',table:1,round:r.body.state.tables[0].round,name:'Alice'});assert.equal(r.status,200);assert.equal(r.body.table.demoPlayerIds.length,1);
+state=(await request(owner,'read')).body.state;let t=state.tables[0],demo=t.demoPlayerIds[0];
+r=await request(owner,'action',{type:'command',table:1,round:t.round,command:{type:'start'}});assert.equal(r.status,200);assert.equal(Object.hasOwn(r.body.state.tables[0].state.firstPlayer.rolls,demo),true);
+for(let i=0;i<12;i++){const current=(await request(alice,'read')).body,roll=current.table.state.firstPlayer;if(roll.winner)break;assert.equal((await request(alice,'action',{type:'command',table:1,round:t.round,command:{type:'roll',round:roll.round}})).status,200);}
+const fakeChange={type:'demoCommand',table:1,round:t.round,playerId:demo,command:{type:'adjust',field:'life',delta:-2400}};
+assert.equal((await request(alice,'action',fakeChange)).status,400);r=await request(owner,'action',fakeChange);assert.equal(r.status,200);assert.equal(r.body.state.tables[0].state.players.find(p=>p.id===demo).life,5600);
+t=r.body.state.tables[1];r=await request(owner,'action',{type:'deleteTable',table:2,round:t.round,revision:t.state.revision});assert.equal(r.status,200);assert.equal(r.body.event.tables.some(t=>t.number===2),false);
+assert.equal((await request(bob,'action',{type:'join',table:2,round:t.round,name:'Bob'})).status,400);
+r=await request(owner,'action',{type:'restoreTable',table:2,round:t.round,revision:r.body.state.tables[1].state.revision});assert.equal(r.status,200);assert.equal(r.body.state.tables[1].round,t.round+1);assert.equal(r.body.state.tables[1].state.players.length,0);
+console.log('Event API end-to-end passed: live guests and demo seats, automatic demo dice, authorized tracking, delete/restore, rounds, corrections and durable paginated history.');

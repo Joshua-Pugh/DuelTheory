@@ -4,6 +4,8 @@ import {eventStatus,tableFinished,type EventState,type EventTable} from './model
 import EventClock from './EventClock';
 import EventHostTools from './EventHostTools';
 import EventCorrection from './EventCorrection';
+import EventDemoControls from './EventDemoControls';
+import EventDeleteTable from './EventDeleteTable';
 import TableTurnSettings from '../TableTurnSettings';
 import TableTitleControls from '../TableTitleControls';
 import TableTurnTimer from '../TableTurnTimer';
@@ -23,6 +25,8 @@ export default function EventTableDetail({hub,table:t,busy,offset,act,command,in
  {!roundManaged&&t.state.players.length>0&&<div className="ct-actions"><button disabled={busy} onClick={()=>review('samePlayers')}>New game · same players</button><button disabled={busy} onClick={()=>review('newPlayers')}>New group · free seats</button></div>}
  {prepare&&!roundManaged&&<form className="eh-review" onSubmit={async e=>{e.preventDefault();const input=prepare==='newPlayers'?{type:'newGroup',revision:reviewRevision}:{type:'command',command:{type:'reset'},revision:reviewRevision};if(await at(input))setPrepare(null);}}><h3>Prepare Table {t.number}</h3><p>This saves Game {t.round} before {prepare==='newPlayers'?`freeing all ${t.state.players.length} seats`:'resetting totals for the same players'}. Its QR code stays the same.</p>{prepare==='newPlayers'&&<label><input type="checkbox" checked={confirmSeats} onChange={e=>setConfirmSeats(e.target.checked)}/>Players will need to join again.</label>}{reviewRevision!==t.state.revision&&<p role="status">The table changed. <button type="button" onClick={()=>setReviewRevision(t.state.revision)}>Review the updated table</button></p>}<button disabled={busy||reviewRevision!==t.state.revision||prepare==='newPlayers'&&!confirmSeats}>Archive & prepare Table {t.number}</button><button type="button" onClick={()=>setPrepare(null)}>Cancel</button></form>}
  <EventCorrection key={`${t.number}-${t.round}`} table={t} busy={busy} act={act}/>
+ <EventDemoControls key={`demo-${t.round}`} table={t} busy={busy} act={act}/>
+ <EventDeleteTable key={`delete-${t.round}`} table={t} busy={busy} roundManaged={Boolean(roundManaged)} act={act}/>
  <details open={finished}><summary>Game history</summary><ol>{t.state.log.map(l=><li key={l.id}><strong>{l.player}:</strong> {l.text}</li>)}</ol>{t.archive.map(a=><details key={a.round}><summary>Game {a.round}{a.eventRound?` · Round ${a.eventRound}`:''} · {a.state.players.length} players</summary><ul>{a.state.players.map(p=><li key={p.id}>{p.name}: {p.life}</li>)}</ul><ol>{a.state.log.map(l=><li key={l.id}>{l.player}: {l.text}</li>)}</ol></details>)}<p>The last three archived games appear here. Download event history for older saved games.</p></details>
  <details><summary>Table settings</summary><EventHostTools key={`${t.number}-${t.round}`} state={t.state} busy={busy||Boolean(t.archived)} change={c=>command(t,c)}/><TableTurnSettings state={t.state} playerId="organizer" busy={busy||Boolean(t.archived)} onChange={c=>void command(t,c)}/><TableTitleControls state={t.state} playerId="organizer" busy={busy||Boolean(t.archived)} onChange={c=>void command(t,c)}/><TableTurnTimer state={t.state} playerId="organizer" busy={busy||Boolean(t.archived)} onChange={c=>void command(t,c)}/></details>
  </section>;

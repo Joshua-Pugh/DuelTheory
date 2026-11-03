@@ -1,6 +1,18 @@
 # A five-minute store demonstration
 
-Use a laptop for the organizer and two phones for players. Open the website in the browser you will take to the store; organizer access belongs to that browser. Internet access is required. This is a real connected demo, not a slideshow.
+Use a laptop for the organizer and a phone for a player. You can also use Open player view to test in a separate tab in the same browser. Organizer access belongs to that browser. Internet access is required.
+
+## Try it without recruiting players
+
+Open **Try the event with demo players**, then **Fill waiting tables with demo players**. The overview counts real and simulated players separately. Before starting, scan Table 1's QR on your phone or choose **Open player view**, enter a name and join. Even if the table is full, one demo seat makes room for you. The organizer tab keeps its access.
+
+Start a round or lock the selected table for a casual game. Demo players roll automatically; you still roll on your own device. In the organizer's selected table, expand **Demo players** and choose a simulated player to change their life, counters or turn. Those controls cannot act as a real player. You can test help requests, corrections, finishing and the next round with one real device. Remove simulated seats before starting, or prepare a new group.
+
+## Remove a table
+
+Select the table, expand **Delete Table**, review it and confirm. Its game is archived, its seats are released and it disappears from the player directory. A deleted table's invitation cannot accept players. Use **Deleted tables · restore** to reopen it with fresh seats and the same table number and QR. Tables assigned to an event round must finish that round and be prepared for the next round before removal.
+
+## Show the full workflow
 
 1. **Set the room up.** Open Table Tools → Event Hub demo. Create four tables with two seats each. In Edit profile, choose starting life and a counter appropriate to the store's game. For a high-life demonstration, use 8,000 Life, taps of 100 and holds of 1,000. Nothing requires a trademarked preset.
 2. **Hand over the invitation.** Select Table 1 and have each person scan its QR with their own phone. They enter nicknames and join. Show that the laptop's organizer did not take either seat. Table 1 changes from Waiting to Ready; the other three tables remain available.

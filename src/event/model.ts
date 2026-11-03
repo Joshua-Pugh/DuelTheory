@@ -1,25 +1,27 @@
 import {applyRoomCommand,newTableRoom,RoomError,tableGameOver,type RoomCommand,type TableRoomState} from '../table/model';
 import {validateTableProfile,type TableProfile} from '../table/profiles';
-export type ArchivedGame={round:number;state:TableRoomState;startedAt?:number;endedAt?:number;eventRound?:number;reason?:string};
+import {addDemoPlayers,removeDemoPlayer,rollDemoPlayers} from './demo';
+export type ArchivedGame={round:number;state:TableRoomState;startedAt?:number;endedAt?:number;eventRound?:number;reason?:string;demoPlayerIds?:string[]};
 export type EventRound={number:number;phase:'active'|'ended'|'seating';tables:number[];durationMinutes:number;startedAt?:number;endedAt?:number;reason?:string};
 export type RoundReport=EventRound&{results:{table:number;group:number;players:{name:string;life:number;counters:Record<string,number>}[]}[]};
-export type EventTable={number:number;round:number;state:TableRoomState;help?:string;announcement?:string;startedAt?:number;endedAt?:number;eventRound?:number;archived?:boolean;finished:boolean;archive:ArchivedGame[]};
+export type EventTable={number:number;round:number;state:TableRoomState;help?:string;announcement?:string;startedAt?:number;endedAt?:number;eventRound?:number;archived?:boolean;finished:boolean;archive:ArchivedGame[];demoPlayerIds?:string[];deletedAt?:number};
 export type EventState={code:string;name:string;revision:number;created:number;updated:number;announcement:string;profile:TableProfile;tables:EventTable[];eventRound?:EventRound;roundHistory?:RoundReport[]};
-export type PublicEvent={code:string;name:string;revision:number;announcement:string;eventRound?:EventRound;tables:{number:number;round:number;joined:number;capacity:number;status:string}[]};
+export type PublicEvent={code:string;name:string;revision:number;announcement:string;eventRound?:EventRound;tables:{number:number;round:number;joined:number;capacity:number;status:string;demoPlayers?:number}[]};
 export type EventStore={state:EventState;owner:string;members:Record<string,{table:number;round:number;id:string}>;requests:Record<string,string>};
 export type EventReply={event:PublicEvent;state?:EventState;table?:EventTable;playerId?:string;serverNow?:number;history?:{table:number;game:ArchivedGame}[];nextCursor?:number};
 const text=(v:unknown,max:number)=>{if(typeof v!=='string'||!v.trim()||v.trim().length>max)throw new RoomError(`Enter 1–${max} characters.`);return v.trim();};
 export const tableFinished=(t:EventTable)=>t.finished||tableGameOver(t.state);
 export const eventStatus=(t:EventTable)=>t.help?'Assistance requested':tableFinished(t)?'Finished':t.state.firstPlayer?.winner?'In progress':t.state.started?'Rolling':t.state.players.length===t.state.capacity?'Ready':'Waiting';
-export function eventSummary(s:EventState):PublicEvent{return {code:s.code,name:s.name,revision:s.revision,announcement:s.announcement,eventRound:s.eventRound,tables:s.tables.map(t=>({number:t.number,round:t.round,joined:t.state.players.length,capacity:t.state.capacity,status:eventStatus(t)}))};}
+export function eventSummary(s:EventState):PublicEvent{return {code:s.code,name:s.name,revision:s.revision,announcement:s.announcement,eventRound:s.eventRound,tables:s.tables.filter(t=>!t.deletedAt).map(t=>({number:t.number,round:t.round,joined:t.state.players.length,capacity:t.state.capacity,status:eventStatus(t),demoPlayers:t.demoPlayerIds?.length??0}))};}
 function archiveGame(t:EventTable,now:number,reason?:string){
  if(t.archived)return;
- t.archive=[{round:t.round,state:structuredClone(t.state),startedAt:t.startedAt,endedAt:t.endedAt??now,eventRound:t.eventRound,reason},...t.archive].slice(0,3);t.archived=true;
+ t.archive=[{round:t.round,state:structuredClone(t.state),startedAt:t.startedAt,endedAt:t.endedAt??now,eventRound:t.eventRound,reason,demoPlayerIds:t.demoPlayerIds},...t.archive].slice(0,3);t.archived=true;
 }
 function prepareTable(s:EventStore,t:EventTable,mode:'samePlayers'|'newPlayers',now:number,id:string){
  archiveGame(t,now);
  t.state=mode==='samePlayers'?applyRoomCommand(t.state,'organizer',{type:'reset'},id,now,undefined,true):newTableRoom(s.state.code,`Table ${t.number}`,t.state.capacity,'organizer',t.state.profile??s.state.profile);
  t.round++;t.finished=false;delete t.help;delete t.startedAt;delete t.endedAt;delete t.eventRound;delete t.archived;delete t.announcement;
+ t.demoPlayerIds=(t.demoPlayerIds??[]).filter(id=>t.state.players.some(p=>p.id===id));
  for(const [key,m] of Object.entries(s.members))if(m.table===t.number){if(mode==='samePlayers'&&t.state.players.some(p=>p.id===m.id))m.round=t.round;else delete s.members[key];}
 }
 const inRound=(s:EventState,t:EventTable)=>s.eventRound?.phase!=='seating'&&s.eventRound?.tables.includes(t.number);
@@ -31,12 +33,18 @@ export function newEvent(code:string,owner:string,input:Record<string,unknown>,n
 export function eventReply(store:EventStore,hash:string,tableNumber?:number):EventReply{
  const event=eventSummary(store.state);if(hash===store.owner)return {event,state:store.state};
  const member=store.members[hash],table=store.state.tables.find(t=>t.number===member?.table);
- return member&&table&&member.round===table.round&&table.state.players.some(p=>p.id===member.id)&&(!tableNumber||table.number===tableNumber)?{event,table,playerId:member.id}:{event};
+ return member&&table&&!table.deletedAt&&member.round===table.round&&table.state.players.some(p=>p.id===member.id)&&(!tableNumber||table.number===tableNumber)?{event,table,playerId:member.id}:{event};
 }
 export function operateEvent(original:EventStore,hash:string,input:Record<string,unknown>,requestId:string,now=Date.now(),playerId:string=crypto.randomUUID()):EventStore{
  const s=structuredClone(original),owner=hash===s.owner;
  if(s.requests[requestId]){if(s.requests[requestId]!==hash)throw new RoomError('Request ID already used.');return s;}
- if(['startRound','endRound','prepareRound'].includes(String(input.type))){
+ if(input.type==='fillDemoTables'){
+  if(!owner)throw new RoomError('Only the organizer can add demo players.');
+  if(input.revision!==s.state.revision)throw new RoomError('The event changed. Review the tables again.');
+  const tables=s.state.tables.filter(t=>!t.deletedAt&&!t.state.started&&!t.finished&&t.state.players.length<t.state.capacity);
+  if(!tables.length)throw new RoomError('There are no open seats in waiting tables.');
+  for(const t of tables)addDemoPlayers(t,t.state.capacity-t.state.players.length,`${requestId}-${t.number}`,now);
+ }else if(['startRound','endRound','prepareRound'].includes(String(input.type))){
   if(!owner)throw new RoomError('Only the organizer can manage rounds.');
   if(input.revision!==s.state.revision)throw new RoomError('The event changed. Review the round again before continuing.');
   const round=s.state.eventRound;
@@ -45,7 +53,7 @@ export function operateEvent(original:EventStore,hash:string,input:Record<string
    if(!Array.isArray(input.tables)||!input.tables.length||input.tables.length>s.state.tables.length||new Set(input.tables).size!==input.tables.length)throw new RoomError('Choose the ready tables for this round.');
    const duration=Number(input.durationMinutes);if(!Number.isInteger(duration)||duration<1||duration>240)throw new RoomError('Choose a round duration of 1–240 minutes.');
    const tables=input.tables.map(n=>s.state.tables.find(t=>t.number===n));
-   if(tables.some(t=>!t||t.state.started||t.finished||t.state.players.length!==t.state.capacity))throw new RoomError('Each selected table must be full and ready.');
+   if(tables.some(t=>!t||t.deletedAt||t.state.started||t.finished||t.state.players.length!==t.state.capacity))throw new RoomError('Each selected table must be full and ready.');
    const number=(round?.number??0)+1;
    for(const table of tables){const t=table!;t.state=applyRoomCommand(t.state,'organizer',{type:'start'},`${requestId}-${t.number}`,now,undefined,true);t.startedAt=now;t.eventRound=number;}
    s.state.eventRound={number,phase:'active',tables:tables.map(t=>t!.number),durationMinutes:duration,startedAt:now};
@@ -68,15 +76,42 @@ export function operateEvent(original:EventStore,hash:string,input:Record<string
   if(!owner)throw new RoomError('Only the organizer can make announcements.');
   if(input.revision!==s.state.revision)throw new RoomError('The event changed. Refresh and try again.');
   const message=typeof input.message==='string'&&input.message.length<=240?input.message.trim():(()=>{throw new RoomError('Use a message under 240 characters.');})();
-  if(input.table!==undefined){const t=s.state.tables.find(t=>t.number===input.table);if(!t||input.round!==t.round)throw new RoomError('The table changed. Select it again.');t.announcement=message;}else s.state.announcement=message;
+  if(input.table!==undefined){const t=s.state.tables.find(t=>t.number===input.table);if(!t||t.deletedAt||input.round!==t.round)throw new RoomError('The table changed. Select it again.');t.announcement=message;}else s.state.announcement=message;
  }else{
   const t=s.state.tables.find(t=>t.number===input.table);if(!t)throw new RoomError('Choose a table in this event.');
+  if(t.deletedAt&&input.type!=='restoreTable')throw new RoomError('This table was deleted. Choose another table or ask the organizer to restore it.');
   if(input.round!==t.round)throw new RoomError('A new group is at this table. Rejoin using its QR code.');
   const member=s.members[hash];
-  if(input.type==='join'){
+  if(input.type==='deleteTable'||input.type==='restoreTable'){
+   if(!owner)throw new RoomError('Only the organizer can delete or restore tables.');
+   if(input.revision!==t.state.revision)throw new RoomError('The table changed. Review it before continuing.');
+   if(input.type==='deleteTable'){
+    if(inRound(s.state,t))throw new RoomError('End and prepare the current round before deleting a participating table.');
+    archiveGame(t,now,'Table deleted by the organizer.');t.deletedAt=now;t.finished=true;delete t.help;
+    for(const [key,m] of Object.entries(s.members))if(m.table===t.number)delete s.members[key];
+   }else{
+    if(!t.deletedAt)throw new RoomError('This table is already active.');
+    prepareTable(s,t,'newPlayers',now,requestId);delete t.deletedAt;
+   }
+  }else if(input.type==='fillDemo'||input.type==='clearDemo'){
+   if(!owner)throw new RoomError('Only the organizer can change demo seats.');
+   if(input.revision!==t.state.revision)throw new RoomError('The table changed. Review its seats again.');
+   if(t.state.started||t.finished)throw new RoomError('Prepare a new game before adding or removing demo players.');
+   if(input.type==='fillDemo'){
+    const count=Number(input.count);if(!Number.isInteger(count)||count<1||count>t.state.capacity-t.state.players.length)throw new RoomError('Choose a number within the available seats.');
+    addDemoPlayers(t,count,requestId,now);
+   }else for(const id of [...(t.demoPlayerIds??[])])removeDemoPlayer(t,id,`${requestId}-${id}`,now);
+  }else if(input.type==='demoCommand'){
+   if(!owner)throw new RoomError('Only the organizer can control demo players.');
+   if(typeof input.playerId!=='string'||!t.demoPlayerIds?.includes(input.playerId))throw new RoomError('Choose a labeled demo player. Real players control their own seats.');
+   if(t.finished||t.archived)throw new RoomError('This game is finished. Prepare the next game first.');
+   const c=input.command as RoomCommand;if(!c||!['adjust','undo','concede','roll','endTurn','claimTitle','releaseTitle'].includes(c.type))throw new RoomError('That demo action is not available.');
+   t.state=applyRoomCommand(t.state,input.playerId,c,requestId,now);
+  }else if(input.type==='join'){
    if(owner)throw new RoomError('The organizer does not occupy a seat. Use another device or browser for a player.');
    if(member&&s.state.tables.some(x=>x.round===member.round&&x.number===member.table&&x.state.players.some(p=>p.id===member.id))){if(member.table!==t.number)throw new RoomError('Leave your current table before joining another.');return s;}
    if(t.finished||t.state.started)throw new RoomError('This table is not taking players. Ask the organizer for a new game.');
+   if(t.state.players.length===t.state.capacity&&t.demoPlayerIds?.length)removeDemoPlayer(t,t.demoPlayerIds[t.demoPlayerIds.length-1],`${requestId}-make-room`,now);
    t.state=applyRoomCommand(t.state,playerId,{type:'join',name:input.name as string,sources:Array.isArray(input.sources)&&input.sources.length?input.sources as string[]:[input.name as string]},requestId,now);s.members[hash]={table:t.number,round:t.round,id:playerId};
   }else if(input.type==='newGroup'){
    if(!owner)throw new RoomError('Only the organizer can seat a new group.');
@@ -114,5 +149,6 @@ export function operateEvent(original:EventStore,hash:string,input:Record<string
    if(command.type==='leave')delete s.members[hash];
   }else throw new RoomError('Unknown event action.');
  }
+ for(const table of s.state.tables){rollDemoPlayers(table,requestId,now);if(!table.deletedAt){if(tableGameOver(table.state))table.endedAt??=now;else if(!table.finished)delete table.endedAt;}}
  s.state.revision++;s.state.updated=now;s.requests[requestId]=hash;s.requests=Object.fromEntries(Object.entries(s.requests).slice(-300));return s;
 }

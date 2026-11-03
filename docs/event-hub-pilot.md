@@ -27,3 +27,9 @@ With the local Worker running, `node scripts/check-event-hub.mjs` checks actual 
 The public search landing pages remain crawlable. Their copy is written for players, their navigation launches the actual tools, and links to them appear only on the main website home footer, not the tracker.
 
 See [the store walkthrough](event-hub-store-walkthrough.md) for the two-phone round demonstration.
+
+## Demo players and table removal
+
+Use Try the event with demo players to fill waiting tables, or use the selected table’s Demo players panel. Simulated players are labeled and counted separately. Open player view or scan the QR before starting to join a full demo table; a simulated seat makes room for you. Organizer and player views can use separate identities in the same browser. Legacy guest invitations still reconnect existing seats. Demo dice roll automatically, while real players must roll themselves. Organizer demo controls cannot target a real player.
+
+Delete Table archives the current game and releases its seats. Deleted tables leave the public directory and cannot accept joins. Deleted tables · restore opens fresh seats under the same table number and QR. Finish and prepare an event round before deleting one of its participating tables.
