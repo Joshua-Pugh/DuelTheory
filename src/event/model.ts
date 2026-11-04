@@ -4,15 +4,15 @@ import {addDemoPlayers,removeDemoPlayer,rollDemoPlayers} from './demo';
 export type ArchivedGame={round:number;state:TableRoomState;startedAt?:number;endedAt?:number;eventRound?:number;reason?:string;demoPlayerIds?:string[]};
 export type EventRound={number:number;phase:'active'|'ended'|'seating';tables:number[];durationMinutes:number;startedAt?:number;endedAt?:number;reason?:string};
 export type RoundReport=EventRound&{results:{table:number;group:number;players:{name:string;life:number;counters:Record<string,number>}[]}[]};
-export type EventTable={number:number;round:number;state:TableRoomState;help?:string;announcement?:string;startedAt?:number;endedAt?:number;eventRound?:number;archived?:boolean;finished:boolean;archive:ArchivedGame[];demoPlayerIds?:string[];deletedAt?:number};
-export type EventState={code:string;name:string;revision:number;created:number;updated:number;announcement:string;profile:TableProfile;tables:EventTable[];eventRound?:EventRound;roundHistory?:RoundReport[]};
-export type PublicEvent={code:string;name:string;revision:number;announcement:string;eventRound?:EventRound;tables:{number:number;round:number;joined:number;capacity:number;status:string;demoPlayers?:number}[]};
+export type EventTable={number:number;round:number;state:TableRoomState;help?:string;helpId?:string;announcement?:string;announcementId?:string;startedAt?:number;endedAt?:number;eventRound?:number;archived?:boolean;finished:boolean;archive:ArchivedGame[];demoPlayerIds?:string[];deletedAt?:number};
+export type EventState={code:string;name:string;revision:number;created:number;updated:number;deletedAt?:number;announcementId?:string;announcement:string;profile:TableProfile;tables:EventTable[];eventRound?:EventRound;roundHistory?:RoundReport[]};
+export type PublicEvent={code:string;name:string;revision:number;deletedAt?:number;announcementId?:string;announcement:string;eventRound?:EventRound;tables:{number:number;round:number;joined:number;capacity:number;status:string;demoPlayers?:number}[]};
 export type EventStore={state:EventState;owner:string;members:Record<string,{table:number;round:number;id:string}>;requests:Record<string,string>};
 export type EventReply={event:PublicEvent;state?:EventState;table?:EventTable;playerId?:string;serverNow?:number;history?:{table:number;game:ArchivedGame}[];nextCursor?:number};
 const text=(v:unknown,max:number)=>{if(typeof v!=='string'||!v.trim()||v.trim().length>max)throw new RoomError(`Enter 1–${max} characters.`);return v.trim();};
 export const tableFinished=(t:EventTable)=>t.finished||tableGameOver(t.state);
 export const eventStatus=(t:EventTable)=>t.help?'Assistance requested':tableFinished(t)?'Finished':t.state.firstPlayer?.winner?'In progress':t.state.started?'Rolling':t.state.players.length===t.state.capacity?'Ready':'Waiting';
-export function eventSummary(s:EventState):PublicEvent{return {code:s.code,name:s.name,revision:s.revision,announcement:s.announcement,eventRound:s.eventRound,tables:s.tables.filter(t=>!t.deletedAt).map(t=>({number:t.number,round:t.round,joined:t.state.players.length,capacity:t.state.capacity,status:eventStatus(t),demoPlayers:t.demoPlayerIds?.length??0}))};}
+export function eventSummary(s:EventState):PublicEvent{return {code:s.code,name:s.name,revision:s.revision,announcement:s.deletedAt?'':s.announcement,announcementId:s.announcementId,deletedAt:s.deletedAt,eventRound:s.deletedAt?undefined:s.eventRound,tables:s.tables.filter(t=>!s.deletedAt&&!t.deletedAt).map(t=>({number:t.number,round:t.round,joined:t.state.players.length,capacity:t.state.capacity,status:eventStatus(t),demoPlayers:t.demoPlayerIds?.length??0}))};}
 function archiveGame(t:EventTable,now:number,reason?:string){
  if(t.archived)return;
  t.archive=[{round:t.round,state:structuredClone(t.state),startedAt:t.startedAt,endedAt:t.endedAt??now,eventRound:t.eventRound,reason,demoPlayerIds:t.demoPlayerIds},...t.archive].slice(0,3);t.archived=true;
@@ -20,7 +20,7 @@ function archiveGame(t:EventTable,now:number,reason?:string){
 function prepareTable(s:EventStore,t:EventTable,mode:'samePlayers'|'newPlayers',now:number,id:string){
  archiveGame(t,now);
  t.state=mode==='samePlayers'?applyRoomCommand(t.state,'organizer',{type:'reset'},id,now,undefined,true):newTableRoom(s.state.code,`Table ${t.number}`,t.state.capacity,'organizer',t.state.profile??s.state.profile);
- t.round++;t.finished=false;delete t.help;delete t.startedAt;delete t.endedAt;delete t.eventRound;delete t.archived;delete t.announcement;
+ t.round++;t.finished=false;delete t.help;delete t.startedAt;delete t.endedAt;delete t.eventRound;delete t.archived;delete t.announcement;delete t.announcementId;delete t.helpId;
  t.demoPlayerIds=(t.demoPlayerIds??[]).filter(id=>t.state.players.some(p=>p.id===id));
  for(const [key,m] of Object.entries(s.members))if(m.table===t.number){if(mode==='samePlayers'&&t.state.players.some(p=>p.id===m.id))m.round=t.round;else delete s.members[key];}
 }
@@ -31,14 +31,27 @@ export function newEvent(code:string,owner:string,input:Record<string,unknown>,n
  return {owner,members:{},requests:{},state:{code,name,profile,revision:0,created:now,updated:now,announcement:'',tables:Array.from({length:count},(_,i)=>({number:i+1,round:1,finished:false,archive:[],state:newTableRoom(code,`Table ${i+1}`,capacity,'organizer',profile)}))}};
 }
 export function eventReply(store:EventStore,hash:string,tableNumber?:number):EventReply{
- const event=eventSummary(store.state);if(hash===store.owner)return {event,state:store.state};
+ const event=eventSummary(store.state);if(hash===store.owner)return {event,state:store.state};if(store.state.deletedAt)return {event};
  const member=store.members[hash],table=store.state.tables.find(t=>t.number===member?.table);
  return member&&table&&!table.deletedAt&&member.round===table.round&&table.state.players.some(p=>p.id===member.id)&&(!tableNumber||table.number===tableNumber)?{event,table,playerId:member.id}:{event};
 }
 export function operateEvent(original:EventStore,hash:string,input:Record<string,unknown>,requestId:string,now=Date.now(),playerId:string=crypto.randomUUID()):EventStore{
  const s=structuredClone(original),owner=hash===s.owner;
  if(s.requests[requestId]){if(s.requests[requestId]!==hash)throw new RoomError('Request ID already used.');return s;}
- if(input.type==='fillDemoTables'){
+ if(input.type==='deleteEvent'||input.type==='restoreEvent'){
+  if(!owner)throw new RoomError('Only the organizer can delete or restore this event.');
+  if(input.revision!==s.state.revision)throw new RoomError('The event changed. Review it again.');
+  if(input.type==='deleteEvent'){
+   if(s.state.deletedAt)throw new RoomError('This event is already deleted.');
+   for(const t of s.state.tables){archiveGame(t,now,'Event deleted by the organizer.');t.finished=true;delete t.help;}
+   s.members={};s.state.deletedAt=now;
+  }else{
+   if(!s.state.deletedAt)throw new RoomError('This event is already active.');
+   for(const t of s.state.tables)if(!t.deletedAt)prepareTable(s,t,'newPlayers',now,requestId);
+   delete s.state.deletedAt;if(s.state.eventRound)s.state.eventRound={number:s.state.eventRound.number,phase:'seating',tables:[],durationMinutes:s.state.eventRound.durationMinutes};s.state.announcement='';delete s.state.announcementId;
+  }
+ }else if(s.state.deletedAt)throw new RoomError('This event was deleted by its organizer.');
+ else if(input.type==='fillDemoTables'){
   if(!owner)throw new RoomError('Only the organizer can add demo players.');
   if(input.revision!==s.state.revision)throw new RoomError('The event changed. Review the tables again.');
   const tables=s.state.tables.filter(t=>!t.deletedAt&&!t.state.started&&!t.finished&&t.state.players.length<t.state.capacity);
@@ -76,7 +89,7 @@ export function operateEvent(original:EventStore,hash:string,input:Record<string
   if(!owner)throw new RoomError('Only the organizer can make announcements.');
   if(input.revision!==s.state.revision)throw new RoomError('The event changed. Refresh and try again.');
   const message=typeof input.message==='string'&&input.message.length<=240?input.message.trim():(()=>{throw new RoomError('Use a message under 240 characters.');})();
-  if(input.table!==undefined){const t=s.state.tables.find(t=>t.number===input.table);if(!t||t.deletedAt||input.round!==t.round)throw new RoomError('The table changed. Select it again.');t.announcement=message;}else s.state.announcement=message;
+  if(input.table!==undefined){const t=s.state.tables.find(t=>t.number===input.table);if(!t||t.deletedAt||input.round!==t.round)throw new RoomError('The table changed. Select it again.');t.announcement=message;t.announcementId=requestId;}else {s.state.announcement=message;s.state.announcementId=requestId;}
  }else{
   const t=s.state.tables.find(t=>t.number===input.table);if(!t)throw new RoomError('Choose a table in this event.');
   if(t.deletedAt&&input.type!=='restoreTable')throw new RoomError('This table was deleted. Choose another table or ask the organizer to restore it.');
@@ -130,8 +143,8 @@ export function operateEvent(original:EventStore,hash:string,input:Record<string
    if(!t.finished){if(tableGameOver(t.state))t.endedAt??=now;else delete t.endedAt;}
   }else if(input.type==='help'||input.type==='finish'||input.type==='clearHelp'){
    if(!owner&&(!member||member.table!==t.number||member.round!==t.round||!t.state.players.some(p=>p.id===member.id)))throw new RoomError('Join this table first.');
-   if(input.type==='clearHelp'){if(!owner)throw new RoomError('Only the organizer can clear a request.');delete t.help;}
-   else if(input.type==='help')t.help=owner?'Organizer check requested':t.state.players.find(p=>p.id===member.id)!.name;
+   if(input.type==='clearHelp'){if(!owner)throw new RoomError('Only the organizer can clear a request.');delete t.help;delete t.helpId;}
+   else if(input.type==='help'){if(!t.help){t.helpId=requestId;t.help=owner?'Organizer check requested':t.state.players.find(p=>p.id===member.id)!.name;}}
    else {if(!owner)throw new RoomError('Only the organizer can mark a table finished.');if(t.archived)throw new RoomError('This game is archived. Prepare the next game instead.');t.finished=!t.finished;if(t.finished)t.endedAt=now;else if(!tableGameOver(t.state))delete t.endedAt;}
   }else if(input.type==='command'){
    const command=input.command as RoomCommand;if(!command||typeof command.type!=='string'||command.type==='join'||command.type==='transferHost'||command.type==='closeRoom')throw new RoomError('That action is not available at an event table.');

@@ -56,4 +56,9 @@ assert.equal((await request(alice,'action',fakeChange)).status,400);r=await requ
 t=r.body.state.tables[1];r=await request(owner,'action',{type:'deleteTable',table:2,round:t.round,revision:t.state.revision});assert.equal(r.status,200);assert.equal(r.body.event.tables.some(t=>t.number===2),false);
 assert.equal((await request(bob,'action',{type:'join',table:2,round:t.round,name:'Bob'})).status,400);
 r=await request(owner,'action',{type:'restoreTable',table:2,round:t.round,revision:r.body.state.tables[1].state.revision});assert.equal(r.status,200);assert.equal(r.body.state.tables[1].round,t.round+1);assert.equal(r.body.state.tables[1].state.players.length,0);
-console.log('Event API end-to-end passed: live guests and demo seats, automatic demo dice, authorized tracking, delete/restore, rounds, corrections and durable paginated history.');
+state=r.body.state;
+assert.equal((await request(alice,'action',{type:'deleteEvent',revision:state.revision})).status,400);
+r=await request(owner,'action',{type:'deleteEvent',revision:state.revision});assert.equal(r.status,200);assert.ok(r.body.event.deletedAt);assert.equal(r.body.event.tables.length,0);
+assert.equal((await request(alice,'read')).body.table,undefined);assert.equal((await request(alice,'action',fakeChange)).status,400);assert.equal((await request(owner,'history')).status,200);
+r=await request(owner,'action',{type:'restoreEvent',revision:r.body.state.revision});assert.equal(r.status,200);assert.equal(r.body.event.deletedAt,undefined);assert.equal(r.body.event.tables.length,6);assert.equal(r.body.state.tables.every(t=>t.state.players.length===0),true);
+console.log('Event API end-to-end passed: guests, demo dice, authorized tracking, table and event delete/restore, rounds, corrections and durable paginated history.');

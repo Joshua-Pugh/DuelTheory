@@ -14,6 +14,10 @@ Select the table, expand **Delete Table**, review it and confirm. Its game is ar
 
 ## Show the full workflow
 
+Organizer announcements appear as a ten-second popup on player screens, including table-specific messages. Players can dismiss them sooner; the message remains on the page. Assistance calls create the same timed popup for the organizer with a View Table action. The table keeps its assistance badge until the organizer resolves it. Repeated polling and repeated calls for an unresolved request do not replay the popup. Hovering or focusing an alert pauses dismissal.
+
+From Return to a hub, choose **Delete event**, review the event name and occupied seats, then confirm. All tables close and players lose their seats. The event moves to **Deleted events · restore**. Restoration keeps event and table QR codes, opens fresh seats, and retains archived games. Deletion is recoverable, not permanent data erasure. Only the organizer browser can perform these actions.
+
 1. **Set the room up.** Open Table Tools → Event Hub demo. Create four tables with two seats each. In Edit profile, choose starting life and a counter appropriate to the store's game. For a high-life demonstration, use 8,000 Life, taps of 100 and holds of 1,000. Nothing requires a trademarked preset.
 2. **Hand over the invitation.** Select Table 1 and have each person scan its QR with their own phone. They enter nicknames and join. Show that the laptop's organizer did not take either seat. Table 1 changes from Waiting to Ready; the other three tables remain available.
 3. **Start a round.** The Round panel automatically selects ready tables. Choose a short demonstration duration, then Start round 1. Both phones roll for first. The organizer sees In progress, the round clock and each player's totals. The QR is now under Show invitation, so it no longer takes the main space.
