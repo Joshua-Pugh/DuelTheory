@@ -2,7 +2,7 @@ import {requestSignal} from '../platform/polling';
 import {publicInviteBase} from '../platform/publicUrl';
 import {COMMANDER_API,newSeatToken} from '../commander/client';
 import type {MatchView,MatchCommand,Game} from './model';
-export const MATCH_API=COMMANDER_API.replace('dueltheory-commander','dueltheory-matches');
+export const MATCH_API=import.meta.env.VITE_MATCH_API_URL||COMMANDER_API.replace('dueltheory-commander','dueltheory-matches');
 export type Credential={code:string;token:string};
 export function savedMatch(code:string):Credential|null{try{return JSON.parse(localStorage.getItem('dt-match:'+code)||'null');}catch{return null;}}
 export function forgetMatch(code:string){localStorage.removeItem('dt-match:'+code);}

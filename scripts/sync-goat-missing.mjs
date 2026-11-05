@@ -137,15 +137,15 @@ async function main(){
   if(existsSync(join(fullPath,`${card.id}.jpg`))&&!card.fullImage)card.fullImage=`/cards/full/${card.id}.jpg`;
  }
  if(added.length||JSON.stringify(updated)!==JSON.stringify(current)){
-  const backup=join(root,'catalog.pre-goat-repair.json');
+  const backup=join(repo,'tools/private-dev/maintenance/catalog.pre-goat-repair.json');
   if(!existsSync(backup))await copyFile(catalogPath,backup);
   const tmp=`${catalogPath}.tmp-${process.pid}`;
   try{await writeFile(tmp,JSON.stringify(updated));await rename(tmp,catalogPath);}finally{await rm(tmp,{force:true}).catch(()=>{});}
  }
  const report={runAt:new Date().toISOString(),existing:current.length,manifest:names.length,added:added.map(c=>({id:c.id,name:c.name})),alreadyPresent:names.length-target.length,newThumbnails:smallCount,newFullImages:largeCount,unresolved:missing,imageFailures,scope:'Targeted manifest only; NOT a complete GOAT historical pool verification.'};
- await writeFile(join(repo,'goat-missing-repair-report.json'),JSON.stringify(report,null,2));
+ await writeFile(join(repo,'tools/private-dev/maintenance/goat-missing-repair-report.json'),JSON.stringify(report,null,2));
  console.log(`Done: added ${added.length} cards; downloaded ${smallCount} thumbnails and ${largeCount} full images. Unresolved names: ${missing.length}; image errors: ${imageFailures.length}.`);
- console.log('Report: goat-missing-repair-report.json');
+ console.log('Report: tools/private-dev/maintenance/goat-missing-repair-report.json');
  if(missing.length||imageFailures.length)process.exitCode=1;
 }
 main().catch(e=>{console.error(`Repair failed: ${errMsg(e)}`);process.exitCode=1;});

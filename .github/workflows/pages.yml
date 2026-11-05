@@ -23,7 +23,8 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci
-      - run: npm test
+      - run: npm run check:test-ownership
+      - run: npm run test:public
       - run: npm run build:pages
         env:
           VITE_ACCOUNTS_ENABLED: ${{ vars.VITE_ACCOUNTS_ENABLED }}

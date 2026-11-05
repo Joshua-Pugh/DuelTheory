@@ -3,7 +3,7 @@ import {publicInviteBase} from '../platform/publicUrl';
 import {requestSignal} from '../platform/polling';
 import type {EventReply} from './model';
 export const EVENT_API=(import.meta as ImportMeta & {env:Record<string,string>}).env.VITE_EVENT_API_URL||TABLE_API;
-export function eventLink(code:string,table?:number,display=false){const url=publicInviteBase();url.searchParams.set('event',code);if(table)url.searchParams.set('eventTable',String(table));if(display)url.searchParams.set('display','1');else url.searchParams.set('player','1');url.hash='/event-hub';return url.toString();}
+export function eventLink(code:string,table?:number,display=false){const url=publicInviteBase();url.searchParams.set('tool','events');url.searchParams.set('event',code);if(table)url.searchParams.set('eventTable',String(table));if(display)url.searchParams.set('display','1');else url.searchParams.set('player','1');url.hash='/event-hub';return url.toString();}
 export function eventToken(code:string,display=false){const key=`dt.event.${display?'display':'access'}.${code}`;let token=localStorage.getItem(key);if(!token){token=newSeatToken();localStorage.setItem(key,token);}return token;}
 /** Reuse legacy guest seats; organizer browsers receive a separate, unprivileged player identity. */
 export async function resolveEventToken(code:string,display=false,player=false,signal?:AbortSignal){

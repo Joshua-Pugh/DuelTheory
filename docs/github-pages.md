@@ -6,7 +6,9 @@ The repository contains the current application source and public card/frame ass
 2. Open **Actions → Deploy DuelTheory to GitHub Pages → Run workflow** on `main`.
 3. Wait for the build and deploy jobs. The deployment link will be `https://dueltheory.com/` once deployment succeeds.
 
-Deployment is manual; pushing the source alone does not publish the site. The workflow installs dependencies, runs the tests, builds with the `/` base for the configured custom domain, prepares dynamic card/image paths and deploys the static output. No development server needs to run on your PC. The game still runs in the visitor's browser; online rooms use the separate Cloudflare Workers.
+Deployment is manual; pushing the source alone does not publish the site. The workflow installs dependencies, checks test ownership, runs the public shared/AT/Companion suites, builds with the `/` base for the configured custom domain, checks the public module and asset boundaries, and deploys the static output. No development server needs to run on your PC. The game still runs in the visitor's browser; online rooms use the separate Cloudflare Workers.
+
+Never publish `dist-private` to Pages. The private build is served only by the identity-protected Worker. Its GOAT catalog and private modules are excluded from the public artifact. See [production boundaries](production-boundaries.md) for private releases and API protection.
 
 Local development: `npm ci`, then `npm run dev`. Production check: `npm run build`. Pages build: `npm run build:pages`.
 

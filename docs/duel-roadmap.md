@@ -1,3 +1,5 @@
+> Historical GOAT development record. Superseded for product priorities by the [current roadmap](platform-roadmap.md) and [Ashen Throne production plan](ashen-production-plan.md). Retained for decisions and regressions, not an active public feature list.
+
 # Duel mode work list
 
 User priorities recorded October 15, 2026. Documentation only; resume implementation in the next work session.

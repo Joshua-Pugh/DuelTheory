@@ -1,3 +1,11 @@
+# DuelTheory — current direction
+
+As of November 5, 2026, DuelTheory is focused on Ashen Throne, with Table Companion as the secondary free public tool. The first production pass separates the public build from the retained GOAT, Event Hub and Creator Studio development portal. Private assets and APIs require an invited, verified identity. See [build and access boundaries](docs/production-boundaries.md) for deployment and test ownership.
+
+Start with the [current roadmap](docs/platform-roadmap.md) and [production audit and build plan](docs/ashen-production-plan.md). The version notes below are historical and may describe navigation, priorities or implementation status that no longer represent the current plan.
+
+## Historical version notes
+
 # GitHub hosting
 
 See [GitHub Pages setup](docs/github-pages.md) to deploy this application without running a local development server.

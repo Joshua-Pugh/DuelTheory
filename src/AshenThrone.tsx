@@ -30,9 +30,9 @@ const keywords=[
  ['Aegis','Cannot be targeted by enemy Actions or Effects.'],
  ['Exhaust / Sacrifice','Fatigue a card to use an ability / destroy your card as an immediate cost.']
 ];
-export default function AshenThrone({onPlay}:{onPlay?:()=>void}={}){
+export default function AshenThrone({onPlay,initialSection='rules'}:{onPlay?:()=>void;initialSection?:'rules'|'cards'|'decks'|'builder'}={}){
  const [variant]=useState<Variant>('command');
- const [section,setSection]=useState<'rules'|'cards'|'decks'|'builder'>('rules');
+ const [section,setSection]=useState<'rules'|'cards'|'decks'|'builder'>(initialSection);
  const [faction,setFaction]=useState<'All'|'Brute'|'Noble'>('All');
  const [query,setQuery]=useState('');
  const [selectedId,setSelectedId]=useState('ashen-brute-frenzied-grunt');

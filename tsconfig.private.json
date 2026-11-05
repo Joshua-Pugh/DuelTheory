@@ -1,0 +1,1 @@
+{"extends":"./tsconfig.json","include":["src/private-dev/main.tsx","src/env.d.ts"]}

@@ -1,3 +1,4 @@
+import {privateIdentity} from '../../src/access/privateAccess';
 import {backgroundMime,MAX_BACKGROUND_BYTES} from '../../src/table/appearance';
 export {EventHub} from './events';
 import {newCommanderRoom} from '../../src/commander/model';
@@ -67,6 +68,7 @@ export default {
   const url=new URL(request.url);if(url.pathname==='/health')return reply({ok:true,service:'DuelTheory Table Companion'});
   const eventMatch=url.pathname.match(/^\/events\/([A-Z2-9]{8})\/(create|read|action|history)$/);
   if(eventMatch){
+   if(!await privateIdentity(request,env))return reply({error:'A verified private-development invitation is required.'},403);
    const [,code,method]=eventMatch;
    const reading=method==='read'||method==='history';
    if(request.method!==(reading?'GET':'POST'))return reply({error:'Method not allowed.'},405);

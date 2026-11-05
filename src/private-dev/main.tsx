@@ -1,0 +1,10 @@
+import LegacyDeckImport from "./LegacyDeckImport";
+import {lazy,Suspense} from 'react';
+import {createRoot} from 'react-dom/client';
+import '../styles.css';import '../ashenLayered.css';import '../platformNavigation.css';import '../platformPages.css';import '../siteWorkbench.css';
+const Legacy=lazy(()=>import('./LegacyApp'));
+const Events=lazy(()=>import('../EventHubPanel'));
+const Studio=lazy(()=>import('../CreatorArena'));
+const params=new URLSearchParams(location.search);
+const tool=params.get('tool')||(params.has('event')||location.hash.startsWith('#/event-hub')?'events':'goat');
+createRoot(document.getElementById('root')!).render(<><header className="panel padded"><strong>DuelTheory · Private development</strong><nav><a href="/?tool=goat#/home">GOAT simulator</a> · <a href="/?tool=events#/event-hub">Event Hub</a> · <a href="/?tool=studio">Creator Studio</a> · <a href="https://dueltheory.com/">Public site</a> · <a href="/cdn-cgi/access/logout">Sign out</a></nav></header>{tool!=="events"&&tool!=="studio"&&<LegacyDeckImport/>}<Suspense fallback={<p>Opening private tool…</p>}>{tool==='events'?<Events/>:tool==='studio'?<Studio deck={{id:'private-studio',name:'Private studio',main:[],side:[],extra:[]}} catalog={[]}/>:<Legacy/>}</Suspense></>);

@@ -10,6 +10,7 @@ dist
 worker-configuration.d.ts
 
 dist-mobile
+dist-private
 android/.gradle
 android/local.properties
 android/**/build

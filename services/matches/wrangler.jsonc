@@ -38,12 +38,19 @@
     }
   ],
   "vars": {
-    "ALLOWED_ORIGINS": "https://joshua-pugh.github.io,https://dueltheory.com,https://www.dueltheory.com,http://localhost:5173,http://127.0.0.1:5197,https://localhost,http://127.0.0.1:5199"
+    "ALLOWED_ORIGINS": "https://joshua-pugh.github.io,https://dueltheory.com,https://www.dueltheory.com,http://localhost:5173,http://127.0.0.1:5197,https://localhost,http://127.0.0.1:5199",
+    "PRIVATE_ACCESS_TEAM": "https://icy-wood-652b.cloudflareaccess.com",
+    "PRIVATE_ACCESS_AUD": "6e04bd166b1a91e097ba4feb47eccd0e37289bf249f2cb7902a29643cfb137f1"
   },
   "observability": {
     "enabled": true,
     "traces": {
       "enabled": true
     }
+  },
+  "secrets": {
+    "required": [
+      "PRIVATE_ACCESS_EMAILS"
+    ]
   }
 }

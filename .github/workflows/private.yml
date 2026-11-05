@@ -1,0 +1,21 @@
+name: Check private development tools
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  private-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run check:test-ownership
+      - run: npm run test:private:goat
+      - run: npm run test:private:events
+      - run: npm run test:private:studio
+      - run: npm run build:private
+      # Private artifacts are never uploaded to the public Pages deployment.

@@ -14,17 +14,7 @@ export const pages=[
   ]
  },
  {
-  slug:'deck-builder',title:'GOAT Format Deck Builder — Import & Export YDK | DuelTheory',
-  heading:'What’s going in your next GOAT deck?',label:'Yu-Gi-Oh! · GOAT Format deck builder',
-  description:'Build your next GOAT Format deck with DuelTheory. Search cards, edit your list, save different builds, and import or export YDK files.',
-  intro:'Bring a list you already play, try a different side deck, or start from scratch. Keep the cards and their text beside your list while you build.',
-  launch:'decks',action:'Build a deck',
-  sections:[
-   ['Find the card you’re thinking of','Search by name, open the card viewer and add cards to your Main, Side or Fusion Deck. Format-limit warnings help you check the list as you go.'],
-   ['Try a change. Keep the original.','Save a named list in your browser, then duplicate it when you want to try something different. Import .ydk or DuelTheory JSON files, and export a copy to share or keep as a backup.'],
-   ['Give the list a game','Set up a local GOAT match or invite a friend to a private room. Supported lists have automatic effects; other lists use manual play. The simulator is still in development, and reports of incorrect interactions help us improve it.'],
-   ['Built by Ashen Forge Games','DuelTheory is an independent project. Yu-Gi-Oh! belongs to its respective rights holders.']
-  ]
+  slug:'deck-builder',title:'Ashen Throne Deck Builder | DuelTheory',heading:'Build your Ashen Throne deck',label:'Ashen Throne · Deck Builder',description:'Browse Brute and Noble cards and save your Ashen Throne prototype decks on DuelTheory.',intro:'Start with the Brutes or Nobles, inspect your cards and refine a list for your next game.',launch:'decks',action:'Open Deck Builder',sections:[['Choose a faction','Browse the Brute and Noble prototype cards and inspect their costs, effects and stats.'],['Save your list','Save decks in this browser and export a copy before changing devices or clearing browser data.'],['Play the prototype','Local duels and private matches currently use the supported prototype decks. Custom deck selection in duels is not yet available.']]
  },
  {
   slug:'ashen-throne',title:'Play Ashen Throne Online — Cards & Rules | DuelTheory',

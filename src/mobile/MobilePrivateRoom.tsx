@@ -17,7 +17,7 @@ import { loadDisplayName, rememberSeatName } from "../playerProfile";
 import { OpeningCoinDialog } from "../DuelLifecycleDialogs";
 import AshenBattlefield from "../AshenBattlefield";
 import "../privateMatch.css";
-export default function MobilePrivateRoom() {
+export default function MobilePrivateRoom({mobile=true}:{mobile?:boolean}={}) {
   const initialCode =
     location.hash.match(/^#\/private\/([A-Z2-9]{8})$/)?.[1] || "";
   const [code, setCode] = useState(initialCode),
@@ -391,7 +391,7 @@ export default function MobilePrivateRoom() {
       {room?.phase === "playing" && room.ashen && (
         <>
           <AshenBattlefield
-            mobile
+            mobile={mobile}
             remote={{
               state: room.ashen,
               choosing,

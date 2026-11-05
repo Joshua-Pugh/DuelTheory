@@ -16,7 +16,7 @@ export default function AboutDuelTheory(){
   <p>Our long-term vision extends beyond a card simulator. We want to build an environment that supports the process of taking a game from its earliest concept to a finished, playable release.</p>
   <h2>Development and technology</h2>
   <p>DuelTheory remains in active development.</p>
-  <p>Our current work includes the GOAT Format simulator, deck-building tools, Ashen Throne, and the shared tabletop systems that will eventually support additional games.</p>
+  <p>Our current focus is Ashen Throne: a complete digital card game for the web and Android. Table Companion remains available for physical tabletop games. Other projects are kept in private development while we finish these experiences.</p>
   <p>We use AI-assisted development tools as part of our workflow, particularly for programming, debugging, and prototyping. These tools help us explore solutions and accelerate development, but they do not replace the need for sound design decisions, testing, or technical verification.</p>
   <p>Ashen Throne’s original game systems, mechanics, world, and rules have been developed through our own creative work. DuelTheory’s direction and intended functionality are likewise guided by the goals we have established for the platform.</p>
   <p>We recognize that automated card games require a high degree of accuracy. Complex interactions, timing rules, and individual card effects must be tested carefully. We do not consider an implemented feature complete simply because it appears to function.</p>
