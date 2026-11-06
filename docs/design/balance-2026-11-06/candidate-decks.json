@@ -2,7 +2,7 @@
   "date": "2026-11-06",
   "revision": "engine-preserving-legendary-review-v2",
   "baseline": {
-    "commit": "a5e8202167268e45647fa3156193d00aa6dd308c",
+    "commit": "f9d1740960bf8e51832571836dcf6fb7b2a7fb1f",
     "files": {
       "src/ashenCatalog.json": "ce920eb58732569ec2de55e410ce5301621a9ffd371c6aec935b5abe7d38f8a9",
       "src/ashenPrintData.json": "314b9e3d92be4de7e8cff6ff097ee7fc9878bbaf872308d1c0192498ed0df789",

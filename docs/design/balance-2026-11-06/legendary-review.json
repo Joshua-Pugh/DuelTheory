@@ -3,7 +3,7 @@
   "revision": "engine-preserving-legendary-review-v2",
   "status": "design-review-no-live-changes",
   "baseline": {
-    "commit": "a5e8202167268e45647fa3156193d00aa6dd308c",
+    "commit": "f9d1740960bf8e51832571836dcf6fb7b2a7fb1f",
     "files": {
       "src/ashenCatalog.json": "ce920eb58732569ec2de55e410ce5301621a9ffd371c6aec935b5abe7d38f8a9",
       "src/ashenPrintData.json": "314b9e3d92be4de7e8cff6ff097ee7fc9878bbaf872308d1c0192498ed0df789",
@@ -195,15 +195,14 @@
         "untuned": 4,
         "oath": 3
       },
-      "status": "blocked-pending-trigger-decision",
+      "status": "creator-intent-confirmed-provisional-test-cost",
       "releaseReady": false,
-      "rationale": "Seven total Essence with a three-Oath Command floor is only a provisional test price for a bounded trigger. No finite price establishes fair balance for the currently permitted self-retriggering Station-damage chain.",
-      "conditionalWordingProposal": "Whenever another Noble Unit you control deals combat damage to an opponent’s Command Station, Garrett of Ashenfield deals 1 damage to any target.",
-      "wordingApproved": false,
+      "creatorDecision": "November 6, 2026: original wording and self-retriggering Station-damage interaction are intentional. Preserve them; no trigger rewrite.",
+      "rationale": "Retain seven total Essence with a three-Oath Command floor as a test price for an intentional combo finisher. Its accessibility, supporting cost reduction and available disruption must be tested together; the price is not a claim of established balance.",
       "gates": [
-        "Creator must explicitly approve or reject the bounded trigger. Preserve the currently retained original ruling and text until then.",
-        "If the lethal self-chain is intentionally retained, evaluate Garrett as a combo win condition; do not describe this proposed cost as balanced.",
-        "Test entry Fortify, multiple attackers and multiple Garretts before booster release."
+        "Preserve original wording and self-triggering behavior.",
+        "Test legal response windows, removal of the source, entry Fortify, multiple attackers and multiple Garretts.",
+        "Review future Command support and cost reduction together with this price; do not assess only nominal cost."
       ]
     }
   ]

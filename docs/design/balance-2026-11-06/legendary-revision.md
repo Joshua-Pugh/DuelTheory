@@ -23,7 +23,7 @@ Costs below are full printed costs. Generic Essence can be paid with any type. R
 | Royal Crusher | 2 generic + 4 Oath = 6 | **Keep 6** | Starter, one copy |
 | Korgath, Lord of Ruin | 3 generic + 3 Fury = 6 | **4 generic + 3 Fury = 7** | Saved booster reserve |
 | Seraphine, Royal Advisor | 3 generic + 2 Oath = 5 | **3 generic + 3 Oath = 6** | Saved booster reserve |
-| Garrett of Ashenfield | 4 generic + 2 Oath = 6 | **4 generic + 3 Oath = 7, conditional** | Saved booster reserve; trigger decision required |
+| Garrett of Ashenfield | 4 generic + 2 Oath = 6 | **4 generic + 3 Oath = 7, test price** | Saved booster reserve; original trigger confirmed intentional |
 
 ### Skarn: preserve an attainable finisher
 
@@ -53,15 +53,13 @@ At **3 generic + 3 Oath**, she has a three-Oath minimum under Command, and her p
 
 There is a further timing issue to test: the current Start Phase executes start effects **before Ready**. A Unit she deploys during Start can therefore Ready later in that same Start Phase and attack that turn. Do not price her on the assumption that the new Unit must wait another turn. Decide deliberately whether that timing is intended before release; this review does not change it.
 
-### Garrett: a higher price cannot solve the existing trigger
+### Garrett: intentional combo finisher
 
-His currently retained ruling permits his own Station damage to trigger him again. That can become a lethal repeatable chain. It would be misleading to label seven, eight or ten Essence a balanced price for the same unbounded interaction simply because deployment happens later.
+The creator confirmed on November 6 that the original wording and self-triggering Station damage are intentional. Preserve that text and behavior. The previously proposed bounded wording is withdrawn. Evaluate him as a deliberate legendary combo finisher, rather than an ordinary combat body.
 
-The saved **seven-Essence price is conditional on a bounded trigger**. With Command, the proposed three Oath remains payable even after generic reductions. One wording option to review is:
+The saved **seven-Essence price remains provisional for testing with his original effect**. With Command, the proposed three Oath remains payable even after generic reductions. Future Command support, how quickly he can be found and deployed, and the opposing deck's disruption must be evaluated together.
 
-> Whenever another Noble Unit you control deals combat damage to an opponent's Command Station, Garrett of Ashenfield deals 1 damage to any target.
-
-That keeps his role as the captain rewarding a successful Noble attack while excluding his own effect damage and noncombat ping chains. **This wording is not approved or implemented.** The original text and current ruling are preserved. If the creator wants the original lethal chain retained, evaluate it as an explicit combo win condition instead of calling this price balanced.
+This confirmation settles his intended wording. It does not claim the seven-cost test price is proven balanced, and no live price or effect has changed.
 
 ## Revised exact starter bookkeeping
 
@@ -81,7 +79,7 @@ The revised lists still preserve every previously requested Siege, Ranged and So
 - [Original reserve designs with separate balance annotations](booster-reserve.json)
 - [All five legendary reviews, original text/costs and recommended test prices](legendary-review.json)
 
-The reserve still contains 17 proposed starter cuts, plus the separately preserved original Fury Offering design. Original printed costs are not overwritten by proposed prices. Korgath, Seraphine and Garrett each have explicit balance status and outstanding checks. Garrett is blocked on the trigger decision. Other reserved cards that have not had a full cost review are marked accordingly, not silently classified as balanced. All cards are marked **not release-ready**.
+The reserve still contains 17 proposed starter cuts, plus the separately preserved original Fury Offering design. Original printed costs are not overwritten by proposed prices. Korgath, Seraphine and Garrett each have explicit balance status and outstanding checks. Garrett's original trigger is confirmed intentional; his price still needs playtesting. Other reserved cards that have not had a full cost review are marked accordingly, not silently classified as balanced. All cards are marked **not release-ready**.
 
 Before activating the starter changes, update the practice fixtures as well. The current lessons find Garrett in a starter deck, and the Command lesson specifically teaches him. Those lessons must use appropriate retained starter cards, such as Court Strategist, with revised goals and costs; otherwise removing Garrett would break the walkthrough. The Noble deck-selection tile also uses Garrett's art: revise its presentation so it does not imply he is included in the starter. Preserve the card catalog, artwork and IDs for saved games and future pool use. Update print-and-play and displayed deck lists together with engine/deck revisions.
 

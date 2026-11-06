@@ -54,11 +54,10 @@ const legendaryReview={
     gates:['Cost-five-or-less must use printed cost, not Command-discounted cost.','Current Start jobs resolve before Ready, so a Unit deployed by Seraphine can be readied in that same Start Phase. Test or deliberately change this timing; do not assume an extra turn of deployment fatigue.','Test multiple Seraphines without assuming an unimplemented one-Legendary rule.'],
   },
   'ashen-noble-garrett-of-ashenfield':{
-    destination:'booster-reserve',recommendedCost:{untuned:4,oath:3},status:'blocked-pending-trigger-decision',releaseReady:false,
-    rationale:'Seven total Essence with a three-Oath Command floor is only a provisional test price for a bounded trigger. No finite price establishes fair balance for the currently permitted self-retriggering Station-damage chain.',
-    conditionalWordingProposal:'Whenever another Noble Unit you control deals combat damage to an opponent’s Command Station, Garrett of Ashenfield deals 1 damage to any target.',
-    wordingApproved:false,
-    gates:['Creator must explicitly approve or reject the bounded trigger. Preserve the currently retained original ruling and text until then.','If the lethal self-chain is intentionally retained, evaluate Garrett as a combo win condition; do not describe this proposed cost as balanced.','Test entry Fortify, multiple attackers and multiple Garretts before booster release.'],
+    destination:'booster-reserve',recommendedCost:{untuned:4,oath:3},status:'creator-intent-confirmed-provisional-test-cost',releaseReady:false,
+    creatorDecision:'November 6, 2026: original wording and self-retriggering Station-damage interaction are intentional. Preserve them; no trigger rewrite.',
+    rationale:'Retain seven total Essence with a three-Oath Command floor as a test price for an intentional combo finisher. Its accessibility, supporting cost reduction and available disruption must be tested together; the price is not a claim of established balance.',
+    gates:['Preserve original wording and self-triggering behavior.','Test legal response windows, removal of the source, entry Fortify, multiple attackers and multiple Garretts.','Review future Command support and cost reduction together with this price; do not assess only nominal cost.'],
   },
 };
 function snapshot(cardId){
@@ -110,6 +109,8 @@ for(const [cardId,review] of Object.entries(legendaryReview)){
   if(review.destination==='starter'&&entry?.count!==1)throw Error(`Starter finisher missing: ${cardId}`);
   if(review.destination==='booster-reserve'&&(entry||!reserve.cards.some(e=>e.card.id===cardId)))throw Error(`Reserve mismatch: ${cardId}`);
 }
+const bruteEntries=profiles.Brute.entries;
+if(!bruteEntries.some(e=>e.cardId==='ashen-brute-korgath-lord-of-ruin')&&bruteEntries.some(e=>e.cardId==='ashen-brute-korgath-s-call'))throw Error('Korgath’s Call cannot remain in this starter without Korgath.');
 const fontDraws=[18,20,22].map(fonts=>({fonts,openingZeroFonts:1-atLeast(fonts,6,1),openingAtLeastTwo:atLeast(fonts,6,2),threeByOwnTurnThree:atLeast(fonts,8,3),fourByOwnTurnFour:atLeast(fonts,9,4)}));
 const write=(name,data)=>writeFileSync(path.join(out,name),JSON.stringify(data,null,2)+'\n');
 write('candidate-decks.json',{date:'2026-11-06',revision,baseline,profiles,fontDraws});write('booster-reserve.json',reserve);

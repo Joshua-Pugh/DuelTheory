@@ -2,6 +2,8 @@
 
 Current recommendation: [engine-preserving legendary revision](legendary-revision.md).
 
+Latest creator decisions and interaction recommendations: [starter interaction review](interaction-review.md). Garrett's original effect is intentional and retained; new interaction slots and the suggested replacement Tactic are not yet approved or active.
+
 - [Current exact 60-card lists and curve tables](curves-and-lists.md)
 - [Current candidate deck data](candidate-decks.json)
 - [Saved booster designs and balance status](booster-reserve.json)
