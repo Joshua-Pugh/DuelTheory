@@ -59,7 +59,8 @@ it('makes Home, Account and Settings explicit and opens email account creation',
 it("starts the bundled Brute/Noble duel after the coin flip and draws both hands", async () => {
   vi.useFakeTimers();
   await act(async () => root.render(<AshenDuelArena />));
-  act(() => button("Flip coin & start AT duel")!.click());
+  act(() => Array.from(document.querySelectorAll<HTMLButtonElement>('.at-start-mode')).find(b=>b.textContent?.includes('Local duel'))!.click());
+  act(() => button("Flip for first")!.click());
   expect(button("Begin duel")!.disabled).toBe(true);
   await act(async () => {
     await vi.advanceTimersByTimeAsync(1300);
@@ -73,6 +74,12 @@ it("starts the bundled Brute/Noble duel after the coin flip and draws both hands
   expect(document.body.textContent).toContain("Ley Basin");
   expect(document.body.textContent).toContain("Ossuary");
   expect(document.body.textContent).not.toContain("could not open");
+  const current=JSON.parse(localStorage.getItem(BATTLEFIELD_KEY)!);
+  act(()=>button('Exit AT duel')!.click());
+  act(()=>button('Resume local duel')!.click());
+  const resumed=JSON.parse(localStorage.getItem(BATTLEFIELD_KEY)!);
+  expect(resumed.table.piles['0:hand']).toEqual(current.table.piles['0:hand']);
+  expect(resumed.table.piles['1:hand']).toEqual(current.table.piles['1:hand']);
 });
 
 import { BATTLEFIELD_KEY } from "../ashenBattlefieldState";
@@ -96,7 +103,8 @@ it("locks the duel viewport on entry and restores normal app mode on exit", asyn
     .mockResolvedValue();
   history.replaceState(null, "", "/#/at");
   await act(async () => root.render(<MobileApp previewAT />));
-  act(() => button("Flip coin & start AT duel")!.click());
+  act(() => Array.from(document.querySelectorAll<HTMLButtonElement>('.at-start-mode')).find(b=>b.textContent?.includes('Local duel'))!.click());
+  act(() => button("Flip for first")!.click());
   await act(async () => {
     await vi.advanceTimersByTimeAsync(1300);
   });

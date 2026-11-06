@@ -1,28 +1,28 @@
+import AshenClashQueue from './games/ashen/arena/AshenClashQueue';
 import {ownResponsePassKey} from './ashenResponsePolicy';
 import AshenOpeningHands from './AshenOpeningHands';
 import {useDuelViewport} from './duelUi/useDuelViewport';
 import CardBack from './duelUi/CardBack';
-import AshenStatBreakdown from './AshenStatBreakdown';
+import AshenCardInspector,{AshenCardReading} from './games/ashen/arena/AshenCardInspector';
 import AshenCommandCost from './AshenCommandCost';
 import AshenEffectNotices from './AshenEffectNotices';
 import AshenCardAnimations from './AshenCardAnimations';
 import CardActionMenu,{type CardMenuAction} from './duelUi/CardActionMenu';
 import ResourcePool from './duelUi/ResourcePool';
 import AshenPhaseControls from './AshenPhaseControls';
-import RulesText from './RulesText';
 import type {AshenCommand} from './matches/ashenCommands';
 import {createPortal} from 'react-dom';
 import AshenReference from './AshenReference';
 import {ashenGuidance,ashenPhaseName} from './ashenGuidance';
 import {useEffect,useRef,useState,type CSSProperties,type DragEvent,type ReactNode} from 'react';
-import {Eye,ChevronRight,Undo2,Swords} from 'lucide-react';
+import {Eye,ChevronRight,Undo2} from 'lucide-react';
 import AshenCardFrame from './AshenCardFrame';
 import AshenEffectDecision from './AshenEffectDecision';
-import {RESOURCES,rulesForCard,type Resource} from './ashenPresentation';
+import {RESOURCES,type Resource} from './ashenPresentation';
 import {BATTLEFIELD_KEY,ashenFaceVisible,ashenTurnNumber,battlefieldDispatch,fontEssence,newBattlefield,readBattlefield,type Battlefield,type BattlefieldAction} from './ashenBattlefieldState';
 import './ashenBattlefield.css';
-import './ashenDuelRoom.css';
-import './ashenPhone.css';
+import './ashenDialogs.css';
+import './games/ashen/arena/ashenArena.css';
 import {ashenEffects,ASHEN_EFFECT_PACK} from './games/ashen/effectPacks';
 import {ashenData,ashenStats,effectChoices,playProgram,resolveAshenEffect,resolveBurnEffect,availableAshenAbilities,pendingAshenChoices,resumeAshenEffect} from './games/ashen/adapter';
 import {chooseAshenOpening,advanceAshenTo,inspectAshenAction,canBlockAshen,confirmAshenTriggerOrder,orderAshenTrigger,newBruteDuel,submitAshenAction,resumeBruteDuel,burnInBruteDuel,nextAshenPhase,passAshenPriority,declareAshenAttackers,assignAshenBlocker,clearAshenBlockers,resolveAshenCombat,korgathCallChoices,chooseKorgathForCall} from './games/ashen/duel';
@@ -59,9 +59,6 @@ export default function AshenBattlefield({remote,initialState,onAgain,onExit,lea
  const pending=pendingAshenChoices(state),decision=state.rules?.pending?.flow.steps[0];
  const st=state.table,opponent:0|1=seat===0?1:0;
  const card=selected?st.cards[selected]:undefined;
- const viewCard=st.cards[hovered||selected||''];
- const viewData=viewCard?ashenData(state,viewCard.instanceId):undefined;
- const viewVisible=viewCard&&(viewCard.controller===seat||(!['hand','deck'].includes(viewCard.zone)&&!viewCard.faceDown));
  const effectDefinition=card?ashenEffects[card.cardId]:undefined;
  const visible=card&&(card.controller===seat||(card.zone!=='hand'&&card.zone!=='deck'&&!card.faceDown));
  useEffect(()=>{if(remote||practice)return;try{localStorage.setItem(BATTLEFIELD_KEY,JSON.stringify(state));}catch{setNotice('Browser storage unavailable. Keep this tab open or export the table.');}},[state,!!practice]);
@@ -109,7 +106,7 @@ export default function AshenBattlefield({remote,initialState,onAgain,onExit,lea
  const zone=(who:0|1,id:string,label:string)=>{
   const ids=st.piles[`${who}:${id}`];
   return <section className={`ab-zone ab-${id} ${selected&&card?.controller===seat?'ab-droppable':''}`} aria-label={`Player ${who+1} ${label}`} onDragOver={e=>e.preventDefault()} onDrop={e=>drop(e,who,id)}>
-   <header><span>{label}</span><small>{ids.length} {id==='command'?'':'· unlimited'}</small></header>
+   <header><span>{label}</span><small>{ids.length} {id==='command'?'':'cards'}</small></header>
    <div className="ab-card-row">{ids.map(id=>renderCard(id))}{!ids.length&&<span className="ab-zone-empty">{id==='unit'?'Muster your forces here':id==='ley'?'Your fonts gather here':id==='support'?'Runes & relics in play':'Command Station'}</span>}</div>
    {!guided&&selected&&card?.controller===seat&&card.zone!==id&&<button className="ab-place" onClick={()=>move(selected,who,id)}>Place selected here</button>}
    {id==='command'&&<div className="ab-hp"><button aria-label={`Player ${who+1} lose 1 HP`} disabled={!!guided} onClick={()=>act({type:'HEALTH',seat:who,delta:-1})}>−</button><strong key={st.health[who]} className="ab-hp-value">{st.health[who]} <small>HP</small></strong><button aria-label={`Player ${who+1} gain 1 HP`} disabled={!!guided} onClick={()=>act({type:'HEALTH',seat:who,delta:1})}>+</button></div>}
@@ -126,8 +123,8 @@ export default function AshenBattlefield({remote,initialState,onAgain,onExit,lea
   {['graveyard','banished'].map(z=><button key={z} data-ashen-pile={`${who}:${z}`} className="ab-pile-button" onClick={()=>setPile({seat:who,zone:z})} onDragOver={e=>e.preventDefault()} onDrop={e=>drop(e,who,z)}><span>{z==='graveyard'?'Ossuary':'Banished'}</span><span className="ab-pile-thumb">{(()=>{const top=st.piles[`${who}:${z}`].at(-1),data=top?ashenData(state,top):undefined;return data&&top&&(!st.cards[top].faceDown||st.cards[top].controller===seat)?<AshenCardFrame card={data} size="mini"/>:<span aria-hidden="true">◇</span>;})()}</span><b>{st.piles[`${who}:${z}`].length}</b></button>)}
  </div>;
  const half=(who:0|1)=><section className={`ab-half ${who!==seat?'ab-opponent':'ab-you'} ${ashenData(state,st.piles[`${who}:command`][0])?.faction==='Brute'?'ab-brute':'ab-noble'}`} aria-label={`Player ${who+1} battlefield`}>
-  <div className="ab-player"><span>{who===seat?'YOU':'OPPONENT'} · PLAYER {who+1}</span><strong>{ashenData(state,st.piles[`${who}:command`][0])?.faction==='Brute'?'Clan of the Broken Fist':'The Crown’s Might'}</strong><small className="ab-command-marks">Plan {state.rules?.nobleMarks?.[who]?.planned||0} · Refine {state.rules?.nobleMarks?.[who]?.refined||0}</small><b className="ab-player-hp">{st.health[who]} HP</b><em>{st.active===who?'Active player':''}</em></div>
-  <div className="ab-half-grid">{zone(who,'command','Command Station')}{zone(who,'support','Runes & Relics')}{zone(who,'ley','Ley Fonts')}{piles(who)}{zone(who,'unit','Frontline')}{basin(who)}</div>
+  <div className="ab-player"><span>{who===seat?'YOU':'OPPONENT'} · PLAYER {who+1}</span><strong>{ashenData(state,st.piles[`${who}:command`][0])?.faction==='Brute'?'Clan of the Broken Fist':'The Crown’s Might'}</strong><small className="ab-command-marks">Plan {state.rules?.nobleMarks?.[who]?.planned||0} · Refine {state.rules?.nobleMarks?.[who]?.refined||0}</small><b className="ab-player-hp">{st.health[who]} HP</b><em>{st.active===who?'Active player':''}</em>{guided&&basin(who)}</div>
+  <div className="ab-half-grid">{zone(who,'command','Command Station')}{zone(who,'support','Runes & Relics')}{zone(who,'ley','Ley Fonts')}{piles(who)}{zone(who,'unit','Frontline')}{!guided&&basin(who)}</div>
  </section>;
  const cardActions:CardMenuAction[]=[{id:'view',label:'View card',run:()=>setViewerOpen(true)}];
  if(menuOpen&&card&&visible&&card.controller===seat){
@@ -160,19 +157,16 @@ export default function AshenBattlefield({remote,initialState,onAgain,onExit,lea
    {!guided&&<><button onClick={()=>{const url=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='ashen-throne-table.json';a.click();URL.revokeObjectURL(url);}}>Export</button>
    <button onClick={()=>{const url=URL.createObjectURL(new Blob([JSON.stringify(ASHEN_EFFECT_PACK,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='ashen-prototype-effects-v1.json';a.click();URL.revokeObjectURL(url);}}>Export AT rules</button></>}{guided&&!practice&&<button aria-pressed={mobile?mobileHelp:learningMode} onClick={()=>mobile?setMobileHelp(v=>!v):setLearningMode(v=>!v)}>{mobile?'Help':learningMode?'Guided: ON':'Guided: OFF'}</button>}<button onClick={()=>setReference('rules')}>Rules</button><button onClick={()=>setReference('keywords')}>Keywords</button><label className="ab-own-response"><input type="checkbox" checked={holdOwnResponses} onChange={e=>setHoldOwnResponses(e.target.checked)}/> Respond to my own plays</label><button className="ab-viewer-toggle" onClick={()=>setViewerOpen(open=>!open)}>Card viewer</button>
   </div>;
- const battlefield=<div className={`ab-shell ${fullscreen?'ab-expanded':''} ${practice?'ab-practice':''} ${guided?'ab-duel':''} ${practice||guided&&learningMode?'ab-learning-mode':''} ${viewerOpen?'ab-viewer-open':''} ${mobile?'ab-mobile-duel':''} ${phone&&!mobile?'ab-browser-phone':''}`} data-remote={!!remote} role={guided?'region':undefined} aria-label={practice?'Ashen Throne practice battlefield':guided?'Ashen Throne duel room':undefined}>
+ const battlefield=<div className={`ab-shell ab-arena ${fullscreen?'ab-expanded':''} ${practice?'ab-practice':''} ${guided?'ab-duel':''} ${practice||guided&&learningMode?'ab-learning-mode':''} ${viewerOpen?'ab-viewer-open':''} ${mobile?'ab-mobile-duel':''} ${phone&&!mobile?'ab-browser-phone':''}`} data-remote={!!remote} role={guided?'region':undefined} aria-label={practice?'Ashen Throne practice battlefield':guided?'Ashen Throne duel room':undefined}>
   {guided||mobile?<header className="ab-compact-toolbar"><strong>{practice?'AT · Practice':'Ashen Throne'}</strong><details className="ab-settings-menu" onKeyDown={event=>{if(event.key==='Escape'){event.currentTarget.open=false;event.currentTarget.querySelector('summary')?.focus();}}}>
    <summary aria-label="Duel settings">⚙</summary><div className="ab-mobile-menu-panel" onClick={event=>{if((event.target as HTMLElement).closest('button')){const details=event.currentTarget.closest('details');if(details)details.open=false;}}}>{toolbarActions}</div>
   </details></header>:  <header className="ab-toolbar"><div><span className="eyebrow">{practice?'ASHEN THRONE · PRACTICE':'ASHEN THRONE · COMMAND SIEGE'}</span><h2>The battlefield</h2><small>{state.preview?'Populated layout preview':'Playtest table'} · {guided?'AT duel · Command Siege rules':assisted?'AT effects sandbox':'Manual effects & costs'}</small></div>{toolbarActions}</header>}
   {practice?<section className="ab-practice-panel">{practice.panel}</section>:guided&&learningMode&&(!mobile||mobileHelp)&&<section className="ab-learning" aria-label="Duel guide" aria-live="polite"><strong>{ashenGuidance(state).title}</strong><span>{ashenGuidance(state).text}</span></section>}
   <div className="ab-workspace"><div className="ab-table" ref={board}>
    <div className="ab-opponent-hand" aria-label={`Opponent hand · ${st.piles[`${opponent}:hand`].length} cards`}>{st.piles[`${opponent}:hand`].map(id=><span className="ab-card-back" data-ashen-card={id} key={id}><CardBack/></span>)}</div>
-   {half(opponent)}<div className="ab-center"><small>Turn {ashenTurnNumber(state)} · Player {st.active+1}{guided?` · ${ashenPhaseName(guided.phase)}`:''}</small>{guided?<AshenPhaseControls state={state} seat={seat} attackIds={attackIds} blockAttack={blockAttack} onSeat={remote?undefined:setSeat} onAdvance={phase=>{if(phase==='end')setFades(([0,1] as const).map(who=>({seat:who,resources:RESOURCES.filter(r=>state.basins[who][r]>0)})));runGuided(s=>advanceAshenTo(s,phase),{type:'phase',phase});}} onNext={()=>{if(guided.phase==='main2')setFades(([0,1] as const).map(who=>({seat:who,resources:RESOURCES.filter(r=>state.basins[who][r]>0)})));runGuided(nextAshenPhase,{type:'next'});}} onPass={()=>runGuided(s=>passAshenPriority(s,seat),{type:'pass'})} onSelectAll={()=>setAttackIds(st.piles[`${st.active}:unit`].filter(id=>!st.cards[id].rotated&&!st.cards[id].faceDown))} onAttack={()=>{if(runGuided(s=>declareAshenAttackers(s,attackIds),{type:'attack',ids:attackIds}))setAttackIds([]);}} onClearBlockers={()=>runGuided(clearAshenBlockers,{type:'clearBlockers'})} onCombat={()=>runGuided(resolveAshenCombat,{type:'combat'})} onOrder={index=>runGuided(s=>orderAshenTrigger(s,index),{type:'order',index})} onConfirmOrder={()=>runGuided(confirmAshenTriggerOrder,{type:'confirmOrder'})}/>:<button onClick={()=>{act({type:'END_TURN'});setSelected(null);}}>End turn <ChevronRight size={14}/></button>}</div>{half(seat)}
+   {half(opponent)}<div className="ab-center"><small className="ab-turn">Turn {ashenTurnNumber(state)} · Player {st.active+1}{guided?` · ${ashenPhaseName(guided.phase)}`:''}</small><AshenClashQueue state={state} onInspect={clickCard}/>{guided?<AshenPhaseControls state={state} seat={seat} attackIds={attackIds} blockAttack={blockAttack} onSeat={remote?undefined:setSeat} onAdvance={phase=>{if(phase==='end')setFades(([0,1] as const).map(who=>({seat:who,resources:RESOURCES.filter(r=>state.basins[who][r]>0)})));runGuided(s=>advanceAshenTo(s,phase),{type:'phase',phase});}} onNext={()=>{if(guided.phase==='main2')setFades(([0,1] as const).map(who=>({seat:who,resources:RESOURCES.filter(r=>state.basins[who][r]>0)})));runGuided(nextAshenPhase,{type:'next'});}} onPass={()=>runGuided(s=>passAshenPriority(s,seat),{type:'pass'})} onSelectAll={()=>setAttackIds(st.piles[`${st.active}:unit`].filter(id=>!st.cards[id].rotated&&!st.cards[id].faceDown))} onAttack={()=>{if(runGuided(s=>declareAshenAttackers(s,attackIds),{type:'attack',ids:attackIds}))setAttackIds([]);}} onClearBlockers={()=>runGuided(clearAshenBlockers,{type:'clearBlockers'})} onCombat={()=>runGuided(resolveAshenCombat,{type:'combat'})} onOrder={index=>runGuided(s=>orderAshenTrigger(s,index),{type:'order',index})} onConfirmOrder={()=>runGuided(confirmAshenTriggerOrder,{type:'confirmOrder'})}/>:<button onClick={()=>{act({type:'END_TURN'});setSelected(null);}}>End turn <ChevronRight size={14}/></button>}</div>{half(seat)}
    {flights.map(f=><span key={f.id} className={`ab-essence-flight ab-${f.resource}`} style={{left:f.x,top:f.y,'--flight-x':`${f.dx}px`,'--flight-y':`${f.dy}px`} as CSSProperties} onAnimationEnd={()=>setFlights(all=>all.filter(i=>i.id!==f.id))}><img src={`/ashen/costs/${f.resource}.png`} alt=""/></span>)}
-  </div><aside className="ab-inspector" aria-label="Card viewer"><button className="ab-viewer-close" onClick={()=>setViewerOpen(false)}>Close card viewer ✕</button><span className="eyebrow">CARD VIEWER</span>{viewVisible&&viewData?<><div className="ab-view-art"><AshenCardFrame card={viewData}/></div><h3>{viewData.name}</h3><p>{viewData.type} · Player {viewCard!.controller+1}</p><AshenCommandCost state={state} id={viewCard!.instanceId}/><AshenStatBreakdown state={state} id={viewCard!.instanceId}/><p className="ab-rules"><RulesText text={rulesForCard(viewData).text}/></p></>:<div className="ab-inspect-empty"><Swords size={32}/><h3>{viewCard?'Face-down card':'Card viewer'}</h3><p>Hover over a card to read it. Click or tap for actions. On phones, choose View card to read the full text.</p></div>}
-   {viewVisible&&viewCard&&<div className="ab-effect-coverage"><strong>{ashenEffects[viewCard.cardId]?'Automatic effects available':'Resolve this card manually'}</strong>{viewCard.type==='Unit'&&<p>Keywords: {ashenStats(state,viewCard.instanceId).keywords.join(', ')||'none'} · {ashenStats(state,viewCard.instanceId).attack}A / {ashenStats(state,viewCard.instanceId).defense}D · {ashenStats(state,viewCard.instanceId).damage} damage</p>}</div>}
-   <details className="ab-history"><summary>Table history</summary>{st.events.slice(-15).map((e,i)=><p key={i}>{e.replace(/graveyard/gi,'Ossuary').replace(/\bDiscard\b/g,'Send to Ossuary')}</p>)}</details>
-  </aside></div>
+  </div><AshenCardInspector state={state} id={hovered||selected||undefined} seat={seat} onClose={()=>setViewerOpen(false)}/></div>
   <section className="ab-hand" aria-label="Your hand"><header><strong>YOUR HAND <small>{st.piles[`${seat}:hand`].length} cards</small></strong><span>Player {seat+1} · {ashenData(state,st.piles[`${seat}:command`][0])?.faction}</span><button disabled={!!guided} onClick={()=>act({type:'DRAW',seat})}>Draw card</button></header><div className="ab-hand-cards">{st.piles[`${seat}:hand`].map(id=>renderCard(id,true))}</div></section>
   {viewerOpen&&<button className="ab-viewer-scrim" aria-label="Close card viewer" onClick={()=>setViewerOpen(false)}/>}
   <p className="ab-notice" role="status">{notice}</p><p className="ab-footnote">Saves in this browser. Manual controls bypass rules. Start a New AT duel for phases, Clash responses and combat. Manual table controls bypass rules.</p>
@@ -180,7 +174,7 @@ export default function AshenBattlefield({remote,initialState,onAgain,onExit,lea
   {guided&&<AshenOpeningHands state={state} seat={seat} onSeat={remote?undefined:setSeat} onChoice={choice=>{if(runGuided(s=>chooseAshenOpening(s,seat,choice),{type:'opening',choice})){setHistory([]);setSelected(null);setHovered(null);setMenuOpen(false);}}}/>}
   <AshenEffectNotices events={st.events}/>
   <AshenCardAnimations key={`motions-${seat}`} state={state} seat={seat} board={board}/>
-  {menuOpen&&card&&<CardActionMenu details={<AshenCommandCost state={state} id={card.instanceId}/>} title={visible?card.name:'Face-down card'} actions={cardActions} onClose={()=>setMenuOpen(false)}/>}
+  {menuOpen&&card&&<CardActionMenu details={<div className="ab-action-reading"><AshenCardReading state={state} id={card.instanceId} seat={seat}/></div>} title={visible?card.name:'Face-down card'} actions={cardActions} onClose={()=>setMenuOpen(false)}/>}
   {reference&&<AshenReference kind={reference} onClose={()=>setReference(null)}/>}
   {guided?.winner!==undefined&&<div className="ab-modal-backdrop"><section className="ab-pile-dialog" role="dialog" aria-modal="true" aria-label="Duel result"><h3>{guided.winner==='draw'?'Duel drawn':`Player ${guided.winner+1} wins`}</h3><button disabled={!!remote} onClick={()=>{if(onAgain){onAgain();return;}setState(newBruteDuel());setSelected(null);setHistory([]);}}>Play again</button><button onClick={()=>onExit?onExit():replace(true)}>Exit duel</button></section></div>}
   {guided?.callPermission==='choose'&&(!remote||st.active===seat)&&<div className="ab-modal-backdrop"><section className="ab-pile-dialog" role="dialog" aria-modal="true" aria-label="Korgath’s Call"><h3>Play Korgath from hand or Ossuary</h3><p>Play him from your hand or Ossuary for free. He enters with Charge and +3 Attack this turn.</p>{korgathCallChoices(state).map(id=><button key={id} onClick={()=>runGuided(s=>chooseKorgathForCall(s,id),{type:'call',id})}>{st.cards[id].name} · {st.cards[id].zone==='graveyard'?'Ossuary':st.cards[id].zone}</button>)}<button onClick={()=>runGuided(s=>chooseKorgathForCall(s,null),{type:'call',id:null})}>No · skip playing Korgath</button></section></div>}

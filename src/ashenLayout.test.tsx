@@ -5,8 +5,19 @@ import {AshenRules} from './RulesText';
 import catalog from './ashenCatalog.json';
 import AshenBattlefield from './AshenBattlefield';
 import {newBattlefield} from './ashenBattlefieldState';
+import {AshenCardReading} from './games/ashen/arena/AshenCardInspector';
 
 describe('shared AT rules layout',()=>{
+ it('keeps opponent hands and hidden field cards out of the shared card reader',()=>{
+  const state=newBattlefield(true,()=>.2);
+  const own=state.table.piles['0:hand'][0],opponent=state.table.piles['1:hand'][0];
+  state.table.cards[own].faceDown=true;
+  expect(renderToStaticMarkup(<AshenCardReading state={state} id={own} seat={0}/>)).toContain(state.table.cards[own].name);
+  const hidden=renderToStaticMarkup(<AshenCardReading state={state} id={opponent} seat={0}/>);
+  expect(hidden).toContain('Hidden card');expect(hidden).not.toContain('ashen-frame-card');
+  const field=state.table.piles['1:unit'][0];state.table.cards[field].faceDown=true;
+  expect(renderToStaticMarkup(<AshenCardReading state={state} id={field} seat={0}/>)).toContain('Hidden card');
+ });
  it('marks a fatigued frontline Unit with an F counter',()=>{
   const state=newBattlefield(true,()=>.2),id=state.table.piles['0:unit'][0];state.table.cards[id].rotated=true;
   const html=renderToStaticMarkup(<AshenBattlefield initialState={state}/>);

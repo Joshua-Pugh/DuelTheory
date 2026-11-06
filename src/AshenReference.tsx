@@ -1,4 +1,5 @@
 import {useEffect,useRef,useState} from 'react';
+import './ashenDialogs.css';
 import {ASHEN_RULES,ASHEN_KEYWORDS} from './games/ashen/reference';
 import {ashenCardMap} from './ashenDecks';
 

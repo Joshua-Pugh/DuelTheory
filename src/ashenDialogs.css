@@ -1,0 +1,438 @@
+/* Shared AT card details, references, decisions and opening hands. Layout lives in arena/. */
+.ab-pile-dialog.ab-opening-dialog {
+  max-width: 1100px;
+  width: min(1100px,calc(100vw - 24px));
+}
+.ab-reference {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: min(1100px,96vw);
+  height: min(90dvh,900px);
+  max-height: 94dvh;
+  box-sizing: border-box;
+  padding: 0;
+  color: #e7e6da;
+  border: 1px solid #bca36c;
+  border-radius: 12px;
+  background: #14221d;
+  overflow: hidden;
+}
+.ab-reference[open] {
+  display: flex;
+  flex-direction: column;
+}
+.ab-reference::backdrop {
+  background: #000c;
+}
+.ab-reference>header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 18px 22px;
+  border-bottom: 1px solid #a48e5c55;
+}
+.ab-reference h2 {
+  font: 25px Georgia,serif;
+  margin: 5px 0;
+}
+.ab-reference small {
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: #cab37b;
+}
+.ab-reference>nav {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+  padding: 12px 22px;
+  border-bottom: 1px solid #a48e5c55;
+}
+.ab-reference button {
+  background: #293d32;
+  color: #efdcad;
+  border: 1px solid #a48e5c77;
+  border-radius: 6px;
+  padding: 9px 12px;
+  cursor: pointer;
+}
+.ab-reference button[aria-pressed=true] {
+  background: #a98d54;
+  color: #101b16;
+}
+.ab-reference input {
+  flex: 1;
+  min-width: 160px;
+  background: #0b1713;
+  color: #eee;
+  border: 1px solid #a48e5c77;
+  border-radius: 5px;
+  padding: 10px;
+  font-size: 16px;
+}
+.ab-reference-body {
+  min-height: 0;
+  overflow: auto;
+  padding: 10px 24px 24px;
+  line-height: 1.7;
+  font-size: 14px;
+}
+.ab-reference-body h3 {
+  color: #eed49b;
+  font-size: 18px;
+  margin: 24px 0 7px;
+}
+.ab-reference-body p {
+  color: #c9d3c8;
+  margin: 6px 0 18px;
+}
+.ab-reference-body details {
+  border-top: 1px solid #71836644;
+  padding: 10px 0;
+}
+.ab-reference-body summary {
+  cursor: pointer;
+  color: #e5d1a1;
+}
+.ab-reference-card-text {
+  white-space: pre-wrap;
+}
+.ab-reference-body section {
+  border-bottom: 1px solid #71836644;
+  padding-bottom: 4px;
+}
+@media(max-width:600px) {
+  .ab-reference>header,.ab-reference>nav {
+    padding: 12px;
+  }
+  .ab-reference h2 {
+    font-size: 20px;
+  }
+  .ab-reference-body {
+    padding: 8px 16px 18px;
+  }
+}
+.ab-shell .ashen-frame-title h3 {
+  color: #20170c;
+  margin: 0;
+  font-size: 4.6cqi;
+  line-height: 1.04;
+  text-shadow: none;
+}
+.ab-modal-backdrop {
+  box-sizing: border-box;
+  padding: 12px;
+}
+.ab-pile-dialog {
+  box-sizing: border-box;
+  width: min(950px,calc(100vw - 24px));
+  max-height: calc(100dvh - 24px - env(safe-area-inset-bottom,0px));
+  overflow: auto;
+  overscroll-behavior: contain;
+  min-width: 0;
+}
+.ab-pile-dialog>header {
+  position: sticky;
+  top: -20px;
+  background: #18251f;
+  z-index: 2;
+  flex-wrap: wrap;
+}
+.ab-pile-dialog>header small {
+  color: #d4c8a6;
+  font-size: 12px;
+}
+.ab-pile-dialog>div {
+  max-height: none;
+}
+.ab-choice-card>.ashen-frame-card {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  margin: 0;
+}
+.ab-shell .ab-choice-card>strong {
+  font-size: 12px;
+  line-height: 1.35;
+  color: #f1e8d0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.ab-choice-card>small {
+  font-size: 11px;
+  color: #bfccb9;
+}
+.ab-choice-card select {
+  width: 100%;
+  min-width: 0;
+  font-size: 16px;
+}
+.ab-choice-wait {
+  position: fixed;
+  z-index: 99;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: calc(100vw - 24px);
+  padding: 12px;
+  box-sizing: border-box;
+  border: 1px solid #c5a76c;
+  border-radius: 8px;
+  background: #182e28;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+}
+.ab-command-badge {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: #163b32f5;
+  border: 1px solid #e2c985;
+  border-radius: 3px;
+  color: #f4dfa5;
+  font-size: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 2px;
+}
+.ab-command-cost {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  background: #163b32;
+  border: 1px solid #a89663;
+  border-radius: 5px;
+  padding: 8px;
+  font-size: 12px;
+  color: #f0dfa9;
+  line-height: 1.4;
+}
+.ab-command-cost>small {
+  color: #bfcdbb;
+  font-size: 10px;
+}
+.ab-command-cost>span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.ab-command-cost del {
+  opacity: .55;
+}
+.ab-command-cost .ashen-costs,.ab-command-badge .ashen-costs {
+  gap: 3px;
+}
+.ab-command-cost .ashen-cost-token img {
+  width: 18px;
+  height: 18px;
+}
+.ab-command-badge .ashen-cost-token img {
+  width: 11px;
+  height: 11px;
+}
+.ab-command-cost .ashen-cost-token b,.ab-command-cost .ashen-cost-free {
+  font: bold 13px Georgia;
+  color: #f3dd99;
+}
+.ab-command-badge .ashen-cost-token b,.ab-command-badge .ashen-cost-free {
+  font: bold 9px Georgia;
+  color: #f3dd99;
+}
+.ab-command-marks {
+  font-size: 9px;
+  color: #c9d4b8;
+  letter-spacing: 0;
+}
+.ab-hp-value {
+  animation: ab-hp-change .6s ease-out;
+}
+.ab-effect-notices {
+  position: fixed;
+  bottom: 30px;
+  left: 14px;
+  z-index: 98;
+  width: min(420px,calc(100vw - 28px));
+  box-sizing: border-box;
+  background: #152e29f5;
+  border: 1px solid #b29d66;
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: #e8dfc5;
+  font-size: 11px;
+  pointer-events: none;
+  max-height: 30dvh;
+  overflow: auto;
+}
+.ab-effect-notices header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.ab-effect-notices p {
+  margin: 5px 0;
+  line-height: 1.4;
+}
+.ab-effect-notices button {
+  pointer-events: auto;
+  padding: 2px 8px;
+  min-height: 28px;
+}
+.ab-effect-notices b {
+  color: #eed289;
+}
+@keyframes ab-hp-change {
+  0% {
+    color: #ffbc7d;
+    text-shadow: 0 0 12px #ff944d;
+  }
+  100% {
+    text-shadow: none;
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  .ab-hp-value {
+    animation: none;
+  }
+}
+.ab-stat-breakdown {
+  border: 1px solid #637b65;
+  border-radius: 5px;
+  padding: 8px;
+  font-size: 11px;
+  color: #d8dfcb;
+  line-height: 1.4;
+}
+.ab-stat-breakdown p {
+  margin: 4px 0;
+}
+.ab-stat-breakdown strong,.ab-stat-breakdown b {
+  color: #efd79f;
+}
+.ab-card-back:has(>.dt-card-back) {
+  border: 0;
+  background: none;
+  box-shadow: none;
+  gap: 0;
+}
+.ab-card-back:has(>.dt-card-back):before,.ab-card-back:has(>.dt-card-back):after {
+  display: none;
+}
+.ab-card-back>.dt-card-back {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  aspect-ratio: auto;
+}
+.ab-opening-backdrop {
+  z-index: 1200;
+  background: #06120fed;
+}
+.ab-opening-dialog>p {
+  line-height: 1.5;
+  color: #d6dfcc;
+}
+.ab-opening-dialog .ab-opening-cards {
+  display: grid;
+  grid-template-columns: repeat(6,minmax(0,1fr));
+  gap: 10px;
+  overflow: visible;
+}
+.ab-opening-cards figure {
+  margin: 0;
+  min-width: 0;
+}
+.ab-opening-cards .ashen-frame-card {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  margin: 0;
+}
+.ab-opening-cards figcaption {
+  font-size: 11px;
+  line-height: 1.3;
+  color: #f1e8d0;
+  margin-top: 5px;
+  overflow-wrap: anywhere;
+}
+.ab-opening-dialog>footer {
+  position: sticky;
+  bottom: -20px;
+  background: #18251f;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  padding: 14px 0 0;
+  margin-top: 14px;
+  border-color: #697a5c;
+}
+.ab-shell .ab-opening-keep {
+  background: #c6a24c;
+  color: #17271d;
+  font-weight: 700;
+}
+.ab-opening-dialog button {
+  min-height: 44px;
+}
+@media(max-width:650px) {
+  .ab-opening-dialog .ab-opening-cards {
+    grid-template-columns: repeat(3,minmax(0,1fr));
+  }
+}
+@media(max-width:420px) {
+  .ab-opening-dialog .ab-opening-cards {
+    grid-template-columns: repeat(2,minmax(0,1fr));
+  }
+}
+@media(max-height:500px) and (min-width:651px) {
+  .ab-opening-dialog {
+    max-width: 850px;
+  }
+  .ab-opening-cards .ashen-frame-card {
+    max-height: 42dvh;
+    width: auto;
+    max-width: 100%;
+    margin: auto;
+  }
+  .ab-opening-cards figcaption {
+    font-size: 10px;
+  }
+}
+.ab-shell .ab-card.ab-font-spent .ab-card-face {
+  opacity: .55;
+  filter: saturate(.35);
+}
+.ab-shell .ab-card.ab-font-spent {
+  box-shadow: 0 1px 4px #0008;
+}
+.ab-shell .ab-card.ab-font-spent.ab-selected {
+  outline: 1px solid #b4c79d;
+  box-shadow: 0 0 0 2px #385c49;
+}
+.ab-shell .ab-spent {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: block;
+  box-sizing: border-box;
+  padding: 2px 0;
+  font: 600 9px/1.2 system-ui,sans-serif;
+  letter-spacing: .2px;
+  text-align: center;
+  background: #162b23f5;
+  color: #f2dfae;
+  border: 1px solid #a08b5b;
+  border-radius: 0 0 3px 3px;
+  pointer-events: none;
+}

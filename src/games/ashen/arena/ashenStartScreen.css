@@ -1,0 +1,393 @@
+.at-start {
+  position: relative;
+  isolation: isolate;
+  min-height: calc(100dvh - 110px);
+  overflow: hidden;
+  color: #f4e9cb;
+  background: #101c18;
+  border: 1px solid #786642;
+}
+.at-start * {
+  box-sizing: border-box;
+}
+.at-start-scenery {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(90deg,#08130ff5 0%,#0b1713e8 30%,#0b171380 65%,#09130f44),linear-gradient(0deg,#08130f 0%,transparent 65%),url('/ashen/artwork/ashen-brute-skarn-the-unchained.webp') right 25%/cover no-repeat;
+  opacity: .9;
+}
+.at-start-content {
+  position: relative;
+  max-width: 1450px;
+  margin: auto;
+  padding: clamp(24px,4vw,64px);
+}
+.at-start-heading {
+  margin-bottom: 32px;
+}
+.at-start-heading>p {
+  font: 600 11px/1.5 system-ui,sans-serif;
+  letter-spacing: 3px;
+  color: #d7bb79;
+  margin: 0 0 12px;
+}
+.at-start-heading h1 {
+  font: 700 clamp(40px,6vw,84px)/1 Georgia,serif;
+  letter-spacing: -1px;
+  color: #f7e7b5;
+  text-shadow: 0 3px 15px #0009;
+  margin: 0 0 14px;
+}
+.at-start-heading>span {
+  color: #ddd6c2;
+  font: 18px/1.4 Georgia,serif;
+}
+.at-start-modes {
+  display: grid;
+  gap: 10px;
+  max-width: 580px;
+}
+.at-start .at-start-mode {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+  padding: 20px 24px;
+  border: 1px solid #81704f;
+  background: #101e18e8;
+  color: #f7edce;
+  text-align: left;
+  text-decoration: none;
+  border-radius: 2px;
+  box-shadow: none;
+  cursor: pointer;
+  transition: background .15s,border-color .15s,translate .15s;
+  white-space: normal;
+}
+.at-start .at-start-mode:hover {
+  background: #203b2c;
+  border-color: #dfbf78;
+  translate: 4px 0;
+}
+.at-start .at-start-mode:focus-visible,.at-start button:focus-visible,.at-start a:focus-visible {
+  outline: 3px solid #f2d689;
+  outline-offset: 3px;
+}
+.at-start-mode>svg:first-child {
+  width: 28px;
+  height: 28px;
+  color: #dabc78;
+  flex-shrink: 0;
+}
+.at-start-mode>svg:last-child {
+  margin-left: auto;
+  flex-shrink: 0;
+  width: 20px;
+}
+.at-start-mode>span {
+  display: grid;
+  gap: 5px;
+  max-width: 400px;
+}
+.at-start-mode small {
+  font: 600 10px/1.2 system-ui,sans-serif;
+  letter-spacing: 1.7px;
+  color: #d5be87;
+}
+.at-start-mode strong {
+  font: 700 25px/1.15 Georgia,serif;
+  color: #f7e6b8;
+}
+.at-start-mode>span>span {
+  font: 14px/1.45 system-ui,sans-serif;
+  color: #dddccf;
+}
+.at-start .at-start-featured {
+  border-left: 4px solid #d8b35f;
+  background: #263a29ee;
+}
+.at-start .at-start-resume {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  max-width: 580px;
+  width: 100%;
+  padding: 15px 24px;
+  margin: 12px 0 0;
+  border: 1px solid #c9ad65;
+  background: #bda060;
+  color: #101e16;
+  font-weight: 700;
+  border-radius: 2px;
+}
+.at-start-note {
+  font: 12px/1.7 system-ui,sans-serif;
+  color: #c2c8b8;
+  margin: 24px 0 0;
+}
+.at-start[data-mode=local] .at-start-heading {
+  display: none;
+}
+.at-start-setup {
+  max-width: 1000px;
+}
+.at-start-setup-heading {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+.at-start-setup-heading h2 {
+  font: 700 26px Georgia,serif;
+  margin: 0;
+  color: #f3dfaa;
+}
+.at-start-setup-heading>span {
+  font-size: 12px;
+  color: #d5d8c9;
+  margin-left: auto;
+}
+.at-start button {
+  border-radius: 2px;
+  min-height: 44px;
+}
+.at-start-setup-heading>button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #13291f;
+  border: 1px solid #8a7b56;
+  color: #f2e5c1;
+}
+.at-starter-seats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.at-starter-seat {
+  border: 1px solid #a28b56;
+  background: #13251eef;
+  overflow: hidden;
+}
+.at-starter-art {
+  height: clamp(140px,24dvh,255px);
+  position: relative;
+  overflow: hidden;
+}
+.at-starter-art>img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 30%;
+}
+.at-starter-art>span {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  padding: 8px 18px;
+  background: #0c1b16e8;
+  color: #f5dfa7;
+  font-size: 11px;
+  letter-spacing: 2px;
+}
+.at-starter-description {
+  padding: 16px 20px;
+}
+.at-starter-description>p:first-child {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #dec283;
+  font-size: 12px;
+  margin: 0 0 8px;
+}
+.at-starter-description img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+.at-starter-description h3 {
+  font: 700 28px Georgia,serif;
+  margin: 0;
+  color: #f8e9c2;
+}
+.at-starter-description p {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #e1e3d4;
+}
+.at-starter-choices {
+  display: flex;
+  gap: 8px;
+}
+.at-starter-choices button {
+  flex: 1;
+  background: #0c1c16;
+  border: 1px solid #817451;
+  color: #f1dfac;
+  padding: 8px 16px;
+}
+.at-starter-choices button[aria-pressed=true] {
+  background: #c4a661;
+  color: #102218;
+  border-color: #e1c47d;
+  font-weight: 700;
+}
+.at-start-launch {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 22px;
+}
+.at-start-launch label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #f2e3ba;
+  font-size: 14px;
+  cursor: pointer;
+}
+.at-start-launch input {
+  width: 20px;
+  height: 20px;
+  accent-color: #c9a758;
+}
+.at-start-launch label small {
+  display: block;
+  color: #c8cebd;
+  margin-top: 4px;
+  font-size: 12px;
+}
+.at-start .at-start-begin {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  min-width: 220px;
+  padding: 16px 28px;
+  background: linear-gradient(#e4c67d,#bb964b);
+  border: 1px solid #f0d794;
+  color: #132319;
+  font: 700 21px Georgia,serif;
+  box-shadow: inset 0 1px #fff8,0 3px 0 #79602d;
+}
+.at-start-begin:hover {
+  filter: brightness(1.08);
+}
+.at-start-launch>p {
+  width: 100%;
+  margin: 0;
+  font-size: 12px;
+  color: #d1d6c7;
+  text-align: right;
+}
+@media(max-width:650px) {
+  .at-start {
+    min-height: calc(100dvh - 90px);
+  }
+  .at-start-content {
+    padding: 28px 18px;
+  }
+  .at-start-heading {
+    margin-bottom: 24px;
+  }
+  .at-start-scenery {
+    background-position: center;
+    background-image: linear-gradient(90deg,#08130ff2,#0b1713a8),linear-gradient(0deg,#08130f 0%,transparent 90%),url('/ashen/artwork/ashen-brute-skarn-the-unchained.webp');
+  }
+  .at-start .at-start-mode {
+    padding: 17px 14px;
+    gap: 12px;
+  }
+  .at-start-mode strong {
+    font-size: 23px;
+  }
+  .at-start-mode>span>span {
+    font-size: 13px;
+  }
+  .at-starter-seats {
+    gap: 12px;
+  }
+  .at-starter-art {
+    height: 140px;
+  }
+  .at-starter-description {
+    padding: 12px;
+  }
+  .at-starter-description h3 {
+    font-size: 21px;
+    min-height: 48px;
+  }
+  .at-starter-description>p:not(:first-child) {
+    display: none;
+  }
+  .at-starter-choices {
+    flex-direction: column;
+    gap: 5px;
+    margin-top: 12px;
+  }
+  .at-starter-choices button {
+    padding: 7px;
+  }
+  .at-start-launch {
+    gap: 16px;
+  }
+  .at-start .at-start-begin {
+    width: 100%;
+    margin: 0;
+  }
+  .at-start-launch>p {
+    text-align: left;
+  }
+  .at-start-setup-heading {
+    gap: 12px;
+  }
+  .at-start-setup-heading>span {
+    display: none;
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  .at-start .at-start-mode {
+    transition: none;
+  }
+  .at-start .at-start-mode:hover {
+    translate: none;
+  }
+}
+@media(min-width:900px) and (max-height:800px) {
+  .at-start-content {
+    padding: 28px 40px;
+  }
+  .at-start-heading {
+    margin-bottom: 20px;
+  }
+  .at-start-heading h1 {
+    font-size: 60px;
+  }
+  .at-start .at-start-mode {
+    padding: 14px 20px;
+  }
+  .at-start-mode small {
+    display: none;
+  }
+  .at-start-mode>span>span {
+    font-size: 13px;
+  }
+  .at-start-mode strong {
+    font-size: 24px;
+  }
+  .at-start-note {
+    margin-top: 16px;
+  }
+  .at-start .at-start-resume {
+    padding: 10px 20px;
+  }
+  .at-starter-art {
+    height: 170px;
+  }
+}

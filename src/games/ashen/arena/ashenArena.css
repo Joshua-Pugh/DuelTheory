@@ -1,0 +1,1172 @@
+/* One viewport contract for web and native. Rules, animations and manual-table skin stay separate. */
+.ab-arena.ab-duel {
+  --arena-hand: clamp(120px,20dvh,180px);
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100dvh;
+  min-width: 0;
+  margin: 0;
+  padding: max(6px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) max(4px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left));
+  display: grid;
+  grid-template-columns: minmax(0,1fr);
+  grid-template-rows: 36px minmax(0,1fr) var(--arena-hand) 20px;
+  grid-template-areas: 'tools' 'workspace' 'hand' 'notice';
+  gap: 6px;
+  overflow: hidden;
+  background: #0b1814;
+  color: #f0e8d2;
+}
+.ab-arena.ab-duel * {
+  box-sizing: border-box;
+}
+.ab-arena.ab-duel.ab-learning-mode {
+  grid-template-rows: 36px auto minmax(0,1fr) var(--arena-hand) 20px;
+  grid-template-areas: 'tools' 'guide' 'workspace' 'hand' 'notice';
+}
+.ab-compact-toolbar {
+  grid-area: tools;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  position: relative;
+  z-index: 40;
+  padding: 0 5px;
+}
+.ab-compact-toolbar>strong {
+  font: 600 16px Georgia,serif;
+  letter-spacing: 1px;
+  color: #e6cc91;
+}
+.ab-settings-menu {
+  position: relative;
+}
+.ab-settings-menu>summary {
+  list-style: none;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 34px;
+  border: 1px solid #ac935d;
+  background: #1c3428;
+  color: #f5e1ad;
+  border-radius: 3px;
+  font-size: 25px;
+}
+.ab-settings-menu>summary::-webkit-details-marker {
+  display: none;
+}
+.ab-settings-menu>summary:focus-visible {
+  outline: 3px solid #e9cf8a;
+  outline-offset: 2px;
+}
+.ab-mobile-menu-panel {
+  position: absolute;
+  right: 0;
+  top: 40px;
+  width: min(340px,calc(100vw - 24px));
+  max-height: calc(100dvh - 70px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 12px;
+  border: 1px solid #b69c61;
+  background: #14261dfc;
+  box-shadow: 0 8px 30px #000b;
+  z-index: 150;
+}
+.ab-settings-menu .ab-tools {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.ab-settings-menu .ab-tools button {
+  min-height: 44px;
+  padding: 8px;
+  font-size: 13px;
+  white-space: normal;
+}
+.ab-own-response {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  grid-column: 1/-1;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #ecdfbb;
+}
+.ab-own-response input {
+  width: 20px;
+  height: 20px;
+}
+.ab-arena .ab-learning {
+  grid-area: guide;
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  max-height: 64px;
+  overflow: auto;
+  padding: 7px 12px;
+  background: #21392c;
+  border-left: 3px solid #c9ab67;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #e2e9db;
+}
+.ab-learning strong {
+  color: #f6dfa2;
+  flex-shrink: 0;
+}
+.ab-arena.ab-duel .ab-workspace {
+  grid-area: workspace;
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0,1fr) clamp(230px,23vw,310px);
+  align-items: stretch;
+  gap: 10px;
+  overflow: hidden;
+}
+.ab-arena.ab-duel .ab-table {
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  display: grid;
+  grid-template-rows: 30px minmax(0,1fr) auto minmax(0,1fr);
+  gap: 5px;
+  padding: 8px;
+  overflow: hidden;
+  border: 1px solid #86764e;
+  border-radius: 5px;
+  background: radial-gradient(ellipse,#29453b 0%,#172d26 55%,#11231e);
+  box-shadow: inset 0 0 75px #07140c77;
+}
+.ab-arena.ab-duel .ab-table:before {
+  display: none;
+}
+.ab-arena.ab-duel .ab-half {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+.ab-arena.ab-duel .ab-player {
+  min-height: 28px;
+  flex: 0 0 28px;
+  gap: 8px;
+  padding: 0 3px;
+  overflow: hidden;
+  flex-wrap: nowrap;
+}
+.ab-arena.ab-duel .ab-player>span {
+  font-size: 9px;
+  letter-spacing: .5px;
+  white-space: nowrap;
+}
+.ab-arena.ab-duel .ab-player strong {
+  font-size: 12px;
+  white-space: nowrap;
+}
+.ab-arena .ab-player-hp {
+  display: inline;
+  color: #f1d696;
+  font: 700 18px Georgia,serif;
+  white-space: nowrap;
+  margin-left: auto;
+}
+.ab-arena .ab-player em {
+  display: none;
+}
+.ab-arena .ab-command-marks {
+  font-size: 10px;
+  white-space: nowrap;
+  color: #c8d3bb;
+}
+.ab-arena.ab-duel .ab-basin {
+  display: flex;
+  flex-flow: row nowrap;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  min-height: 0;
+  min-width: 90px;
+  max-width: 220px;
+  padding: 2px 6px;
+  overflow: visible;
+  background: #0b1e16b8;
+  border: 1px solid #83956c55;
+  border-radius: 3px;
+}
+.ab-arena.ab-duel .ab-basin header {
+  display: block;
+  flex: 0 0 auto;
+}
+.ab-arena.ab-duel .ab-basin header>span {
+  font: 600 8px system-ui;
+  letter-spacing: 0;
+  color: #ccbd92;
+}
+.ab-arena.ab-duel .ab-basin header>small,.ab-arena.ab-duel .ab-vessel {
+  display: none;
+}
+.ab-arena.ab-duel .dt-resource-pool {
+  min-width: 0;
+}
+.ab-arena.ab-duel .dt-pool-contents {
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+  max-height: none;
+  max-width: 145px;
+  overflow: auto;
+}
+.ab-arena.ab-duel .dt-pool-resource {
+  font-size: 14px;
+  gap: 3px;
+  min-height: 20px;
+  flex-shrink: 0;
+}
+.ab-arena.ab-duel .dt-pool-resource img {
+  width: 16px;
+  height: 16px;
+}
+.ab-arena.ab-duel .dt-pool-empty {
+  font-size: 10px;
+}
+.ab-arena.ab-duel .dt-resource-pool>small {
+  display: none;
+}
+.ab-arena.ab-duel .ab-half-grid,.ab-arena.ab-duel .ab-you .ab-half-grid {
+  min-height: 0;
+  flex: 1;
+  display: grid;
+  grid-template-columns: clamp(64px,7vw,100px) minmax(0,1fr) clamp(105px,19vw,230px) 56px;
+  grid-template-rows: repeat(2,minmax(0,1fr));
+  grid-template-areas: 'command unit support piles' 'command unit ley piles';
+  gap: 5px;
+}
+.ab-arena.ab-duel .ab-zone {
+  container-type: size;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  padding: 4px 6px;
+  border: 1px solid #6e887067;
+  border-radius: 4px;
+  background: #0b201866;
+}
+.ab-arena.ab-duel .ab-unit {
+  border-color: #b19c596b;
+  background: #14302477;
+}
+.ab-arena.ab-duel .ab-command {
+  background: #112319b8;
+  border-color: #b3a16a77;
+}
+.ab-arena.ab-duel .ab-zone header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 5px;
+  height: 15px;
+  margin: 0 0 3px;
+  color: #cfccaa;
+  font-size: 9px;
+  letter-spacing: .6px;
+}
+.ab-arena.ab-duel .ab-zone header small {
+  font-size: 9px;
+  letter-spacing: 0;
+}
+.ab-arena.ab-duel .ab-zone header small:empty {
+  display: none;
+}
+.ab-arena.ab-duel .ab-card-row {
+  height: calc(100% - 18px);
+  min-height: 0;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 1px 3px;
+  scrollbar-width: thin;
+  scrollbar-color: #a38c56 #14281f;
+  touch-action: pan-x;
+  scroll-padding: 6px;
+}
+.ab-arena.ab-duel .ab-card-wrap {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+.ab-arena.ab-duel .ab-zone .ab-card {
+  width: clamp(44px,calc((100cqh - 26px)*.714),110px)!important;
+  height: auto!important;
+  min-width: 0;
+  max-width: none;
+  aspect-ratio: 5/7;
+}
+.ab-arena.ab-duel .ab-command .ab-card-row {
+  justify-content: center;
+  padding: 0;
+  overflow-x: hidden;
+}
+.ab-arena.ab-duel .ab-command .ab-card {
+  width: clamp(40px,calc((100cqh - 26px)*.714),85px)!important;
+  max-width: 100%;
+}
+.ab-arena.ab-duel .ab-command .ab-hp {
+  display: none;
+}
+.ab-arena.ab-duel .ab-zone-empty {
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  height: 100%;
+  width: 100%;
+  padding: 0;
+  font-size: 11px;
+  color: #b2c1a8;
+}
+.ab-arena.ab-duel .ab-zone .ab-card:hover {
+  translate: none;
+}
+.ab-arena.ab-duel .ab-card .ashen-frame-card {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  max-width: 100%;
+  margin: 0;
+  pointer-events: none;
+}
+.ab-arena.ab-duel .ab-piles {
+  display: grid;
+  grid-template-rows: repeat(3,minmax(0,1fr));
+  gap: 4px;
+  min-height: 0;
+}
+.ab-arena.ab-duel .ab-deck,.ab-arena.ab-duel .ab-pile-button {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  min-height: 0;
+  overflow: hidden;
+  padding: 3px;
+  background: #102319b5;
+  border: 1px solid #7b906766;
+  border-radius: 3px;
+  font-size: 9px;
+}
+.ab-arena.ab-duel .ab-deck>.ab-card-back {
+  width: 22px;
+  height: 30px;
+  min-height: 0;
+  box-shadow: none;
+}
+.ab-arena.ab-duel .ab-deck>small {
+  display: none;
+}
+.ab-arena.ab-duel .ab-deck strong {
+  position: static;
+  font-size: 12px;
+  background: transparent;
+  padding: 0;
+  margin-left: 4px;
+}
+.ab-arena.ab-duel .ab-pile-button b {
+  font-size: 12px;
+}
+.ab-arena.ab-duel .ab-pile-thumb {
+  display: none;
+}
+.ab-arena.ab-duel .ab-opponent-hand {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 4px;
+  min-height: 0;
+  height: 30px;
+  overflow: hidden;
+  margin: 0;
+}
+.ab-arena.ab-duel .ab-opponent-hand>.ab-card-back {
+  height: 28px;
+  width: 20px;
+  min-width: 9px;
+  flex: 0 1 auto;
+  border: 0;
+  box-shadow: none;
+}
+.ab-card-back:has(>.dt-card-back) {
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+.ab-card-back>.dt-card-back {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  aspect-ratio: auto;
+}
+.ab-arena.ab-duel .ab-center {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  gap: 4px;
+  height: auto;
+  min-height: 58px;
+  max-height: 110px;
+  overflow: auto;
+  margin: 0;
+  padding: 5px 10px;
+  background: #0c211bf2;
+  border-block: 1px solid #b29a59a0;
+  color: #e7d6a9;
+}
+.ab-arena .ab-turn {
+  font-size: 11px;
+  color: #e4d3a2;
+}
+.ab-arena .ab-phase-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+.ab-arena .dt-phase-selector {
+  justify-content: flex-start;
+  gap: 5px;
+}
+.ab-arena .ab-center .dt-phase-selector button {
+  margin: 0;
+  min-height: 32px;
+  padding: 5px 10px;
+  background: #182f26;
+  color: #e6d7b2;
+  border-color: #9e8a5c;
+}
+.ab-arena .ab-center .dt-phase-selector button.active {
+  background: #c9aa64;
+  color: #102317;
+  opacity: 1;
+}
+.ab-arena .ab-step-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+.ab-arena .ab-step-actions>span {
+  font-size: 12px;
+}
+.ab-arena .ab-center .ab-step-actions button {
+  margin: 0;
+  min-height: 32px;
+  padding: 5px 10px;
+  font-size: 12px;
+  background: #c5a35c;
+  color: #122317;
+  font-weight: 700;
+}
+.ab-arena.ab-duel .ab-hand {
+  grid-area: hand;
+  container-type: size;
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 3px 12px;
+  margin: 0;
+  border: 1px solid #8b7a4e;
+  border-radius: 4px;
+  background: linear-gradient(#1d3528,#0e2119);
+}
+.ab-arena.ab-duel .ab-hand header {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 10px;
+  flex: 0 0 20px;
+  font-size: 10px;
+  letter-spacing: 1px;
+  min-height: 0;
+}
+.ab-arena.ab-duel .ab-hand header span {
+  font-size: 10px;
+}
+.ab-arena.ab-duel .ab-hand header>button {
+  display: none;
+}
+.ab-arena.ab-duel .ab-hand-cards {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 10px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 4px 3px;
+  touch-action: pan-x;
+  scrollbar-width: thin;
+  scrollbar-color: #a38c56 #14281f;
+}
+.ab-arena.ab-duel .ab-hand .ab-card {
+  width: clamp(55px,calc((100cqh - 32px)*.714),120px)!important;
+  height: auto!important;
+  aspect-ratio: 5/7;
+  min-width: 0;
+}
+.ab-arena.ab-duel .ab-hand .ab-card-wrap {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+.ab-arena .ab-command-badge {
+  font-size: 8px;
+}
+.ab-arena.ab-duel .ab-notice {
+  grid-area: notice;
+  min-height: 0;
+  margin: 0;
+  padding: 0 5px;
+  font-size: 11px;
+  line-height: 20px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #e6cb89;
+}
+.ab-arena.ab-duel .ab-footnote {
+  display: none;
+}
+.ab-arena .ab-viewer-toggle {
+  display: none!important;
+}
+.ab-arena .ab-viewer-close {
+  display: none;
+}
+.ab-arena .ab-viewer-scrim {
+  display: none;
+}
+.ab-arena.ab-duel .ab-inspector {
+  position: static;
+  display: block;
+  min-height: 0;
+  min-width: 0;
+  max-height: none;
+  overflow: auto;
+  padding: 12px;
+  border: 1px solid #8b7a4e;
+  border-radius: 4px;
+  background: #11261d;
+  scrollbar-width: thin;
+}
+.ab-arena .ab-inspector>.eyebrow {
+  font-size: 10px;
+  color: #d9c184;
+}
+.ab-arena .ab-view-art>.ashen-frame-card {
+  width: min(100%,230px);
+  min-width: 0;
+  max-width: 100%;
+  height: auto;
+  margin: 10px auto;
+}
+.ab-arena .ab-reading-text h3 {
+  font: 700 22px/1.2 Georgia,serif;
+  color: #f3dfac;
+  margin: 10px 0;
+}
+.ab-arena .ab-reading-type {
+  font-size: 12px;
+  color: #c8d4c1;
+  margin: 5px 0 10px;
+}
+.ab-arena .ab-rules,.ab-action-reading .ab-rules {
+  font: 15px/1.55 system-ui,sans-serif;
+  white-space: pre-line;
+  color: #f4eedc;
+}
+.ab-arena .ab-history {
+  margin: 12px 0 0;
+  padding-top: 10px;
+}
+.ab-arena .ab-history p {
+  color: #d0d6c3;
+  font-size: 12px;
+}
+.ab-arena .ab-inspect-empty {
+  padding: 30px 8px;
+}
+.ab-arena .ab-inspect-empty p {
+  font-size: 14px;
+  color: #cad1c0;
+}
+.dt-action-dialog:has(.ab-action-reading) {
+  width: min(680px,calc(100vw - 24px));
+}
+.ab-action-reading {
+  display: grid;
+  grid-template-columns: 180px minmax(0,1fr);
+  gap: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #927d50;
+  margin-bottom: 10px;
+}
+.ab-action-reading .ab-view-art>.ashen-frame-card {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+}
+.ab-action-reading .ab-reading-text h3 {
+  display: none;
+}
+.ab-action-reading .ab-reading-type {
+  margin: 0 0 8px;
+  font-size: 12px;
+  color: #c9d3bd;
+}
+.ab-action-reading .ab-rules {
+  font-size: 15px;
+  margin: 10px 0;
+}
+.ab-action-reading .ab-stat-breakdown {
+  font-size: 12px;
+}
+.ab-action-reading .ab-effect-coverage {
+  font-size: 11px;
+  color: #c8d4bd;
+}
+.ab-clash-queue {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  border-left: 3px solid #c7ab66;
+  padding: 4px 8px;
+  background: #37291e;
+}
+.ab-clash-queue>strong {
+  font: 700 10px Georgia,serif;
+  letter-spacing: 1px;
+  color: #f4d99f;
+}
+.ab-clash-queue ol {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+.ab-clash-queue li {
+  flex-shrink: 0;
+}
+.ab-arena .ab-clash-queue button {
+  display: grid;
+  gap: 2px;
+  min-height: 36px;
+  text-align: left;
+  justify-content: start;
+  margin: 0;
+  padding: 4px 10px;
+  font-size: 12px;
+  background: #211c17;
+}
+.ab-clash-queue button small {
+  font-size: 9px;
+  color: #e2c286;
+}
+.ab-clash-queue button:disabled {
+  opacity: 1;
+}
+.ab-arena.ab-duel .ab-center:has(.ab-clash-queue) {
+  max-height: 190px;
+  min-height: 112px;
+}
+.ab-arena .ashen-frame-title h3 {
+  color: #20170c;
+  margin: 0;
+  font-size: 4.6cqi;
+  line-height: 1.04;
+  text-shadow: none;
+}
+.ab-arena.ab-duel.ab-practice {
+  grid-template-columns: 250px minmax(0,1fr);
+  grid-template-rows: 36px minmax(0,1fr) var(--arena-hand) 20px;
+  grid-template-areas: 'tools tools' 'guide workspace' 'guide hand' 'guide notice';
+}
+.ab-practice-panel {
+  grid-area: guide;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  padding: 16px;
+  background: #1d3427;
+  border: 1px solid #947f50;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #e9e4d2;
+}
+.ab-practice-panel>div+div {
+  display: grid;
+  gap: 10px;
+  margin-top: 20px;
+}
+.ab-practice-panel p {
+  margin: 12px 0;
+}
+.ab-practice-panel summary {
+  cursor: pointer;
+  color: #efd59d;
+}
+.ab-practice-panel label {
+  display: grid;
+  gap: 6px;
+}
+.ab-practice-panel select {
+  width: 100%;
+  min-width: 0;
+  font-size: 14px;
+  min-height: 40px;
+}
+.ab-practice-panel button {
+  min-height: 40px;
+}
+.ab-practice-panel [role=status] {
+  color: #e5cf94;
+}
+.ab-arena.ab-practice .ab-workspace {
+  grid-template-columns: minmax(0,1fr);
+}
+.ab-arena.ab-practice .ab-inspector {
+  display: none;
+}
+.ab-arena.ab-practice .ab-viewer-toggle {
+  display: inline-flex!important;
+}
+/* Narrow readers are overlays; cards and field halves keep usable sizes. */
+.ab-arena.ab-duel .ab-half-grid .ab-ley .ab-card,.ab-arena.ab-duel .ab-half-grid .ab-support .ab-card {
+  width: clamp(18px,calc((100cqh - 26px)*.714),75px)!important;
+}
+.ab-arena.ab-duel .ab-half-grid .ab-ley .ab-card-wrap,.ab-arena.ab-duel .ab-half-grid .ab-support .ab-card-wrap {
+  min-width: 40px;
+  display: flex;
+  justify-content: center;
+}
+.ab-arena.ab-duel .ab-half-grid .ab-ley .ab-spent {
+  font-size: 7px;
+  padding: 1px 0;
+  letter-spacing: 0;
+}
+@media(max-width:1100px) {
+  .ab-arena.ab-duel .ab-workspace {
+    grid-template-columns: minmax(0,1fr);
+  }
+  .ab-arena.ab-duel .ab-inspector {
+    display: none;
+  }
+  .ab-arena .ab-viewer-toggle {
+    display: inline-flex!important;
+  }
+  .ab-arena.ab-duel .ab-player strong {
+    display: none;
+  }
+  .ab-arena.ab-duel .ab-command-marks {
+    font-size: 9px;
+  }
+  .ab-arena.ab-duel .ab-half-grid,.ab-arena.ab-duel .ab-you .ab-half-grid {
+    grid-template-columns: 64px minmax(0,1fr) clamp(90px,20vw,180px) 48px;
+  }
+  .ab-arena.ab-duel .ab-player {
+    gap: 6px;
+  }
+  .ab-arena.ab-duel.ab-practice {
+    grid-template-columns: 210px minmax(0,1fr);
+  }
+}
+.ab-arena.ab-duel.ab-viewer-open .ab-inspector {
+  display: block;
+  position: fixed;
+  z-index: 180;
+  inset: 8px 8px 8px auto;
+  width: min(400px,calc(100vw - 16px));
+  height: auto;
+  max-height: none;
+  overflow: auto;
+  box-shadow: 0 12px 40px #0009;
+}
+.ab-arena.ab-viewer-open .ab-viewer-close {
+  display: flex;
+  position: sticky;
+  top: 0;
+  width: 100%;
+  min-height: 44px;
+  z-index: 3;
+  background: #24432e;
+  margin-bottom: 10px;
+}
+.ab-arena.ab-viewer-open .ab-viewer-scrim {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 179;
+  background: #0009;
+  border: 0;
+}
+@media(max-width:600px) {
+  .ab-arena.ab-duel {
+    --arena-hand: 142px;
+    padding: 4px;
+    gap: 4px;
+  }
+  .ab-arena .ab-compact-toolbar>strong {
+    font-size: 14px;
+  }
+  .ab-arena.ab-duel .ab-table {
+    grid-template-rows: 24px minmax(0,1fr) auto minmax(0,1fr);
+    padding: 4px;
+    gap: 4px;
+  }
+  .ab-arena.ab-duel .ab-opponent-hand {
+    height: 24px;
+  }
+  .ab-arena.ab-duel .ab-opponent-hand>.ab-card-back {
+    height: 23px;
+    width: 17px;
+  }
+  .ab-arena.ab-duel .ab-half-grid,.ab-arena.ab-duel .ab-you .ab-half-grid {
+    grid-template-columns: 44px minmax(0,1fr) 76px 35px;
+    gap: 3px;
+  }
+  .ab-arena.ab-duel .ab-zone {
+    padding: 3px;
+  }
+  .ab-arena.ab-duel .ab-zone header {
+    font-size: 7px;
+    letter-spacing: 0;
+    gap: 1px;
+    line-height: 1.1;
+    height: 16px;
+  }
+  .ab-arena.ab-duel .ab-zone header small {
+    display: none;
+  }
+  .ab-arena.ab-duel .ab-zone .ab-card {
+    width: clamp(40px,calc((100cqh - 26px)*.714),82px)!important;
+  }
+  .ab-arena.ab-duel .ab-command .ab-card {
+    width: 36px!important;
+  }
+  .ab-arena.ab-duel .ab-zone-empty {
+    font-size: 9px;
+    padding: 2px;
+  }
+  .ab-arena.ab-duel .ab-card-row {
+    gap: 6px;
+  }
+  .ab-arena.ab-duel .ab-player {
+    min-height: 26px;
+    flex-basis: 26px;
+    gap: 5px;
+  }
+  .ab-arena .ab-player-hp {
+    font-size: 16px;
+  }
+  .ab-arena .ab-command-marks {
+    display: none;
+  }
+  .ab-arena.ab-duel .ab-basin {
+    min-width: 85px;
+    max-width: 155px;
+    padding: 2px 4px;
+    gap: 4px;
+  }
+  .ab-arena.ab-duel .ab-basin header>span {
+    font-size: 7px;
+  }
+  .ab-arena.ab-duel .dt-pool-contents {
+    max-width: 100px;
+    gap: 4px;
+  }
+  .ab-arena.ab-duel .dt-pool-resource {
+    font-size: 12px;
+  }
+  .ab-arena.ab-duel .dt-pool-resource img {
+    width: 14px;
+    height: 14px;
+  }
+  .ab-arena.ab-duel .ab-deck,.ab-arena.ab-duel .ab-pile-button {
+    font-size: 7px;
+    flex-direction: column;
+    gap: 1px;
+    padding: 1px;
+  }
+  .ab-arena.ab-duel .ab-deck>.ab-card-back {
+    width: 17px;
+    height: 24px;
+  }
+  .ab-arena.ab-duel .ab-deck strong {
+    font-size: 10px;
+    margin: 0;
+  }
+  .ab-arena.ab-duel .ab-center {
+    min-height: 78px;
+    padding: 5px;
+    max-height: 125px;
+  }
+  .ab-arena .ab-turn {
+    font-size: 10px;
+  }
+  .ab-arena .ab-phase-controls {
+    gap: 5px;
+  }
+  .ab-arena .ab-center .dt-phase-selector button {
+    min-height: 32px;
+    padding: 4px 9px;
+  }
+  .ab-arena .ab-step-actions>span {
+    font-size: 11px;
+  }
+  .ab-arena .ab-step-actions button {
+    font-size: 11px;
+  }
+  .ab-arena.ab-duel .ab-hand {
+    padding: 3px 6px;
+  }
+  .ab-arena.ab-duel .ab-hand-cards {
+    justify-content: flex-start;
+    gap: 9px;
+  }
+  .ab-arena.ab-duel .ab-hand header span {
+    font-size: 9px;
+  }
+  .ab-arena .ab-learning {
+    display: block;
+    max-height: 54px;
+    font-size: 11px;
+    padding: 5px 8px;
+  }
+  .ab-learning strong {
+    margin-right: 6px;
+  }
+  .ab-action-reading {
+    grid-template-columns: 95px minmax(0,1fr);
+    gap: 12px;
+  }
+  .ab-action-reading .ab-rules {
+    font-size: 14px;
+  }
+  .ab-action-reading .ab-command-cost {
+    padding: 5px;
+    font-size: 11px;
+  }
+  .ab-arena.ab-duel.ab-practice {
+    grid-template-columns: minmax(0,1fr);
+    grid-template-rows: 36px 100px minmax(0,1fr) var(--arena-hand) 20px;
+    grid-template-areas: 'tools' 'guide' 'workspace' 'hand' 'notice';
+  }
+  .ab-practice-panel {
+    padding: 7px 10px;
+    font-size: 12px;
+  }
+  .ab-practice-panel>div+div {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  .ab-practice-panel label {
+    max-width: 100%;
+  }
+  .ab-practice-panel p {
+    margin: 6px 0;
+  }
+}
+/* Landscape phones spend width on the hand instead of stealing field height. */
+@media(max-height:550px) and (min-width:601px) {
+  .ab-arena.ab-duel {
+    --arena-hand: 0px;
+    grid-template-columns: minmax(0,1fr) 126px;
+    grid-template-rows: 32px minmax(0,1fr) 18px;
+    grid-template-areas: 'tools tools' 'workspace hand' 'notice notice';
+    padding: 4px;
+    gap: 4px;
+  }
+  .ab-arena.ab-duel.ab-learning-mode {
+    grid-template-rows: 32px 34px minmax(0,1fr) 18px;
+    grid-template-areas: 'tools tools' 'guide hand' 'workspace hand' 'notice notice';
+  }
+  .ab-arena.ab-duel .ab-workspace {
+    grid-template-columns: minmax(0,1fr);
+  }
+  .ab-arena.ab-duel .ab-inspector {
+    display: none;
+  }
+  .ab-arena .ab-viewer-toggle {
+    display: inline-flex!important;
+  }
+  .ab-arena.ab-duel .ab-table {
+    grid-template-rows: 16px minmax(0,1fr) auto minmax(0,1fr);
+    gap: 3px;
+    padding: 3px;
+  }
+  .ab-arena.ab-duel .ab-opponent-hand {
+    height: 16px;
+  }
+  .ab-arena.ab-duel .ab-opponent-hand>.ab-card-back {
+    height: 16px;
+    width: 12px;
+  }
+  .ab-arena.ab-duel .ab-player {
+    min-height: 22px;
+    flex-basis: 22px;
+  }
+  .ab-arena.ab-duel .ab-player strong,.ab-arena.ab-duel .ab-command-marks {
+    display: none;
+  }
+  .ab-arena .ab-player-hp {
+    font-size: 15px;
+  }
+  .ab-arena.ab-duel .ab-half-grid,.ab-arena.ab-duel .ab-you .ab-half-grid {
+    grid-template-columns: 43px minmax(0,1fr) 92px 42px;
+    gap: 3px;
+  }
+  .ab-arena.ab-duel .ab-zone {
+    padding: 2px 4px;
+  }
+  .ab-arena.ab-duel .ab-zone header {
+    height: 11px;
+    margin: 0 0 2px;
+    font-size: 7px;
+    letter-spacing: 0;
+  }
+  .ab-arena.ab-duel .ab-zone header small {
+    display: none;
+  }
+  .ab-arena.ab-duel .ab-card-row {
+    height: calc(100% - 13px);
+    padding: 0;
+    gap: 5px;
+  }
+  .ab-arena.ab-duel .ab-zone .ab-card {
+    width: clamp(27px,calc((100cqh - 16px)*.714),67px)!important;
+  }
+  .ab-arena.ab-duel .ab-command .ab-card {
+    width: 34px!important;
+  }
+  .ab-arena.ab-duel .ab-center {
+    min-height: 46px;
+    max-height: 95px;
+    padding: 3px 6px;
+    gap: 2px;
+  }
+  .ab-arena .ab-turn {
+    font-size: 9px;
+  }
+  .ab-arena .ab-phase-controls {
+    gap: 5px;
+  }
+  .ab-arena .ab-center .dt-phase-selector button {
+    min-height: 26px;
+    padding: 3px 7px;
+    font-size: 10px;
+  }
+  .ab-arena .ab-center .ab-step-actions button {
+    min-height: 28px;
+    padding: 3px 7px;
+    font-size: 10px;
+  }
+  .ab-arena .ab-step-actions>span {
+    font-size: 10px;
+  }
+  .ab-arena .ab-learning {
+    font-size: 10px;
+    padding: 3px 7px;
+    max-height: 34px;
+  }
+  .ab-arena.ab-duel .ab-hand {
+    container-type: normal;
+    padding: 3px;
+    overflow: auto;
+  }
+  .ab-arena.ab-duel .ab-hand header {
+    font-size: 8px;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    gap: 3px;
+  }
+  .ab-arena.ab-duel .ab-hand header>span {
+    display: none;
+  }
+  .ab-arena.ab-duel .ab-hand-cards {
+    display: grid;
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    align-content: start;
+    justify-items: center;
+    gap: 5px;
+    overflow: visible;
+    flex: none;
+    padding: 4px 0;
+  }
+  .ab-arena.ab-duel .ab-hand .ab-card {
+    width: 49px!important;
+  }
+  .ab-arena.ab-duel .ab-notice {
+    font-size: 10px;
+    line-height: 18px;
+  }
+  .ab-arena.ab-duel .ab-basin {
+    padding: 1px 5px;
+    min-width: 85px;
+  }
+  .ab-arena.ab-duel .ab-deck>.ab-card-back {
+    display: none;
+  }
+  .ab-arena.ab-duel .ab-deck strong {
+    margin: 0;
+  }
+  .ab-arena.ab-duel .ab-pile-button {
+    font-size: 7px;
+    gap: 2px;
+  }
+  .ab-arena.ab-duel.ab-practice {
+    grid-template-columns: 185px minmax(0,1fr) 126px;
+    grid-template-rows: 32px minmax(0,1fr) 18px;
+    grid-template-areas: 'tools tools tools' 'guide workspace hand' 'guide notice notice';
+  }
+  .ab-practice-panel {
+    padding: 8px;
+    font-size: 11px;
+  }
+  .ab-practice-panel>div+div {
+    margin-top: 8px;
+    gap: 6px;
+  }
+  .ab-practice-panel p {
+    margin: 7px 0;
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  .ab-arena .ab-card,.ab-arena .ab-card-face {
+    transition: none;
+  }
+}
