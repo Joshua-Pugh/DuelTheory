@@ -1,0 +1,498 @@
+{
+  "date": "2026-11-06",
+  "baseline": {
+    "commit": "0aa4314147bdaa616a37ab2c7cccfaf338a6aa53",
+    "files": {
+      "src/ashenCatalog.json": "ce920eb58732569ec2de55e410ce5301621a9ffd371c6aec935b5abe7d38f8a9",
+      "src/ashenPrintData.json": "314b9e3d92be4de7e8cff6ff097ee7fc9878bbaf872308d1c0192498ed0df789",
+      "src/games/ashen/duel.ts": "699259c9b9c772edcaced1c9a1a00877b141197271db44b8633ec8fa8d64fed9",
+      "src/games/ashen/adapter.ts": "b0ecfbc161bac88e92e6e5e280447c95952595a513fc48a6ba2fe4f095d1e63c",
+      "src/games/ashen/bruteEffects.ts": "fb1c6c210889abd3aec12ee5a19ab67d627a5e71137df50b670a24681df5b7c7",
+      "src/games/ashen/nobleEffects.ts": "31b3307a72f6b398de67e506549e22bab670d331a639d9e4765cc006fbbd4a8c"
+    }
+  },
+  "profiles": {
+    "Noble": {
+      "status": "draft-for-creator-review-not-active",
+      "stationId": "ashen-noble-the-crown-s-bastion",
+      "entries": [
+        {
+          "cardId": "ashen-noble-shieldbearer-noble",
+          "count": 3
+        },
+        {
+          "cardId": "ashen-noble-spearman-of-the-crown",
+          "count": 2
+        },
+        {
+          "cardId": "ashen-noble-court-scribe",
+          "count": 3
+        },
+        {
+          "cardId": "ashen-noble-banner-guard",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-noble-junior-tactician",
+          "count": 2
+        },
+        {
+          "cardId": "ashen-noble-crown-archer",
+          "count": 2
+        },
+        {
+          "cardId": "ashen-noble-watchtower-scout",
+          "count": 2
+        },
+        {
+          "cardId": "ashen-noble-ballista-crew",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-noble-griffin-knight-of-ashenfield",
+          "count": 2
+        },
+        {
+          "cardId": "ashen-noble-archivist-of-the-crown",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-noble-griffin-lancer",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-noble-crown-s-cavalier",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-noble-royal-longbowman",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-noble-garrett-of-ashenfield",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-noble-royal-crusher",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-noble-rune-of-foresight",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-noble-rune-of-clarity",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-noble-rune-of-the-banner",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-noble-ring-of-the-ley",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-noble-oathfire-decree",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-noble-royal-decree",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-noble-purge-the-unworthy",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-noble-judgment-of-the-crown",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-noble-law-of-precedence",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-noble-crown-s-verdict",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-noble-throne-s-will",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-noble-enforce-the-law",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-noble-oath-font",
+          "count": 18
+        },
+        {
+          "cardId": "ashen-noble-oath-sanctum",
+          "count": 2
+        },
+        {
+          "cardId": "ashen-noble-oath-forge",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-noble-verdant-veil-fount",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-noble-ashenfield-war-ram",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-noble-ashenfield-lance",
+          "count": 1
+        }
+      ],
+      "costOverrides": {
+        "ashen-noble-watchtower-scout": {
+          "untuned": 1,
+          "oath": 2
+        }
+      },
+      "keywordAdditions": {
+        "ashen-noble-shieldbearer-noble": [
+          "Standfast"
+        ],
+        "ashen-noble-banner-guard": [
+          "Standfast"
+        ],
+        "ashen-noble-crown-archer": [
+          "Standfast"
+        ]
+      },
+      "effectProposals": {
+        "ashen-noble-rune-of-clarity": "Keep one copy. Test activation as Exhaust and pay 1 Oath: Refine 2. Keep its printed draw-damage trigger for this first test."
+      },
+      "current": {
+        "total": 60,
+        "fonts": 22,
+        "nonFonts": 38,
+        "printedEssence": 121,
+        "meanPrintedCost": 3.1842105263157894,
+        "histogram": {
+          "1": 7,
+          "2": 8,
+          "3": 6,
+          "4": 8,
+          "5": 6,
+          "6": 3
+        },
+        "unitCurve": {
+          "1": 4,
+          "2": 3,
+          "3": 2,
+          "4": 6,
+          "5": 3,
+          "6": 2
+        },
+        "types": {
+          "Unit": 20,
+          "Rune": 4,
+          "Relic": 4,
+          "Strategy": 5,
+          "Tactic": 5,
+          "Ley Font": 22
+        }
+      },
+      "candidate": {
+        "total": 60,
+        "fonts": 22,
+        "nonFonts": 38,
+        "printedEssence": 100,
+        "meanPrintedCost": 2.6315789473684212,
+        "histogram": {
+          "1": 11,
+          "2": 9,
+          "3": 7,
+          "4": 7,
+          "5": 2,
+          "6": 2
+        },
+        "unitCurve": {
+          "1": 8,
+          "2": 4,
+          "3": 3,
+          "4": 6,
+          "5": 2,
+          "6": 2
+        },
+        "types": {
+          "Unit": 25,
+          "Rune": 3,
+          "Relic": 3,
+          "Strategy": 3,
+          "Tactic": 4,
+          "Ley Font": 22
+        }
+      }
+    },
+    "Brute": {
+      "status": "draft-for-creator-review-not-active",
+      "stationId": "ashen-brute-the-broken-fist-keep",
+      "entries": [
+        {
+          "cardId": "ashen-brute-frenzied-grunt",
+          "count": 2
+        },
+        {
+          "cardId": "ashen-brute-bloodfang-raider",
+          "count": 2
+        },
+        {
+          "cardId": "ashen-brute-bloodpit-initiate",
+          "count": 2
+        },
+        {
+          "cardId": "ashen-brute-raging-mauler",
+          "count": 2
+        },
+        {
+          "cardId": "ashen-brute-rubble-flinger",
+          "count": 2
+        },
+        {
+          "cardId": "ashen-brute-savage-warcaller",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-feral-axebreaker",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-battlefield-howler",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-crude-spearthrower",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-warhowl-instigator",
+          "count": 2
+        },
+        {
+          "cardId": "ashen-brute-warband-overseer",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-bonespike-hurler",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-howling-skyterror",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-pit-sired-warmonger",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-skyclaw-raider",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-ironhide-catapult",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-siegebreaker-ram",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-ashclaw-skyreaver",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-bonecrusher-catapult",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-korgath-lord-of-ruin",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-skarn-the-unchained",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-banner-of-the-broken-fist",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-pit-of-the-frenzied",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-ring-of-the-ley",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-blood-cauldron",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-frenzied-stampede",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-fury-offering",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-bloodfire-collapse",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-bloodrush-gambit",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-rites-of-ragefire",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-skullsplitter-s-roar",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-pit-digger-s-howl",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-fury-font",
+          "count": 16
+        },
+        {
+          "cardId": "ashen-brute-fury-pit",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-bloodforge-hollow",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-ashfang-ravine",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-the-maw-below",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-ashen-warhawk",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-ashen-strike",
+          "count": 1
+        }
+      ],
+      "costOverrides": {
+        "ashen-brute-bloodpit-initiate": {
+          "untuned": 1,
+          "fury": 1
+        },
+        "ashen-brute-warhowl-instigator": {
+          "untuned": 1,
+          "fury": 2
+        }
+      },
+      "keywordAdditions": {},
+      "effectProposals": {
+        "ashen-brute-blood-cauldron": "Add a second activated option: Exhaust: Create one 1A/1D Frenzied Brute token. Both options exhaust this Relic; they cannot both be used without readying it. Token has no inherent Charge.",
+        "ashen-brute-fury-offering": "Replace effect for this test: Create two 1A/1D Frenzied Brute tokens. If you control no Units as this resolves, create three instead. Tokens have no inherent Charge. Preserve the original sacrifice/damage/draw design in the reserve snapshot."
+      },
+      "current": {
+        "total": 60,
+        "fonts": 18,
+        "nonFonts": 42,
+        "printedEssence": 125,
+        "meanPrintedCost": 2.9761904761904763,
+        "histogram": {
+          "1": 6,
+          "2": 10,
+          "3": 16,
+          "4": 2,
+          "5": 5,
+          "6": 3
+        },
+        "unitCurve": {
+          "1": 3,
+          "2": 4,
+          "3": 10,
+          "4": 2,
+          "5": 3,
+          "6": 2
+        },
+        "types": {
+          "Unit": 24,
+          "Rune": 3,
+          "Relic": 5,
+          "Strategy": 4,
+          "Tactic": 6,
+          "Ley Font": 18
+        }
+      },
+      "candidate": {
+        "total": 60,
+        "fonts": 20,
+        "nonFonts": 40,
+        "printedEssence": 111,
+        "meanPrintedCost": 2.775,
+        "histogram": {
+          "1": 7,
+          "2": 10,
+          "3": 16,
+          "4": 1,
+          "5": 4,
+          "6": 2
+        },
+        "unitCurve": {
+          "1": 4,
+          "2": 7,
+          "3": 11,
+          "4": 1,
+          "5": 3,
+          "6": 2
+        },
+        "types": {
+          "Unit": 28,
+          "Rune": 2,
+          "Relic": 2,
+          "Strategy": 3,
+          "Tactic": 5,
+          "Ley Font": 20
+        }
+      }
+    }
+  },
+  "fontDraws": [
+    {
+      "fonts": 18,
+      "openingZeroFonts": 0.1047818925668137,
+      "openingAtLeastTwo": 0.5893682588597843,
+      "threeByOwnTurnThree": 0.45038931823444905,
+      "fourByOwnTurnFour": 0.25735136618102555
+    },
+    {
+      "fonts": 20,
+      "openingZeroFonts": 0.07666967748791254,
+      "openingAtLeastTwo": 0.6604628568392449,
+      "threeByOwnTurnThree": 0.5391782696900526,
+      "fourByOwnTurnFour": 0.34184750808594305
+    },
+    {
+      "fonts": 22,
+      "openingZeroFonts": 0.05514319111630639,
+      "openingAtLeastTwo": 0.7242840444184686,
+      "threeByOwnTurnThree": 0.6231303919514499,
+      "fourByOwnTurnFour": 0.4314053152755004
+    }
+  ]
+}
