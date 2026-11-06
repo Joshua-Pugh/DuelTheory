@@ -1,3 +1,4 @@
+import {fixtureCard} from '../../test/ashenFixtureCard';
 import {readyAshenDuel as newAshenDuel} from '../../test/ashenReady';
 import {expect,it} from 'vitest';
 import {ashenActionCost,moveAshenCard} from './adapter';
@@ -27,7 +28,7 @@ it('counts the start-of-turn draw and does not damage the Station until its sele
  let next=advanceAshenTo(s,'end');expect(next.rules!.pending!.flow.context.source).toBe(id);expect(next.table.health[0]).toBe(20);next=resumeBruteDuel(next,[station.instanceId]);for(let n=0;n<20&&next.rules!.duel!.priority;n++)next=passAshenPriority(next,Number(next.rules!.duel!.priority!.holder) as 0|1);expect(next.table.health[0]).toBe(19);expect(next.rules!.duel!.phase).toBe('main1');
 });
 it('uses a single capped Command discount calculation for UI and payment',()=>{
- const {s}=setup(),card=Object.values(s.table.cards).find(c=>c.controller===0&&c.cardId==='ashen-noble-high-strategist')!;if(card.zone!=='hand')moveAshenCard(s,card.instanceId,'hand');const base=ashenActionCost(s,card.instanceId);expect(base.isCommand).toBe(true);
+ const {s}=setup(),card=fixtureCard(s,'ashen-noble-high-strategist');if(card.zone!=='hand')moveAshenCard(s,card.instanceId,'hand');const base=ashenActionCost(s,card.instanceId);expect(base.isCommand).toBe(true);
  s.rules!.nobleMarks={0:{planned:1,refined:1},1:{planned:90}};const cost=ashenActionCost(s,card.instanceId);expect(cost.reduction).toBe(Math.min(2,base.printed.untuned||0));expect(cost.payable.oath).toBe(base.printed.oath);s.rules!.nobleMarks[0]={planned:99};expect(ashenActionCost(s,card.instanceId).payable.untuned).toBe(0);expect(ashenActionCost(s,card.instanceId).reduction).toBe(base.printed.untuned);
 });
 it('handles an extra Bastion draw without replaying Refine or its original draw triggers',()=>{

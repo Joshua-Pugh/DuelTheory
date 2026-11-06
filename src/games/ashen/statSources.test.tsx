@@ -1,3 +1,4 @@
+import {fixtureCard} from '../../test/ashenFixtureCard';
 import {readyAshenDuel as newAshenDuel} from '../../test/ashenReady';
 import {expect,it} from 'vitest';
 import {renderToStaticMarkup} from 'react-dom/server';
@@ -6,7 +7,7 @@ import {moveAshenCard,ashenStats,drainTriggers,ashenAdapter} from './adapter';
 import {executeProgram} from '../../framework';
 import AshenStatBreakdown from '../../AshenStatBreakdown';
 import type {Battlefield} from '../../ashenBattlefieldState';
-function put(s:Battlefield,slug:string,zone='unit'){const id=Object.values(s.table.cards).find(c=>c.controller===0&&c.cardId==='ashen-noble-'+slug)!.instanceId;if(s.table.cards[id].zone!==zone)moveAshenCard(s,id,zone);return id;}
+function put(s:Battlefield,slug:string,zone='unit'){const id=fixtureCard(s,'ashen-noble-'+slug).instanceId;if(s.table.cards[id].zone!==zone)moveAshenCard(s,id,zone);return id;}
 function finish(start:Battlefield){let s=start,steps=0;for(;steps<100;steps++){
  const flow=s.rules?.pending?.flow,step=flow?.steps[0];
  if(step?.op==='plan')s=resumeBruteDuel(s,flow!.planIds!.map(id=>'t:'+id));

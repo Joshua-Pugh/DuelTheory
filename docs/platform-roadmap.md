@@ -1,10 +1,10 @@
 # DuelTheory roadmap
 
-Updated November 5, 2026. Current direction: **DuelTheory is the digital home of Ashen Throne**, developed by Ashen Forge Games. Table Companion remains the secondary free public tool.
+Updated November 6, 2026. Current direction: **DuelTheory is the digital home of Ashen Throne**, developed by Ashen Forge Games. Table Companion remains the secondary free public tool.
 
 ## Current status
 
-The **first production-boundary pass is implemented**: an AT-first public shell, separate private build and asset allowlist, signed Cloudflare Access identity checks at the gateway and original private APIs, and explicit test-suite ownership. See [implementation details](production-boundaries.md). The [first arena presentation pass](ashen-arena-update.md) adds the game start screen, visual starter selection, shared viewport layout, readable touch card actions and Clash queue. The engine is preserved. Rules authority, populated combat playtesting and real-device refinement remain ahead. Android store publication is a separate release step.
+The **first production-boundary pass is implemented**: an AT-first public shell, separate private build and asset allowlist, signed Cloudflare Access identity checks at the gateway and original private APIs, and explicit test-suite ownership. See [implementation details](production-boundaries.md). The [first arena presentation pass](ashen-arena-update.md) adds the game start screen, visual starter selection, shared viewport layout, readable touch card actions and Clash queue. The engine is preserved. The [approved starter balance pass](design/balance-2026-11-06/applied-starters.md) now supplies two revised 60-card starters, current practice lessons, interaction and recovery effects, and a saved booster reserve. Start a new duel to test these lists. Rules authority, populated combat playtesting and real-device refinement remain ahead. Android store publication is a separate release step.
 
 Read the [production audit and implementation plan](ashen-production-plan.md) for findings, proposed ownership, private invitations, tests, cleanup candidates and acceptance criteria. This is the current source of direction; older platform and duel roadmaps are historical records.
 

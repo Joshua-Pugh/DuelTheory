@@ -1,3 +1,4 @@
+import {fixtureCard} from './test/ashenFixtureCard';
 import {readyBruteDuel as newBruteDuel,readyAshenDuel as newAshenDuel} from './test/ashenReady';
 // @vitest-environment happy-dom
 import {act} from 'react';
@@ -81,7 +82,7 @@ it('keeps a Command Station target choice with the effect owner and labels each 
  const dialog=document.querySelector('[aria-label="Choose a Command Station"]')!;expect(dialog.textContent).toContain('Player 1 · Command Station');expect(dialog.textContent).toContain('Player 2 · Command Station');
 });
 it('shows Command reductions in the hand, viewer and card menu',async()=>{
- const s=newAshenDuel(['Noble','Brute'],42,0),card=Object.values(s.table.cards).find(c=>c.controller===0&&c.cardId==='ashen-noble-high-strategist')!;if(card.zone!=='hand')moveAshenCard(s,card.instanceId,'hand');s.rules!.nobleMarks={0:{planned:1,refined:1}};await mount(<AshenBattlefield initialState={s} learning={false}/>);
+ const s=newAshenDuel(['Noble','Brute'],42,0),card=fixtureCard(s,'ashen-noble-high-strategist');if(card.zone!=='hand')moveAshenCard(s,card.instanceId,'hand');s.rules!.nobleMarks={0:{planned:1,refined:1}};await mount(<AshenBattlefield initialState={s} learning={false}/>);
  expect(document.querySelector(`[data-ashen-card="${card.instanceId}"]`)?.parentElement?.textContent).toContain('Command −2');await click(document.querySelector(`[data-ashen-card="${card.instanceId}"]`)!);const menu=document.querySelector('.dt-action-dialog')!;expect(menu.textContent).toContain('Command active · −2 generic');expect(menu.querySelector('[aria-label^="Current cost:"]')).not.toBeNull();expect(menu.querySelector('[aria-label^="Printed cost:"]')).not.toBeNull();expect(menu.textContent).toContain('Plan 1 · Refine 1');
 });
 it('announces newly triggered cards and damage without replaying old notices on reconnect',async()=>{

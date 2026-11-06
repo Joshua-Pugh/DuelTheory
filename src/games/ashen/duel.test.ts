@@ -1,3 +1,4 @@
+import {fixtureCard} from '../../test/ashenFixtureCard';
 import {readyBruteDuel as newBruteDuel} from '../../test/ashenReady';
 import {describe,it,expect} from 'vitest';
 import {ashenResponseOptions,submitAshenAction,passAshenPriority,nextAshenPhase,declareAshenAttackers,assignAshenBlocker,resolveAshenCombat,canBlockAshen,resumeBruteDuel,chooseKorgathForCall,settleAshenDuel,korgathCallChoices,confirmAshenTriggerOrder,orderAshenTrigger,burnInBruteDuel} from './duel';
@@ -5,7 +6,7 @@ import {moveAshenCard,ashenStats,ashenAdapter,playProgram} from './adapter';
 import {bruteEffects} from './bruteEffects';
 import {ashenCardMap} from '../../ashenDecks';
 import type {Battlefield} from '../../ashenBattlefieldState';
-const id=(s:Battlefield,slug:string,seat=0)=>Object.values(s.table.cards).find(c=>c.controller===seat&&c.cardId==='ashen-brute-'+slug)!.instanceId;
+const id=(s:Battlefield,slug:string,seat=0)=>fixtureCard(s,'ashen-brute-'+slug,seat).instanceId;
 function setup(){const s=newBruteDuel(()=>.4);s.table.active=0;for(const c of Object.values(s.table.cards))if(['hand','unit','support','ley'].includes(c.zone))moveAshenCard(s,c.instanceId,'deck');return s;}
 function field(s:Battlefield,slug:string,zone='unit',seat=0){const key=id(s,slug,seat);moveAshenCard(s,key,zone);return key;}
 function hand(s:Battlefield,slug:string,seat=0){const key=field(s,slug,'hand',seat);s.basins[seat].fury=99;s.basins[seat].untuned=99;return key;}
@@ -67,6 +68,6 @@ it('resolves an equipped token’s paid ability after the token sacrifices itsel
 it('offers a Tactic response payable by burning Ready Fonts',()=>{let s=setup();const strike=hand(s,'ashen-strike'),response=hand(s,'ashen-strike',1);s.basins[1].fury=0;s.basins[1].untuned=0;const fonts=Object.values(s.table.cards).filter(c=>c.controller===1&&c.type==='Ley Font').slice(0,2);for(const font of fonts)moveAshenCard(s,font.instanceId,'ley');s=submitAshenAction(s,strike,{player:'0',source:strike,targets:[s.table.piles['1:command'][0]]});expect(s.rules!.duel!.priority?.holder).toBe('1');for(const font of fonts)s=burnInBruteDuel(s,font.instanceId,1);s=submitAshenAction(s,response,{player:'1',source:response,targets:[s.table.piles['0:command'][0]]});s=passes(s);expect(s.table.health).toEqual([17,17]);});
 it('can order Rage after attacking-token creation',()=>{let s=combat(setup());const skarn=field(s,'skarn-the-unchained'),mauler=field(s,'raging-mauler');field(s,'ring-of-the-ley','support');s=declareAshenAttackers(s,[skarn,mauler]);const tokenTrigger=s.rules!.duel!.stack.findIndex(e=>e.program.id==='attacking-brutes');s=orderAshenTrigger(s,tokenTrigger);s=passes(s);expect(ashenStats(s,mauler).attack).toBe(8);});
 
-it('has verified deployment programs and complete coverage for every Brute deck card',()=>{for(const card of ashenCardMap.values())if(card.faction==='Brute'){expect(bruteEffects[card.id].coverage,card.name).toBe('implemented');if(card.type!=='Command Station'){const s=setup(),c=Object.values(s.table.cards).find(c=>c.controller===0&&c.cardId===card.id)!;expect(c,card.name).toBeDefined();moveAshenCard(s,c.instanceId,'hand');expect(()=>playProgram(s,c.instanceId),card.name).not.toThrow();}}});
+it('has verified deployment programs and complete coverage for every Brute deck card',()=>{for(const card of ashenCardMap.values())if(card.faction==='Brute'){expect(bruteEffects[card.id].coverage,card.name).toBe('implemented');if(card.type!=='Command Station'){const s=setup(),c=fixtureCard(s,card.id);expect(c,card.name).toBeDefined();moveAshenCard(s,c.instanceId,'hand');expect(()=>playProgram(s,c.instanceId),card.name).not.toThrow();}}});
 
 it('End Phase discards down to seven before changing turns',()=>{let s=setup();const cards=s.table.piles['0:deck'].slice(0,12);for(const c of cards)moveAshenCard(s,c,'hand');s.rules!.duel!.phase='main2';s=nextAshenPhase(s);expect(s.table.active).toBe(0);expect(s.rules?.pending).toBeDefined();s=resumeBruteDuel(s,cards.slice(0,5));expect(s.table.piles['0:hand']).toHaveLength(7);expect(s.table.active).toBe(1);});

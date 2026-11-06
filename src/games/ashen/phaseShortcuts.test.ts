@@ -1,3 +1,4 @@
+import {fixtureCard} from '../../test/ashenFixtureCard';
 import {readyBruteDuel as newBruteDuel} from '../../test/ashenReady';
 import {expect,it} from 'vitest';
 import {advanceAshenTo,nextAshenPhase,declareAshenAttackers,resolveAshenCombat,passAshenPriority,resumeBruteDuel} from './duel';
@@ -12,7 +13,7 @@ it('can skip to Main II without ending the turn or paying fatigue',()=>{
  const s=setup(),next=advanceAshenTo(s,'main2');expect(next.rules!.duel!.phase).toBe('main2');expect(next.rules!.turn).toBe(1);expect(next.table.active).toBe(0);expect(next.rules!.duel!.combat?.attackers).toEqual([]);
 });
 it('cannot bypass a Ready Reckless Unit, but allows a fatigued one',()=>{
- const s=setup(),unit=Object.values(s.table.cards).find(c=>c.controller===0&&c.cardId==='ashen-brute-stonehide-juggernaut')!;moveAshenCard(s,unit.instanceId,'unit');
+ const s=setup(),unit=fixtureCard(s,'ashen-brute-stonehide-juggernaut');moveAshenCard(s,unit.instanceId,'unit');
  expect(()=>advanceAshenTo(s,'end')).toThrow('Reckless');s.table.cards[unit.instanceId].rotated=true;expect(()=>advanceAshenTo(s,'end')).not.toThrow();
 });
 it('cannot skip blocking or combat damage and permits End after combat finishes',()=>{

@@ -5,7 +5,7 @@ import AshenCardFrame from './AshenCardFrame';
 import {DEFAULT_LOOK,loadCardLook,saveCardLook,type FrameLook} from './framePersonalization';
 import {getArtwork,putArtwork} from './cardStudio';
 import {BookOpen,Layers3,Shield,Flame,Info} from 'lucide-react';
-import {starterDeck,changeAshenQuantity,inspectAshenDeck,safeLoadAshenDecks,ASHEN_STORAGE_KEY,type AshenDeck,type AshenFaction} from './ashenDecks';
+import {ashenStarterCards,starterDeck,changeAshenQuantity,inspectAshenDeck,safeLoadAshenDecks,ASHEN_STORAGE_KEY,type AshenDeck,type AshenFaction} from './ashenDecks';
 
 type Variant='command'|'battle';
 const phases=[
@@ -49,12 +49,12 @@ export default function AshenThrone({onPlay,initialSection='rules'}:{onPlay?:()=
  const [savedDecks,setSavedDecks]=useState<AshenDeck[]>(safeLoadAshenDecks);
  const [activeDeck,setActiveDeck]=useState<AshenDeck>(()=>starterDeck('Brute'));
  const [deckSearch,setDeckSearch]=useState('');
- const [feedback,setFeedback]=useState('Prototype lists are imported as documented; no missing cards have been invented.');
+ const [feedback,setFeedback]=useState('Updated 60-card starters. Cut designs are saved for future boosters.');
  const deckReview=inspectAshenDeck(activeDeck);
  const editDeck=(cardId:string,delta:number)=>{const updated=changeAshenQuantity(activeDeck,cardId,delta);setActiveDeck(updated);setFeedback(updated===activeDeck?'Change blocked by deck construction rules.':`Updated ${catalog.cards.find(c=>c.id===cardId)?.name||'card'}. Unsaved changes.`)};
  const saveDeck=()=>{const updated=[...savedDecks.filter(d=>d.id!==activeDeck.id),activeDeck];setSavedDecks(updated);localStorage.setItem(ASHEN_STORAGE_KEY,JSON.stringify(updated));setFeedback(`Saved ${activeDeck.name} locally.`)};
  const exportDeck=()=>{const blob=new Blob([JSON.stringify({format:'ashen-command-siege-v0.3.9',deck:activeDeck},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=activeDeck.name.toLowerCase().replace(/[^a-z0-9]+/g,'-')+'.ashen.json';a.click();URL.revokeObjectURL(url)};
- const cards=catalog.cards;
+ const cards=ashenStarterCards;
  const selected=cards.find(card=>card.id===selectedId) || cards[0];
  const filtered=useMemo(()=>cards.filter(card=>(faction==='All'||card.faction===faction)&&(cardType==='All'||card.type===cardType)&&card.name.toLowerCase().includes(query.toLowerCase())).sort((a,b)=>a.name.localeCompare(b.name)),[cards,faction,cardType,query]);
  const availableTypes=['All',...new Set(cards.map(card=>card.type))];

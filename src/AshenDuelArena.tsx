@@ -5,7 +5,7 @@ import {OpeningCoinDialog} from './DuelLifecycleDialogs';
 import {openingCoin} from './duelLifecycle';
 import {freshRandomSeed as freshDuelSeed} from './framework/random';
 import {newAshenDuel} from './games/ashen/duel';
-import type {AshenFaction} from './ashenDecks';
+import {ASHEN_CONTENT_REVISION,type AshenFaction} from './ashenDecks';
 import {readBattlefield,type Battlefield} from './ashenBattlefieldState';
 import './duelRoom.css';
 import AshenStartScreen from './games/ashen/arena/AshenStartScreen';
@@ -20,7 +20,7 @@ export default function AshenDuelArena({mobile=false}:{allowResume?:boolean;mobi
  if(practice)return <AshenPractice mobile={mobile} onExit={()=>setPractice(false)}/>;
  if(game)return <AshenBattlefield key={seed} mobile={mobile} initialState={game} learning={learning} onAgain={start} onExit={()=>{setSaved(readBattlefield());setGame(null);setSeed(null);}}/>;
  return <>
-  <AshenStartScreen decks={decks} onDeck={(seat,faction)=>setDecks(current=>{const next:[AshenFaction,AshenFaction]=[...current];next[seat]=faction;return next;})} learning={learning} onLearning={setLearning} onStart={start} onPractice={()=>setPractice(true)} onResume={saved?.rules?.duel&&saved.rules.duel.winner==null?()=>setGame(saved):undefined}/>
+  <AshenStartScreen decks={decks} onDeck={(seat,faction)=>setDecks(current=>{const next:[AshenFaction,AshenFaction]=[...current];next[seat]=faction;return next;})} learning={learning} onLearning={setLearning} onStart={start} onPractice={()=>setPractice(true)} legacySave={saved?.contentRevision!==ASHEN_CONTENT_REVISION} onResume={saved?.rules?.duel&&saved.rules.duel.winner==null?()=>setGame(saved):undefined}/>
   {seed!==null&&<OpeningCoinDialog key={seed} seed={seed} onExit={()=>setSeed(null)} onBegin={()=>setGame(newAshenDuel(decks,seed,openingCoin(seed).firstSeat))}/>}
  </>;
 }

@@ -1,9 +1,10 @@
+import {fixtureCard} from '../../test/ashenFixtureCard';
 import {describe,it,expect} from 'vitest';
 import {newBattlefield,battlefieldDispatch,type Battlefield} from '../../ashenBattlefieldState';
 import {playProgram,resolveAshenEffect,ashenStats,resolveBurnEffect,availableAshenAbilities,resumeAshenEffect,pendingAshenChoices} from './adapter';
 import {validateEffectProgram} from '../../framework';
 import {bruteEffects} from './bruteEffects';
-const idOf=(s:Battlefield,slug:string)=>Object.values(s.table.cards).find(c=>c.cardId===`ashen-brute-${slug}`)!.instanceId;
+const idOf=(s:Battlefield,slug:string)=>fixtureCard(s,`ashen-brute-${slug}`).instanceId;
 function hand(s:Battlefield,slug:string){const id=idOf(s,slug);if(s.table.cards[id].zone!=='hand')s=battlefieldDispatch(s,{type:'MOVE',instanceId:id,seat:0,zone:'hand'});s.basins[0].fury=50;s.basins[0].untuned=50;return {s,id};}
 const deploy=(s:Battlefield,id:string,targets:string[]=[],costCards:string[]=[])=>resolveAshenEffect(s,playProgram(s,id),{player:'0',source:id,targets,costCards},true);
 describe('first Brute effects through the shared framework',()=>{
@@ -138,12 +139,10 @@ describe('Brute effect continuations',()=>{
   const p=bruteEffects[s.table.cards[drum].cardId].activated![0],deck=[...s.table.piles['0:deck']];s=resolveAshenEffect(s,p,{player:'0',source:drum});s=resumeAshenEffect(s,[]);
   expect(s.table.piles['0:deck']).toHaveLength(deck.length);expect(s.table.piles['0:deck']).not.toEqual(deck);expect(s.rules?.counters?.[drum]?.momentum).toBe(0);
  });
- it('Fury Offering remembers the sacrificed Attack and uses reproducible random discards',()=>{
-  let start=hand(newBattlefield(false,()=>.4),'fury-offering'),s=start.s;const victim=idOf(s,'frenzied-grunt');s=battlefieldDispatch(s,{type:'MOVE',instanceId:victim,seat:0,zone:'unit'});
-  s=battlefieldDispatch(s,{type:'COUNTER',instanceId:victim,delta:2});const attack=ashenStats(s,victim).attack,station=s.table.piles['1:command'][0],deck=s.table.piles['0:deck'].length;
-  s=deploy(s,start.id,[station]);const before=JSON.stringify(s),a=resumeAshenEffect(s,[victim]),b=resumeAshenEffect(JSON.parse(before),[victim]);
-  expect(a).toEqual(b);expect(a.table.health[1]).toBe(20-attack);expect(a.table.piles['0:deck']).toHaveLength(deck-attack);expect(a.table.cards[victim].zone).toBe('graveyard');
-  expect(a.rules?.pending).toBeUndefined();expect(a.table.piles['0:graveyard'].length).toBe(4);
+ it('Fury Offering creates recovery tokens without sacrificing, damaging or drawing',()=>{
+  const start=hand(newBattlefield(false,()=>.4),'fury-offering');const s=deploy(start.s,start.id);
+  expect(s.table.piles['0:unit']).toHaveLength(3);expect(s.table.piles['0:deck']).toHaveLength(start.s.table.piles['0:deck'].length);expect(s.table.health).toEqual([20,20]);
+  expect(s.table.piles['0:unit'].every(id=>s.table.cards[id].rotated)).toBe(true);expect(s.rules?.pending).toBeUndefined();
  });
 });
 

@@ -1,0 +1,336 @@
+{
+  "revision": "starter-balance-2026-11-06",
+  "status": "implemented-for-playtesting",
+  "profiles": {
+    "Brute": {
+      "name": "Clan of the Broken Fist",
+      "entries": [
+        {
+          "cardId": "ashen-brute-frenzied-grunt",
+          "count": 2
+        },
+        {
+          "cardId": "ashen-brute-bloodfang-raider",
+          "count": 2
+        },
+        {
+          "cardId": "ashen-brute-bloodpit-initiate",
+          "count": 2
+        },
+        {
+          "cardId": "ashen-brute-raging-mauler",
+          "count": 2
+        },
+        {
+          "cardId": "ashen-brute-rubble-flinger",
+          "count": 2
+        },
+        {
+          "cardId": "ashen-brute-feral-axebreaker",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-battlefield-howler",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-crude-spearthrower",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-warhowl-instigator",
+          "count": 2
+        },
+        {
+          "cardId": "ashen-brute-bonespike-hurler",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-howling-skyterror",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-pit-sired-warmonger",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-skyclaw-raider",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-ironhide-catapult",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-siegebreaker-ram",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-ashclaw-skyreaver",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-bonecrusher-catapult",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-skarn-the-unchained",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-banner-of-the-broken-fist",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-pit-of-the-frenzied",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-drum-of-the-pit",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-ring-of-the-ley",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-blood-cauldron",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-frenzied-stampede",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-fury-offering",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-bloodfire-collapse",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-rites-of-ragefire",
+          "count": 2
+        },
+        {
+          "cardId": "ashen-brute-skullsplitter-s-roar",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-pit-digger-s-howl",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-fury-font",
+          "count": 16
+        },
+        {
+          "cardId": "ashen-brute-fury-pit",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-bloodforge-hollow",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-ashfang-ravine",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-the-maw-below",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-ashen-warhawk",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-ashen-strike",
+          "count": 2
+        },
+        {
+          "cardId": "ashen-brute-bring-down-the-mighty",
+          "count": 1
+        }
+      ],
+      "stationId": "ashen-brute-the-broken-fist-keep",
+      "total": 60,
+      "byType": {
+        "Unit": 25,
+        "Rune": 2,
+        "Relic": 3,
+        "Strategy": 3,
+        "Tactic": 7,
+        "Ley Font": 20
+      },
+      "nonFontEssenceCurve": {
+        "1": 8,
+        "2": 10,
+        "3": 16,
+        "4": 1,
+        "5": 4,
+        "6": 1
+      }
+    },
+    "Noble": {
+      "name": "The Crown’s Might",
+      "entries": [
+        {
+          "cardId": "ashen-noble-shieldbearer-noble",
+          "count": 3
+        },
+        {
+          "cardId": "ashen-noble-spearman-of-the-crown",
+          "count": 2
+        },
+        {
+          "cardId": "ashen-noble-court-scribe",
+          "count": 3
+        },
+        {
+          "cardId": "ashen-noble-banner-guard",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-noble-junior-tactician",
+          "count": 2
+        },
+        {
+          "cardId": "ashen-noble-crown-archer",
+          "count": 2
+        },
+        {
+          "cardId": "ashen-noble-watchtower-scout",
+          "count": 2
+        },
+        {
+          "cardId": "ashen-noble-court-strategist",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-noble-ballista-crew",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-noble-griffin-knight-of-ashenfield",
+          "count": 2
+        },
+        {
+          "cardId": "ashen-noble-griffin-lancer",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-noble-crown-s-cavalier",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-noble-royal-longbowman",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-noble-royal-crusher",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-noble-rune-of-foresight",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-noble-rune-of-clarity",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-noble-rune-of-the-banner",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-noble-ring-of-the-ley",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-noble-oathfire-decree",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-noble-royal-decree",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-noble-purge-the-unworthy",
+          "count": 2
+        },
+        {
+          "cardId": "ashen-noble-judgment-of-the-crown",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-noble-law-of-precedence",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-noble-crown-s-verdict",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-noble-throne-s-will",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-noble-enforce-the-law",
+          "count": 2
+        },
+        {
+          "cardId": "ashen-noble-oath-font",
+          "count": 18
+        },
+        {
+          "cardId": "ashen-noble-oath-sanctum",
+          "count": 2
+        },
+        {
+          "cardId": "ashen-noble-oath-forge",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-noble-verdant-veil-fount",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-noble-ashenfield-war-ram",
+          "count": 1
+        }
+      ],
+      "stationId": "ashen-noble-the-crown-s-bastion",
+      "total": 60,
+      "byType": {
+        "Unit": 24,
+        "Rune": 3,
+        "Relic": 2,
+        "Strategy": 4,
+        "Tactic": 5,
+        "Ley Font": 22
+      },
+      "nonFontEssenceCurve": {
+        "1": 11,
+        "2": 9,
+        "3": 9,
+        "4": 6,
+        "5": 2,
+        "6": 1
+      }
+    }
+  },
+  "additionalCuts": {
+    "Brute": [
+      "savage-warcaller",
+      "warband-overseer",
+      "bloodrush-gambit"
+    ],
+    "Noble": [
+      "archivist-of-the-crown",
+      "ashenfield-lance"
+    ]
+  },
+  "reserveCount": 22
+}

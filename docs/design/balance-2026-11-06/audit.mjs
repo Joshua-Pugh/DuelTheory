@@ -9,6 +9,7 @@ const out=path.dirname(fileURLToPath(import.meta.url));
 const root=path.resolve(out,'../../..');
 const read=name=>readFileSync(path.join(root,name),'utf8');
 const catalog=JSON.parse(read('src/ashenCatalog.json'));
+if(catalog.contentRevision)throw Error('Historical proposal generator: live starters have changed. Use the saved baseline and applied-release.json; do not overwrite the original review.');
 const print=JSON.parse(read('src/ashenPrintData.json'));
 const cards=new Map(catalog.cards.map(card=>[card.id,card]));
 const id=(faction,slug)=>`ashen-${faction.toLowerCase()}-${slug}`;

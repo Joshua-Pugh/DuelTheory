@@ -1,13 +1,12 @@
-# Starter balance review — November 6, 2026
+# Starter balance — November 6, 2026
 
-Current recommendation: [engine-preserving legendary revision](legendary-revision.md).
+The creator-approved changes are now implemented for playtesting. [Applied lists, costs and curve](applied-starters.md) and [machine-readable release](applied-release.json) describe the active runtime starters.
 
-Latest creator decisions and interaction recommendations: [starter interaction review](interaction-review.md). Garrett's original effect is intentional and retained; new interaction slots and the suggested replacement Tactic are not yet approved or active.
+[Booster reserve](booster-reserve.json) preserves 22 removed designs and the original Fury Offering. Reserved designs remain in the catalog/engine for older saves and private development, but are not offered in the public starter builder. They are not cleared for booster release.
 
-- [Current exact 60-card lists and curve tables](curves-and-lists.md)
-- [Current candidate deck data](candidate-decks.json)
-- [Saved booster designs and balance status](booster-reserve.json)
-- [Legendary prices and release gates](legendary-review.json)
-- [Initial audit, retained as history](review.md)
+Earlier reviews, candidate lists and legendary recommendations below are historical design decisions, superseded by the applied release where they differ. The historical audit generator refuses to overwrite those reviews after a runtime revision. Original input snapshots are saved as baseline-catalog.json and baseline-print-data.json.
 
-Run `node docs/design/balance-2026-11-06/audit.mjs` from the repository root to regenerate the analysis from the current source. It verifies both 60-card lists, retained mechanic representatives and legendary destinations. It writes only design files here, never the runtime catalog, effect packs or browser saves. Generated file hashes and source commit identify the inputs. Recommendations remain provisional until approved and playtested.
+- [Interaction review](interaction-review.md)
+- [Legendary review](legendary-revision.md)
+- [Historical proposal](candidate-decks.json)
+- [Initial review](review.md)

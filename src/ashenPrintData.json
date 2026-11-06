@@ -45,10 +45,10 @@
   "ashen-noble-watchtower-scout": {
     "resourceCost": {
       "untuned": 1,
-      "oath": 1
+      "oath": 2
     },
     "frameFaction": "Noble",
-    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+    "costSource": "Creator-approved starter balance pass, 2026-11-06"
   },
   "ashen-noble-court-strategist": {
     "resourceCost": {
@@ -132,18 +132,18 @@
   "ashen-noble-garrett-of-ashenfield": {
     "resourceCost": {
       "untuned": 4,
-      "oath": 2
+      "oath": 3
     },
     "frameFaction": "Noble",
-    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+    "costSource": "Creator-approved starter balance pass, 2026-11-06"
   },
   "ashen-noble-seraphine-royal-advisor": {
     "resourceCost": {
       "untuned": 3,
-      "oath": 2
+      "oath": 3
     },
     "frameFaction": "Noble",
-    "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+    "costSource": "Creator-approved starter balance pass, 2026-11-06"
   },
   "ashen-noble-royal-crusher": {
     "resourceCost": {
@@ -332,10 +332,11 @@
   },
   "ashen-brute-bloodpit-initiate": {
     "resourceCost": {
+      "untuned": 1,
       "fury": 1
     },
     "frameFaction": "Brute",
-    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+    "costSource": "Creator-approved starter balance pass, 2026-11-06"
   },
   "ashen-brute-raging-mauler": {
     "resourceCost": {
@@ -392,10 +393,11 @@
   },
   "ashen-brute-warhowl-instigator": {
     "resourceCost": {
+      "untuned": 1,
       "fury": 2
     },
     "frameFaction": "Brute",
-    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+    "costSource": "Creator-approved starter balance pass, 2026-11-06"
   },
   "ashen-brute-warband-overseer": {
     "resourceCost": {
@@ -486,11 +488,11 @@
   },
   "ashen-brute-korgath-lord-of-ruin": {
     "resourceCost": {
-      "untuned": 3,
+      "untuned": 4,
       "fury": 3
     },
     "frameFaction": "Brute",
-    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+    "costSource": "Creator-approved starter balance pass, 2026-11-06"
   },
   "ashen-brute-skarn-the-unchained": {
     "resourceCost": {
@@ -588,11 +590,11 @@
   },
   "ashen-brute-korgath-s-call": {
     "resourceCost": {
-      "untuned": 3,
+      "untuned": 4,
       "fury": 3
     },
     "frameFaction": "Brute",
-    "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+    "costSource": "Creator-approved starter balance pass, 2026-11-06"
   },
   "ashen-brute-ashen-strike": {
     "resourceCost": {
@@ -668,5 +670,13 @@
     "resourceCost": {},
     "frameFaction": "Brute",
     "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+  },
+  "ashen-brute-bring-down-the-mighty": {
+    "resourceCost": {
+      "untuned": 1,
+      "fury": 2
+    },
+    "frameFaction": "Brute",
+    "costSource": "Creator-approved starter balance pass, 2026-11-06"
   }
 }

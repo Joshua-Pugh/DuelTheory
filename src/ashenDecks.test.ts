@@ -6,7 +6,7 @@ describe('Ashen Throne prototype deck rules',()=>{
    const deck=starterDeck(faction);
    expect(deckCount(deck)).toBe(60);
    expect(inspectAshenDeck(deck).valid).toBe(true);
-   const expected=faction==='Brute' ? {Unit:24,Rune:3,Relic:5,Strategy:4,Tactic:6,'Ley Font':18} : {Unit:20,Rune:4,Relic:4,Strategy:5,Tactic:5,'Ley Font':22};
+   const expected=faction==='Brute' ? {"Unit":25,"Rune":2,"Relic":3,"Strategy":3,"Tactic":7,"Ley Font":20} : {"Unit":24,"Rune":3,"Relic":2,"Strategy":4,"Tactic":5,"Ley Font":22};
    const actual:Record<string,number>={};
    for(const entry of deck.entries){
     const card=ashenCardMap.get(entry.cardId);

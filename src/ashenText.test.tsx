@@ -12,8 +12,8 @@ describe('source card text',()=>{
   expect(catalog.cards.find(c=>c.name==='Ashenfield War Ram')!.effectText).toContain('each Noble you control');
   for(const c of catalog.cards)expect(c.effectText).not.toMatch(/under your,|each Noble your control|to ant target|damage is delt|Kordath/);
  });
- it('provides rules for all 91 entries without costs or footer text in the type line',()=>{
-  expect(catalog.cards).toHaveLength(91);
+ it('provides rules for all 92 entries without costs or footer text in the type line',()=>{
+  expect(catalog.cards).toHaveLength(92);
   for(const c of catalog.cards){expect(c.effectText.trim().length).toBeGreaterThan(0);expect(c.effectStatus).toBe('source-transcribed');expect(c.subtype).not.toMatch(/Ashen Throne|A\d+\s*\/|^\d/);}
  });
  it('recovers the missing triggered effect and resource icons from Word text boxes',()=>{

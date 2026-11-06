@@ -12,7 +12,7 @@ function finish(start:Battlefield){let s=start;for(let n=0;n<100;n++){
  if(p){const step=p.flow.steps[0];let ids:string[]=[];
   if(step.op==='plan')ids=(p.flow.planIds||[]).map(id=>'t:'+id);
   else if(step.op==='mode')ids=step.options.slice(0,step.min).map(o=>o.id);
-  else if(step.op==='choose'||step.op==='select')ids=candidates(s,ashenAdapter,step.selection,p.flow.context).sort((a,b)=>Number(b.controller==='1')-Number(a.controller==='1')).slice(0,step.selection.min??step.selection.count).map(e=>e.id);
+  else if(step.op==='choose'||step.op==='select')ids=candidates(s,ashenAdapter,step.selection,p.flow.context).sort((a,b)=>Number(b.controller==='1')-Number(a.controller==='1')||Number(s.table.cards[b.id]?.cardId==='ashen-noble-shieldbearer-noble')-Number(s.table.cards[a.id]?.cardId==='ashen-noble-shieldbearer-noble')).slice(0,step.selection.min??step.selection.count).map(e=>e.id);
   s=resumeBruteDuel(s,ids);continue;
  }
  if(s.rules?.duel?.priority){s=passAshenPriority(s,Number(s.rules.duel.priority.holder) as 0|1);continue;}
@@ -34,7 +34,7 @@ describe('live AT practice situations',()=>{
   let s=play(createPractice(1),'shieldbearer-noble');expect(practiceComplete(1,s)).toBe(true);
   s=play(createPractice(2),'rune-of-clarity','clarity-refine');expect(practiceComplete(2,s)).toBe(true);
  });
- it('pays the actual Command discount and Fortifies both Nobles',()=>{
-  const s=play(createPractice(3),'garrett-of-ashenfield');expect(s.basins[0].oath).toBe(0);expect(s.basins[0].untuned).toBe(0);expect(practiceComplete(3,s)).toBe(true);
+ it('pays the actual Command discount and Fortifies the selected Noble',()=>{
+  const s=play(createPractice(3),'court-strategist');expect(s.basins[0].oath).toBe(0);expect(s.basins[0].untuned).toBe(0);expect(practiceComplete(3,s)).toBe(true);
  });
 });

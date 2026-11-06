@@ -4,6 +4,9 @@ export type AshenFaction='Brute'|'Noble';
 export type AshenDeck={id:string;name:string;faction:AshenFaction;commandStationId:string;entries:{cardId:string;count:number}[];updatedAt:string};
 export const ASHEN_STORAGE_KEY='dueltheory-ashen-command-decks-v1';
 export const ashenCardMap=new Map(catalog.cards.map(c=>[c.id,c]));
+export const ASHEN_CONTENT_REVISION=catalog.contentRevision;
+const starterIds=new Set(Object.values(catalog.decks).flatMap(d=>[d.stationId,...d.entries.map(e=>e.cardId)]));
+export const ashenStarterCards=catalog.cards.filter(c=>starterIds.has(c.id));
 export function starterDeck(faction:AshenFaction):AshenDeck{
  const source=catalog.decks[faction];
  const station=catalog.cards.find(c=>c.faction===faction&&c.type==='Command Station');
@@ -12,7 +15,7 @@ export function starterDeck(faction:AshenFaction):AshenDeck{
 export function deckCount(deck:AshenDeck){return deck.entries.reduce((sum,e)=>sum+e.count,0)}
 export function changeAshenQuantity(deck:AshenDeck,cardId:string,delta:number):AshenDeck{
  const card=ashenCardMap.get(cardId);
- if(!card||card.type==='Command Station'||card.faction!==deck.faction||!Number.isInteger(delta))return deck;
+ if(!card||card.type==='Command Station'||card.faction!==deck.faction||!Number.isInteger(delta)||(!starterIds.has(cardId)&&delta>0))return deck;
  const current=deck.entries.find(e=>e.cardId===cardId)?.count||0;
  const next=current+delta;
  if(next<0||next>60||deckCount(deck)+delta>60)return deck;
@@ -31,6 +34,7 @@ export function inspectAshenDeck(deck:AshenDeck){
  for(const entry of deck.entries){
   const card=ashenCardMap.get(entry.cardId);
   if(!card||card.type==='Command Station'||card.faction!==deck.faction)issues.push(`Invalid entry: ${entry.cardId}`);
+  if(card&&!starterIds.has(card.id))issues.push(`${card.name} is reserved for future boosters. Replace it to use the current starter pool.`);
   if(!Number.isInteger(entry.count)||entry.count<1)issues.push(`Invalid quantity: ${entry.cardId}`);
   if(seen.has(entry.cardId))issues.push(`Duplicate entry row: ${entry.cardId}`);
   seen.add(entry.cardId);

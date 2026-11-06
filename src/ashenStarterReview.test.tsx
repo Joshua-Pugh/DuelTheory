@@ -23,7 +23,7 @@ describe('AT starter review',()=>{
   for(const deck of ['Brute','Noble'] as const)for(const lesson of [...sharedLessons,...deckLessons[deck]]){
    expect(lesson.answers[lesson.correct]).toBeTruthy();expect(lesson.why.length).toBeGreaterThan(120);expect(lesson.tryIt).toBeTruthy();
   }
-  expect(deckLessons.Noble.map(x=>x.why).join(' ')).toContain('zero damage');
-  expect(deckLessons.Brute.map(x=>x.why).join(' ')).toContain('Call itself');
+  expect(deckLessons.Noble.map(x=>x.why).join(' ')).toContain('one chosen Noble');
+  expect(deckLessons.Brute.map(x=>x.why).join(' ')).toContain('Bring Down the Mighty');
  });
 });

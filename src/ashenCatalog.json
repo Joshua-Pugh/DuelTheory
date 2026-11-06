@@ -475,7 +475,7 @@
       "rarity": "Silver",
       "attack": null,
       "defense": null,
-      "effectText": "Exhaust and sacrifice 2 Brutes: create a 4A/4D Brute Berserker with Charge.",
+      "effectText": "Exhaust and sacrifice 2 Brutes: create a 4A/4D Brute Berserker with Charge.\nExhaust: Create a 1A/1D Frenzied Brute token.",
       "effectStatus": "source-transcribed",
       "artStatus": "placeholder",
       "sourceDeck": "Clan of the Broken Fist",
@@ -507,7 +507,7 @@
       "rarity": "Silver",
       "attack": null,
       "defense": null,
-      "effectText": "Sacrifice a Brute you control. Deal damage equal to its Attack to any target.\nThen, draw that many cards and send 2 cards at random from your hand to your Ossuary.",
+      "effectText": "Create two 1A/1D Frenzied Brute tokens. If you control no Units, create three instead.",
       "effectStatus": "source-transcribed",
       "artStatus": "placeholder",
       "sourceDeck": "Clan of the Broken Fist",
@@ -731,7 +731,7 @@
       "rarity": "Iron",
       "attack": 1,
       "defense": 1,
-      "effectText": "When Shieldbearer Noble enters the Frontline, Refine 1 (Draw 1 card, then place 1 card from your hand on the bottom of your deck.)",
+      "effectText": "Standfast\nWhen Shieldbearer Noble enters the Frontline, Refine 1 (Draw 1 card, then place 1 card from your hand on the bottom of your deck.)",
       "effectStatus": "source-transcribed",
       "artStatus": "placeholder",
       "sourceDeck": "The Crown’s Might",
@@ -779,7 +779,7 @@
       "rarity": "Iron",
       "attack": 2,
       "defense": 3,
-      "effectText": "Other Nobles you control gain +1A/+1D, for as long as Banner Guard remains on the Frontline.",
+      "effectText": "Standfast\nOther Nobles you control gain +1A/+1D, for as long as Banner Guard remains on the Frontline.",
       "effectStatus": "source-transcribed",
       "artStatus": "placeholder",
       "sourceDeck": "The Crown’s Might",
@@ -811,7 +811,7 @@
       "rarity": "Iron",
       "attack": 2,
       "defense": 2,
-      "effectText": "Ranged (Cannot be blocked by units without Ranged. Can block Soar Units.)\nWhenever you Plan, Crown Archer deals 1 damage to target Command Station.",
+      "effectText": "Standfast\nRanged (Cannot be blocked by units without Ranged. Can block Soar Units.)\nWhenever you Plan, Crown Archer deals 1 damage to target Command Station.",
       "effectStatus": "source-transcribed",
       "artStatus": "placeholder",
       "sourceDeck": "The Crown’s Might",
@@ -1051,7 +1051,7 @@
       "rarity": "Iron",
       "attack": null,
       "defense": null,
-      "effectText": "Pay {Oath} : Refine 2.\nWhenever you draw a card, deal 1 damage to target Command Station.",
+      "effectText": "Exhaust and pay 1 Oath: Refine 2.\nWhenever you draw a card, deal 1 damage to target Command Station.",
       "effectStatus": "source-transcribed",
       "artStatus": "placeholder",
       "sourceDeck": "The Crown’s Might",
@@ -1457,6 +1457,22 @@
       "sourceDeck": "The Crown’s Might",
       "flavorText": "",
       "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+    },
+    {
+      "id": "ashen-brute-bring-down-the-mighty",
+      "name": "Bring Down the Mighty",
+      "faction": "Brute",
+      "type": "Tactic",
+      "subtype": "Tactic",
+      "rarity": "Iron",
+      "attack": null,
+      "defense": null,
+      "effectText": "Additional cost: Sacrifice a Brute Unit you control.\nDestroy target enemy Unit with Defense 4 or greater.",
+      "effectStatus": "source-transcribed",
+      "artStatus": "placeholder",
+      "sourceDeck": "Clan of the Broken Fist",
+      "flavorText": "",
+      "effectSource": "Creator-approved starter balance pass, 2026-11-06"
     }
   ],
   "decks": {
@@ -1465,27 +1481,23 @@
       "entries": [
         {
           "cardId": "ashen-brute-frenzied-grunt",
-          "count": 1
+          "count": 2
         },
         {
           "cardId": "ashen-brute-bloodfang-raider",
-          "count": 1
+          "count": 2
         },
         {
           "cardId": "ashen-brute-bloodpit-initiate",
-          "count": 1
+          "count": 2
         },
         {
           "cardId": "ashen-brute-raging-mauler",
-          "count": 1
+          "count": 2
         },
         {
           "cardId": "ashen-brute-rubble-flinger",
-          "count": 1
-        },
-        {
-          "cardId": "ashen-brute-savage-warcaller",
-          "count": 1
+          "count": 2
         },
         {
           "cardId": "ashen-brute-feral-axebreaker",
@@ -1501,11 +1513,7 @@
         },
         {
           "cardId": "ashen-brute-warhowl-instigator",
-          "count": 1
-        },
-        {
-          "cardId": "ashen-brute-warband-overseer",
-          "count": 1
+          "count": 2
         },
         {
           "cardId": "ashen-brute-bonespike-hurler",
@@ -1517,14 +1525,6 @@
         },
         {
           "cardId": "ashen-brute-pit-sired-warmonger",
-          "count": 1
-        },
-        {
-          "cardId": "ashen-brute-warchanter-savage",
-          "count": 1
-        },
-        {
-          "cardId": "ashen-brute-stonehide-juggernaut",
           "count": 1
         },
         {
@@ -1548,10 +1548,6 @@
           "count": 1
         },
         {
-          "cardId": "ashen-brute-korgath-lord-of-ruin",
-          "count": 1
-        },
-        {
           "cardId": "ashen-brute-skarn-the-unchained",
           "count": 1
         },
@@ -1560,15 +1556,7 @@
           "count": 1
         },
         {
-          "cardId": "ashen-brute-flesh-slinger-s-chant",
-          "count": 1
-        },
-        {
           "cardId": "ashen-brute-pit-of-the-frenzied",
-          "count": 1
-        },
-        {
-          "cardId": "ashen-brute-flamebelcher-rig",
           "count": 1
         },
         {
@@ -1596,16 +1584,8 @@
           "count": 1
         },
         {
-          "cardId": "ashen-brute-korgath-s-call",
-          "count": 1
-        },
-        {
-          "cardId": "ashen-brute-bloodrush-gambit",
-          "count": 1
-        },
-        {
           "cardId": "ashen-brute-rites-of-ragefire",
-          "count": 1
+          "count": 2
         },
         {
           "cardId": "ashen-brute-skullsplitter-s-roar",
@@ -1616,12 +1596,8 @@
           "count": 1
         },
         {
-          "cardId": "ashen-brute-ragekindle",
-          "count": 1
-        },
-        {
           "cardId": "ashen-brute-fury-font",
-          "count": 14
+          "count": 16
         },
         {
           "cardId": "ashen-brute-fury-pit",
@@ -1644,11 +1620,11 @@
           "count": 1
         },
         {
-          "cardId": "ashen-brute-warband-of-bloodfire",
-          "count": 1
+          "cardId": "ashen-brute-ashen-strike",
+          "count": 2
         },
         {
-          "cardId": "ashen-brute-ashen-strike",
+          "cardId": "ashen-brute-bring-down-the-mighty",
           "count": 1
         }
       ],
@@ -1659,15 +1635,15 @@
       "entries": [
         {
           "cardId": "ashen-noble-shieldbearer-noble",
-          "count": 1
+          "count": 3
         },
         {
           "cardId": "ashen-noble-spearman-of-the-crown",
-          "count": 1
+          "count": 2
         },
         {
           "cardId": "ashen-noble-court-scribe",
-          "count": 1
+          "count": 3
         },
         {
           "cardId": "ashen-noble-banner-guard",
@@ -1675,22 +1651,18 @@
         },
         {
           "cardId": "ashen-noble-junior-tactician",
-          "count": 1
+          "count": 2
         },
         {
           "cardId": "ashen-noble-crown-archer",
-          "count": 1
+          "count": 2
         },
         {
           "cardId": "ashen-noble-watchtower-scout",
-          "count": 1
+          "count": 2
         },
         {
           "cardId": "ashen-noble-court-strategist",
-          "count": 1
-        },
-        {
-          "cardId": "ashen-noble-royal-guard",
           "count": 1
         },
         {
@@ -1699,15 +1671,7 @@
         },
         {
           "cardId": "ashen-noble-griffin-knight-of-ashenfield",
-          "count": 1
-        },
-        {
-          "cardId": "ashen-noble-archivist-of-the-crown",
-          "count": 1
-        },
-        {
-          "cardId": "ashen-noble-high-strategist",
-          "count": 1
+          "count": 2
         },
         {
           "cardId": "ashen-noble-griffin-lancer",
@@ -1719,14 +1683,6 @@
         },
         {
           "cardId": "ashen-noble-royal-longbowman",
-          "count": 1
-        },
-        {
-          "cardId": "ashen-noble-garrett-of-ashenfield",
-          "count": 1
-        },
-        {
-          "cardId": "ashen-noble-seraphine-royal-advisor",
           "count": 1
         },
         {
@@ -1746,10 +1702,6 @@
           "count": 1
         },
         {
-          "cardId": "ashen-noble-rune-of-the-crown",
-          "count": 1
-        },
-        {
           "cardId": "ashen-noble-ring-of-the-ley",
           "count": 1
         },
@@ -1758,27 +1710,15 @@
           "count": 1
         },
         {
-          "cardId": "ashen-noble-crown-of-dominion",
-          "count": 1
-        },
-        {
           "cardId": "ashen-noble-royal-decree",
           "count": 1
         },
         {
           "cardId": "ashen-noble-purge-the-unworthy",
-          "count": 1
+          "count": 2
         },
         {
           "cardId": "ashen-noble-judgment-of-the-crown",
-          "count": 1
-        },
-        {
-          "cardId": "ashen-noble-order-s-end",
-          "count": 1
-        },
-        {
-          "cardId": "ashen-noble-mandate-of-dominion",
           "count": 1
         },
         {
@@ -1795,11 +1735,7 @@
         },
         {
           "cardId": "ashen-noble-enforce-the-law",
-          "count": 1
-        },
-        {
-          "cardId": "ashen-noble-the-king-s-will",
-          "count": 1
+          "count": 2
         },
         {
           "cardId": "ashen-noble-oath-font",
@@ -1820,13 +1756,10 @@
         {
           "cardId": "ashen-noble-ashenfield-war-ram",
           "count": 1
-        },
-        {
-          "cardId": "ashen-noble-ashenfield-lance",
-          "count": 1
         }
       ],
       "stationId": "ashen-noble-the-crown-s-bastion"
     }
-  }
+  },
+  "contentRevision": "starter-balance-2026-11-06"
 }

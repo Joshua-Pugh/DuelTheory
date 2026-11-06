@@ -1,18 +1,18 @@
 import { useMemo, useState } from "react";
-import catalog from "../ashenCatalog.json";
+import {ashenStarterCards as cardsInPool} from "../ashenDecks";
 import AshenCardFrame from "../AshenCardFrame";
 export default function MobileCards() {
   const [query, setQuery] = useState(""),
     [page, setPage] = useState(0),
-    [id, setId] = useState(catalog.cards[0].id);
+    [id, setId] = useState(cardsInPool[0].id);
   const cards = useMemo(
     () =>
-      catalog.cards.filter((c) =>
+      cardsInPool.filter((c) =>
         c.name.toLowerCase().includes(query.toLowerCase()),
       ),
     [query],
   );
-  const selected = catalog.cards.find((c) => c.id === id)!;
+  const selected = cardsInPool.find((c) => c.id === id)!;
   return (
     <section className="mobile-card">
       <h1>Ashen Throne cards</h1>

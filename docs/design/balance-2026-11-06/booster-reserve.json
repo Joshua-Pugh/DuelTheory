@@ -1,5 +1,5 @@
 {
-  "status": "proposed-reserve-not-approved-or-removed-from-live",
+  "status": "approved-reserve-removed-from-current-starters-not-release-ready",
   "revision": "engine-preserving-legendary-review-v2",
   "date": "2026-11-06",
   "baseline": {
@@ -16,7 +16,7 @@
   "cards": [
     {
       "faction": "Noble",
-      "reason": "Proposed starter cut; retain for a future booster review, not a declaration that the card is balanced.",
+      "reason": "Approved starter cut; retain for a future booster review, not a declaration that the card is balanced.",
       "balanceReview": {
         "status": "not-yet-cost-reviewed",
         "releaseReady": false
@@ -43,11 +43,18 @@
         },
         "frameFaction": "Noble",
         "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+      },
+      "currentPrinted": {
+        "resourceCost": {
+          "oath": 1
+        },
+        "frameFaction": "Noble",
+        "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
       }
     },
     {
       "faction": "Noble",
-      "reason": "Proposed starter cut; retain for a future booster review, not a declaration that the card is balanced.",
+      "reason": "Approved starter cut; retain for a future booster review, not a declaration that the card is balanced.",
       "balanceReview": {
         "destination": "booster-reserve",
         "recommendedCost": {
@@ -87,11 +94,19 @@
         },
         "frameFaction": "Noble",
         "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+      },
+      "currentPrinted": {
+        "resourceCost": {
+          "untuned": 4,
+          "oath": 3
+        },
+        "frameFaction": "Noble",
+        "costSource": "Creator-approved starter balance pass, 2026-11-06"
       }
     },
     {
       "faction": "Noble",
-      "reason": "Proposed starter cut; retain for a future booster review, not a declaration that the card is balanced.",
+      "reason": "Approved starter cut; retain for a future booster review, not a declaration that the card is balanced.",
       "balanceReview": {
         "status": "not-yet-cost-reviewed",
         "releaseReady": false
@@ -119,11 +134,19 @@
         },
         "frameFaction": "Noble",
         "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+      },
+      "currentPrinted": {
+        "resourceCost": {
+          "untuned": 2,
+          "oath": 2
+        },
+        "frameFaction": "Noble",
+        "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
       }
     },
     {
       "faction": "Noble",
-      "reason": "Proposed starter cut; retain for a future booster review, not a declaration that the card is balanced.",
+      "reason": "Approved starter cut; retain for a future booster review, not a declaration that the card is balanced.",
       "balanceReview": {
         "destination": "booster-reserve",
         "recommendedCost": {
@@ -162,11 +185,19 @@
         },
         "frameFaction": "Noble",
         "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+      },
+      "currentPrinted": {
+        "resourceCost": {
+          "untuned": 3,
+          "oath": 3
+        },
+        "frameFaction": "Noble",
+        "costSource": "Creator-approved starter balance pass, 2026-11-06"
       }
     },
     {
       "faction": "Noble",
-      "reason": "Proposed starter cut; retain for a future booster review, not a declaration that the card is balanced.",
+      "reason": "Approved starter cut; retain for a future booster review, not a declaration that the card is balanced.",
       "balanceReview": {
         "status": "not-yet-cost-reviewed",
         "releaseReady": false
@@ -194,11 +225,19 @@
         },
         "frameFaction": "Noble",
         "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+      },
+      "currentPrinted": {
+        "resourceCost": {
+          "untuned": 2,
+          "oath": 3
+        },
+        "frameFaction": "Noble",
+        "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
       }
     },
     {
       "faction": "Noble",
-      "reason": "Proposed starter cut; retain for a future booster review, not a declaration that the card is balanced.",
+      "reason": "Approved starter cut; retain for a future booster review, not a declaration that the card is balanced.",
       "balanceReview": {
         "status": "not-yet-cost-reviewed",
         "releaseReady": false
@@ -226,11 +265,19 @@
         },
         "frameFaction": "Noble",
         "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+      },
+      "currentPrinted": {
+        "resourceCost": {
+          "untuned": 2,
+          "oath": 3
+        },
+        "frameFaction": "Noble",
+        "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
       }
     },
     {
       "faction": "Noble",
-      "reason": "Proposed starter cut; retain for a future booster review, not a declaration that the card is balanced.",
+      "reason": "Approved starter cut; retain for a future booster review, not a declaration that the card is balanced.",
       "balanceReview": {
         "status": "not-yet-cost-reviewed",
         "releaseReady": false
@@ -258,11 +305,19 @@
         },
         "frameFaction": "Noble",
         "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+      },
+      "currentPrinted": {
+        "resourceCost": {
+          "untuned": 2,
+          "oath": 4
+        },
+        "frameFaction": "Noble",
+        "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
       }
     },
     {
       "faction": "Noble",
-      "reason": "Proposed starter cut; retain for a future booster review, not a declaration that the card is balanced.",
+      "reason": "Approved starter cut; retain for a future booster review, not a declaration that the card is balanced.",
       "balanceReview": {
         "status": "not-yet-cost-reviewed",
         "releaseReady": false
@@ -290,11 +345,19 @@
         },
         "frameFaction": "Noble",
         "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+      },
+      "currentPrinted": {
+        "resourceCost": {
+          "untuned": 2,
+          "oath": 3
+        },
+        "frameFaction": "Noble",
+        "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
       }
     },
     {
       "faction": "Noble",
-      "reason": "Proposed starter cut; retain for a future booster review, not a declaration that the card is balanced.",
+      "reason": "Approved starter cut; retain for a future booster review, not a declaration that the card is balanced.",
       "balanceReview": {
         "status": "not-yet-cost-reviewed",
         "releaseReady": false
@@ -322,11 +385,19 @@
         },
         "frameFaction": "Noble",
         "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+      },
+      "currentPrinted": {
+        "resourceCost": {
+          "untuned": 2,
+          "oath": 2
+        },
+        "frameFaction": "Noble",
+        "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
       }
     },
     {
       "faction": "Brute",
-      "reason": "Proposed starter cut; retain for a future booster review, not a declaration that the card is balanced.",
+      "reason": "Approved starter cut; retain for a future booster review, not a declaration that the card is balanced.",
       "balanceReview": {
         "status": "not-yet-cost-reviewed",
         "releaseReady": false
@@ -354,11 +425,19 @@
         },
         "frameFaction": "Brute",
         "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+      },
+      "currentPrinted": {
+        "resourceCost": {
+          "untuned": 2,
+          "fury": 1
+        },
+        "frameFaction": "Brute",
+        "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
       }
     },
     {
       "faction": "Brute",
-      "reason": "Proposed starter cut; retain for a future booster review, not a declaration that the card is balanced.",
+      "reason": "Approved starter cut; retain for a future booster review, not a declaration that the card is balanced.",
       "balanceReview": {
         "status": "not-yet-cost-reviewed",
         "releaseReady": false
@@ -386,11 +465,19 @@
         },
         "frameFaction": "Brute",
         "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+      },
+      "currentPrinted": {
+        "resourceCost": {
+          "untuned": 1,
+          "fury": 3
+        },
+        "frameFaction": "Brute",
+        "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
       }
     },
     {
       "faction": "Brute",
-      "reason": "Proposed starter cut; retain for a future booster review, not a declaration that the card is balanced.",
+      "reason": "Approved starter cut; retain for a future booster review, not a declaration that the card is balanced.",
       "balanceReview": {
         "status": "not-yet-cost-reviewed",
         "releaseReady": false
@@ -418,11 +505,19 @@
         },
         "frameFaction": "Brute",
         "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+      },
+      "currentPrinted": {
+        "resourceCost": {
+          "untuned": 4,
+          "fury": 3
+        },
+        "frameFaction": "Brute",
+        "costSource": "Creator-approved starter balance pass, 2026-11-06"
       }
     },
     {
       "faction": "Brute",
-      "reason": "Proposed starter cut; retain for a future booster review, not a declaration that the card is balanced.",
+      "reason": "Approved starter cut; retain for a future booster review, not a declaration that the card is balanced.",
       "balanceReview": {
         "status": "not-yet-cost-reviewed",
         "releaseReady": false
@@ -450,11 +545,19 @@
         },
         "frameFaction": "Brute",
         "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+      },
+      "currentPrinted": {
+        "resourceCost": {
+          "untuned": 2,
+          "fury": 3
+        },
+        "frameFaction": "Brute",
+        "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
       }
     },
     {
       "faction": "Brute",
-      "reason": "Proposed starter cut; retain for a future booster review, not a declaration that the card is balanced.",
+      "reason": "Approved starter cut; retain for a future booster review, not a declaration that the card is balanced.",
       "balanceReview": {
         "status": "not-yet-cost-reviewed",
         "releaseReady": false
@@ -481,11 +584,18 @@
         },
         "frameFaction": "Brute",
         "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+      },
+      "currentPrinted": {
+        "resourceCost": {
+          "fury": 2
+        },
+        "frameFaction": "Brute",
+        "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
       }
     },
     {
       "faction": "Brute",
-      "reason": "Proposed starter cut; retain for a future booster review, not a declaration that the card is balanced.",
+      "reason": "Approved starter cut; retain for a future booster review, not a declaration that the card is balanced.",
       "balanceReview": {
         "status": "not-yet-cost-reviewed",
         "releaseReady": false
@@ -513,11 +623,19 @@
         },
         "frameFaction": "Brute",
         "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+      },
+      "currentPrinted": {
+        "resourceCost": {
+          "untuned": 1,
+          "fury": 1
+        },
+        "frameFaction": "Brute",
+        "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
       }
     },
     {
       "faction": "Brute",
-      "reason": "Proposed starter cut; retain for a future booster review, not a declaration that the card is balanced.",
+      "reason": "Approved starter cut; retain for a future booster review, not a declaration that the card is balanced.",
       "balanceReview": {
         "status": "not-yet-cost-reviewed",
         "releaseReady": false
@@ -545,11 +663,19 @@
         "frameFaction": "Neutral",
         "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx",
         "outfitCost": 1
+      },
+      "currentPrinted": {
+        "resourceCost": {
+          "untuned": 2
+        },
+        "frameFaction": "Neutral",
+        "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx",
+        "outfitCost": 1
       }
     },
     {
       "faction": "Brute",
-      "reason": "Proposed starter cut; retain for a future booster review, not a declaration that the card is balanced.",
+      "reason": "Approved starter cut; retain for a future booster review, not a declaration that the card is balanced.",
       "balanceReview": {
         "destination": "booster-reserve",
         "recommendedCost": {
@@ -587,6 +713,214 @@
         },
         "frameFaction": "Brute",
         "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+      },
+      "currentPrinted": {
+        "resourceCost": {
+          "untuned": 4,
+          "fury": 3
+        },
+        "frameFaction": "Brute",
+        "costSource": "Creator-approved starter balance pass, 2026-11-06"
+      }
+    },
+    {
+      "faction": "Brute",
+      "reason": "Starter slot for additional interaction; original design preserved for future booster review.",
+      "balanceReview": {
+        "status": "needs-playtesting",
+        "releaseReady": false
+      },
+      "card": {
+        "id": "ashen-brute-savage-warcaller",
+        "name": "Savage Warcaller",
+        "faction": "Brute",
+        "type": "Unit",
+        "subtype": "Unit — Brute Shaman",
+        "rarity": "Silver",
+        "attack": 2,
+        "defense": 3,
+        "effectText": "Soar\nWhen a Brute you control dies, Savage Warcaller gains +2A/+0D until end of turn and you draw 1 card.",
+        "effectStatus": "source-transcribed",
+        "artStatus": "placeholder",
+        "sourceDeck": "Clan of the Broken Fist",
+        "flavorText": "",
+        "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+      },
+      "printed": {
+        "resourceCost": {
+          "untuned": 1,
+          "fury": 2
+        },
+        "frameFaction": "Brute",
+        "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+      },
+      "currentPrinted": {
+        "resourceCost": {
+          "untuned": 1,
+          "fury": 2
+        },
+        "frameFaction": "Brute",
+        "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+      }
+    },
+    {
+      "faction": "Brute",
+      "reason": "Starter slot for additional interaction; original design preserved for future booster review.",
+      "balanceReview": {
+        "status": "needs-playtesting",
+        "releaseReady": false
+      },
+      "card": {
+        "id": "ashen-brute-warband-overseer",
+        "name": "Warband Overseer",
+        "faction": "Brute",
+        "type": "Unit",
+        "subtype": "Unit — Brute Captain",
+        "rarity": "Bronze",
+        "attack": 2,
+        "defense": 2,
+        "effectText": "Charge\nOther Brutes you control get +1A/+1D and gain Charge.",
+        "effectStatus": "source-transcribed",
+        "artStatus": "placeholder",
+        "sourceDeck": "Clan of the Broken Fist",
+        "flavorText": "",
+        "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+      },
+      "printed": {
+        "resourceCost": {
+          "untuned": 1,
+          "fury": 2
+        },
+        "frameFaction": "Brute",
+        "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+      },
+      "currentPrinted": {
+        "resourceCost": {
+          "untuned": 1,
+          "fury": 2
+        },
+        "frameFaction": "Brute",
+        "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+      }
+    },
+    {
+      "faction": "Brute",
+      "reason": "Starter slot for additional interaction; original design preserved for future booster review.",
+      "balanceReview": {
+        "status": "needs-playtesting",
+        "releaseReady": false
+      },
+      "card": {
+        "id": "ashen-brute-bloodrush-gambit",
+        "name": "Bloodrush Gambit",
+        "faction": "Brute",
+        "type": "Tactic",
+        "subtype": "Tactic",
+        "rarity": "Iron",
+        "attack": null,
+        "defense": null,
+        "effectText": "Send a card from your hand to your Ossuary, then draw 2 cards.\nIf the card sent this way was a Brute Unit, add {Fury} to your Ley Basin.",
+        "effectStatus": "source-transcribed",
+        "artStatus": "placeholder",
+        "sourceDeck": "Clan of the Broken Fist",
+        "flavorText": "“Think? No. Feel. Then kill.”",
+        "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+      },
+      "printed": {
+        "resourceCost": {
+          "untuned": 1,
+          "fury": 1
+        },
+        "frameFaction": "Brute",
+        "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+      },
+      "currentPrinted": {
+        "resourceCost": {
+          "untuned": 1,
+          "fury": 1
+        },
+        "frameFaction": "Brute",
+        "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+      }
+    },
+    {
+      "faction": "Noble",
+      "reason": "Starter slot for additional interaction; original design preserved for future booster review.",
+      "balanceReview": {
+        "status": "needs-playtesting",
+        "releaseReady": false
+      },
+      "card": {
+        "id": "ashen-noble-archivist-of-the-crown",
+        "name": "Archivist of the Crown",
+        "faction": "Noble",
+        "type": "Unit",
+        "subtype": "Unit — Noble Advisor",
+        "rarity": "Bronze",
+        "attack": 2,
+        "defense": 5,
+        "effectText": "Whenever you place a card on the bottom of your deck, add {Untuned} to your Ley Basin.",
+        "effectStatus": "source-transcribed",
+        "artStatus": "placeholder",
+        "sourceDeck": "The Crown’s Might",
+        "flavorText": "",
+        "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+      },
+      "printed": {
+        "resourceCost": {
+          "untuned": 2,
+          "oath": 2
+        },
+        "frameFaction": "Noble",
+        "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+      },
+      "currentPrinted": {
+        "resourceCost": {
+          "untuned": 2,
+          "oath": 2
+        },
+        "frameFaction": "Noble",
+        "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+      }
+    },
+    {
+      "faction": "Noble",
+      "reason": "Starter slot for additional interaction; original design preserved for future booster review.",
+      "balanceReview": {
+        "status": "needs-playtesting",
+        "releaseReady": false
+      },
+      "card": {
+        "id": "ashen-noble-ashenfield-lance",
+        "name": "Ashenfield Lance",
+        "faction": "Noble",
+        "type": "Relic",
+        "subtype": "Relic — Weapon",
+        "rarity": "Silver",
+        "attack": null,
+        "defense": null,
+        "effectText": "Outfit ( {Untuned} ): Attach to a unit you control.\nOutfitted unit gets +2A/+0D.\nWhen outfitted unit attacks, it gains Siege until the end of the turn.",
+        "effectStatus": "source-transcribed",
+        "artStatus": "placeholder",
+        "sourceDeck": "The Crown’s Might",
+        "flavorText": "",
+        "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+      },
+      "printed": {
+        "resourceCost": {
+          "untuned": 2
+        },
+        "frameFaction": "Neutral",
+        "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx",
+        "outfitCost": 1
+      },
+      "currentPrinted": {
+        "resourceCost": {
+          "untuned": 2
+        },
+        "frameFaction": "Neutral",
+        "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx",
+        "outfitCost": 1
       }
     }
   ],
@@ -630,5 +964,6 @@
         "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
       }
     }
-  ]
+  ],
+  "appliedRevision": "starter-balance-2026-11-06"
 }

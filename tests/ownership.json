@@ -22,6 +22,7 @@
     "src/games/ashen/ossuary.test.ts",
     "src/games/ashen/phaseShortcuts.test.ts",
     "src/games/ashen/reference.test.ts",
+    "src/games/ashen/starterBalance.test.ts",
     "src/games/ashen/statSources.test.tsx",
     "src/matches/ashenClarity.test.ts"
   ],

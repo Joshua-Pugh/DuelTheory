@@ -29,7 +29,7 @@ describe('printed AT presentation',()=>{
  it('carries editable costs and Outfit through Studio decks and saved tabletop data',()=>{
   const p=newAshenCreatorProject();expect(validateProject(p)).toEqual([]);
   const c=p.cards.find(c=>c.name==='Ashenfield Lance')!;c.resourceCost={untuned:4};c.outfitCost=2;
-  const inputs=projectDeck(p,1);const data=inputs.find(c=>c.name==='Ashenfield Lance')!;
+  p.decks![1].entries[c.cardId]=1;const inputs=projectDeck(p,1);const data=inputs.find(c=>c.name==='Ashenfield Lance')!;
   expect(data.presentation).toMatchObject({resourceCost:{untuned:4},outfitCost:2});
   expect(cardPresentation(JSON.parse(JSON.stringify({...c,outfitCost:null}))).outfitCost).toBeUndefined();
   const state=createTabletop(p.definition,[projectDeck(p,0),inputs]);

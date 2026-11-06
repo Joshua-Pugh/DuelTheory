@@ -14,12 +14,12 @@ const trigger=(id:string,event:string,steps:EffectStep[],zones=['unit'],subject:
 const mode=(id:string,label:string,steps:EffectStep[])=>({id,label,steps});
 const choice=(options:{id:string;label:string;steps:EffectStep[];when?:{kind:'flag';flag:string}}[],max=1,allIf?:string,min=1):EffectStep=>({op:'mode',options,max,min,...(allIf?{allIf:flag(allIf)}:{})});
 const rules:Record<string,AshenEffectDefinition>={
- 'shieldbearer-noble':{coverage:'implemented',onPlay:p('shieldbearer-entry','Refine 1',[refine()])},
+ 'shieldbearer-noble':{coverage:'implemented',keywords:['Standfast'],onPlay:p('shieldbearer-entry','Refine 1',[refine()])},
  'spearman-of-the-crown':{coverage:'implemented',onStart:p('spearman-start','Plan 1',[plan()]),triggers:[trigger('spearman-fortify','planned',[fortify(1,'source')])]},
  'court-scribe':{coverage:'implemented',onPlay:p('scribe-entry','Plan 1',[plan()])},
- 'banner-guard':{coverage:'implemented'},
+ 'banner-guard':{coverage:'implemented',keywords:['Standfast']},
  'junior-tactician':{coverage:'implemented',onPlay:p('junior-entry','Plan or Refine',[{op:'if',condition:{kind:'count',filter:{zones:['unit'],tags:['Noble','Advisor'],controller:'self'},atLeast:1},then:[refine()],otherwise:[plan()]}]),activated:[p('junior-promise','Exhaust: prepare Fortify on your next Plan',[{op:'signal',name:'next-plan-fortify'}],{cost:{exhaust:true}})]},
- 'crown-archer':{coverage:'implemented',keywords:['Ranged'],triggers:[trigger('archer-plan','planned',stationPing(1))]},
+ 'crown-archer':{coverage:'implemented',keywords:['Ranged','Standfast'],triggers:[trigger('archer-plan','planned',stationPing(1))]},
  'watchtower-scout':{coverage:'implemented',keywords:['Ranged'],onPlay:p('scout-entry','Plan 1',[plan()]),triggers:[trigger('scout-draw','fortified',[{op:'draw',count:1}],['unit'],nobles)]},
  'court-strategist':{coverage:'implemented',keywords:['Command'],onPlay:p('strategist-entry','Fortify a Noble',[select({...nobles,controller:'any'},'Choose a Noble to Fortify'),fortify()]),activated:[p('strategist-plan','Exhaust + Oath: Plan 1, then draw 1',[plan(),{op:'draw',count:1}],{cost:{exhaust:true,resources:{oath:1}}})]},
  'royal-guard':{coverage:'implemented',onStart:p('guard-start','Refine 1',[refine()]),triggers:[trigger('guard-refine','refined',[{op:'modify',targets:'source',stats:{attack:1},duration:'turn'}])]},
@@ -34,7 +34,7 @@ const rules:Record<string,AshenEffectDefinition>={
  'seraphine-royal-advisor':{coverage:'implemented',keywords:['Command'],onStart:p('seraphine-start','Seraphine: optional free Noble',[{op:'if',condition:flag('last-plan-refine'),then:[{op:'choose',selection:{filter:{zones:['hand'],types:['Unit'],tags:['Noble'],controller:'self',stats:{cost:{max:5}}},count:1,optional:true,label:'Seraphine: deploy a Noble with cost 5 or less for free'},destination:'free-play',event:'free-deploy'}]}])},
  'royal-crusher':{coverage:'implemented',keywords:['Siege','Pierce'],onPlay:p('crusher-entry','Fortify up to three Nobles twice',[select(nobles,'Choose up to three Nobles',3,0),fortify(2)])},
  'rune-of-foresight':{coverage:'implemented',activated:[p('foresight-plan','Pay Oath: Plan 2',[plan(2)],{cost:{resources:{oath:1}}})],triggers:[trigger('foresight-bottom','bottomed',stationPing(1),['support'])]},
- 'rune-of-clarity':{coverage:'implemented',activated:[p('clarity-refine','Pay Oath: Refine 2',[refine(2)],{cost:{resources:{oath:1}}})],triggers:[trigger('clarity-draw','drawn',stationPing(1),['support'])]},
+ 'rune-of-clarity':{coverage:'implemented',activated:[p('clarity-refine','Exhaust + 1 Oath: Refine 2',[refine(2)],{cost:{exhaust:true,resources:{oath:1}}})],triggers:[trigger('clarity-draw','drawn',stationPing(1),['support'])]},
  'rune-of-the-banner':{coverage:'implemented',onPlay:p('banner-entry','Choose Banner mode',[choice([mode('rally','Rally the Ranks: +1/+1 while this Rune remains',[{op:'counter',targets:'source',counter:'banner-rally',amount:1}]),mode('hold','Hold the Line: Plan grants Fortify',[{op:'counter',targets:'source',counter:'banner-hold',amount:1}])])]),triggers:[{...trigger('banner-plan','planned',[select(nobles,'Banner: Fortify a Noble'),fortify()],['support']),requiresCounter:'banner-hold'}]},
  'rune-of-the-crown':{coverage:'implemented',onPlay:p('crown-entry','Fortify all your Nobles',[fortify(1,nobles)]),triggers:[trigger('crown-fortify','fortified',stationPing(2),['support'],{...nobles,controller:'any'})]},
  'ring-of-the-ley':{coverage:'implemented',activated:[p('noble-ring','Exhaust: add 2 Untuned',[{op:'resource',resource:'untuned',amount:2}],{cost:{exhaust:true}})]},
