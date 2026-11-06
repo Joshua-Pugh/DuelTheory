@@ -1,5 +1,7 @@
 # Ashen Throne starter balance review
 
+**Historical initial draft:** the [engine-preserving legendary revision](legendary-revision.md) supersedes the candidate cuts and candidate-curve columns below. The generated lists and reserve files now reflect that newer revision. Current source observations and initial concerns below are retained for context.
+
 November 6, 2026. **Draft for creator review. No live card, deck, saved profile or engine has changed.** This is a source-based design assessment, not a claim of proven competitive balance.
 
 ## What the current lists actually contain

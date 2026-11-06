@@ -6,12 +6,12 @@ Generated from the live source data. These are design candidates, not active dec
 |---|---:|---:|---:|---:|
 | 1 | 6 | 7 | 7 | 11 |
 | 2 | 10 | 10 | 8 | 9 |
-| 3 | 16 | 16 | 6 | 7 |
+| 3 | 16 | 17 | 6 | 8 |
 | 4 | 2 | 1 | 8 | 7 |
 | 5 | 5 | 4 | 6 | 2 |
-| 6 | 3 | 2 | 3 | 2 |
+| 6 | 3 | 1 | 3 | 1 |
 | Fonts | 18 | 20 | 22 | 22 |
-| Non-Font mean | 2.98 | 2.78 | 3.18 | 2.63 |
+| Non-Font mean | 2.98 | 2.70 | 3.18 | 2.55 |
 
 ## Natural Font access
 
@@ -36,13 +36,13 @@ Exact hypergeometric draws, first player, six opening cards, first draw skipped.
 | Junior Tactician | 2 | 2 oath |
 | Crown Archer | 2 | 2 oath |
 | Watchtower Scout | 2 | 1 generic + 2 oath |
+| Court Strategist | 1 | 1 generic + 2 oath |
 | Ballista Crew | 1 | 1 generic + 3 oath |
 | Griffin Knight of Ashenfield | 2 | 2 generic + 2 oath |
 | Archivist of the Crown | 1 | 2 generic + 2 oath |
 | Griffin Lancer | 1 | 1 generic + 3 oath |
 | Crown’s Cavalier | 1 | 3 generic + 2 oath |
 | Royal Longbowman | 1 | 1 generic + 3 oath |
-| Garrett of Ashenfield | 1 | 4 generic + 2 oath |
 | Royal Crusher | 1 | 2 generic + 4 oath |
 | Rune of Foresight | 1 | 2 oath |
 | Rune of Clarity | 1 | 2 oath |
@@ -65,7 +65,7 @@ Exact hypergeometric draws, first player, six opening cards, first draw skipped.
 
 ## Brute: draft 60-card test list
 
-28 Units · 2 Runes · 2 Relics · 3 Strategys · 5 Tactics · 20 Ley Fonts
+27 Units · 2 Runes · 3 Relics · 3 Strategys · 5 Tactics · 20 Ley Fonts
 
 | Card | Copies | Printed cost in candidate |
 |---|---:|---|
@@ -88,10 +88,10 @@ Exact hypergeometric draws, first player, six opening cards, first draw skipped.
 | Siegebreaker Ram | 1 | 2 generic + 3 fury |
 | Ashclaw Skyreaver | 1 | 2 generic + 3 fury |
 | Bonecrusher Catapult | 1 | 1 generic + 4 fury |
-| Korgath, Lord of Ruin | 1 | 3 generic + 3 fury |
 | Skarn the Unchained | 1 | 3 generic + 3 fury |
 | Banner of the Broken Fist | 1 | 2 fury |
 | Pit of the Frenzied | 1 | 2 generic + 1 fury |
+| Drum of the Pit | 1 | 1 generic + 2 fury |
 | Ring of the Ley | 1 | 1 generic |
 | Blood Cauldron | 1 | 1 generic + 2 fury |
 | Frenzied Stampede | 1 | 2 generic + 1 fury |

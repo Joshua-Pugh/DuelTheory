@@ -15,20 +15,50 @@ const id=(faction,slug)=>`ashen-${faction.toLowerCase()}-${slug}`;
 const proposal={
   Noble:{
     additions:{'shieldbearer-noble':2,'spearman-of-the-crown':1,'court-scribe':2,'junior-tactician':1,'crown-archer':1,'watchtower-scout':1,'griffin-knight-of-ashenfield':1},
-    cuts:['royal-guard','court-strategist','high-strategist','seraphine-royal-advisor','rune-of-the-crown','crown-of-dominion','mandate-of-dominion','order-s-end','the-king-s-will'],
+    cuts:['royal-guard','garrett-of-ashenfield','high-strategist','seraphine-royal-advisor','rune-of-the-crown','crown-of-dominion','mandate-of-dominion','order-s-end','the-king-s-will'],
     costOverrides:{'watchtower-scout':{untuned:1,oath:2}},
     keywordAdditions:{'shieldbearer-noble':['Standfast'],'banner-guard':['Standfast'],'crown-archer':['Standfast']},
     effectProposals:{'rune-of-clarity':'Keep one copy. Test activation as Exhaust and pay 1 Oath: Refine 2. Keep its printed draw-damage trigger for this first test.'},
   },
   Brute:{
     additions:{'frenzied-grunt':1,'bloodfang-raider':1,'bloodpit-initiate':1,'raging-mauler':1,'warhowl-instigator':1,'rubble-flinger':1,'fury-font':2},
-    cuts:['warchanter-savage','stonehide-juggernaut','korgath-s-call','warband-of-bloodfire','ragekindle','flesh-slinger-s-chant','flamebelcher-rig','drum-of-the-pit'],
+    cuts:['warchanter-savage','stonehide-juggernaut','korgath-s-call','warband-of-bloodfire','ragekindle','flesh-slinger-s-chant','flamebelcher-rig','korgath-lord-of-ruin'],
     costOverrides:{'bloodpit-initiate':{untuned:1,fury:1},'warhowl-instigator':{untuned:1,fury:2}},
     keywordAdditions:{},
     effectProposals:{
       'blood-cauldron':'Add a second activated option: Exhaust: Create one 1A/1D Frenzied Brute token. Both options exhaust this Relic; they cannot both be used without readying it. Token has no inherent Charge.',
       'fury-offering':'Replace effect for this test: Create two 1A/1D Frenzied Brute tokens. If you control no Units as this resolves, create three instead. Tokens have no inherent Charge. Preserve the original sacrifice/damage/draw design in the reserve snapshot.',
     },
+  },
+};
+const revision='engine-preserving-legendary-review-v2';
+const legendaryReview={
+  'ashen-brute-skarn-the-unchained':{
+    destination:'starter',recommendedCost:{untuned:3,fury:3},status:'retain-current-cost-for-testing',releaseReady:false,
+    rationale:'Retain a clear combat/token finisher at six total Essence. With the Keep, a first unblocked attack is normally 7 from Skarn plus 1 from each created attacking token, not 11: the new tokens were not declared attackers and do not trigger the Keep attack bonus.',
+    gates:['Test blocked and unblocked attacks, Pierce, further attacks and token pumps. Do not assume Reckless fully pays for the attack trigger.'],
+  },
+  'ashen-noble-royal-crusher':{
+    destination:'starter',recommendedCost:{untuned:2,oath:4},status:'retain-current-cost-for-testing',releaseReady:false,
+    rationale:'Retain the dedicated Siege finisher. Four Oath cannot be discounted by Command; Crusher has no printed Charge. It can Fortify itself to 6/9 and up to two other Nobles, so its immediate board payoff still needs testing.',
+    gates:['Measure attacks by already-present Nobles after its entry. Ring can supply generic costs but not its four Oath.'],
+  },
+  'ashen-brute-korgath-lord-of-ruin':{
+    destination:'booster-reserve',recommendedCost:{untuned:4,fury:3},status:'provisional-test-cost',releaseReady:false,
+    rationale:'Test seven total Essence for Charge, Relentless and a death-pulse engine on a 6/5. It threatens damage on entry-turn attacks and on destruction; it is a different archetype payoff rather than a mandatory second starter boss.',
+    gates:['Test modified last-known Attack for Relentless, self-death pulse, sacrifice chains and simultaneous Station defeat.','Reprice Korgath’s Call alongside Korgath; a higher creature cost must not leave the old free-deployment route as the cheap burst route.'],
+  },
+  'ashen-noble-seraphine-royal-advisor':{
+    destination:'booster-reserve',recommendedCost:{untuned:3,oath:3},status:'provisional-test-cost',releaseReady:false,
+    rationale:'Test six total Essence with a three-Oath floor under Command. At printed cost six, Seraphine no longer qualifies for her own cost-five-or-less free deployment. The starter still retains cheaper Plan/Fortify engines.',
+    gates:['Cost-five-or-less must use printed cost, not Command-discounted cost.','Current Start jobs resolve before Ready, so a Unit deployed by Seraphine can be readied in that same Start Phase. Test or deliberately change this timing; do not assume an extra turn of deployment fatigue.','Test multiple Seraphines without assuming an unimplemented one-Legendary rule.'],
+  },
+  'ashen-noble-garrett-of-ashenfield':{
+    destination:'booster-reserve',recommendedCost:{untuned:4,oath:3},status:'blocked-pending-trigger-decision',releaseReady:false,
+    rationale:'Seven total Essence with a three-Oath Command floor is only a provisional test price for a bounded trigger. No finite price establishes fair balance for the currently permitted self-retriggering Station-damage chain.',
+    conditionalWordingProposal:'Whenever another Noble Unit you control deals combat damage to an opponent’s Command Station, Garrett of Ashenfield deals 1 damage to any target.',
+    wordingApproved:false,
+    gates:['Creator must explicitly approve or reject the bounded trigger. Preserve the currently retained original ruling and text until then.','If the lethal self-chain is intentionally retained, evaluate Garrett as a combo win condition; do not describe this proposed cost as balanced.','Test entry Fortify, multiple attackers and multiple Garretts before booster release.'],
   },
 };
 function snapshot(cardId){
@@ -69,14 +99,21 @@ const profiles=Object.fromEntries(Object.keys(proposal).map(faction=>{
   return [faction,{status:'draft-for-creator-review-not-active',stationId:catalog.decks[faction].stationId,entries,costOverrides:Object.fromEntries(Object.entries(config.costOverrides).map(([slug,cost])=>[id(faction,slug),cost])),keywordAdditions:Object.fromEntries(Object.entries(config.keywordAdditions).map(([slug,keywords])=>[id(faction,slug),keywords])),effectProposals:Object.fromEntries(Object.entries(config.effectProposals).map(([slug,text])=>[id(faction,slug),text])),current:curve(catalog.decks[faction].entries,faction),candidate:curve(entries,faction,true)}];
 }));
 // Explicitly retain the named mechanic representatives requested by the creator.
-for(const [faction,slugs] of Object.entries({Noble:['royal-crusher','ballista-crew','royal-longbowman','griffin-lancer','crown-s-cavalier'],Brute:['ironhide-catapult','siegebreaker-ram','bonecrusher-catapult','rubble-flinger','bonespike-hurler','crude-spearthrower','ashen-warhawk','skyclaw-raider','howling-skyterror','ashclaw-skyreaver']})){
+for(const [faction,slugs] of Object.entries({Noble:['court-strategist','royal-crusher','ballista-crew','royal-longbowman','griffin-lancer','crown-s-cavalier'],Brute:['drum-of-the-pit','skarn-the-unchained','ironhide-catapult','siegebreaker-ram','bonecrusher-catapult','rubble-flinger','bonespike-hurler','crude-spearthrower','ashen-warhawk','skyclaw-raider','howling-skyterror','ashclaw-skyreaver']})){
   for(const slug of slugs)if(!profiles[faction].entries.some(e=>e.cardId===id(faction,slug)))throw Error(`Required mechanic lost: ${slug}`);
 }
 const baseline={commit:execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),files:Object.fromEntries(['src/ashenCatalog.json','src/ashenPrintData.json','src/games/ashen/duel.ts','src/games/ashen/adapter.ts','src/games/ashen/bruteEffects.ts','src/games/ashen/nobleEffects.ts'].map(file=>[file,createHash('sha256').update(read(file)).digest('hex')]))};
-const reserve={status:'proposed-reserve-not-approved-or-removed-from-live',date:'2026-11-06',baseline,cards:Object.entries(proposal).flatMap(([faction,config])=>config.cuts.map(slug=>({faction,reason:'Proposed starter cut; retain for a future booster review, not a declaration that the card is balanced.',...snapshot(id(faction,slug))}))),replacedDesigns:[{reason:'Original Fury Offering if its proposed recovery replacement is accepted. Keep separate version/identity history before changing rules.',...snapshot(id('Brute','fury-offering'))}]};
+const reserve={status:'proposed-reserve-not-approved-or-removed-from-live',revision,date:'2026-11-06',baseline,cards:Object.entries(proposal).flatMap(([faction,config])=>config.cuts.map(slug=>({faction,reason:'Proposed starter cut; retain for a future booster review, not a declaration that the card is balanced.',balanceReview:legendaryReview[id(faction,slug)]||{status:'not-yet-cost-reviewed',releaseReady:false},...snapshot(id(faction,slug))}))),relatedCostReviews:[{cardId:'ashen-brute-korgath-s-call',recommendedCost:{untuned:4,fury:3},status:'provisional-test-cost',releaseReady:false,rationale:'Test at seven alongside the seven-cost Korgath. Revival, +3 Attack and conditional healing remain meaningful benefits. This is not a claim of tested balance.'}],replacedDesigns:[{reason:'Original Fury Offering if its proposed recovery replacement is accepted. Keep separate version/identity history before changing rules.',...snapshot(id('Brute','fury-offering'))}]};
+for(const [cardId,review] of Object.entries(legendaryReview)){
+  const card=cards.get(cardId),entry=profiles[card.faction].entries.find(e=>e.cardId===cardId);
+  if(card.rarity!=='Legendary')throw Error(`Not Legendary: ${cardId}`);
+  if(review.destination==='starter'&&entry?.count!==1)throw Error(`Starter finisher missing: ${cardId}`);
+  if(review.destination==='booster-reserve'&&(entry||!reserve.cards.some(e=>e.card.id===cardId)))throw Error(`Reserve mismatch: ${cardId}`);
+}
 const fontDraws=[18,20,22].map(fonts=>({fonts,openingZeroFonts:1-atLeast(fonts,6,1),openingAtLeastTwo:atLeast(fonts,6,2),threeByOwnTurnThree:atLeast(fonts,8,3),fourByOwnTurnFour:atLeast(fonts,9,4)}));
 const write=(name,data)=>writeFileSync(path.join(out,name),JSON.stringify(data,null,2)+'\n');
-write('candidate-decks.json',{date:'2026-11-06',baseline,profiles,fontDraws});write('booster-reserve.json',reserve);
+write('candidate-decks.json',{date:'2026-11-06',revision,baseline,profiles,fontDraws});write('booster-reserve.json',reserve);
+write('legendary-review.json',{date:'2026-11-06',revision,status:'design-review-no-live-changes',baseline,cards:Object.entries(legendaryReview).map(([cardId,review])=>({...snapshot(cardId),...review}))});
 const pct=p=>(p*100).toFixed(1)+'%';
 const mean=value=>(Math.round(value*100)/100).toFixed(2);
 const costText=cost=>Object.entries(cost).map(([key,n])=>`${n} ${key==='untuned'?'generic':key}`).join(' + ');

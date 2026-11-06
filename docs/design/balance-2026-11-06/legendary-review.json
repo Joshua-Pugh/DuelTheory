@@ -1,0 +1,210 @@
+{
+  "date": "2026-11-06",
+  "revision": "engine-preserving-legendary-review-v2",
+  "status": "design-review-no-live-changes",
+  "baseline": {
+    "commit": "a5e8202167268e45647fa3156193d00aa6dd308c",
+    "files": {
+      "src/ashenCatalog.json": "ce920eb58732569ec2de55e410ce5301621a9ffd371c6aec935b5abe7d38f8a9",
+      "src/ashenPrintData.json": "314b9e3d92be4de7e8cff6ff097ee7fc9878bbaf872308d1c0192498ed0df789",
+      "src/games/ashen/duel.ts": "699259c9b9c772edcaced1c9a1a00877b141197271db44b8633ec8fa8d64fed9",
+      "src/games/ashen/adapter.ts": "b0ecfbc161bac88e92e6e5e280447c95952595a513fc48a6ba2fe4f095d1e63c",
+      "src/games/ashen/bruteEffects.ts": "fb1c6c210889abd3aec12ee5a19ab67d627a5e71137df50b670a24681df5b7c7",
+      "src/games/ashen/nobleEffects.ts": "31b3307a72f6b398de67e506549e22bab670d331a639d9e4765cc006fbbd4a8c"
+    }
+  },
+  "cards": [
+    {
+      "card": {
+        "id": "ashen-brute-skarn-the-unchained",
+        "name": "Skarn the Unchained",
+        "faction": "Brute",
+        "type": "Unit",
+        "subtype": "Legendary Unit — Brute Titan",
+        "rarity": "Legendary",
+        "attack": 6,
+        "defense": 6,
+        "effectText": "Charge, Pierce, Reckless\nWhenever Skarn the Unchained attacks, create 2 1A/1D frenzied brute tokens exhausted and attacking. (Place a fatigue token on each one.)",
+        "effectStatus": "source-transcribed",
+        "artStatus": "placeholder",
+        "sourceDeck": "Clan of the Broken Fist",
+        "flavorText": "",
+        "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+      },
+      "printed": {
+        "resourceCost": {
+          "untuned": 3,
+          "fury": 3
+        },
+        "frameFaction": "Brute",
+        "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+      },
+      "destination": "starter",
+      "recommendedCost": {
+        "untuned": 3,
+        "fury": 3
+      },
+      "status": "retain-current-cost-for-testing",
+      "releaseReady": false,
+      "rationale": "Retain a clear combat/token finisher at six total Essence. With the Keep, a first unblocked attack is normally 7 from Skarn plus 1 from each created attacking token, not 11: the new tokens were not declared attackers and do not trigger the Keep attack bonus.",
+      "gates": [
+        "Test blocked and unblocked attacks, Pierce, further attacks and token pumps. Do not assume Reckless fully pays for the attack trigger."
+      ]
+    },
+    {
+      "card": {
+        "id": "ashen-noble-royal-crusher",
+        "name": "Royal Crusher",
+        "faction": "Noble",
+        "type": "Unit",
+        "subtype": "Legendary Unit — Noble Siege Engine",
+        "rarity": "Legendary",
+        "attack": 4,
+        "defense": 7,
+        "effectText": "Siege, Pierce\nWhen Royal Crusher enters the Frontline, up to three Nobles you control get Fortify 2.",
+        "effectStatus": "source-transcribed",
+        "artStatus": "placeholder",
+        "sourceDeck": "The Crown’s Might",
+        "flavorText": "",
+        "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+      },
+      "printed": {
+        "resourceCost": {
+          "untuned": 2,
+          "oath": 4
+        },
+        "frameFaction": "Noble",
+        "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+      },
+      "destination": "starter",
+      "recommendedCost": {
+        "untuned": 2,
+        "oath": 4
+      },
+      "status": "retain-current-cost-for-testing",
+      "releaseReady": false,
+      "rationale": "Retain the dedicated Siege finisher. Four Oath cannot be discounted by Command; Crusher has no printed Charge. It can Fortify itself to 6/9 and up to two other Nobles, so its immediate board payoff still needs testing.",
+      "gates": [
+        "Measure attacks by already-present Nobles after its entry. Ring can supply generic costs but not its four Oath."
+      ]
+    },
+    {
+      "card": {
+        "id": "ashen-brute-korgath-lord-of-ruin",
+        "name": "Korgath, Lord of Ruin",
+        "faction": "Brute",
+        "type": "Unit",
+        "subtype": "Legendary Unit — Brute Warlord",
+        "rarity": "Legendary",
+        "attack": 6,
+        "defense": 5,
+        "effectText": "Charge, Relentless\nWhenever a Brute you control dies, Korgath, Lord of Ruin deals 1 damage to each Command Station.",
+        "effectStatus": "source-transcribed",
+        "artStatus": "placeholder",
+        "sourceDeck": "Clan of the Broken Fist",
+        "flavorText": "",
+        "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+      },
+      "printed": {
+        "resourceCost": {
+          "untuned": 3,
+          "fury": 3
+        },
+        "frameFaction": "Brute",
+        "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
+      },
+      "destination": "booster-reserve",
+      "recommendedCost": {
+        "untuned": 4,
+        "fury": 3
+      },
+      "status": "provisional-test-cost",
+      "releaseReady": false,
+      "rationale": "Test seven total Essence for Charge, Relentless and a death-pulse engine on a 6/5. It threatens damage on entry-turn attacks and on destruction; it is a different archetype payoff rather than a mandatory second starter boss.",
+      "gates": [
+        "Test modified last-known Attack for Relentless, self-death pulse, sacrifice chains and simultaneous Station defeat.",
+        "Reprice Korgath’s Call alongside Korgath; a higher creature cost must not leave the old free-deployment route as the cheap burst route."
+      ]
+    },
+    {
+      "card": {
+        "id": "ashen-noble-seraphine-royal-advisor",
+        "name": "Seraphine, Royal Advisor",
+        "faction": "Noble",
+        "type": "Unit",
+        "subtype": "Legendary Unit — Noble Advisor",
+        "rarity": "Legendary",
+        "attack": 4,
+        "defense": 6,
+        "effectText": "Command\nAt the start of your turn, if you Planned or Refined last turn, you may deploy a Noble with cost 5 or less from your hand without paying its cost.",
+        "effectStatus": "source-transcribed",
+        "artStatus": "placeholder",
+        "sourceDeck": "The Crown’s Might",
+        "flavorText": "",
+        "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+      },
+      "printed": {
+        "resourceCost": {
+          "untuned": 3,
+          "oath": 2
+        },
+        "frameFaction": "Noble",
+        "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+      },
+      "destination": "booster-reserve",
+      "recommendedCost": {
+        "untuned": 3,
+        "oath": 3
+      },
+      "status": "provisional-test-cost",
+      "releaseReady": false,
+      "rationale": "Test six total Essence with a three-Oath floor under Command. At printed cost six, Seraphine no longer qualifies for her own cost-five-or-less free deployment. The starter still retains cheaper Plan/Fortify engines.",
+      "gates": [
+        "Cost-five-or-less must use printed cost, not Command-discounted cost.",
+        "Current Start jobs resolve before Ready, so a Unit deployed by Seraphine can be readied in that same Start Phase. Test or deliberately change this timing; do not assume an extra turn of deployment fatigue.",
+        "Test multiple Seraphines without assuming an unimplemented one-Legendary rule."
+      ]
+    },
+    {
+      "card": {
+        "id": "ashen-noble-garrett-of-ashenfield",
+        "name": "Garrett of Ashenfield",
+        "faction": "Noble",
+        "type": "Unit",
+        "subtype": "Legendary Unit — Noble Captain",
+        "rarity": "Legendary",
+        "attack": 5,
+        "defense": 6,
+        "effectText": "Command\nWhen Garrett of Ashenfield enters the Frontline, all Nobles you control get Fortify 1.\nWhenever a Noble you control deals damage to a Command Station, Garrett of Ashenfield deals 1 damage to any target.",
+        "effectStatus": "source-transcribed",
+        "artStatus": "placeholder",
+        "sourceDeck": "The Crown’s Might",
+        "flavorText": "",
+        "effectSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+      },
+      "printed": {
+        "resourceCost": {
+          "untuned": 4,
+          "oath": 2
+        },
+        "frameFaction": "Noble",
+        "costSource": "Noble Mono Deck — The Crown’s Might (Command Siege).docx"
+      },
+      "destination": "booster-reserve",
+      "recommendedCost": {
+        "untuned": 4,
+        "oath": 3
+      },
+      "status": "blocked-pending-trigger-decision",
+      "releaseReady": false,
+      "rationale": "Seven total Essence with a three-Oath Command floor is only a provisional test price for a bounded trigger. No finite price establishes fair balance for the currently permitted self-retriggering Station-damage chain.",
+      "conditionalWordingProposal": "Whenever another Noble Unit you control deals combat damage to an opponent’s Command Station, Garrett of Ashenfield deals 1 damage to any target.",
+      "wordingApproved": false,
+      "gates": [
+        "Creator must explicitly approve or reject the bounded trigger. Preserve the currently retained original ruling and text until then.",
+        "If the lethal self-chain is intentionally retained, evaluate Garrett as a combo win condition; do not describe this proposed cost as balanced.",
+        "Test entry Fortify, multiple attackers and multiple Garretts before booster release."
+      ]
+    }
+  ]
+}

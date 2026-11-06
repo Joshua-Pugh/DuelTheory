@@ -1,8 +1,9 @@
 {
   "status": "proposed-reserve-not-approved-or-removed-from-live",
+  "revision": "engine-preserving-legendary-review-v2",
   "date": "2026-11-06",
   "baseline": {
-    "commit": "0aa4314147bdaa616a37ab2c7cccfaf338a6aa53",
+    "commit": "a5e8202167268e45647fa3156193d00aa6dd308c",
     "files": {
       "src/ashenCatalog.json": "ce920eb58732569ec2de55e410ce5301621a9ffd371c6aec935b5abe7d38f8a9",
       "src/ashenPrintData.json": "314b9e3d92be4de7e8cff6ff097ee7fc9878bbaf872308d1c0192498ed0df789",
@@ -16,6 +17,10 @@
     {
       "faction": "Noble",
       "reason": "Proposed starter cut; retain for a future booster review, not a declaration that the card is balanced.",
+      "balanceReview": {
+        "status": "not-yet-cost-reviewed",
+        "releaseReady": false
+      },
       "card": {
         "id": "ashen-noble-royal-guard",
         "name": "Royal Guard",
@@ -43,16 +48,33 @@
     {
       "faction": "Noble",
       "reason": "Proposed starter cut; retain for a future booster review, not a declaration that the card is balanced.",
+      "balanceReview": {
+        "destination": "booster-reserve",
+        "recommendedCost": {
+          "untuned": 4,
+          "oath": 3
+        },
+        "status": "blocked-pending-trigger-decision",
+        "releaseReady": false,
+        "rationale": "Seven total Essence with a three-Oath Command floor is only a provisional test price for a bounded trigger. No finite price establishes fair balance for the currently permitted self-retriggering Station-damage chain.",
+        "conditionalWordingProposal": "Whenever another Noble Unit you control deals combat damage to an opponent’s Command Station, Garrett of Ashenfield deals 1 damage to any target.",
+        "wordingApproved": false,
+        "gates": [
+          "Creator must explicitly approve or reject the bounded trigger. Preserve the currently retained original ruling and text until then.",
+          "If the lethal self-chain is intentionally retained, evaluate Garrett as a combo win condition; do not describe this proposed cost as balanced.",
+          "Test entry Fortify, multiple attackers and multiple Garretts before booster release."
+        ]
+      },
       "card": {
-        "id": "ashen-noble-court-strategist",
-        "name": "Court Strategist",
+        "id": "ashen-noble-garrett-of-ashenfield",
+        "name": "Garrett of Ashenfield",
         "faction": "Noble",
         "type": "Unit",
-        "subtype": "Unit — Noble Advisor",
-        "rarity": "Bronze",
-        "attack": 3,
-        "defense": 4,
-        "effectText": "Command\nWhen Court Strategist enters the Frontline, target Noble gets Fortify 1.\nExhaust and pay {Oath} : Plan 1, then draw 1 card.",
+        "subtype": "Legendary Unit — Noble Captain",
+        "rarity": "Legendary",
+        "attack": 5,
+        "defense": 6,
+        "effectText": "Command\nWhen Garrett of Ashenfield enters the Frontline, all Nobles you control get Fortify 1.\nWhenever a Noble you control deals damage to a Command Station, Garrett of Ashenfield deals 1 damage to any target.",
         "effectStatus": "source-transcribed",
         "artStatus": "placeholder",
         "sourceDeck": "The Crown’s Might",
@@ -61,7 +83,7 @@
       },
       "printed": {
         "resourceCost": {
-          "untuned": 1,
+          "untuned": 4,
           "oath": 2
         },
         "frameFaction": "Noble",
@@ -71,6 +93,10 @@
     {
       "faction": "Noble",
       "reason": "Proposed starter cut; retain for a future booster review, not a declaration that the card is balanced.",
+      "balanceReview": {
+        "status": "not-yet-cost-reviewed",
+        "releaseReady": false
+      },
       "card": {
         "id": "ashen-noble-high-strategist",
         "name": "High Strategist",
@@ -99,6 +125,21 @@
     {
       "faction": "Noble",
       "reason": "Proposed starter cut; retain for a future booster review, not a declaration that the card is balanced.",
+      "balanceReview": {
+        "destination": "booster-reserve",
+        "recommendedCost": {
+          "untuned": 3,
+          "oath": 3
+        },
+        "status": "provisional-test-cost",
+        "releaseReady": false,
+        "rationale": "Test six total Essence with a three-Oath floor under Command. At printed cost six, Seraphine no longer qualifies for her own cost-five-or-less free deployment. The starter still retains cheaper Plan/Fortify engines.",
+        "gates": [
+          "Cost-five-or-less must use printed cost, not Command-discounted cost.",
+          "Current Start jobs resolve before Ready, so a Unit deployed by Seraphine can be readied in that same Start Phase. Test or deliberately change this timing; do not assume an extra turn of deployment fatigue.",
+          "Test multiple Seraphines without assuming an unimplemented one-Legendary rule."
+        ]
+      },
       "card": {
         "id": "ashen-noble-seraphine-royal-advisor",
         "name": "Seraphine, Royal Advisor",
@@ -127,6 +168,10 @@
     {
       "faction": "Noble",
       "reason": "Proposed starter cut; retain for a future booster review, not a declaration that the card is balanced.",
+      "balanceReview": {
+        "status": "not-yet-cost-reviewed",
+        "releaseReady": false
+      },
       "card": {
         "id": "ashen-noble-rune-of-the-crown",
         "name": "Rune of the Crown",
@@ -155,6 +200,10 @@
     {
       "faction": "Noble",
       "reason": "Proposed starter cut; retain for a future booster review, not a declaration that the card is balanced.",
+      "balanceReview": {
+        "status": "not-yet-cost-reviewed",
+        "releaseReady": false
+      },
       "card": {
         "id": "ashen-noble-crown-of-dominion",
         "name": "Crown of Dominion",
@@ -183,6 +232,10 @@
     {
       "faction": "Noble",
       "reason": "Proposed starter cut; retain for a future booster review, not a declaration that the card is balanced.",
+      "balanceReview": {
+        "status": "not-yet-cost-reviewed",
+        "releaseReady": false
+      },
       "card": {
         "id": "ashen-noble-mandate-of-dominion",
         "name": "Mandate of Dominion",
@@ -211,6 +264,10 @@
     {
       "faction": "Noble",
       "reason": "Proposed starter cut; retain for a future booster review, not a declaration that the card is balanced.",
+      "balanceReview": {
+        "status": "not-yet-cost-reviewed",
+        "releaseReady": false
+      },
       "card": {
         "id": "ashen-noble-order-s-end",
         "name": "Order’s End",
@@ -239,6 +296,10 @@
     {
       "faction": "Noble",
       "reason": "Proposed starter cut; retain for a future booster review, not a declaration that the card is balanced.",
+      "balanceReview": {
+        "status": "not-yet-cost-reviewed",
+        "releaseReady": false
+      },
       "card": {
         "id": "ashen-noble-the-king-s-will",
         "name": "The King’s Will",
@@ -267,6 +328,10 @@
     {
       "faction": "Brute",
       "reason": "Proposed starter cut; retain for a future booster review, not a declaration that the card is balanced.",
+      "balanceReview": {
+        "status": "not-yet-cost-reviewed",
+        "releaseReady": false
+      },
       "card": {
         "id": "ashen-brute-warchanter-savage",
         "name": "Warchanter Savage",
@@ -295,6 +360,10 @@
     {
       "faction": "Brute",
       "reason": "Proposed starter cut; retain for a future booster review, not a declaration that the card is balanced.",
+      "balanceReview": {
+        "status": "not-yet-cost-reviewed",
+        "releaseReady": false
+      },
       "card": {
         "id": "ashen-brute-stonehide-juggernaut",
         "name": "Stonehide Juggernaut",
@@ -323,6 +392,10 @@
     {
       "faction": "Brute",
       "reason": "Proposed starter cut; retain for a future booster review, not a declaration that the card is balanced.",
+      "balanceReview": {
+        "status": "not-yet-cost-reviewed",
+        "releaseReady": false
+      },
       "card": {
         "id": "ashen-brute-korgath-s-call",
         "name": "Korgath’s Call",
@@ -351,6 +424,10 @@
     {
       "faction": "Brute",
       "reason": "Proposed starter cut; retain for a future booster review, not a declaration that the card is balanced.",
+      "balanceReview": {
+        "status": "not-yet-cost-reviewed",
+        "releaseReady": false
+      },
       "card": {
         "id": "ashen-brute-warband-of-bloodfire",
         "name": "Warband of Bloodfire",
@@ -379,6 +456,10 @@
     {
       "faction": "Brute",
       "reason": "Proposed starter cut; retain for a future booster review, not a declaration that the card is balanced.",
+      "balanceReview": {
+        "status": "not-yet-cost-reviewed",
+        "releaseReady": false
+      },
       "card": {
         "id": "ashen-brute-ragekindle",
         "name": "Ragekindle",
@@ -406,6 +487,10 @@
     {
       "faction": "Brute",
       "reason": "Proposed starter cut; retain for a future booster review, not a declaration that the card is balanced.",
+      "balanceReview": {
+        "status": "not-yet-cost-reviewed",
+        "releaseReady": false
+      },
       "card": {
         "id": "ashen-brute-flesh-slinger-s-chant",
         "name": "Flesh-Slinger’s Chant",
@@ -434,6 +519,10 @@
     {
       "faction": "Brute",
       "reason": "Proposed starter cut; retain for a future booster review, not a declaration that the card is balanced.",
+      "balanceReview": {
+        "status": "not-yet-cost-reviewed",
+        "releaseReady": false
+      },
       "card": {
         "id": "ashen-brute-flamebelcher-rig",
         "name": "Flamebelcher Rig",
@@ -462,30 +551,56 @@
     {
       "faction": "Brute",
       "reason": "Proposed starter cut; retain for a future booster review, not a declaration that the card is balanced.",
+      "balanceReview": {
+        "destination": "booster-reserve",
+        "recommendedCost": {
+          "untuned": 4,
+          "fury": 3
+        },
+        "status": "provisional-test-cost",
+        "releaseReady": false,
+        "rationale": "Test seven total Essence for Charge, Relentless and a death-pulse engine on a 6/5. It threatens damage on entry-turn attacks and on destruction; it is a different archetype payoff rather than a mandatory second starter boss.",
+        "gates": [
+          "Test modified last-known Attack for Relentless, self-death pulse, sacrifice chains and simultaneous Station defeat.",
+          "Reprice Korgath’s Call alongside Korgath; a higher creature cost must not leave the old free-deployment route as the cheap burst route."
+        ]
+      },
       "card": {
-        "id": "ashen-brute-drum-of-the-pit",
-        "name": "Drum of the Pit",
+        "id": "ashen-brute-korgath-lord-of-ruin",
+        "name": "Korgath, Lord of Ruin",
         "faction": "Brute",
-        "type": "Relic",
-        "subtype": "Relic",
-        "rarity": "Silver",
-        "attack": null,
-        "defense": null,
-        "effectText": "Whenever a Brute you control attacks, put a Momentum counter on Drum of the Pit.\nExhaust and remove 3 Momentum counters: Search your deck for a Brute Unit, reveal it, and put it into your hand. Then, shuffle your deck.",
+        "type": "Unit",
+        "subtype": "Legendary Unit — Brute Warlord",
+        "rarity": "Legendary",
+        "attack": 6,
+        "defense": 5,
+        "effectText": "Charge, Relentless\nWhenever a Brute you control dies, Korgath, Lord of Ruin deals 1 damage to each Command Station.",
         "effectStatus": "source-transcribed",
         "artStatus": "placeholder",
         "sourceDeck": "Clan of the Broken Fist",
-        "flavorText": "“The Iron remembers its masters – and calls them back to war.”",
+        "flavorText": "",
         "effectSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
       },
       "printed": {
         "resourceCost": {
-          "untuned": 1,
-          "fury": 2
+          "untuned": 3,
+          "fury": 3
         },
         "frameFaction": "Brute",
         "costSource": "Brute Mono Deck — Clan of the Broken Fist (Command Siege).docx"
       }
+    }
+  ],
+  "relatedCostReviews": [
+    {
+      "cardId": "ashen-brute-korgath-s-call",
+      "recommendedCost": {
+        "untuned": 4,
+        "fury": 3
+      },
+      "status": "provisional-test-cost",
+      "releaseReady": false,
+      "rationale": "Test at seven alongside the seven-cost Korgath. Revival, +3 Attack and conditional healing remain meaningful benefits. This is not a claim of tested balance."
     }
   ],
   "replacedDesigns": [

@@ -1,7 +1,8 @@
 {
   "date": "2026-11-06",
+  "revision": "engine-preserving-legendary-review-v2",
   "baseline": {
-    "commit": "0aa4314147bdaa616a37ab2c7cccfaf338a6aa53",
+    "commit": "a5e8202167268e45647fa3156193d00aa6dd308c",
     "files": {
       "src/ashenCatalog.json": "ce920eb58732569ec2de55e410ce5301621a9ffd371c6aec935b5abe7d38f8a9",
       "src/ashenPrintData.json": "314b9e3d92be4de7e8cff6ff097ee7fc9878bbaf872308d1c0192498ed0df789",
@@ -45,6 +46,10 @@
           "count": 2
         },
         {
+          "cardId": "ashen-noble-court-strategist",
+          "count": 1
+        },
+        {
           "cardId": "ashen-noble-ballista-crew",
           "count": 1
         },
@@ -66,10 +71,6 @@
         },
         {
           "cardId": "ashen-noble-royal-longbowman",
-          "count": 1
-        },
-        {
-          "cardId": "ashen-noble-garrett-of-ashenfield",
           "count": 1
         },
         {
@@ -204,23 +205,23 @@
         "total": 60,
         "fonts": 22,
         "nonFonts": 38,
-        "printedEssence": 100,
-        "meanPrintedCost": 2.6315789473684212,
+        "printedEssence": 97,
+        "meanPrintedCost": 2.5526315789473686,
         "histogram": {
           "1": 11,
           "2": 9,
-          "3": 7,
+          "3": 8,
           "4": 7,
           "5": 2,
-          "6": 2
+          "6": 1
         },
         "unitCurve": {
           "1": 8,
           "2": 4,
-          "3": 3,
+          "3": 4,
           "4": 6,
           "5": 2,
-          "6": 2
+          "6": 1
         },
         "types": {
           "Unit": 25,
@@ -313,10 +314,6 @@
           "count": 1
         },
         {
-          "cardId": "ashen-brute-korgath-lord-of-ruin",
-          "count": 1
-        },
-        {
           "cardId": "ashen-brute-skarn-the-unchained",
           "count": 1
         },
@@ -326,6 +323,10 @@
         },
         {
           "cardId": "ashen-brute-pit-of-the-frenzied",
+          "count": 1
+        },
+        {
+          "cardId": "ashen-brute-drum-of-the-pit",
           "count": 1
         },
         {
@@ -443,15 +444,15 @@
         "total": 60,
         "fonts": 20,
         "nonFonts": 40,
-        "printedEssence": 111,
-        "meanPrintedCost": 2.775,
+        "printedEssence": 108,
+        "meanPrintedCost": 2.7,
         "histogram": {
           "1": 7,
           "2": 10,
-          "3": 16,
+          "3": 17,
           "4": 1,
           "5": 4,
-          "6": 2
+          "6": 1
         },
         "unitCurve": {
           "1": 4,
@@ -459,12 +460,12 @@
           "3": 11,
           "4": 1,
           "5": 3,
-          "6": 2
+          "6": 1
         },
         "types": {
-          "Unit": 28,
+          "Unit": 27,
           "Rune": 2,
-          "Relic": 2,
+          "Relic": 3,
           "Strategy": 3,
           "Tactic": 5,
           "Ley Font": 20
