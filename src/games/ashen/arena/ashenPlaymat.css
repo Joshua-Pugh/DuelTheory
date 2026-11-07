@@ -1,11 +1,13 @@
 /* Skirmish layout. The existing arena remains the source of card and control behavior. */
 .ab-arena.ab-duel.ab-playmat {
   --arena-hand: clamp(78px, 18dvh, 158px);
+  gap: 3px;
+  background: #101210;
+}
+.ab-arena.ab-duel.ab-playmat:not(:has(>.ab-practice-panel)) {
   grid-template-columns: minmax(0,1fr);
   grid-template-rows: 32px minmax(0,1fr) var(--arena-hand) 18px;
   grid-template-areas: 'tools' 'workspace' 'hand' 'notice';
-  gap: 3px;
-  background: #101210;
 }
 .ab-arena.ab-duel.ab-playmat .ab-workspace {
   grid-template-columns: minmax(0,1fr);
