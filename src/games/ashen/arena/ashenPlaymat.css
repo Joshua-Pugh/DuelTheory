@@ -4,7 +4,7 @@
   gap: 3px;
   background: #101210;
 }
-.ab-arena.ab-duel.ab-playmat:not(:has(>.ab-practice-panel)) {
+.ab-arena.ab-duel.ab-playmat {
   grid-template-columns: minmax(0,1fr);
   grid-template-rows: 32px minmax(0,1fr) var(--arena-hand) 18px;
   grid-template-areas: 'tools' 'workspace' 'hand' 'notice';

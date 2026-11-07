@@ -714,15 +714,13 @@
   line-height: 1.04;
   text-shadow: none;
 }
-.ab-arena.ab-duel.ab-practice {
-  grid-template-columns: 250px minmax(0,1fr);
-  grid-template-rows: 36px minmax(0,1fr) var(--arena-hand) 20px;
-  grid-template-areas: 'tools tools' 'guide workspace' 'guide hand' 'guide notice';
-}
 .ab-practice-panel {
-  grid-area: guide;
-  align-self: start;
-  max-height: 100%;
+  position: absolute;
+  z-index: 12;
+  inset: 8px auto auto 50%;
+  transform: translateX(-50%);
+  width: min(360px, 70%);
+  max-height: 48%;
   min-width: 0;
   min-height: 0;
   overflow: auto;
@@ -821,9 +819,6 @@
   }
   .ab-arena.ab-duel .ab-player {
     gap: 6px;
-  }
-  .ab-arena.ab-duel.ab-practice {
-    grid-template-columns: 210px minmax(0,1fr);
   }
 }
 .ab-arena.ab-duel.ab-viewer-open .ab-inspector {
@@ -1002,11 +997,6 @@
     padding: 5px;
     font-size: 11px;
   }
-  .ab-arena.ab-duel.ab-practice {
-    grid-template-columns: minmax(0,1fr);
-    grid-template-rows: 36px 100px minmax(0,1fr) var(--arena-hand) 20px;
-    grid-template-areas: 'tools' 'guide' 'workspace' 'hand' 'notice';
-  }
   .ab-practice-panel {
     padding: 7px 10px;
     font-size: 12px;
@@ -1172,11 +1162,6 @@
     font-size: 7px;
     gap: 2px;
   }
-  .ab-arena.ab-duel.ab-practice {
-    grid-template-columns: 185px minmax(0,1fr) 126px;
-    grid-template-rows: 32px minmax(0,1fr) 18px;
-    grid-template-areas: 'tools tools tools' 'guide workspace hand' 'guide notice notice';
-  }
   .ab-practice-panel {
     padding: 8px;
     font-size: 11px;
@@ -1198,3 +1183,7 @@
 .ab-own-response {display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:14px;}
 .ab-own-response small {flex-basis:100%;font-size:12px;line-height:1.4;color:#d4c8a6;}
 .ab-arena:fullscreen {width:100%;height:100%;inset:0;}
+
+.ab-practice .ab-table { position: relative; }
+.ab-practice-panel>div+div { display: flex; flex-wrap: wrap; margin-top: 6px; }
+.ab-practice-panel p { margin: 6px 0; }

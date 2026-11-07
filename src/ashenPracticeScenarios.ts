@@ -6,10 +6,12 @@ export const practiceLessons=[
  {id:'refine',title:'Nobles: exchange a card with Refine',setup:'You have one Oath in the Basin, Shieldbearer Noble and two expensive Nobles in hand. Your next draw is Oath Font.',goal:'Play Shieldbearer Noble, draw the Font, then finish Refine by bottoming a hand card.',steps:'Play Shieldbearer Noble. Resolve its Refine prompt. Compare the costs in your hand before choosing what to put on the bottom. Your Bastion may then ask you to choose its separate reward; finish that choice too.',reason:'Refine draws before you choose the card to bottom. Keeping the new Font can help you pay for a future turn. You do not have to return the card you just drew. The entering Shieldbearer is Unready. Standfast still lets it block.'},
  {id:'runes',title:'Nobles: resolve the Runes in order',setup:'Rune of Clarity and Rune of Foresight are already in play. You have exactly one Oath in the Basin. Your hand and the next two draws are fixed for this exercise.',goal:'Use Clarity to Refine, put one card on the bottom and deal at least 3 damage to the enemy Station.',steps:'Click Rune of Clarity, Exhaust it and pay one Oath for Refine. Each drawn card triggers Clarity; choose the enemy Station for each damage prompt. Put one card on the bottom to trigger Foresight. Resolve the Bastion’s separate reward as well.',reason:'One Refine produces two draw events and one bottoming event. Clarity watches draws; Foresight watches bottoming. Read the source and player on each prompt. A new prompt is often another trigger, not the same choice being repeated.'},
  {id:'command',title:'Nobles: pay a discounted Command cost',setup:'This prepared turn has already recorded one Plan and one Refine. You have 2 Oath in the Basin. Court Strategist is in hand and Shieldbearer Noble is on the Frontline.',goal:'Deploy Court Strategist for 2 Oath, then choose Shieldbearer Noble for Fortify 1.',steps:'Read Court Strategist’s cost reduction, then play him. When his entry asks for a Noble, choose Shieldbearer Noble. Check that it receives Fortify 1. Compare the Basin before and after payment.',reason:'Command reduces the generic part of the cost by one per Plan or Refine. Court Strategist normally costs 1 generic and 2 Oath. Your two recorded actions cover the generic part; the 2 Oath must still be paid. His entry Fortifies one Noble you choose. Fortify increases both Attack and Defense.'}
+ ,{id:'deploy-unit',title:'Deploying Units',setup:'You have one Fury and a Grunt in hand.',goal:'Deploy Frenzied Grunt.',steps:'Select it and choose Play.',reason:'A Unit moves to the Frontline when it resolves.'}
+ ,{id:'unit-readiness',title:'Unready and Fatigue',setup:'Raging Mauler is Unready. Frenzied Grunt is Ready.',goal:'Attack with Frenzied Grunt.',steps:'Enter Skirmish and declare an attack with the Grunt.',reason:'Deploying makes a Unit Unready. Attacking or exhausting can give it Fatigue.'}
 ] as const;
 export function createPractice(index:number):Battlefield{
  const lesson=practiceLessons[index];if(!lesson)throw Error('Unknown practice lesson');
- const noble=index>0;let s=newAshenDuel([noble?'Noble':'Brute',noble?'Brute':'Noble'],731+index,0);
+ const noble=index>0&&index<4;let s=newAshenDuel([noble?'Noble':'Brute',noble?'Brute':'Noble'],731+index,0);
  s=chooseAshenOpening(s,0,'keep');s=chooseAshenOpening(s,1,'keep');
  for(const seat of [0,1] as const)for(const id of [...s.table.piles[`${seat}:hand`]])moveAshenCard(s,id,'deck');
  const put=(slug:string,zone:string)=>{const card=Object.values(s.table.cards).find(c=>c.controller===0&&c.cardId===`ashen-${noble?'noble':'brute'}-${slug}`&&c.zone==='deck');if(!card)throw Error('Missing practice card '+slug);if(card.zone!==zone)moveAshenCard(s,card.instanceId,zone);card.faceDown=false;card.rotated=false;return card.instanceId;};
@@ -18,6 +20,8 @@ export function createPractice(index:number):Battlefield{
  if(index===1){put('shieldbearer-noble','hand');put('royal-crusher','hand');put('royal-longbowman','hand');top(['oath-font']);s.basins[0].oath=1;}
  if(index===2){put('rune-of-clarity','support');put('rune-of-foresight','support');put('royal-crusher','hand');put('royal-longbowman','hand');top(['oath-font','shieldbearer-noble']);s.basins[0].oath=1;}
  if(index===3){put('court-strategist','hand');put('shieldbearer-noble','unit');s.rules!.nobleMarks={0:{planned:1,refined:1}};s.basins[0].untuned=0;s.basins[0].oath=2;}
+ if(index===4){put('frenzied-grunt','hand');s.basins[0].fury=1;}
+ if(index===5){put('frenzied-grunt','unit');s.table.cards[put('raging-mauler','unit')].unready=true;}
  s.table.events=['Practice situation prepared. No saved duel is changed.'];return s;
 }
 export function practiceComplete(index:number,s:Battlefield){
@@ -26,5 +30,7 @@ export function practiceComplete(index:number,s:Battlefield){
  if(index===0)return s.table.health[1]===18&&own('frenzied-grunt')?.zone==='unit';
  if(index===1)return own('shieldbearer-noble')?.zone==='unit'&&(s.rules?.nobleMarks?.[0]?.refined||0)>=1;
  if(index===2)return s.table.health[1]<=17&&(s.rules?.nobleMarks?.[0]?.refined||0)>=1;
+ if(index===4)return s.table.piles['0:unit'].some(id=>s.table.cards[id].cardId.endsWith('-frenzied-grunt'))&&s.basins[0].fury===0;
+ if(index===5)return s.table.piles['0:unit'].some(id=>s.table.cards[id].cardId.endsWith('-frenzied-grunt')&&s.table.cards[id].rotated);
  return own('court-strategist')?.zone==='unit'&&(own('shieldbearer-noble')?.counters||0)>=1;
 }
