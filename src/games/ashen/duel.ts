@@ -81,27 +81,40 @@ export function submitAshenAction(original:Battlefield,id:string,context:EffectC
  s=drainTriggers(s,paid.events.filter(e=>e.kind!=='resolved'));duel(s).priority=openPriority(['0','1'],context.player);
  s.table.events.push(`Clash: ${card.name}${ability?' — '+p.label:''}. Costs paid.`);return settleAshenDuel(s);
 }
-export function ashenResponseOptions(s:Battlefield,who:string){
+export function ashenResponseOptions(s:Battlefield,who:string,includeSetup=true,includeResourceOnly=includeSetup,interruptTarget?:string){
  if(ashenOpeningPlayer(s)!==null)return [];
  const options:{source:string;label:string}[]=[];
  const affordable=structuredClone(s);
  for(const c of Object.values(s.table.cards).filter(c=>String(c.controller)===who&&c.zone==='ley'&&!c.faceDown&&!c.rotated)){
-  affordable.basins[c.controller][fontEssence(c.cardId)]++;
+  if(includeSetup)affordable.basins[c.controller][fontEssence(c.cardId)]++;
   const effect=ashenEffects[c.cardId]?.onBurn;
-  if(effect&&s.table.piles[`${who}:unit`].some(id=>!s.table.cards[id].faceDown)&&hasAshenChoices(s,effect.steps,{source:c.instanceId,player:who}))options.push({source:c.instanceId,label:`Burn ${c.name}: ${effect.label}`});
+  if(includeResourceOnly&&effect&&s.table.piles[`${who}:unit`].some(id=>!s.table.cards[id].faceDown)&&hasAshenChoices(s,effect.steps,{source:c.instanceId,player:who}))options.push({source:c.instanceId,label:`Burn ${c.name}: ${effect.label}`});
  }
 
  for(const c of Object.values(s.table.cards).filter(c=>String(c.controller)===who)){
   const programs=c.zone==='hand'&&c.type==='Tactic'?[playProgram({...s,table:{...s.table,active:c.controller}},c.instanceId)]:['unit','support','ley'].includes(c.zone)?availableAshenAbilities(s,c.instanceId).filter(p=>reactive(s,c.instanceId,p)):[];
-  for(const p of programs){try{if(p.oncePerTurn&&s.rules?.abilityUses?.[`${s.rules.turn}:${c.instanceId}:${p.id}`])continue;
+  for(const p of programs){try{if(!includeResourceOnly&&p.steps.every(step=>step.op==='resource'))continue;if(p.oncePerTurn&&s.rules?.abilityUses?.[`${s.rules.turn}:${c.instanceId}:${p.id}`])continue;
    const context={source:c.instanceId,player:who};if(!hasAshenChoices(s,p.steps,context))continue;const targets=p.targets?candidates(s,ashenAdapter,p.targets,context).map(e=>e.id).slice(0,p.targets.count):[];
    const costs=p.cost?.cards?candidates(s,ashenAdapter,p.cost.cards,context).map(e=>e.id).slice(0,p.cost.cards.count):[];
+   if(interruptTarget&&!canNullifyEntry(s,p.steps,context,interruptTarget,p.targets))continue;
    executeProgram(affordable,ashenAdapter,{...p,steps:[]},{...context,targets,costCards:costs});options.push({source:c.instanceId,label:`${c.name}: ${p.label}`});
   }catch{/* Unaffordable or without legal choices. */}}
  }
  return options;
 }
-function canReact(s:Battlefield,who:string){return ashenResponseOptions(s,who).length>0;}
+function canNullifyEntry(s:Battlefield,steps:EffectProgram['steps'],context:EffectContext,key:string,selection?:EffectProgram['targets']):boolean{
+ for(const step of steps){
+  if(step.op==='select')selection=step.selection;
+  if(step.op==='nullify'&&step.targets==='targets'&&selection&&candidates(s,ashenAdapter,selection,context).some(entity=>entity.id===key))return true;
+  if(step.op==='mode'&&step.options.some(option=>canNullifyEntry(s,option.steps,context,key,selection)))return true;
+ }
+ return false;
+}
+function canReact(s:Battlefield,who:string){
+ const d=duel(s),top=d.stack.at(-1);
+ if(d.holdResponses?.[Number(who)])return ashenResponseOptions(s,who).length>0;
+ return !!top?.key&&top.context.player!==who&&ashenResponseOptions(s,who,false,false,top.key).length>0;
+}
 export function passAshenPriority(original:Battlefield,who:0|1){const s=structuredClone(original),d=duel(s);if(s.rules?.pending||d.ordering)throw Error('Finish the current selection first.');if(!d.priority)throw Error('No Clash response is pending.');const pass=passPriority(d.priority,String(who));d.priority=pass.done?null:pass.priority;if(pass.done){if(d.stack.length)resolveTopEntry(s);else d.responseWindow=false;}return settleAshenDuel(s);}
 function nextCallBlocked(s:Battlefield,id:string){const permission=duel(s).callPermission;return !!permission&&permission!==id;}
 export function korgathCallChoices(s:Battlefield){const d=duel(s);if(d.callPermission!=='choose')return [];return Object.values(s.table.cards).filter(c=>c.controller===s.table.active&&c.cardId==='ashen-brute-korgath-lord-of-ruin'&&['hand','graveyard'].includes(c.zone)).map(c=>c.instanceId);}
@@ -136,7 +149,47 @@ export function resumeBruteDuel(original:Battlefield,ids:string[]){
  }
  return settleAshenDuel(resumeAshenEffect(original,ids));
 }
-export function burnInBruteDuel(original:Battlefield,id:string,who:0|1){requireOpeningKept(original);let s=structuredClone(original);const d=duel(s),c=s.table.cards[id];if(d.winner!==undefined||s.rules?.pending||d.ordering||d.callPermission||c?.controller!==who||c.zone!=='ley'||c.faceDown||c.rotated)throw Error('This Font cannot be burned.');if(d.priority?d.priority.holder!==String(who):s.table.active!==who)throw Error('You do not have priority.');s.table.cards[id].faceDown=true;s.basins[who][fontEssence(c.cardId)]++;const p=ashenEffects[c.cardId]?.onBurn;if(p){d.stack.push({kind:'ability',program:p,context:{player:String(who),source:id}});d.priority=openPriority(['0','1'],String(who));}return settleAshenDuel(s);}
+
+export function readyAshenFonts(s:Battlefield,who:0|1){
+ const d=duel(s);
+ if(ashenOpeningPlayer(s)!==null||d.winner!==undefined||s.rules?.pending||d.ordering||d.callPermission)return [];
+ if(d.priority?d.priority.holder!==String(who):s.table.active!==who)return [];
+ return s.table.piles[`${who}:ley`].filter(id=>{
+  const card=s.table.cards[id];
+  return card.controller===who&&!card.faceDown&&!card.rotated;
+ });
+}
+
+function burnAshenFonts(original:Battlefield,who:0|1,ids:string[]){
+ if(!ids.length)throw Error('No Ready Fonts to burn.');
+ const state=structuredClone(original),d=duel(state);
+ for(const id of ids){
+  const card=state.table.cards[id];
+  card.faceDown=true;
+  state.basins[who][fontEssence(card.cardId)]++;
+ }
+ const previousSize=d.stack.length;
+ // Queue in reverse so burn effects resolve in battlefield order.
+ for(const id of [...ids].reverse()){
+  const effect=ashenEffects[state.table.cards[id].cardId]?.onBurn;
+  if(effect)d.stack.push({kind:'ability',program:effect,context:{source:id,player:String(who)}});
+ }
+ if(d.stack.length>previousSize)d.priority=openPriority(['0','1'],String(who));
+ state.table.events.push(ids.length===1?`Burned ${state.table.cards[ids[0]].name}.`:`Burned ${ids.length} Ready Fonts.`);
+ return settleAshenDuel(state);
+}
+
+export function burnInBruteDuel(original:Battlefield,id:string,who:0|1){
+ requireOpeningKept(original);
+ if(!readyAshenFonts(original,who).includes(id))throw Error('This Font cannot be burned.');
+ return burnAshenFonts(original,who,[id]);
+}
+
+export function burnAllAshenFonts(original:Battlefield,who:0|1){
+ requireOpeningKept(original);
+ return burnAshenFonts(original,who,readyAshenFonts(original,who));
+}
+
 export function nextAshenPhase(original:Battlefield){let s=structuredClone(original);requireIdle(s);const d=duel(s);
  if(d.phase==='main1'){d.phase='combat';d.combat={stage:'attack',attackers:[],blockers:{},blocked:[]};}
  else if(d.phase==='combat'){if(d.combat?.stage!=='finished')throw Error('Finish or skip the Skirmish first.');d.phase='main2';}

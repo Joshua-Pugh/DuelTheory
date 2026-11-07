@@ -1,8 +1,8 @@
 import type {Battlefield} from '../../../ashenBattlefieldState';
 import {canChooseAshenCombat,inspectAshenAttacker,inspectAshenBlocker} from '../duel';
 
-export type CombatCardIntent='attack'|'target'|'block'|'unblock';
-export type CombatCardView={intent?:CombatCardIntent;label?:string;reason?:string;selected?:boolean;attacking:boolean;blocking:boolean};
+export type CombatCardIntent='attack'|'target'|'block'|'unblock'|'effect-target';
+export type CombatCardView={intent?:CombatCardIntent;label?:string;reason?:string;blockTarget?:string;selected?:boolean;attacking:boolean;blocking:boolean};
 export function combatCardView(state:Battlefield,id:string,seat:0|1,selected:string[],target:string|null):CombatCardView{
  const c=state.table.cards[id],combat=state.rules?.duel?.combat;
  const assigned=!!combat&&Object.values(combat.blockers).some(ids=>ids.includes(id));
@@ -13,6 +13,9 @@ export function combatCardView(state:Battlefield,id:string,seat:0|1,selected:str
  if(c.controller===state.table.active&&combat?.attackers.includes(id))return {...view,intent:'target',selected:target===id,label:target===id?'Choose a blocker':'Choose to block'};
  if(c.controller!==seat)return view;
  if(assigned)return {...view,intent:'unblock',label:'Blocking · tap to remove'};
+ const legalAttackers=combat?.attackers.filter(id=>inspectAshenBlocker(state,id,c.instanceId).allowed)||[];
+ if(!target&&combat?.attackers.length===1&&legalAttackers.length===0)return {...view,reason:inspectAshenBlocker(state,combat.attackers[0],id).reason};
+ if(!target&&legalAttackers.length===1)return {...view,intent:'block',label:'Can block',blockTarget:legalAttackers[0]};
  if(target){const check=inspectAshenBlocker(state,target,id);return {...view,...(check.allowed?{intent:'block' as const,label:'Can block'}:{reason:check.reason})};}
  return view;
 }

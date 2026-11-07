@@ -12,6 +12,17 @@ function field(s:Battlefield,slug:string,zone='unit',seat=0){const key=id(s,slug
 function hand(s:Battlefield,slug:string,seat=0){const key=field(s,slug,'hand',seat);s.basins[seat].fury=99;s.basins[seat].untuned=99;return key;}
 function passes(s:Battlefield){if(s.rules!.duel!.ordering)s=confirmAshenTriggerOrder(s);let n=100;while(s.rules!.duel!.priority&&n--&&!s.rules?.pending)s=passAshenPriority(s,Number(s.rules!.duel!.priority!.holder) as 0|1);return s;}
 function combat(s:Battlefield){s.rules!.duel!.phase='combat';s.rules!.duel!.combat={stage:'attack',attackers:[],blockers:{},blocked:[]};return s;}
+it('skips both empty active-player combat stops even with a payable Tactic',()=>{
+ const initial=combat(setup()),attacker=field(initial,'frenzied-grunt');
+ initial.rules!.duel!.holdResponses=[false,false];
+ hand(initial,'ashen-strike');
+ const blocking=declareAshenAttackers(initial,[attacker]);
+ expect(blocking.rules!.duel!.priority).toBeNull();
+ expect(blocking.rules!.duel!.combat!.stage).toBe('block');
+ const finished=resolveAshenCombat(blocking);
+ expect(finished.rules!.duel!.priority).toBeNull();
+ expect(finished.rules!.duel!.combat!.stage).toBe('finished');
+});
 describe('complete Brute duel',()=>{
  it('offers a ready relic response and removes it while fatigued',()=>{
   const s=setup(),ring=field(s,'ring-of-the-ley','support');

@@ -38,7 +38,7 @@ it('handles an extra Bastion draw without replaying Refine or its original draw 
   const flow=next.rules?.pending?.flow,step=flow?.steps[0];
   if(flow&&step?.op==='select'){targets++;next=resumeBruteDuel(next,[enemy.instanceId]);}
   else if(flow&&step?.op==='mode')next=resumeBruteDuel(next,['draw']);
-  else if(flow&&step?.op==='choose'){bottom++;expect(targets).toBe(3);next=resumeBruteDuel(next,next.table.piles['0:hand'].slice(0,2));}
+  else if(flow&&step?.op==='choose'){bottom++;expect(targets).toBe(2);expect(next.rules!.nobleMarks?.[0]?.refined??0).toBe(0);next=resumeBruteDuel(next,next.table.piles['0:hand'].slice(0,2));}
   else if(next.rules!.duel!.priority)next=passAshenPriority(next,Number(next.rules!.duel!.priority!.holder) as 0|1);else break;
  }
  expect(targets).toBe(3);expect(bottom).toBe(1);expect(next.table.health[1]).toBe(17);expect(next.table.piles['0:hand']).toHaveLength(hand+1);expect(next.rules!.nobleMarks?.[0]?.refined).toBe(1);

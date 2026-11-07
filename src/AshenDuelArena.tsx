@@ -8,19 +8,23 @@ import {newAshenDuel} from './games/ashen/duel';
 import {ASHEN_CONTENT_REVISION,type AshenFaction} from './ashenDecks';
 import {readBattlefield,type Battlefield} from './ashenBattlefieldState';
 import './duelRoom.css';
+import {createArenaSkirmish} from './games/ashen/arena/skirmish';
+import {playAshenCue} from './games/ashen/arena/arenaAudio';
 import AshenStartScreen from './games/ashen/arena/AshenStartScreen';
 
 export default function AshenDuelArena({mobile=false}:{allowResume?:boolean;mobile?:boolean}={}){
+ const [skirmish,setSkirmish]=useState<{state:Battlefield;round:number}|null>(null);
  const [practice,setPractice]=useState(false);
  const [saved,setSaved]=useState(()=>readBattlefield());
  const [learning,setLearning]=useState(true);
  const [decks,setDecks]=useState<[AshenFaction,AshenFaction]>(['Brute','Noble']);
  const [seed,setSeed]=useState<number|null>(null),[game,setGame]=useState<Battlefield|null>(null);
- const start=()=>{setGame(null);setSeed(freshDuelSeed());};
+ const start=()=>{playAshenCue('coin');setGame(null);setSeed(freshDuelSeed());};
+ if(skirmish)return <AshenBattlefield key={skirmish.round} mobile={mobile} initialState={skirmish.state} playmat skirmish learning={false} onAgain={()=>setSkirmish({state:createArenaSkirmish(),round:skirmish.round+1})} onExit={()=>setSkirmish(null)}/>;
  if(practice)return <AshenPractice mobile={mobile} onExit={()=>setPractice(false)}/>;
- if(game)return <AshenBattlefield key={seed} mobile={mobile} initialState={game} learning={learning} onAgain={start} onExit={()=>{setSaved(readBattlefield());setGame(null);setSeed(null);}}/>;
+ if(game)return <AshenBattlefield key={seed} mobile={mobile} initialState={game} playmat={!mobile} learning={learning} onAgain={start} onExit={()=>{setSaved(readBattlefield());setGame(null);setSeed(null);}}/>;
  return <>
-  <AshenStartScreen decks={decks} onDeck={(seat,faction)=>setDecks(current=>{const next:[AshenFaction,AshenFaction]=[...current];next[seat]=faction;return next;})} learning={learning} onLearning={setLearning} onStart={start} onPractice={()=>setPractice(true)} legacySave={saved?.contentRevision!==ASHEN_CONTENT_REVISION} onResume={saved?.rules?.duel&&saved.rules.duel.winner==null?()=>setGame(saved):undefined}/>
+  <AshenStartScreen decks={decks} onDeck={(seat,faction)=>setDecks(current=>{const next:[AshenFaction,AshenFaction]=[...current];next[seat]=faction;return next;})} learning={learning} onLearning={setLearning} onStart={start} onPractice={()=>setPractice(true)} onSkirmish={()=>{playAshenCue('ready');setSkirmish({state:createArenaSkirmish(),round:0});}} legacySave={saved?.contentRevision!==ASHEN_CONTENT_REVISION} onResume={saved?.rules?.duel&&saved.rules.duel.winner==null?()=>setGame(saved):undefined}/>
   {seed!==null&&<OpeningCoinDialog key={seed} seed={seed} onExit={()=>setSeed(null)} onBegin={()=>setGame(newAshenDuel(decks,seed,openingCoin(seed).firstSeat))}/>}
  </>;
 }

@@ -132,8 +132,11 @@ export function completeOrPause(result:EffectResult<Battlefield>,label:string,wo
  // Refine's draw triggers resolve before its bottom-deck choice. Keep the trusted continuation;
  // emittedEvents prevents draws and their Refine bookkeeping from firing a second time on resume.
  if(result.pending&&result.state.rules?.duel&&step?.op==='choose'&&step.destination==='deck-bottom'&&fresh.some(e=>e.kind==='drawn')){
-  let state=drainTriggers(result.state,fresh,work);state.rules!.resumeAfterTriggers??=[];
-  state.rules!.resumeAfterTriggers.push({flow:result.pending,label,emittedEvents:result.events.length});
+  const deferred=fresh.filter(event=>event.kind==='refined');
+  const state=drainTriggers(result.state,fresh.filter(event=>event.kind!=='refined'),work);
+  result.pending.events=[...result.events.slice(0,emittedEvents),...fresh.filter(event=>event.kind!=='refined'),...deferred];
+  state.rules!.resumeAfterTriggers??=[];
+  state.rules!.resumeAfterTriggers.push({flow:result.pending,label,emittedEvents:result.events.length-deferred.length});
   state.table.events.push(`Waiting for draw triggers before completing: ${label}.`);return state;
  }
  if(result.pending){result.state.rules??=emptyAshenRules();result.state.rules.pending={flow:result.pending,label,work,emittedEvents};result.state.table.events.push(`Choose cards to continue: ${label}.`);return result.state;}

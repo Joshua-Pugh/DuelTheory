@@ -19,7 +19,7 @@ function finish(start:Battlefield){let s=start,steps=0;for(;steps<100;steps++){
 it('keeps Seraphine at 4/6 with Longbowman and both Runes through finite Plan/Refine damage chains',()=>{
  let s=newAshenDuel(['Noble','Noble'],42,0);s.basins[0].oath=99;const seraphine=put(s,'seraphine-royal-advisor');put(s,'royal-longbowman');const clarity=put(s,'rune-of-clarity','support'),foresight=put(s,'rune-of-foresight','support');
  s=finish(submitAshenAction(s,foresight,{player:'0',source:foresight},'foresight-plan'));expect(s.table.health[1]).toBe(19);
- s=finish(submitAshenAction(s,clarity,{player:'0',source:clarity},'clarity-refine'));expect(s.table.health[1]).toBe(13);expect(ashenStats(s,seraphine)).toMatchObject({attack:4,defense:6,bonuses:[]});expect(s.rules!.nobleMarks?.[0]).toMatchObject({planned:1,refined:1});
+ s=finish(submitAshenAction(s,clarity,{player:'0',source:clarity},'clarity-refine'));expect(s.table.health[1]).toBe(14);expect(ashenStats(s,seraphine)).toMatchObject({attack:4,defense:6,bonuses:[]});expect(s.rules!.nobleMarks?.[0]).toMatchObject({planned:1,refined:1});
  // Bastion is the stat-granting effect: it Fortifies both stats at End after Plan + Refine.
  s=advanceAshenTo(s,'end');expect(s.rules!.pending?.flow.context.source).toBe(s.table.piles['0:command'][0]);s=resumeBruteDuel(s,[seraphine]);while(s.rules!.duel!.priority)s=passAshenPriority(s,Number(s.rules!.duel!.priority!.holder) as 0|1);expect(ashenStats(s,seraphine)).toMatchObject({attack:5,defense:7});
 });

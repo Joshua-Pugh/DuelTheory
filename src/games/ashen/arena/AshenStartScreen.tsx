@@ -10,6 +10,7 @@ type Props={
   onLearning:(value:boolean)=>void;
   onStart:()=>void;
   onPractice:()=>void;
+  onSkirmish?:()=>void;
   onResume?:()=>void;
   legacySave?:boolean;
 };
@@ -19,7 +20,7 @@ const factions={
 } as const;
 
 /** A launch surface only. Every mode continues into the existing rules engine. */
-export default function AshenStartScreen({decks,onDeck,learning,onLearning,onStart,onPractice,onResume,legacySave}:Props){
+export default function AshenStartScreen({decks,onDeck,learning,onLearning,onStart,onPractice,onSkirmish,onResume,legacySave}:Props){
   const [mode,setMode]=useState<'home'|'local'>('home');
   const installed=typeof window!=='undefined'&&window.matchMedia('(display-mode: standalone)').matches;
   return <section className="at-start" data-mode={mode} aria-label="Ashen Throne start screen">
@@ -32,6 +33,7 @@ export default function AshenStartScreen({decks,onDeck,learning,onLearning,onSta
           <button className="at-start-mode" onClick={()=>setMode('local')}><Swords/><span><small>ON THIS DEVICE</small><strong>Local duel</strong><span>Choose two starter decks. Play both sides or share the screen.</span></span><ChevronRight/></button>
           <a className="at-start-mode" href="#/private/ashen"><Users/><span><small>ON TWO DEVICES</small><strong>Play a friend</strong><span>Create a room or join by code. Each player sees their own hand.</span></span><ChevronRight/></a>
         </div>
+        {onSkirmish&&<button className="at-start-resume" onClick={onSkirmish}>Try the new battlefield · Skirmish <ChevronRight size={18}/></button>}
         {onResume&&<button className="at-start-resume" onClick={onResume}>Resume local duel <ChevronRight size={18}/></button>}
         {onResume&&legacySave&&<p className="at-start-note">Your saved duel uses an older deck list. Start a new local duel to test the updated starters.</p>}
         {!installed&&<details className="at-install-help"><summary>More room to play on your phone</summary><p>Turn your phone sideways for a wider battlefield.</p><p>On iPhone, open Safari’s Share menu, choose <strong>Add to Home Screen</strong>, and turn on <strong>Open as Web App</strong> if shown. Launch DuelTheory from that icon to play without Safari’s tabs and address bar.</p><p>On Android, use <strong>Enter fullscreen</strong> in the duel’s settings when available.</p></details>}<p className="at-start-note">Two playable starter decks · Brutes & Nobles<br/>Working prototype. Computer opponents are still in development.</p>

@@ -79,7 +79,12 @@ it('does not expose another player’s pending Plan choices in a private room',a
 it('keeps a Command Station target choice with the effect owner and labels each target seat',async()=>{
  const s=setup(),source=s.table.piles['1:command'][0];const result=executeProgram(s,ashenAdapter,{version:1,id:'station-ping',label:'Foresight damage',steps:[{op:'select',selection:{filter:{zones:['command']},count:1,label:'Choose a Command Station'}},{op:'damage',targets:'targets',amount:1}]},{player:'1',source});result.state.rules!.pending={flow:result.pending!,label:'Foresight damage'};
  await mount(<AshenBattlefield initialState={result.state} learning={false}/>);expect(document.querySelector('[aria-label="Choose a Command Station"]')).toBeNull();await click(document.querySelector('.ab-choice-wait button')!);
- const dialog=document.querySelector('[aria-label="Choose a Command Station"]')!;expect(dialog.textContent).toContain('Player 1 · Command Station');expect(dialog.textContent).toContain('Player 2 · Command Station');
+ const prompt=document.querySelector('[aria-label="Choose cards on the battlefield"]');
+ expect(prompt?.textContent).toContain('Choose a Command Station');
+ const station=s.table.piles['0:command'][0];
+ expect(document.querySelectorAll('[data-combat-action="effect-target"]')).toHaveLength(2);
+ await click(document.querySelector(`[data-ashen-card="${station}"]`)!);
+ expect(document.querySelector('[aria-label="Player 1 battlefield"]')?.textContent).toContain('19 HP');
 });
 it('shows Command reductions in the hand, viewer and card menu',async()=>{
  const s=newAshenDuel(['Noble','Brute'],42,0),card=fixtureCard(s,'ashen-noble-high-strategist');if(card.zone!=='hand')moveAshenCard(s,card.instanceId,'hand');s.rules!.nobleMarks={0:{planned:1,refined:1}};await mount(<AshenBattlefield initialState={s} learning={false}/>);

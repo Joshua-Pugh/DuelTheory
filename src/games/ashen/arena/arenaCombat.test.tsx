@@ -20,7 +20,7 @@ let root:Root|undefined;
 afterEach(async()=>{if(root)await act(async()=>root!.unmount());root=undefined;document.body.innerHTML='';localStorage.clear();});
 function fixture(){const s=readyAshenDuel(['Brute','Noble'],42,0);for(const seat of [0,1] as const)for(const id of [...s.table.piles[`${seat}:hand`]])moveAshenCard(s,id,'deck');s.rules!.duel!.phase='combat';s.rules!.duel!.combat={stage:'attack',attackers:[],blockers:{},blocked:[]};return s;}
 function put(s:Battlefield,id:string,seat:0|1){const c=fixtureCard(s,id,seat);moveAshenCard(s,c.instanceId,'unit');c.rotated=false;return c.instanceId;}
-async function mount(s:Battlefield,seat:0|1,send:(command:AshenCommand)=>void){const host=document.createElement('div');document.body.append(host);root=createRoot(host);await act(async()=>root!.render(<AshenBattlefield remote={{state:s,seat,send}} learning={false}/>));}
+async function mount(s:Battlefield,seat:0|1,send:(command:AshenCommand)=>void,playmat=false){const host=document.createElement('div');document.body.append(host);root=createRoot(host);await act(async()=>root!.render(<AshenBattlefield remote={{state:s,seat,send}} playmat={playmat} learning={false}/>));}
 async function tap(selector:string){await act(async()=>(document.querySelector(selector) as HTMLElement).click());}
 it('uses actual legal actions for attack highlights and excludes fatigued Units and pending responses',()=>{
  const s=fixture(),a=put(s,'ashen-brute-frenzied-grunt',0),before=JSON.stringify(s);expect(combatCardView(s,a,0,[],null)).toMatchObject({intent:'attack',label:'Can attack'});expect(combatLinks(s,[a])[0]).toMatchObject({from:a,to:s.table.piles['1:command'][0],kind:'attack',preview:true});expect(JSON.stringify(s)).toBe(before);
@@ -45,6 +45,29 @@ it('allows direct attacker selection without a modal and sends the existing auth
 it('supports direct blocking and a separate readable inspector without sending an illegal assignment',async()=>{
  let s=fixture();const a=put(s,'ashen-brute-ashen-warhawk',0),b=put(s,'ashen-noble-crown-archer',1),send=vi.fn();s=declareAshenAttackers(s,[a]);await mount(s,1,send);await tap(`[data-ashen-card="${a}"]`);expect(document.querySelector(`[data-ashen-card="${b}"]`)?.getAttribute('data-combat-action')).toBe('block');await tap(`[data-ashen-card="${b}"]`);expect(send).toHaveBeenCalledWith({type:'block',attacker:a,blocker:b});
  await tap(`[aria-label="Read Crown Archer"]`);expect(document.querySelector('.ab-viewer-open')).not.toBeNull();expect(document.querySelector('.dt-action-dialog')).toBeNull();
+});
+it('assigns a legal blocker with a pointer drag and rejects an illegal drop',async()=>{
+ let s=fixture();
+ const attacker=put(s,'ashen-brute-ashen-warhawk',0);
+ const archer=put(s,'ashen-noble-crown-archer',1);
+ const ground=put(s,'ashen-noble-shieldbearer-noble',1);
+ s=declareAshenAttackers(s,[attacker]);
+ const send=vi.fn();
+ await mount(s,1,send,true);
+ const card=(id:string)=>document.querySelector<HTMLElement>(`[data-ashen-card="${id}"]`)!;
+ const board=document.querySelector<HTMLElement>('.ab-table')!;
+ const hit=vi.spyOn(document,'elementFromPoint').mockReturnValue(card(attacker));
+ const capture=vi.spyOn(board,'setPointerCapture').mockImplementation(()=>{});
+ try{
+  for(const blocker of [ground,archer]){
+   await act(async()=>{
+    card(blocker).dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,isPrimary:true,pointerId:1,clientX:30,clientY:140}));
+    board.dispatchEvent(new PointerEvent('pointermove',{bubbles:true,isPrimary:true,pointerId:1,clientX:30,clientY:40}));
+    board.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,isPrimary:true,pointerId:1,clientX:30,clientY:40}));
+   });
+  }
+  expect(send).toHaveBeenCalledExactlyOnceWith({type:'block',attacker,blocker:archer});
+ }finally{hit.mockRestore();capture.mockRestore();}
 });
 it('labels remaining Defense, damage and fatigued Standfast separately',()=>{
  const s=fixture(),id=put(s,'ashen-noble-crown-archer',1);s.table.cards[id].rotated=true;s.rules!.damage[id]=1;

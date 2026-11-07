@@ -26,6 +26,20 @@ function finish(start:Battlefield,choose?:(s:Battlefield)=>string[]){let s=start
  return s;
  }throw Error('Choice/trigger loop did not finish');}
 describe('Noble deck and mixed AT duels',()=>{
+ it('shares one Bastion reward across Plan and Refine and resets on the other turn',()=>{
+  let s=fixture();
+  const station=s.table.piles['0:command'][0];
+  const entity=ashenAdapter.entities(s).find(card=>card.id===station)!;
+  const signal=(kind:string)=>({kind,source:station,player:'0',entity});
+  const hand=s.table.piles['0:hand'].length;
+  s=finish(settleAshenDuel(drainTriggers(s,[signal('planned'),signal('refined'),signal('planned')])));
+  expect(s.table.piles['0:hand']).toHaveLength(hand+1);
+  s.rules!.duel!.phase='main2';
+  s=finish(nextAshenPhase(s));
+  expect(s.table.active).toBe(1);
+  s=finish(settleAshenDuel(drainTriggers(s,[signal('refined')])));
+  expect(s.table.piles['0:hand']).toHaveLength(hand+2);
+ });
  it('keeps Rune of Foresight targeting with its controller in either seat',()=>{
   for(const seat of [0,1] as const){
    let s=newAshenDuel(['Noble','Noble'],42,seat);s.table.active=seat;s.basins[seat].oath=50;
@@ -59,11 +73,11 @@ describe('Noble deck and mixed AT duels',()=>{
    expect(enemy.rules?.counters?.[id]?.dominion||0).toBe(0);
   }
  });
- it('states Bastion’s exact amount and adds one Untuned essence to the Basin',()=>{
+ it('states Bastion’s exact amount and restores two Station HP',()=>{
   const s=fixture(),id=source(s,'the-crown-s-bastion');moveAshenCard(s,id,'command');
-  expect(ashenCardMap.get('ashen-noble-the-crown-s-bastion')?.effectText).toContain('Add 1 Untuned essence to your Ley Basin');
+  expect(ashenCardMap.get('ashen-noble-the-crown-s-bastion')?.effectText).toContain('Restore 2 HP to your Command Station');
   const start=executeProgram(s,ashenAdapter,nobleEffects['ashen-noble-the-crown-s-bastion'].triggers![0].program,{source:id,player:'0'});
-  const done=continueProgram(start.state,ashenAdapter,start.pending!,['essence']);expect(done.state.basins[0].untuned).toBe(s.basins[0].untuned+1);expect(done.state.basins[0].oath).toBe(s.basins[0].oath);
+  const done=continueProgram(start.state,ashenAdapter,start.pending!,['heal']);expect(done.state.table.health[0]).toBe(s.table.health[0]+2);expect(done.state.basins[0]).toEqual(s.basins[0]);
  });
  it('registers every Noble catalog card with valid portable programs',()=>{
   const cards=[...ashenCardMap.values()].filter(c=>c.faction==='Noble');expect(cards).toHaveLength(43);

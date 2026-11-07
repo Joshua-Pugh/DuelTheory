@@ -18,7 +18,7 @@ export function rulesForCard(card:AshenCardData){
 }
 export function cleanTypeLine(card:AshenCardData){
  let value=(card.subtype||card.type).replace(/\s+/g,' ').replace(/--|–/g,'—').trim();
- const start=value.search(new RegExp(`(?:Legendary )?${card.type.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}`));
+ const start=value.search(new RegExp(`(?:Legendary |Basic |Advanced )?${card.type.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}`));
  if(start>0)value=value.slice(start);
  value=value.split('Ashen Throne')[0].replace(/\s+(?:Iron|Bronze|Brozne|Silver)\b.*$/,'').replace(/\s+A\s*\d+\s*\/.*$/,'').trim();
  return value;

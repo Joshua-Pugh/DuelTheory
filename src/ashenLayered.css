@@ -52,6 +52,7 @@
 /* DuelTheory field milestone: ensure type and subtype stay inside the ornate plaque.
    The original subtype remains in game data; the rendered label is clipped safely. */
 .layered-frame .ashen-frame-typeline{display:flex;align-items:center;justify-content:space-between;gap:1.3cqi;min-width:0;overflow:hidden;}
+.layered-frame .ashen-frame-title h3,.layered-frame .ashen-frame-typeline,.layered-frame .ashen-frame-footer{text-align:left;}
 .layered-frame .ashen-frame-typeline>span:first-child{display:block;flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.12;}
 .layered-frame .ashen-frame-typeline>.ashen-rarity-icon{flex-shrink:0;}
 .layered-frame .ashen-frame-effect{overflow:hidden;}

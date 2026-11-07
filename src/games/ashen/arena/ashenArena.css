@@ -689,7 +689,13 @@
   padding: 4px 10px;
   font-size: 12px;
   background: #211c17;
+  color: #f4e4b8;
 }
+.ab-field-choice {display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;color:#f9e8b6;font-size:12px;}
+.ab-arena .ab-card.ab-combat-effect-target {outline:2px solid #91e9cc;outline-offset:1px;}
+.ab-arena .ab-card.ab-combat-effect-target[aria-pressed="true"] {outline-color:#f5c567;}
+.ab-arena .ab-burn-all {margin:0;padding:2px 5px;min-height:24px;font-size:10px;white-space:nowrap;}
+.ab-arena .ab-ley header:has(.ab-burn-all) small {display:none;}
 .ab-clash-queue button small {
   font-size: 9px;
   color: #e2c286;

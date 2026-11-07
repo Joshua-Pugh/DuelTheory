@@ -37,7 +37,7 @@ describe('first Brute effects through the shared framework',()=>{
   const start=hand(s,'bloodfire-collapse');const before=start.s.table.piles['0:unit'].length+start.s.table.piles['1:unit'].length;
   s=deploy(start.s,start.id);
   expect(s.table.health).toEqual([20-before,20-before]);
-  expect(s.table.piles['0:unit']).toHaveLength(3);expect(s.table.piles['1:unit']).toHaveLength(0);
+  expect(s.table.piles['0:unit']).toHaveLength(1);expect(s.table.piles['1:unit']).toHaveLength(0);
  });
  it('resolves a sacrifice cost and draw as one undoable transaction',()=>{
   const {s,id}=hand(newBattlefield(true,()=>.4),'pit-digger-s-howl');const sacrifice=s.table.piles['0:unit'][0],deck=s.table.piles['0:deck'].length;

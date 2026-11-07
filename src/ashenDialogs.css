@@ -377,8 +377,12 @@
 .ab-opening-dialog>footer {position: static;flex: 0 0 auto;display: flex;gap: 10px;justify-content: flex-end;margin: 0;padding: 10px 0 0;border-top: 1px solid #697a5c;background: #18251f;}
 .ab-opening-dialog button {min-height: 44px;}
 .ab-shell .ab-opening-keep {background: #c6a24c;color: #17271d;font-weight: 700;}
-.ab-opening-read-nav {display: flex;align-items: center;gap: 8px;flex-wrap: wrap;margin-bottom: 10px;font-size: 13px;}
-.ab-opening-read-nav span {margin-right: auto;}
+.ab-opening-read-nav {display:grid;grid-template-columns:minmax(0,1fr) auto 40px 40px;align-items:center;gap:6px;margin-bottom:10px;font-size:13px;}
+.ab-opening-read-nav button:first-child {justify-self:start;}
+.ab-opening-read-nav button:nth-last-child(-n+2) {padding-inline:0;width:40px;}
+.ab-opening-read-nav span {white-space:nowrap;font-variant-numeric:tabular-nums;}
+.ab-effect-choice .ab-plan-reader {margin:12px 0;padding:12px;border:1px solid #8d784c;border-radius:8px;text-align:left;}
+.ab-plan-reader p {margin:6px 0 0;white-space:pre-line;}
 .ab-opening-read-content {display: grid;grid-template-columns: minmax(100px,240px) minmax(0,1fr);gap: 18px;align-items: start;}
 .ab-opening-read-content>.ashen-frame-card {width: 100%;min-width: 0;margin: 0;}
 .ab-opening-read-content h4 {font: 600 23px/1.2 Georgia,serif;margin: 0 0 8px;color: #efd59a;}

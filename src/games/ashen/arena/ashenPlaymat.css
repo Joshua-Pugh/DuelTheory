@@ -1,0 +1,185 @@
+/* Skirmish layout. The existing arena remains the source of card and control behavior. */
+.ab-arena.ab-duel.ab-playmat {
+  --arena-hand: clamp(78px, 18dvh, 158px);
+  grid-template-columns: minmax(0,1fr);
+  grid-template-rows: 32px minmax(0,1fr) var(--arena-hand) 18px;
+  grid-template-areas: 'tools' 'workspace' 'hand' 'notice';
+  gap: 3px;
+  background: #101210;
+}
+.ab-arena.ab-duel.ab-playmat .ab-workspace {
+  grid-template-columns: minmax(0,1fr);
+}
+.ab-arena.ab-duel.ab-playmat:has(>.ab-learning) {
+  grid-template-rows: 32px auto minmax(0,1fr) var(--arena-hand) 18px;
+  grid-template-areas: 'tools' 'guide' 'workspace' 'hand' 'notice';
+}
+.ab-arena.ab-duel.ab-playmat .ab-inspector { display: none; }
+.ab-arena.ab-duel.ab-playmat.ab-viewer-open .ab-inspector { display: block; }
+.ab-arena.ab-playmat .ab-viewer-toggle { display: inline-flex; }
+.ab-arena.ab-duel.ab-playmat .ab-table {
+  grid-template-rows: clamp(12px,4dvh,28px) minmax(0,1fr) auto minmax(0,1fr);
+  gap: 2px;
+  border-color: #746047;
+  background:
+    linear-gradient(180deg,#080d0bb0,#16171444 43%,#16171444 57%,#080d0bb0),
+    url('/ashen/battlefield/ruined-courtyard.png') center / 100% 100%,
+    #282823;
+}
+.ab-arena.ab-duel.ab-playmat .ab-half-grid {
+  grid-template-columns: clamp(48px,9vw,120px) minmax(0,1fr) minmax(0,1fr) clamp(42px,8vw,85px);
+  grid-template-rows: minmax(0,1fr) minmax(0,1.75fr);
+  grid-template-areas: 'command ley support piles' 'command unit unit piles';
+}
+.ab-arena.ab-duel.ab-playmat .ab-you .ab-half-grid {
+  grid-template-rows: minmax(0,1.75fr) minmax(0,1fr);
+  grid-template-areas: 'command unit unit piles' 'command ley support piles';
+}
+.ab-arena.ab-duel.ab-playmat .ab-zone {
+  background: #100e0b22;
+  border-color: transparent;
+  box-shadow: none;
+}
+.ab-arena.ab-duel.ab-playmat .ab-zone header:not(:has(button)),
+.ab-arena.ab-duel.ab-playmat .ab-zone header>span,
+.ab-arena.ab-duel.ab-playmat .ab-zone header>small,
+.ab-arena.ab-duel.ab-playmat .ab-zone-empty,
+.ab-arena.ab-duel.ab-playmat .ab-readiness,
+.ab-arena.ab-duel.ab-playmat .ab-spent,
+.ab-arena.ab-duel.ab-playmat .ab-combat-tag {
+  display: none;
+}
+.ab-arena.ab-duel.ab-playmat .ab-zone header:has(button) {
+  position: absolute;
+  inset: 2px 4px auto auto;
+  z-index: 5;
+  height: auto;
+}
+.ab-arena.ab-duel.ab-playmat .ab-card-row { height: 100%; }
+.ab-arena.ab-duel.ab-playmat .ab-ley:has(header button) .ab-card-row { padding-inline-end: 74px; }
+.ab-font-cascade {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  isolation: isolate;
+}
+.ab-arena.ab-playmat .ab-font-spent .ab-card-face {
+  animation: ab-font-flip 230ms ease-out;
+}
+@keyframes ab-font-flip {
+  from { scale: .05 1; }
+  to { scale: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ab-arena.ab-playmat .ab-font-spent .ab-card-face { animation: none; }
+}
+.ab-arena.ab-duel.ab-playmat .ab-ley .ab-font-cascade>.ab-card-wrap { min-width: 0; }
+.ab-font-cascade>.ab-card-wrap+.ab-card-wrap { margin-inline-start: -12px; }
+
+.ab-font-cascade .ab-card-face { pointer-events: none; }
+@media (hover: hover) and (pointer: fine) {
+  .ab-arena.ab-duel.ab-playmat .ab-ley:has(.ab-font-cascade) .ab-card:hover {
+    translate: none;
+  }
+
+}
+.ab-arena.ab-duel.ab-playmat .ab-drag-blocker {
+  touch-action: none;
+  cursor: grab;
+  box-shadow: 0 0 0 1px #81d2b9,0 4px 8px #000b;
+}
+.ab-arena.ab-duel.ab-playmat .ab-drag-target {
+  outline: 2px solid #b1ffdc;
+  outline-offset: 2px;
+}
+.ab-keyword-icons {
+  position: absolute;
+  bottom: 15px;
+  left: 1px;
+  z-index: 2;
+  display: flex;
+  gap: 1px;
+}
+.ab-keyword-icons>span {
+  display: grid;
+  place-items: center;
+  width: clamp(12px,1.6vw,20px);
+  aspect-ratio: 1;
+  color: #ffe4a6;
+  border: 1px solid #aa8a51;
+  border-radius: 4px;
+  background: #15140e;
+}
+.ab-keyword-icons svg { width: 80%; }
+.ab-playmat .ab-opposing .ab-keyword-icons svg { rotate: 180deg; }
+.ab-arena.ab-duel.ab-playmat .ab-ley .ab-card.ab-font-spent .ab-card-face {
+  opacity: 1;
+  filter: none;
+}
+.ab-arena.ab-duel.ab-playmat .ab-font-cascade .ab-card:is(:hover,:focus-visible)::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border: 2px solid #ffe6a5;
+  border-radius: inherit;
+  box-shadow: inset 0 0 6px #ffda7066;
+}
+.ab-arena.ab-duel.ab-playmat .ab-command {
+  background: #17130ec4;
+  border-color: #aa885277;
+}
+.ab-arena.ab-duel.ab-playmat .ab-player {
+  background: #151612cd;
+  padding-inline: 8px;
+}
+.ab-arena.ab-duel.ab-playmat .ab-unit .ab-card-row {
+  justify-content: safe center;
+}
+.ab-arena.ab-duel.ab-playmat .ab-card-face {
+  filter: drop-shadow(0 3px 3px #000b);
+}
+.ab-arena.ab-duel.ab-playmat .ab-combat-read {
+  width: 20px;
+  height: 20px;
+  min-height: 20px;
+  padding: 0;
+}
+.ab-arena.ab-duel.ab-playmat .ab-combat-read svg {
+  width: 12px;
+  height: 12px;
+}
+.ab-arena.ab-duel.ab-playmat .ab-center {
+  min-height: 0;
+  max-height: 100px;
+  background: linear-gradient(90deg,#17150eed,#211d13e8,#17150eed);
+  border-color: #a68751;
+}
+.ab-arena.ab-duel.ab-playmat .ab-center .ab-phase-controls {
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.ab-arena.ab-duel.ab-playmat .ab-center .ab-step-actions {
+  flex: 1 1 260px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+.ab-arena.ab-duel.ab-playmat .ab-center .ab-step-actions>span {
+  flex: 1 1 150px;
+  white-space: normal;
+}
+.ab-arena.ab-duel.ab-playmat .ab-hand {
+  background: radial-gradient(ellipse at 50% 100%,#4b3927,#171712 75%);
+  border: 0;
+}
+.ab-arena.ab-playmat .ab-pile-dialog .ashen-frame-card {
+  width: min(110px,25vw);
+  margin: 0 auto 5px;
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .ab-arena.ab-duel.ab-playmat { --arena-hand: 68px; }
+  .ab-arena.ab-duel.ab-playmat .ab-table { padding: 2px; }
+  .ab-arena.ab-duel.ab-playmat .ab-half { gap: 0; }
+  .ab-arena.ab-duel.ab-playmat .ab-center { padding: 2px 5px; }
+  .ab-arena.ab-duel.ab-playmat .ab-turn { font-size: 9px; }
+}

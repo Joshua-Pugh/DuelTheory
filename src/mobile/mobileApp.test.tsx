@@ -71,7 +71,7 @@ it("starts the bundled Brute/Noble duel after the coin flip and draws both hands
     0,
   );
   expect(document.querySelectorAll(".dt-card-back").length).toBeGreaterThan(0);
-  expect(document.body.textContent).toContain("Ley Basin");
+  expect(document.body.textContent).toMatch(/ley basin/i);
   expect(document.body.textContent).toContain("Ossuary");
   expect(document.body.textContent).not.toContain("could not open");
   const current=JSON.parse(localStorage.getItem(BATTLEFIELD_KEY)!);
