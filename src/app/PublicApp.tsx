@@ -6,6 +6,7 @@ import '../platformPages.css';
 import './publicApp.css';
 const Arena=lazy(()=>import('../AshenDuelArena'));
 const Cards=lazy(()=>import('../AshenThrone'));
+const Rules=lazy(()=>import('../games/ashen/AshenRulesPage'));
 const Table=lazy(()=>import('../TableCompanion'));
 const Account=lazy(()=>import('../account/AccountPanel'));
 const Match=lazy(()=>import('../mobile/MobilePrivateRoom'));
@@ -20,7 +21,8 @@ export default function PublicApp(){
  {route==='home'&&<><section className="dt-public-intro"><div><p className="eyebrow">ASHEN FORGE GAMES</p><h1>Ashen Throne</h1><p>Command your Frontline. Wield the Ley. Break the enemy’s Command Station.</p><p>Play the Brute and Noble prototype decks on one device or invite a friend to a private match.</p><div className="builder-actions"><button className="primary" onClick={()=>go('play')}>Play Ashen Throne</button><button className="secondary" onClick={()=>go('cards')}>Browse the cards</button></div><small>Working prototype · Solo AI is in development.</small></div><img src="/ashen/artwork/ashen-noble-garrett-of-ashenfield.webp" alt="Garrett of Ashenfield"/></section><section className="panel padded"><h2>Playing at a physical table?</h2><p>Set your starting life, counters and damage sources. Invite friends by QR and track the game your way.</p><button className="secondary" onClick={()=>go('companion')}>Open Table Companion</button></section><p className="dt-site-tagline">Build. Simulate. Master.</p></>}
  {route==='play'&&<Arena/>}
  {route==='match'&&<Match mobile={false}/>}
- {['cards','decks','rules'].includes(route)&&<Cards key={route} initialSection={route==='cards'?'cards':route==='decks'?'builder':'rules'} onPlay={()=>go('play')}/>}
+ {route==='rules'&&<Rules/>}
+ {(route==='cards'||route==='decks')&&<Cards key={route} initialSection={route} onPlay={()=>go('play')}/>}
  {route==='companion'&&<Table/>}
  {route==='about'&&<AboutDuelTheory/>}
  {route==='settings'&&<><Account/><LegacyDeckExport/></>}

@@ -17,6 +17,7 @@ export const ASHEN_RULES=[
 ];
 export const ASHEN_KEYWORDS=[
  ['Aegis','Enemy effects cannot select this Unit as a target. Global effects that do not target still affect it.'],
+ ['Banish','Move the card to its owner’s Banished pile. Banishing a card does not destroy or discard it. Only an effect that refers to banished cards can retrieve it.'],
  ['Burn','Turn a Ready Ley Font face down to add one of its printed essence type to the Ley Basin. Apply its Burn effect, if any. A spent or fatigued Font cannot be burned again until readied.'],
  ['Charge','This Unit can attack while Unready. Charge does not bypass Fatigue.'],
  ['Command','The current engine reduces this card’s generic essence cost by the number of Plan and Refine actions its controller has performed this turn, to a minimum of zero. Colored costs are unchanged.'],

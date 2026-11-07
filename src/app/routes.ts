@@ -11,4 +11,4 @@ export function publicRoute(hash:string,search=''):PublicRoute{
  if(['ashen','rules','help'].includes(name))return 'rules';
  return ['home','about','settings'].includes(name)?name as PublicRoute:'home';
 }
-export const PUBLIC_LINKS=[['Home','home'],['Play Ashen Throne','play'],['Deck Builder','decks'],['Card Library','cards'],['Table Companion','companion'],['About','about']] as const;
+export const PUBLIC_LINKS=[['Home','home'],['Play Ashen Throne','play'],['Starter Decks','decks'],['Card Library','cards'],['Rules','rules'],['Table Companion','companion'],['About','about']] as const;

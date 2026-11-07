@@ -9,7 +9,7 @@ import CostSymbols from './ResourceCost';
 import {cardPresentation,rulesForCard,cleanTypeLine,type AshenCardData} from './ashenPresentation';
 import type {FrameTemplate} from './cardStudio';
 import {getArtwork} from './cardStudio';
-import {loadCardLook,type FrameLook} from './framePersonalization';
+import {DEFAULT_LOOK,loadCardLook,type FrameLook} from './framePersonalization';
 const metalRamps={
  Noble:[[.025,.08,.18,.35,.58,.8,.96],[.02,.055,.12,.25,.44,.67,.94],[.015,.025,.055,.11,.23,.43,.87]],
  Brute:[[.02,.09,.2,.37,.57,.79,.96],[.025,.095,.21,.39,.59,.8,.96],[.025,.1,.22,.41,.61,.82,.97]],
@@ -21,7 +21,7 @@ const inlayRamps={
  Neutral:[[.02,.07,.16,.28,.43,.65,.93],[.025,.075,.17,.3,.45,.67,.94],[.03,.09,.19,.33,.49,.71,.96]]
 };
 function ToneFilter({id,channels}:{id:string;channels:number[][]}){return <filter id={id} colorInterpolationFilters="sRGB"><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncR type="table" tableValues={channels[0].join(' ')}/><feFuncG type="table" tableValues={channels[1].join(' ')}/><feFuncB type="table" tableValues={channels[2].join(' ')}/></feComponentTransfer></filter>;}
-export default function AshenCardFrame({card,size='full',className='',template='ornate',artworkUrl,look}:{card:AshenCardData;size?:'full'|'mini';className?:string;template?:FrameTemplate;artworkUrl?:string;look?:FrameLook}){
+export default function AshenCardFrame({card,size='full',className='',template='ornate',artworkUrl,look,publishedArtOnly=false}:{card:AshenCardData;size?:'full'|'mini';className?:string;template?:FrameTemplate;artworkUrl?:string;look?:FrameLook;publishedArtOnly?:boolean}){
  const uid=useId().replace(/:/g,'');
  const artworkKey=card.id??card.cardId??'';
  const [storedArt,setStoredArt]=useState<{key:string;url:string}>();
@@ -29,9 +29,9 @@ export default function AshenCardFrame({card,size='full',className='',template='
  const [,setLookVersion]=useState(0);
  useEffect(()=>{const changed=(event:Event)=>{if((event as CustomEvent<string>).detail===artworkKey)setLookVersion(v=>v+1);};window.addEventListener('dueltheory-card-look',changed);return()=>window.removeEventListener('dueltheory-card-look',changed);},[artworkKey]);
  const bundledArt=defaultAshenArtwork(artworkKey);
- const effectiveLook=look??loadCardLook(artworkKey,bundledArt?.crop);
+ const effectiveLook=look??(publishedArtOnly?{...DEFAULT_LOOK,...bundledArt?.crop}:loadCardLook(artworkKey,bundledArt?.crop));
  useEffect(()=>{const changed=(event:Event)=>{if((event as CustomEvent<string>).detail===artworkKey)setArtVersion(v=>v+1);};window.addEventListener('dueltheory-artwork',changed);return()=>window.removeEventListener('dueltheory-artwork',changed);},[artworkKey]);
- useEffect(()=>{if(artworkUrl||card.image||!artworkKey.startsWith('ashen-'))return;let disposed=false;let url:string|undefined;setStoredArt(undefined);getArtwork(artworkKey).then(blob=>{if(blob&&!disposed){url=URL.createObjectURL(blob);setStoredArt({key:artworkKey,url});}}).catch(()=>{});return()=>{disposed=true;if(url)URL.revokeObjectURL(url);};},[artworkKey,artworkUrl,card.image,artVersion]);
+ useEffect(()=>{if(publishedArtOnly||artworkUrl||card.image||!artworkKey.startsWith('ashen-'))return;let disposed=false;let url:string|undefined;setStoredArt(undefined);getArtwork(artworkKey).then(blob=>{if(blob&&!disposed){url=URL.createObjectURL(blob);setStoredArt({key:artworkKey,url});}}).catch(()=>{});return()=>{disposed=true;if(url)URL.revokeObjectURL(url);};},[artworkKey,artworkUrl,card.image,artVersion,publishedArtOnly]);
  const {faction,resourceCost,outfitCost}=cardPresentation(card);
  const rules=rulesForCard(card);
  let text=rules.text;
@@ -49,7 +49,7 @@ export default function AshenCardFrame({card,size='full',className='',template='
  const subtype=cleanTypeLine(card);
  const showOutfit=outfitCost!==undefined&&!/\bOutfit\s*\(/i.test(text);
  const stats=card.type==='Command Station'?(stationHP?`HP ${stationHP}`:'HP —'):card.attack!=null&&card.defense!=null?`A${card.attack} / D${card.defense}`:'';
- const art=artworkUrl??card.image??(storedArt?.key===artworkKey?storedArt.url:undefined)??bundledArt?.image;
+ const art=artworkUrl??card.image??(!publishedArtOnly&&storedArt?.key===artworkKey?storedArt.url:undefined)??bundledArt?.image;
  return <article className={`ashen-frame-card frame-ornate layered-frame ${faction.toLowerCase()} ${size==='mini'?'mini':''} ${expanded?'rules-expanded':''} ${hasStats?'has-stats':'statless-frame'} ${className}`} data-legacy-template={template} data-faction={faction} aria-label={`${card.name} ${card.type} card`} style={{'--art-zoom':effectiveLook.zoom,'--art-x':`${effectiveLook.panX}%`,'--art-y':`${effectiveLook.panY}%`} as CSSProperties}>
   <svg className="ashen-material-filters" aria-hidden="true"><defs><ToneFilter id={`${uid}-metal`} channels={metalRamps[faction]}/><ToneFilter id={`${uid}-inlay`} channels={inlayRamps[faction]}/></defs></svg>
   <div className="ashen-frame-art paper inset"><div className="ashen-frame-artfill">{art?<img className="ashen-frame-art-image" src={art} alt={`${card.name} artwork`}/>:<><span className="ashen-frame-watermark">AT</span></>}</div></div>
