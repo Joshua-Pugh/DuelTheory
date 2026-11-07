@@ -1,13 +1,22 @@
-.afc-lesson{max-width:820px;margin:24px auto;padding:clamp(16px,4vw,32px);display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:20px;background:#1d3328;color:#f7edcc}
+.afc-lesson{width:min(94vw,1040px);max-width:none;max-height:92dvh;margin:auto;padding:clamp(18px,4vw,36px);grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);align-items:center;gap:clamp(16px,4vw,36px);background:#15271f;color:#f7edcc;border:1px solid #b99a54;border-radius:18px;box-shadow:0 24px 70px #0009;overflow:auto}
+.afc-lesson[open]{display:grid}
+.afc-lesson::backdrop{background:#080e0bc4}
 .afc-lesson header{grid-column:1/-1}
+.afc-lesson header p{color:#e1c786;margin:0 0 6px}
+.afc-lesson h1{font:700 clamp(1.55rem,4vw,2.75rem) Georgia,serif;margin:0}
 .afc-lesson p{line-height:1.5}
-.afc-card{position:relative;width:min(100%,300px);margin-inline:auto}
+.afc-card{position:relative;width:min(100%,420px,45dvh);margin-inline:auto}
 .afc-card .ashen-frame-card{width:100%;max-width:none;min-width:0;margin:0}
-.afc-region{position:absolute;z-index:5;background:#ffe39730;border:2px solid #ffe397;border-radius:6px;box-shadow:0 0 10px #ffe39790}
+.afc-region{position:absolute;z-index:5;background:#ffe39730;border:2px solid #ffe397;border-radius:6px;box-shadow:0 0 10px #ffe39790;cursor:pointer}
 .afc-name{top:6%;left:10%;width:61%;height:9%}
 .afc-cost{top:6%;right:8%;width:21%;height:9%}
 .afc-type{top:46%;left:7%;width:85%;height:7%}
 .afc-stats{bottom:5%;right:5%;width:21%;height:12%}
 .afc-ability{top:54%;left:7%;width:85%;height:33%}
 .afc-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
-@media(max-width:600px){.afc-lesson{grid-template-columns:1fr}.afc-card{width:min(100%,240px)}}
+.afc-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:9px 14px;border-radius:9px;border:1px solid #a68f54;background:#263d31;color:#f7edcc;font:inherit;font-weight:650;cursor:pointer}
+.afc-button:hover{background:#355544}
+.afc-primary{background:#e3bf69;color:#18271e;border-color:#efcf82}
+.afc-primary:hover{background:#f2d48c}
+.afc-button:focus-visible,.afc-region:focus-visible{outline:2px solid #fff0be;outline-offset:3px}
+@media(max-width:600px){.afc-lesson{grid-template-columns:1fr}.afc-card{width:min(100%,300px,40dvh)}}
