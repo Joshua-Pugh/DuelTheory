@@ -30,7 +30,8 @@ export function validateEffectProgram(value:unknown):string[]{
    if(step.op==='draw')return amount(step.count);
    if(step.op==='resource')return key(step.resource)&&amount(step.amount);
    if(step.op==='damage')return targets(step.targets)&&amount(step.amount);
-   if(step.op==='plan'||step.op==='refine')return integer(step.count,1,50);
+   if(step.op==='plan')return integer(step.count,1,50);
+   if(step.op==='refine')return integer(step.count,1,50)&&(step.bottomCount===undefined||integer(step.bottomCount,1,50));
    if(step.op==='signal')return key(step.name);
    if(step.op==='nullify')return targets(step.targets);
    if(step.op==='fortify')return targets(step.targets)&&integer(step.amount,1,999);

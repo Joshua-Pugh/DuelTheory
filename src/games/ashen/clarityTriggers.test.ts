@@ -16,11 +16,11 @@ it('resolves one Clarity trigger per Refine draw before returning to bottom-deck
     next=resumeBruteDuel(next,[station.instanceId]);
    }else if(flow&&step?.op==='choose'){
     expect(targets).toBe(2);expect(next.table.health[other]).toBe(18);expect(next.table.piles[`${seat}:hand`]).toHaveLength(count+2);expect(next.table.piles[`${seat}:deck`]).toHaveLength(deck-2);bottom=true;
-    next=resumeBruteDuel(next,next.table.piles[`${seat}:hand`].slice(0,2));
+    next=resumeBruteDuel(next,next.table.piles[`${seat}:hand`].slice(0,1));
    }else if(next.rules!.duel!.priority)next=passAshenPriority(next,Number(next.rules!.duel!.priority!.holder) as 0|1);
    else break;
   }
-  expect(targets).toBe(2);expect(bottom).toBe(true);expect(next.table.health[other]).toBe(18);expect(next.table.piles[`${seat}:hand`]).toHaveLength(count);expect(next.rules!.nobleMarks?.[seat]?.refined).toBe(1);expect(next.rules!.resumeAfterTriggers||[]).toHaveLength(0);expect(next.table.events.filter(e=>e.startsWith('Triggered:')&&e.includes('Rune of Clarity'))).toHaveLength(2);
+  expect(targets).toBe(2);expect(bottom).toBe(true);expect(next.table.health[other]).toBe(18);expect(next.table.piles[`${seat}:hand`]).toHaveLength(count+1);expect(next.rules!.nobleMarks?.[seat]?.refined).toBe(1);expect(next.rules!.resumeAfterTriggers||[]).toHaveLength(0);expect(next.table.events.filter(e=>e.startsWith('Triggered:')&&e.includes('Rune of Clarity'))).toHaveLength(2);
  }
 });
 it('counts the start-of-turn draw and does not damage the Station until its selected trigger resolves',()=>{
@@ -38,8 +38,8 @@ it('handles an extra Bastion draw without replaying Refine or its original draw 
   const flow=next.rules?.pending?.flow,step=flow?.steps[0];
   if(flow&&step?.op==='select'){targets++;next=resumeBruteDuel(next,[enemy.instanceId]);}
   else if(flow&&step?.op==='mode')next=resumeBruteDuel(next,['draw']);
-  else if(flow&&step?.op==='choose'){bottom++;expect(targets).toBe(2);expect(next.rules!.nobleMarks?.[0]?.refined??0).toBe(0);next=resumeBruteDuel(next,next.table.piles['0:hand'].slice(0,2));}
+  else if(flow&&step?.op==='choose'){bottom++;expect(targets).toBe(2);expect(next.rules!.nobleMarks?.[0]?.refined??0).toBe(0);next=resumeBruteDuel(next,next.table.piles['0:hand'].slice(0,1));}
   else if(next.rules!.duel!.priority)next=passAshenPriority(next,Number(next.rules!.duel!.priority!.holder) as 0|1);else break;
  }
- expect(targets).toBe(3);expect(bottom).toBe(1);expect(next.table.health[1]).toBe(17);expect(next.table.piles['0:hand']).toHaveLength(hand+1);expect(next.rules!.nobleMarks?.[0]?.refined).toBe(1);
+ expect(targets).toBe(3);expect(bottom).toBe(1);expect(next.table.health[1]).toBe(17);expect(next.table.piles['0:hand']).toHaveLength(hand+2);expect(next.rules!.nobleMarks?.[0]?.refined).toBe(1);
 });

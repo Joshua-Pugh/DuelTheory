@@ -72,5 +72,5 @@ it('assigns a legal blocker with a pointer drag and rejects an illegal drop',asy
 it('labels remaining Defense, damage and Unready separately',()=>{
  const s=fixture(),id=put(s,'ashen-noble-crown-archer',1);s.table.cards[id].unready=true;s.rules!.damage[id]=1;
  const html=renderToStaticMarkup(<AshenBattlefieldCard state={s} seat={1} id={id} hand={false} selected={false} combat={{attacking:false,blocking:false}} onClick={()=>{}} onActions={()=>{}} onRead={()=>{}} onHover={()=>{}} onDrag={()=>{}}/>);
- expect(html).toContain('2 Attack, 1 of 2 Defense remaining');expect(html).toContain('Unready');expect(html).toContain('1 dmg');
+ expect(html).toContain('2 Attack, 1 of 2 Defense remaining');expect(html).toContain('Unready');expect(html).toContain('class="ab-damaged-defense">1D');
 });

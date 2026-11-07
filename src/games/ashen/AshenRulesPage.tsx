@@ -44,7 +44,6 @@ const definitions:Record<string,string>={
  'Exhaust / Fatigue':'To Exhaust a Ready card, mark it Fatigued as the cost of its ability. Fatigued Units cannot attack, block or Exhaust. Clear Fatigue during the controller’s next Start Phase.',
  Outfit:'During your Main Phase, pay the listed cost to attach the Relic to a legal friendly Unit. It grants its printed bonuses or abilities while attached.',
  Reckless:'This Unit must attack if able.',
- 'Refine N':'Draw N cards, then choose N cards from your hand to put on the bottom of your deck.',
  Sacrifice:'Move a card you control to its owner’s Ossuary as the cost or effect directs.',
  Siege:'This Unit deals double combat damage to Command Stations. It cannot block Soar or Ranged attackers.',
  'Tokens and named counters':'Tokens have the type, faction, stats and keywords named by the effect that creates them. Fury, Momentum and Dominion counters follow the instructions on their cards. Counters are separate from Essence.'

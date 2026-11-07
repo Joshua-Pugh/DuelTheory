@@ -186,3 +186,10 @@
   .ab-arena.ab-duel.ab-playmat .ab-center { padding: 2px 5px; }
   .ab-arena.ab-duel.ab-playmat .ab-turn { font-size: 9px; }
 }
+.ab-arena .ab-card-badges {position:absolute;top:15%;right:7%;z-index:3;display:flex;align-items:center;gap:2px;pointer-events:none;}
+.ab-arena .ab-opposing .ab-card-badges {top:auto;bottom:15%;right:auto;left:7%;flex-direction:row-reverse;}
+.ab-arena .ab-card-badges .ab-keyword-icons,.ab-arena .ab-card-badges .ab-fatigue-counter {position:static;}
+.ab-arena .ab-card-badges .ab-fatigue-counter {width:13px;height:13px;border-width:1px;font-size:9px;}
+.ab-arena .ab-card-badges .ab-keyword-icons>span {width:clamp(11px,1.2vw,16px);}
+.ab-arena .ab-fortify {top:15%;left:7%;right:auto;bottom:auto;z-index:3;min-width:15px;height:15px;font-size:9px;}
+.ab-arena .ab-opposing .ab-fortify {top:auto;left:auto;right:7%;bottom:18%;}

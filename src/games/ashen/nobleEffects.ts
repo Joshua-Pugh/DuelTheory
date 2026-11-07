@@ -4,7 +4,7 @@ const units:Selector={zones:['unit'],types:['Unit']},nobles:Selector={...units,t
 const p=(id:string,label:string,steps:EffectStep[],rest:Partial<EffectProgram>={}):EffectProgram=>({version:1,id,label,steps,...rest});
 const select=(filter:Selector,label:string,count=1,min?:number):EffectStep=>({op:'select',selection:{filter,count,label,...(min===undefined?{}:{min})}});
 const fortify=(amount=1,targets:'source'|'targets'|Selector='targets'):EffectStep=>({op:'fortify',targets,amount});
-const plan=(count=1):EffectStep=>({op:'plan',count}),refine=(count=1):EffectStep=>({op:'refine',count});
+const plan=(count=1):EffectStep=>({op:'plan',count}),refine=():EffectStep=>({op:'refine',count:2,bottomCount:1});
 const flag=(name:string)=>({kind:'flag' as const,flag:name});
 const damage=(amount:number):EffectStep=>({op:'damage',targets:'targets',amount});
 const stationPing=(n:number):EffectStep[]=>[select(stations,'Choose a Command Station'),damage(n)];
@@ -14,7 +14,7 @@ const trigger=(id:string,event:string,steps:EffectStep[],zones=['unit'],subject:
 const mode=(id:string,label:string,steps:EffectStep[])=>({id,label,steps});
 const choice=(options:{id:string;label:string;steps:EffectStep[];when?:{kind:'flag';flag:string}}[],max=1,allIf?:string,min=1):EffectStep=>({op:'mode',options,max,min,...(allIf?{allIf:flag(allIf)}:{})});
 const rules:Record<string,AshenEffectDefinition>={
- 'shieldbearer-noble':{coverage:'implemented',keywords:['Standfast'],onPlay:p('shieldbearer-entry','Refine 1',[refine()])},
+ 'shieldbearer-noble':{coverage:'implemented',keywords:['Standfast'],onPlay:p('shieldbearer-entry','Refine',[refine()])},
  'spearman-of-the-crown':{coverage:'implemented',onStart:p('spearman-start','Plan 1',[plan()]),triggers:[trigger('spearman-fortify','planned',[fortify(1,'source')])]},
  'court-scribe':{coverage:'implemented',onPlay:p('scribe-entry','Plan 1',[plan()])},
  'banner-guard':{coverage:'implemented',keywords:['Standfast']},
@@ -22,19 +22,19 @@ const rules:Record<string,AshenEffectDefinition>={
  'crown-archer':{coverage:'implemented',keywords:['Ranged','Standfast'],triggers:[trigger('archer-plan','planned',stationPing(1))]},
  'watchtower-scout':{coverage:'implemented',keywords:['Ranged'],onPlay:p('scout-entry','Plan 1',[plan()]),triggers:[trigger('scout-draw','fortified',[{op:'draw',count:1}],['unit'],nobles)]},
  'court-strategist':{coverage:'implemented',keywords:['Command'],onPlay:p('strategist-entry','Fortify a Noble',[select({...nobles,controller:'any'},'Choose a Noble to Fortify'),fortify()]),activated:[p('strategist-plan','Exhaust + Oath: Plan 1, then draw 1',[plan(),{op:'draw',count:1}],{cost:{exhaust:true,resources:{oath:1}}})]},
- 'royal-guard':{coverage:'implemented',onStart:p('guard-start','Refine 1',[refine()]),triggers:[trigger('guard-refine','refined',[{op:'modify',targets:'source',stats:{attack:1},duration:'turn'}])]},
+ 'royal-guard':{coverage:'implemented',onStart:p('guard-start','Refine',[refine()]),triggers:[trigger('guard-refine','refined',[{op:'modify',targets:'source',stats:{attack:1},duration:'turn'}])]},
  'ballista-crew':{coverage:'implemented',keywords:['Siege']},
- 'griffin-knight-of-ashenfield':{coverage:'implemented',keywords:['Soar'],onPlay:p('griffin-entry','Refine 2',[refine(2)])},
+ 'griffin-knight-of-ashenfield':{coverage:'implemented',keywords:['Soar'],onPlay:p('griffin-entry','Refine',[refine()])},
  'archivist-of-the-crown':{coverage:'implemented',triggers:[trigger('archivist-bottom','bottomed',[{op:'resource',resource:'untuned',amount:1}])]},
  'high-strategist':{coverage:'implemented',keywords:['Command'],onPlay:p('high-entry','Plan 3',[plan(3)]),activated:[p('high-choice','Exhaust: Plan 2 and draw, or add Oath',[choice([mode('plan','Plan 2, then draw 1',[plan(2),{op:'draw',count:1}]),mode('oath','Add 1 Oath',[{op:'resource',resource:'oath',amount:1}])])],{cost:{exhaust:true}})]},
  'griffin-lancer':{coverage:'implemented',keywords:['Soar'],triggers:[{...trigger('lancer-station','dealt-station',[select(nobles,'Griffin Lancer: Fortify a Noble'),fortify()],['unit'],{onlySource:true}),target:{controller:'other'}}]},
  'crown-s-cavalier':{coverage:'implemented',keywords:['Duelist’s Edge','Soar'],triggers:[trigger('cavalier-refine','refined',[{op:'modify',targets:'source',stats:{},keywords:['DoubleStation'],duration:'turn'}],['unit'],{controller:'self'},1)]},
- 'royal-longbowman':{coverage:'implemented',keywords:['Ranged'],onPlay:p('longbow-entry','Refine 2',[refine(2)]),triggers:[trigger('longbow-refine','refined',stationPing(1))]},
+ 'royal-longbowman':{coverage:'implemented',keywords:['Ranged'],onPlay:p('longbow-entry','Refine',[refine()]),triggers:[trigger('longbow-refine','refined',stationPing(1))]},
  'garrett-of-ashenfield':{coverage:'implemented',keywords:['Command'],onPlay:p('garrett-entry','Fortify all your Nobles',[fortify(1,nobles)]),triggers:[trigger('garrett-station','dealt-station',[select(any,'Garrett: choose a damage target'),damage(1)],['unit'],{tags:['Noble'],controller:'self'})]},
  'seraphine-royal-advisor':{coverage:'implemented',keywords:['Command'],onStart:p('seraphine-start','Seraphine: optional free Noble',[{op:'if',condition:flag('last-plan-refine'),then:[{op:'choose',selection:{filter:{zones:['hand'],types:['Unit'],tags:['Noble'],controller:'self',stats:{cost:{max:5}}},count:1,optional:true,label:'Seraphine: deploy a Noble with cost 5 or less for free'},destination:'free-play',event:'free-deploy'}]}])},
  'royal-crusher':{coverage:'implemented',keywords:['Siege','Pierce'],onPlay:p('crusher-entry','Fortify up to three Nobles twice',[select(nobles,'Choose up to three Nobles',3,0),fortify(2)])},
  'rune-of-foresight':{coverage:'implemented',activated:[p('foresight-plan','Pay Oath: Plan 2',[plan(2)],{cost:{resources:{oath:1}}})],triggers:[trigger('foresight-bottom','bottomed',stationPing(1),['support'])]},
- 'rune-of-clarity':{coverage:'implemented',activated:[p('clarity-refine','Exhaust + 1 Oath: Refine 2',[refine(2)],{cost:{exhaust:true,resources:{oath:1}}})],triggers:[trigger('clarity-draw','drawn',stationPing(1),['support'])]},
+ 'rune-of-clarity':{coverage:'implemented',activated:[p('clarity-refine','Exhaust + 1 Oath: Refine',[refine()],{cost:{exhaust:true,resources:{oath:1}}})],triggers:[trigger('clarity-draw','drawn',stationPing(1),['support'])]},
  'rune-of-the-banner':{coverage:'implemented',onPlay:p('banner-entry','Choose Banner mode',[choice([mode('rally','Rally the Ranks: +1/+1 while this Rune remains',[{op:'counter',targets:'source',counter:'banner-rally',amount:1}]),mode('hold','Hold the Line: Plan grants Fortify',[{op:'counter',targets:'source',counter:'banner-hold',amount:1}])])]),triggers:[{...trigger('banner-plan','planned',[select(nobles,'Banner: Fortify a Noble'),fortify()],['support']),requiresCounter:'banner-hold'}]},
  'rune-of-the-crown':{coverage:'implemented',onPlay:p('crown-entry','Fortify all your Nobles',[fortify(1,nobles)]),triggers:[trigger('crown-fortify','fortified',stationPing(2),['support'],{...nobles,controller:'any'})]},
  'ring-of-the-ley':{coverage:'implemented',activated:[p('noble-ring','Exhaust: add 2 Untuned',[{op:'resource',resource:'untuned',amount:2}],{cost:{exhaust:true}})]},

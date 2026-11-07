@@ -1,9 +1,8 @@
 import {expect,it} from 'vitest';
 import {readyAshenDuel} from '../../test/ashenReady';
 import {fixtureCard} from '../../test/ashenFixtureCard';
-import {ashenAdapter,moveAshenCard,ashenStats,playProgram} from './adapter';
-import {submitAshenAction,passAshenPriority,resumeBruteDuel,canBlockAshen} from './duel';
-import {bruteEffects} from './bruteEffects';
+import {ashenAdapter,drainTriggers,moveAshenCard,ashenStats,playProgram} from './adapter';
+import {submitAshenAction,passAshenPriority,resumeBruteDuel,canBlockAshen,settleAshenDuel} from './duel';
 import {starterDeck,ashenStarterCards,changeAshenQuantity} from '../../ashenDecks';
 import reserve from '../../../docs/design/balance-2026-11-06/booster-reserve.json';
 import type {Battlefield} from '../../ashenBattlefieldState';
@@ -36,9 +35,29 @@ it('rechecks effective Defense at resolution without refunding the sacrifice or 
  put(s,'ring-of-the-ley',0,'support');s=submitAshenAction(s,source,{source,player:'0',targets:[target],costCards:[victim]});expect(s.rules?.duel?.stack.length).toBeGreaterThan(0);s.table.cards[target].counters=0;s=finish(s);
  expect(s.table.cards[target].zone).toBe('unit');expect(s.table.cards[victim].zone).toBe('graveyard');expect(s.basins[0]).toMatchObject({untuned:9,fury:8});
 });
-it('offers repeatable Cauldron recovery and locks both activations after Exhaust',()=>{
- let s=setup();const source=put(s,'blood-cauldron',0,'support');s=finish(submitAshenAction(s,source,{source,player:'0'},'cauldron-recover'));expect(tokens(s)).toHaveLength(1);expect(s.table.cards[source].rotated).toBe(true);
- for(const ability of bruteEffects['ashen-brute-blood-cauldron'].activated!)expect(()=>submitAshenAction(s,source,{source,player:'0'},ability.id)).toThrow();
+it('creates a Cauldron token when a friendly Brute damages the enemy Station',()=>{
+ let s=setup();
+ const cauldron=put(s,'blood-cauldron',0,'support'),source=put(s,'frenzied-grunt');
+ const entities=ashenAdapter.entities(s),entity=entities.find(card=>card.id===source)!;
+ const hit=(seat:number)=>finish(settleAshenDuel(drainTriggers(s,[{
+  kind:'dealt-station',source,player:'0',entity,amount:1,
+  target:entities.find(card=>card.id===s.table.piles[`${seat}:command`][0])
+ }])));
+ s=hit(0);
+ expect(tokens(s)).toHaveLength(0);
+ s=hit(1);
+ expect(tokens(s)).toHaveLength(1);
+ expect(s.table.cards[cauldron].rotated).toBe(false);
+});
+it('Warhowl draws when another non-token Brute enters after it',()=>{
+ let s=setup();
+ const warhowl=put(s,'warhowl-instigator',0,'hand');
+ s=finish(submitAshenAction(s,warhowl,{source:warhowl,player:'0'}));
+ expect(s.table.piles['0:hand']).toHaveLength(0);
+ const raider=put(s,'bloodfang-raider',0,'hand');
+ s=finish(submitAshenAction(s,raider,{source:raider,player:'0'}));
+ expect(tokens(s)).toHaveLength(1);
+ expect(s.table.piles['0:hand']).toHaveLength(1);
 });
 it('Offering makes three on an empty Frontline, two otherwise, and Banner grants their Charge',()=>{
  for(const existing of [false,true]){let s=setup();if(existing){put(s,'frenzied-grunt');put(s,'banner-of-the-broken-fist',0,'support');}const source=put(s,'fury-offering',0,'hand');s=finish(submitAshenAction(s,source,{source,player:'0'}));expect(tokens(s)).toHaveLength(existing?2:3);for(const id of tokens(s))expect(s.table.cards[id]).toMatchObject({unready:true,rotated:false});}

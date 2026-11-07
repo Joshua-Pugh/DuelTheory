@@ -13,7 +13,7 @@ it('keeps interrupted Refine server-only and authenticates each private Clarity 
   if(step?.op==='select'){
    choices++;expect(s.ashen!.rules!.resumeAfterTriggers).toHaveLength(1);expect(matchView(s,0,[]).ashen!.rules!.resumeAfterTriggers).toBeUndefined();const other=matchView(s,1,[]).ashen!;expect(other.rules!.pending).toBeUndefined();expect(other.rules!.resumeAfterTriggers).toBeUndefined();expect(other.table.piles['0:hand'].every(id=>other.table.cards[id].cardId==='hidden')).toBe(true);
    const ids=[s.ashen!.table.piles['1:command'][0]];expect(()=>applyMatchCommand(s,1,{type:'ashen',action:{type:'choice',ids}},[],42)).toThrow('other player');s=applyMatchCommand(s,0,{type:'ashen',action:{type:'choice',ids}},[],42);
-  }else if(step?.op==='choose'){expect(choices).toBe(2);expect(s.ashen!.table.health[1]).toBe(18);s=applyMatchCommand(s,0,{type:'ashen',action:{type:'choice',ids:s.ashen!.table.piles['0:hand'].slice(0,2)}},[],42);}
+  }else if(step?.op==='choose'){expect(choices).toBe(2);expect(s.ashen!.table.health[1]).toBe(18);s=applyMatchCommand(s,0,{type:'ashen',action:{type:'choice',ids:s.ashen!.table.piles['0:hand'].slice(0,1)}},[],42);}
   else if(priority)s=applyMatchCommand(s,Number(priority.holder) as 0|1,{type:'ashen',action:{type:'pass'}},[],42);else break;
  }
  expect(choices).toBe(2);expect(s.ashen!.table.health[1]).toBe(18);expect(s.ashen!.rules!.pending).toBeUndefined();

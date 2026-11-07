@@ -94,8 +94,8 @@ describe('Noble deck and mixed AT duels',()=>{
  });
  it('Refines once, moves chosen hand cards to the deck bottom and retains draw events',()=>{
   const s=fixture(),id=source(s,'shieldbearer-noble'),deck=[...s.table.piles['0:deck']],p=nobleEffects[s.table.cards[id].cardId].onPlay!;
-  const start=executeProgram(s,ashenAdapter,p,{source:id,player:'0'});expect(start.pending).toBeDefined();expect(start.events.filter(e=>e.kind==='drawn')).toHaveLength(1);
-  const done=continueProgram(start.state,ashenAdapter,start.pending!,[deck[0]]);expect(done.state.table.piles['0:deck']).toEqual([...deck.slice(1),deck[0]]);expect(done.events.filter(e=>e.kind==='refined')).toHaveLength(1);
+  const start=executeProgram(s,ashenAdapter,p,{source:id,player:'0'});expect(start.pending).toBeDefined();expect(start.events.filter(e=>e.kind==='drawn')).toHaveLength(2);
+  const done=continueProgram(start.state,ashenAdapter,start.pending!,[deck[0]]);expect(done.state.table.piles['0:deck']).toEqual([...deck.slice(2),deck[0]]);expect(done.events.filter(e=>e.kind==='refined')).toHaveLength(1);
  });
  it('deploys Garrett and Fortifies all friendly Nobles including himself',()=>{
   let s=fixture();const garrett=source(s,'garrett-of-ashenfield'),other=source(s,'banner-guard');moveAshenCard(s,other,'unit');s=finish(submitAshenAction(s,garrett,{source:garrett,player:'0'}));expect(s.table.cards[garrett].counters).toBe(1);expect(s.table.cards[other].counters).toBe(1);

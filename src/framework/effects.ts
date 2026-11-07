@@ -10,7 +10,7 @@ export type Condition={kind:'destroyed';filter?:Selector}|{kind:'costCard'|'chos
 export type EffectStep=
  |{op:'choose';selection:Selection;destination:string;reveal?:boolean;shuffle?:string;event?:string}
  |{op:'plan';count:number}
- |{op:'refine';count:number}
+ |{op:'refine';count:number;bottomCount?:number}
  |{op:'mode';options:{id:string;label:string;steps:EffectStep[];when?:Condition}[];min:number;max:number;allIf?:Condition}
  |{op:'fortify';targets:Targets;amount:number}
  |{op:'nullify';targets:Targets}
@@ -128,7 +128,7 @@ export function continueProgram<S>(original:S,adapter:EffectAdapter<S>,continuat
  while(flow.steps.length){const step=flow.steps.shift()!;if(--flow.budget<0)throw new EffectError('Effect execution budget exceeded.');
   if(step.op==='mode'){if(step.allIf&&condition(step.allIf)){flow.steps.unshift(...step.options.flatMap(o=>o.steps));continue;}flow.steps.unshift({...step,options:step.options.filter(o=>!o.when||condition(o.when))});return {state,events,pending:flow};}
   else if(step.op==='plan'){if(!adapter.top)throw new EffectError('Game does not support Plan.');flow.planIds=adapter.top(state,context.player,step.count);if(!flow.planIds.length){emit('planned',adapter.entities(state).find(e=>e.id===context.source),step.count);continue;}flow.steps.unshift(step);return {state,events,pending:flow};}
-  else if(step.op==='refine'){const before=new Map(adapter.entities(state).map(e=>[e.id,e.zone]));adapter.draw(state,context.player,step.count);for(const e of adapter.entities(state))if(before.get(e.id)!==e.zone)emit('drawn',e);emit('refined',adapter.entities(state).find(e=>e.id===context.source),step.count);flow.steps.unshift({op:'choose',selection:{filter:{zones:['hand'],controller:'self'},count:step.count,label:`Refine: place ${step.count} on the bottom of your deck`},destination:'deck-bottom',event:'bottomed'});}
+  else if(step.op==='refine'){const bottomCount=step.bottomCount??step.count;const before=new Map(adapter.entities(state).map(e=>[e.id,e.zone]));adapter.draw(state,context.player,step.count);for(const e of adapter.entities(state))if(before.get(e.id)!==e.zone)emit('drawn',e);emit('refined',adapter.entities(state).find(e=>e.id===context.source),step.count);flow.steps.unshift({op:'choose',selection:{filter:{zones:['hand'],controller:'self'},count:bottomCount,label:`Refine: place ${bottomCount} on the bottom of your deck`},destination:'deck-bottom',event:'bottomed'});}
   else if(step.op==='fortify'){if(!adapter.fortify)throw new EffectError('Game does not support Fortify.');for(const e of entities(step.targets)){adapter.fortify(state,e.id,step.amount);emit('fortified',e,step.amount);}}
   else if(step.op==='signal'){emit(step.name,adapter.entities(state).find(e=>e.id===context.source));}
   else if(step.op==='nullify'){if(!adapter.nullify)throw new EffectError('Game does not support Nullify.');for(const e of entities(step.targets)){adapter.nullify(state,e.id);emit('nullified',e);}}

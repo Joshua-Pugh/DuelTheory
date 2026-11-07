@@ -22,11 +22,10 @@ export default function AshenBattlefieldCard({state,id,seat,hand,showKeywords,dr
   <button type="button" className={['ab-card',dragBlocker?'ab-drag-blocker':'',dragTarget?'ab-drag-target':'',c.controller!==seat&&!hand?'ab-opposing':'',fatigued?'ab-fatigued':'',unready?'ab-unready':'',spent?'ab-font-spent':'',selected||combat.selected?'ab-selected':'',combat.intent?'ab-combat-'+combat.intent:'',combat.attacking?'ab-attacking':'',combat.blocking?'ab-blocking':'',stats?.damage?'ab-damaged':''].filter(Boolean).join(' ')}
    data-ashen-card={id} data-combat-action={combat.intent} aria-label={`${label}${spent?' · spent':''}`} aria-pressed={combat.intent==='attack'||combat.intent==='target'||combat.intent==='effect-target'?!!combat.selected:undefined} aria-description={[combat.label,combat.reason,status,stats?.keywords.filter(k=>['Ranged','Soar','Siege'].includes(k)).join(', '),stats?`${stats.attack} Attack, ${remaining} of ${stats.defense} Defense remaining`:null].filter(Boolean).join('. ')} title={[label,combat.label||combat.reason,status].filter(Boolean).join(' · ')} draggable={!state.rules?.duel&&c.controller===seat} onDragStart={onDrag} onMouseEnter={()=>onHover(id)} onMouseLeave={()=>onHover(null)} onFocus={()=>onHover(id)} onBlur={()=>onHover(null)} onClick={onClick} onContextMenu={e=>{e.preventDefault();onActions();}}>
    <span className="ab-card-face">{face&&data?<AshenCardFrame card={data} size="mini"/>:<span className="ab-card-back"><CardBack/></span>}</span>
-   {fatigued&&<span className="ab-fatigue-counter" aria-label="1 Fatigue counter">F</span>}
-   {c.counters>0&&<span className="ab-counter">+{c.counters}</span>}
+   <span className="ab-card-badges">{fatigued&&<span className="ab-fatigue-counter" aria-label="1 Fatigue counter">F</span>}{showKeywords&&stats&&<AshenKeywordIcons keywords={stats.keywords}/>}</span>
+   {known&&c.counters>0&&<span className="ab-counter ab-fortify" title={`${c.counters} Fortify`} aria-label={`${c.counters} Fortify`}>+{c.counters}</span>}
    {Object.entries(state.rules?.counters?.[id]||{}).filter(([,n])=>n>0).map(([name,n])=><span className="ab-counter" key={name}>{name}: {n}</span>)}
-   {stats&&<span className="ab-stat-chip" title={`${stats.attack} Attack · ${remaining} of ${stats.defense} Defense remaining`}>{stats.attack}/{remaining}{stats.damage>0&&<small> · {stats.damage} dmg</small>}</span>}
-   {showKeywords&&stats&&<AshenKeywordIcons keywords={stats.keywords}/>}
+   {stats&&<span className="ab-stat-chip" title={`${stats.attack} Attack · ${remaining} of ${stats.defense} Defense remaining`}>{stats.attack}A/<span className={stats.damage>0?'ab-damaged-defense':undefined}>{remaining}D</span></span>}
    {spent&&<span className="ab-spent">Spent</span>}
    {!hand&&!spent&&status&&<span className="ab-readiness">{status}</span>}
    {(combat.label||combat.attacking||combat.blocking)&&<span className="ab-combat-tag">{combat.label||(combat.blocking?'Blocking':'Attacking')}</span>}
