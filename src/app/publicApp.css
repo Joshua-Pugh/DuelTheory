@@ -8,3 +8,4 @@
 .dt-contact img{display:block;width:100%;max-width:340px;height:auto;border:1px solid #a58b4b}
 @media(max-width:650px){.dt-contact{grid-template-columns:1fr;margin-top:12px}}
 .dt-public-footer a,.dt-public-footer a:visited{color:#205537}
+.dt-contact-form{display:block;width:100%;height:760px;border:1px solid #a58b4b;background:#fff}

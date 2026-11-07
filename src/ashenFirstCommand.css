@@ -1,0 +1,13 @@
+.afc-lesson{max-width:820px;margin:24px auto;padding:clamp(16px,4vw,32px);display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:20px;background:#1d3328;color:#f7edcc}
+.afc-lesson header{grid-column:1/-1}
+.afc-lesson p{line-height:1.5}
+.afc-card{position:relative;width:min(100%,300px);margin-inline:auto}
+.afc-card .ashen-frame-card{width:100%;max-width:none;min-width:0;margin:0}
+.afc-region{position:absolute;z-index:5;background:#ffe39730;border:2px solid #ffe397;border-radius:6px;box-shadow:0 0 10px #ffe39790}
+.afc-name{top:6%;left:10%;width:61%;height:9%}
+.afc-cost{top:6%;right:8%;width:21%;height:9%}
+.afc-type{top:46%;left:7%;width:85%;height:7%}
+.afc-stats{bottom:5%;right:5%;width:21%;height:12%}
+.afc-ability{top:54%;left:7%;width:85%;height:33%}
+.afc-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+@media(max-width:600px){.afc-lesson{grid-template-columns:1fr}.afc-card{width:min(100%,240px)}}
