@@ -21,7 +21,7 @@ export function AshenCardReading({state,id,seat}:Props){
     <div className="ab-reading-text"><h3>{data.name}</h3><p className="ab-reading-type">{data.type} · Player {card.controller+1}</p>
     <AshenCommandCost state={state} id={card.instanceId}/><AshenStatBreakdown state={state} id={card.instanceId}/>
     <p className="ab-rules"><RulesText text={rulesForCard(data).text}/></p>
-    <div className="ab-effect-coverage"><strong>{ashenEffects[card.cardId]?'Automatic effects available':'Resolve this card manually'}</strong>{stats&&<p>{stats.attack} Attack / {stats.defense} Defense · {stats.damage} damage{stats.keywords.length?` · ${stats.keywords.join(', ')}`:''}</p>}</div></div>
+    <div className="ab-effect-coverage"><strong>{ashenEffects[card.cardId]?'Card effects':'Resolve this card manually'}</strong>{stats&&<p>{stats.attack} Attack / {stats.defense} Defense · {stats.damage} damage{stats.keywords.length?` · ${stats.keywords.join(', ')}`:''}</p>}</div></div>
   </>;
 }
 

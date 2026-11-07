@@ -391,3 +391,8 @@
     height: 170px;
   }
 }
+
+.at-install-help {max-width:680px;margin:14px auto 0;padding:10px 14px;border:1px solid #89754b;background:#10251eee;color:#e8dfc6;font-size:14px;line-height:1.5;}
+.at-install-help summary {cursor:pointer;color:#efd59a;}
+.at-install-help p {margin:8px 0;}
+@media(min-width:1101px) {.at-install-help {display:none;}}

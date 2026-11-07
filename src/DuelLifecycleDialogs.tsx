@@ -4,7 +4,7 @@ import {openingCoin,duelResult} from './duelLifecycle';
 
 function LifecycleDialog({title,children}:{title:string;children:ReactNode}){
  const ref=useRef<HTMLDivElement>(null);
- useEffect(()=>{const previous=document.activeElement as HTMLElement|null;ref.current?.querySelector<HTMLElement>('button:not(:disabled)')?.focus();return()=>previous?.focus();},[]);
+ useEffect(()=>{const previous=document.activeElement as HTMLElement|null;ref.current?.querySelector<HTMLElement>('button:not(:disabled)')?.focus({preventScroll:true});return()=>previous?.focus({preventScroll:true});},[]);
  return <div className="dt-lifecycle-backdrop"><div ref={ref} className="dt-lifecycle-dialog" role="dialog" aria-modal="true" aria-label={title} onKeyDown={e=>{
   if(e.key!=='Tab')return;
   const items=Array.from(ref.current?.querySelectorAll<HTMLElement>('button:not(:disabled)')??[]),first=items[0],last=items[items.length-1];

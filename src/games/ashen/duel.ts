@@ -1,4 +1,5 @@
 import {openingHandSize,canRedrawOpeningHand} from '../../framework/openingHand';
+import {ownResponsePassKey} from '../../ashenResponsePolicy';
 import {continueProgram,candidates,matches,executeProgram,openPriority,passPriority,type Priority,type EffectProgram,type EffectContext,type EffectEvent,type EffectStackEntry} from '../../framework';
 import {newBattlefield,emptyBasin,fontEssence,type Battlefield} from '../../ashenBattlefieldState';
 import type {AshenFaction} from '../../ashenDecks';
@@ -8,7 +9,7 @@ import {ashenEffects} from './effectPacks';
 export type Phase='start'|'main1'|'combat'|'main2'|'end';
 export type ClashEntry=EffectStackEntry&{kind:'action'|'ability'|'trigger';bonus?:boolean;key?:string;notified?:boolean};
 type Job={kind:'program';program:EffectProgram;context:EffectContext}|{kind:'ready'|'draw'|'main'|'newTurn'|'endCleanup'}|{kind:'combatDamage';first?:boolean};
-export type AshenDuel={phase:Phase;stack:ClashEntry[];priority:Priority|null;responseWindow?:boolean;ordering?:boolean;jobs:Job[];sacrificed:[number,number];combat?:{stage:'attack'|'block'|'damage'|'finished';attackers:string[];blockers:Record<string,string[]>;blocked:string[]};winner?:0|1|'draw';first:0|1;opening?:{redraws:[number,number];kept:[boolean,boolean]};callPermission?:string;damagePackets?:{source:string;target:string;amount:number}[]};
+export type AshenDuel={phase:Phase;stack:ClashEntry[];priority:Priority|null;holdResponses?:[boolean,boolean];responseWindow?:boolean;ordering?:boolean;jobs:Job[];sacrificed:[number,number];combat?:{stage:'attack'|'block'|'damage'|'finished';attackers:string[];blockers:Record<string,string[]>;blocked:string[]};winner?:0|1|'draw';first:0|1;opening?:{redraws:[number,number];kept:[boolean,boolean]};callPermission?:string;damagePackets?:{source:string;target:string;amount:number}[]};
 const duel=(s:Battlefield)=>{const d=s.rules?.duel;if(!d)throw Error('Start a Brute duel first.');return d;};
 const active=(s:Battlefield)=>String(s.table.active);
 const fieldEvent=(s:Battlefield,id:string,kind:string):EffectEvent=>({kind,source:id,player:String(s.table.cards[id].controller),entity:ashenAdapter.entities(s).find(e=>e.id===id),observers:ashenAdapter.entities(s)});
@@ -162,11 +163,16 @@ export function advanceAshenTo(original:Battlefield,target:Phase){
  }
  throw Error('Unable to reach that phase.');
 }
+/** A seat's response preference is authoritative for local and network games alike. */
+export function setAshenResponseMode(original:Battlefield,seat:0|1,hold:boolean){
+ if(![0,1].includes(seat)||typeof hold!=='boolean')throw Error('Choose a valid response setting.');
+ const s=structuredClone(original),d=duel(s);d.holdResponses??=[false,false];d.holdResponses[seat]=hold;return settleAshenDuel(s);
+}
 export function settleAshenDuel(initial:Battlefield):Battlefield{
  if(ashenOpeningPlayer(initial)!==null)return initial;
  let s=initial,budget=512;
  while(budget--){const d=duel(s);for(const entry of d.stack)entry.key??=`clash-${++s.rules!.serial}`;checkAshenVictory(s);if(d.winner!==undefined||s.rules?.pending||d.callPermission==='choose'||d.ordering)return s;
-  if(d.stack.length||d.responseWindow){if(d.stack.at(-1)?.program.steps[0]?.op==='select'){resolveTopEntry(s);continue;}if(!d.priority)d.priority=openPriority(['0','1'],d.stack.at(-1)?.context.player||active(s));if(canReact(s,d.priority.holder))return s;const pass=passPriority(d.priority,d.priority.holder);d.priority=pass.done?null:pass.priority;if(pass.done){if(d.stack.length)resolveTopEntry(s);else d.responseWindow=false;}continue;}
+  if(d.stack.length||d.responseWindow){if(d.stack.at(-1)?.program.steps[0]?.op==='select'){resolveTopEntry(s);continue;}if(!d.priority)d.priority=openPriority(['0','1'],d.stack.at(-1)?.context.player||active(s));const holder=Number(d.priority.holder) as 0|1;const passOwn=ownResponsePassKey(s,holder,!!d.holdResponses?.[holder]);if(!passOwn&&canReact(s,d.priority.holder))return s;const pass=passPriority(d.priority,d.priority.holder);d.priority=pass.done?null:pass.priority;if(pass.done){if(d.stack.length)resolveTopEntry(s);else d.responseWindow=false;}continue;}
   d.priority=null;
   const suspended=s.rules?.resumeAfterTriggers?.pop();if(suspended){s=completeOrPause(continueProgram(s,ashenAdapter,suspended.flow),suspended.label,suspended.work,suspended.emittedEvents);continue;}
   const job=d.jobs.shift();if(!job)return s;

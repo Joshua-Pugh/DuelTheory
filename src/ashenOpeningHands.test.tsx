@@ -27,3 +27,11 @@ it('shows remote waiting text without rendering the other player’s opening car
  expect(document.querySelector('.ab-opening-dialog')!.textContent).toContain('Waiting for Player 2');
  expect(document.querySelectorAll('.ab-opening-cards figure')).toHaveLength(0);expect(button('View Player 2 hand')).toBeUndefined();
 });
+it('lets a player read and browse their opening cards without changing the hand or paying a cost',async()=>{
+ const state=newAshenDuel(['Brute','Noble'],42,0);await mount({initialState:state,learning:false});
+ const read=document.querySelector('.ab-opening-cards button') as HTMLButtonElement;await act(async()=>read.click());
+ expect(document.querySelector('.ab-opening-reader')).not.toBeNull();expect(document.querySelector('.ab-opening-rules')?.textContent).toBeTruthy();
+ await act(async()=>(document.querySelector('[aria-label="Read next opening card"]') as HTMLButtonElement).click());expect(document.querySelector('.ab-opening-read-nav')?.textContent).toContain('Card 2 of 6');
+ await click('← Back to hand');expect(document.querySelectorAll('.ab-opening-cards figure')).toHaveLength(6);
+ await click('Free redraw · 6 cards');expect(document.querySelectorAll('.ab-opening-cards figure')).toHaveLength(6);expect(document.querySelector('.ab-opening-reader')).toBeNull();
+});

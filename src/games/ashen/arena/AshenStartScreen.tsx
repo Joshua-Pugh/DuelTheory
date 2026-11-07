@@ -21,6 +21,7 @@ const factions={
 /** A launch surface only. Every mode continues into the existing rules engine. */
 export default function AshenStartScreen({decks,onDeck,learning,onLearning,onStart,onPractice,onResume,legacySave}:Props){
   const [mode,setMode]=useState<'home'|'local'>('home');
+  const installed=typeof window!=='undefined'&&window.matchMedia('(display-mode: standalone)').matches;
   return <section className="at-start" data-mode={mode} aria-label="Ashen Throne start screen">
     <div className="at-start-scenery" aria-hidden="true"/>
     <div className="at-start-content">
@@ -33,7 +34,7 @@ export default function AshenStartScreen({decks,onDeck,learning,onLearning,onSta
         </div>
         {onResume&&<button className="at-start-resume" onClick={onResume}>Resume local duel <ChevronRight size={18}/></button>}
         {onResume&&legacySave&&<p className="at-start-note">Your saved duel uses an older deck list. Start a new local duel to test the updated starters.</p>}
-        <p className="at-start-note">Two playable starter decks · Brutes & Nobles<br/>Working prototype. Computer opponents are still in development.</p>
+        {!installed&&<details className="at-install-help"><summary>More room to play on your phone</summary><p>Turn your phone sideways for a wider battlefield.</p><p>On iPhone, open Safari’s Share menu, choose <strong>Add to Home Screen</strong>, and turn on <strong>Open as Web App</strong> if shown. Launch DuelTheory from that icon to play without Safari’s tabs and address bar.</p><p>On Android, use <strong>Enter fullscreen</strong> in the duel’s settings when available.</p></details>}<p className="at-start-note">Two playable starter decks · Brutes & Nobles<br/>Working prototype. Computer opponents are still in development.</p>
       </>:<section className="at-start-setup" aria-labelledby="at-deck-title">
         <div className="at-start-setup-heading"><button onClick={()=>setMode('home')}><ChevronLeft size={16}/> Back</button><h2 id="at-deck-title">Choose your sides</h2><span>Local duel · one device</span></div>
         <div className="at-starter-seats">{([0,1] as const).map(seat=>{

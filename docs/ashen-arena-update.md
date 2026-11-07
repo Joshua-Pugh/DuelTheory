@@ -2,6 +2,8 @@
 
 November 5, 2026. This implements the first presentation pass of roadmap milestone 2. It does not claim a rules audit, AI opponent or the five-encounter campaign is complete.
 
+November 6 follow-up: [gameplay flow fixes](ashen-gameplay-flow.md) move normal own-response passing into the shared engine, add seat-scoped Full control, rebuild phone opening-hand inspection, fit the visible browser viewport and provide Home Screen web-app setup. Earlier statements below about unchanged engine commands describe the initial presentation pass.
+
 ## Components and boundaries
 
 - `games/ashen/arena/AshenStartScreen.tsx`: game launch modes, existing-art faction selection and play guidance. Local play continues through the existing coin and opening-hand engine. Friend play keeps its existing AT-only room route.

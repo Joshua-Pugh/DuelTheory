@@ -2,11 +2,11 @@
 .ab-arena.ab-duel {
   --arena-hand: clamp(120px,20dvh,180px);
   position: fixed;
-  inset: 0;
+  inset: var(--arena-view-top,0px) auto auto var(--arena-view-left,0px);
   z-index: 80;
   box-sizing: border-box;
-  width: 100%;
-  height: 100dvh;
+  width: var(--arena-view-width,100%);
+  height: var(--arena-view-height,100dvh);
   min-width: 0;
   margin: 0;
   padding: max(6px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) max(4px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left));
@@ -1170,3 +1170,7 @@
     transition: none;
   }
 }
+
+.ab-own-response {display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:14px;}
+.ab-own-response small {flex-basis:100%;font-size:12px;line-height:1.4;color:#d4c8a6;}
+.ab-arena:fullscreen {width:100%;height:100%;inset:0;}

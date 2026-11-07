@@ -1,5 +1,5 @@
+import {useArenaDisplay} from './games/ashen/arena/useArenaDisplay';
 import AshenClashQueue from './games/ashen/arena/AshenClashQueue';
-import {ownResponsePassKey} from './ashenResponsePolicy';
 import AshenOpeningHands from './AshenOpeningHands';
 import {useDuelViewport} from './duelUi/useDuelViewport';
 import CardBack from './duelUi/CardBack';
@@ -25,7 +25,7 @@ import './ashenDialogs.css';
 import './games/ashen/arena/ashenArena.css';
 import {ashenEffects,ASHEN_EFFECT_PACK} from './games/ashen/effectPacks';
 import {ashenData,ashenStats,effectChoices,playProgram,resolveAshenEffect,resolveBurnEffect,availableAshenAbilities,pendingAshenChoices,resumeAshenEffect} from './games/ashen/adapter';
-import {chooseAshenOpening,advanceAshenTo,inspectAshenAction,canBlockAshen,confirmAshenTriggerOrder,orderAshenTrigger,newBruteDuel,submitAshenAction,resumeBruteDuel,burnInBruteDuel,nextAshenPhase,passAshenPriority,declareAshenAttackers,assignAshenBlocker,clearAshenBlockers,resolveAshenCombat,korgathCallChoices,chooseKorgathForCall} from './games/ashen/duel';
+import {setAshenResponseMode,chooseAshenOpening,advanceAshenTo,inspectAshenAction,canBlockAshen,confirmAshenTriggerOrder,orderAshenTrigger,newBruteDuel,submitAshenAction,resumeBruteDuel,burnInBruteDuel,nextAshenPhase,passAshenPriority,declareAshenAttackers,assignAshenBlocker,clearAshenBlockers,resolveAshenCombat,korgathCallChoices,chooseKorgathForCall} from './games/ashen/duel';
 import type {EffectProgram,EffectContext} from './framework';
 
 const NAMES:Record<Resource,string>={untuned:'Untuned',oath:'Oath',fury:'Fury',ash:'Ash',veil:'Veil'};
@@ -35,7 +35,7 @@ export default function AshenBattlefield({remote,initialState,onAgain,onExit,lea
  const state=remote?.state??localState;
  const [localSeat,setLocalSeat]=useState<0|1>(initialState?.table.active||0),[selected,setSelected]=useState<string|null>(null);
  const seat=remote?.seat??localSeat,setSeat=(next:0|1)=>{if(!remote)setLocalSeat(next);};
- const [history,setHistory]=useState<Battlefield[]>([]),[notice,setNotice]=useState('Select a font and burn it to send essence into your Ley Basin.');
+ const [history,setHistory]=useState<Battlefield[]>([]),[notice,setNotice]=useState('Play a Ley Font, then Burn it to gain Essence.');
  const [flights,setFlights]=useState<Flight[]>([]),[pile,setPile]=useState<{seat:0|1;zone:string}|null>(null);
  const [attackIds,setAttackIds]=useState<string[]>([]),[blockAttack,setBlockAttack]=useState<string|null>(null);
  const [pendingIds,setPendingIds]=useState<string[]>([]);
@@ -46,14 +46,13 @@ export default function AshenBattlefield({remote,initialState,onAgain,onExit,lea
  const [effectFlow,setEffectFlow]=useState<{program:EffectProgram;context:EffectContext;deploy:boolean;step:number}|null>(null);
  useEffect(()=>{remote?.choosing?.(!!effectFlow);},[Boolean(effectFlow),remote?.choosing]);
  useEffect(()=>{practice?.onChange(state);},[state,practice?.onChange]);
- const board=useRef<HTMLDivElement>(null),flightId=useRef(0);
+ const arena=useRef<HTMLDivElement>(null),board=useRef<HTMLDivElement>(null),flightId=useRef(0);
  const [learningMode,setLearningMode]=useState(learning);
  const guided=state.rules?.duel;
  const fullscreen=Boolean(guided)||expanded;
  useDuelViewport(fullscreen&&mobile);
+ const display=useArenaDisplay(arena,fullscreen);
  const [mobileHelp,setMobileHelp]=useState(false);
- const [holdOwnResponses,setHoldOwnResponses]=useState(false);
- const autoPassKey=useRef('');
  const [phone,setPhone]=useState(()=>typeof window!=='undefined'&&window.matchMedia('(max-width:1100px), (pointer:coarse)').matches);
  useEffect(()=>{const media=window.matchMedia('(max-width:1100px), (pointer:coarse)');const update=()=>setPhone(media.matches);media.addEventListener('change',update);return()=>media.removeEventListener('change',update);},[]);
  const pending=pendingAshenChoices(state),decision=state.rules?.pending?.flow.steps[0];
@@ -68,10 +67,9 @@ export default function AshenBattlefield({remote,initialState,onAgain,onExit,lea
  const completeChoice=(ids:string[])=>{if(choicePlayer!==undefined&&choicePlayer!==String(seat)){setNotice(`Player ${Number(choicePlayer)+1} must make this effect choice.`);return;}if(remote){remote.send({type:'choice',ids});setPendingIds([]);return;}try{const next=guided?resumeBruteDuel(state,ids):resumeAshenEffect(state,ids);setState(next);setPendingIds([]);setNotice(next.table.events.at(-1)||'Effect resolved.');}catch(e){setNotice(e instanceof Error?e.message:String(e));}};
  const runGuided=(fn:(s:Battlefield)=>Battlefield,command?:AshenCommand)=>{if(remote){if(command)remote.send(command);return !!command;}try{const next=fn(state);setHistory(h=>[...h.slice(-29),state]);setState(next);setNotice(next.table.events.at(-1)||'Updated.');return true;}catch(e){setNotice(e instanceof Error?e.message:String(e));return false;}};
  const act=(action:BattlefieldAction)=>{
-  try{if(guided){if(action.type==='BURN'){return runGuided(s=>burnInBruteDuel(s,action.instanceId,seat),{type:'burn',id:action.instanceId});}throw Error('Manual controls are disabled in a AT duel. Use the phase and card controls.');}let next=battlefieldDispatch(state,action);if(assisted&&action.type==='BURN')next=resolveBurnEffect(next,action.instanceId);if(assisted&&action.type==='END_TURN'){for(const zone of ['unit','support'])for(const id of next.table.piles[`${next.table.active}:${zone}`])next.table.cards[id].rotated=false;}setHistory(h=>[...h.slice(-29),state]);setState(next);setNotice(next.table.events.at(-1)||'Updated.');return true;}
+  try{if(guided){if(action.type==='BURN'){return runGuided(s=>burnInBruteDuel(s,action.instanceId,seat),{type:'burn',id:action.instanceId});}throw Error('Use the card actions and phase buttons to play this duel.');}let next=battlefieldDispatch(state,action);if(assisted&&action.type==='BURN')next=resolveBurnEffect(next,action.instanceId);if(assisted&&action.type==='END_TURN'){for(const zone of ['unit','support'])for(const id of next.table.piles[`${next.table.active}:${zone}`])next.table.cards[id].rotated=false;}setHistory(h=>[...h.slice(-29),state]);setState(next);setNotice(next.table.events.at(-1)||'Updated.');return true;}
   catch(e){setNotice(e instanceof Error?e.message:String(e));return false;}
  };
- useEffect(()=>{const key=ownResponsePassKey(state,seat,holdOwnResponses);if(!key){autoPassKey.current='';return;}if(autoPassKey.current===key)return;autoPassKey.current=key;if(remote)remote.send({type:'pass'});else setState(current=>ownResponsePassKey(current,seat,holdOwnResponses)===key?passAshenPriority(current,seat):current);},[state,seat,holdOwnResponses,remote?.send]);
 
  const finishEffect=(program:EffectProgram,context:EffectContext,deploy:boolean)=>{if(remote){remote.send({type:'play',source:context.source,context,ability:deploy?undefined:program.id});setEffectFlow(null);return;}try{const next=guided?submitAshenAction(state,context.source,context,deploy?undefined:program.id):resolveAshenEffect(state,program,context,deploy);setHistory(h=>[...h.slice(-29),state]);setState(next);setEffectFlow(null);setNotice(next.table.events.at(-1)||'Effect resolved.');}catch(e){setEffectFlow(null);setNotice(e instanceof Error?e.message:String(e));}};
  const beginEffect=(program:EffectProgram,deploy=false)=>{if(!selected)return;const context={player:String(seat),source:selected};const choices=effectChoices(state,program,context);if(choices.length)setEffectFlow({program,context,deploy,step:0});else finishEffect(program,context,deploy);};
@@ -155,9 +153,9 @@ export default function AshenBattlefield({remote,initialState,onAgain,onExit,lea
    <button disabled={!!remote} onClick={()=>{if(onAgain){onAgain();return;}setState(newBruteDuel());setAssisted(true);setSelected(null);setAttackIds([]);setHistory([]);}}>{practice?'Reset lesson':'New AT duel'}</button>{(onExit||guided)&&<button onClick={()=>onExit?onExit():replace(true)}>{practice?'Exit practice':'Exit AT duel'}</button>}{!guided&&<><button disabled={!!guided} onClick={()=>setAssisted(a=>!a)} aria-pressed={assisted}>{assisted?'AT effects: ON':'AT effects: OFF'}</button><button onClick={()=>setExpanded(e=>!e)}>{expanded?'Exit full screen':'Expand table'}</button><button onClick={()=>replace(false)}>New table</button><button onClick={()=>replace(true)}>Layout preview</button></>}<button disabled={!!remote} onClick={()=>{setSeat(opponent);setSelected(null);setHovered(null);setPile(null);}}><Eye size={14}/> View P{opponent+1}</button>
    <button disabled={!!remote||!history.length} onClick={()=>{setState(history[history.length-1]);setHistory(h=>h.slice(0,-1));setFlights([]);setSelected(null);setNotice('Previous table restored.');}}><Undo2 size={14}/> Undo</button>
    {!guided&&<><button onClick={()=>{const url=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='ashen-throne-table.json';a.click();URL.revokeObjectURL(url);}}>Export</button>
-   <button onClick={()=>{const url=URL.createObjectURL(new Blob([JSON.stringify(ASHEN_EFFECT_PACK,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='ashen-prototype-effects-v1.json';a.click();URL.revokeObjectURL(url);}}>Export AT rules</button></>}{guided&&!practice&&<button aria-pressed={mobile?mobileHelp:learningMode} onClick={()=>mobile?setMobileHelp(v=>!v):setLearningMode(v=>!v)}>{mobile?'Help':learningMode?'Guided: ON':'Guided: OFF'}</button>}<button onClick={()=>setReference('rules')}>Rules</button><button onClick={()=>setReference('keywords')}>Keywords</button><label className="ab-own-response"><input type="checkbox" checked={holdOwnResponses} onChange={e=>setHoldOwnResponses(e.target.checked)}/> Respond to my own plays</label><button className="ab-viewer-toggle" onClick={()=>setViewerOpen(open=>!open)}>Card viewer</button>
+   <button onClick={()=>{const url=URL.createObjectURL(new Blob([JSON.stringify(ASHEN_EFFECT_PACK,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='ashen-prototype-effects-v1.json';a.click();URL.revokeObjectURL(url);}}>Export AT rules</button></>}{guided&&!practice&&<button aria-pressed={mobile?mobileHelp:learningMode} onClick={()=>mobile?setMobileHelp(v=>!v):setLearningMode(v=>!v)}>{mobile?'Help':learningMode?'Guided: ON':'Guided: OFF'}</button>}<button onClick={()=>setReference('rules')}>Rules</button><button onClick={()=>setReference('keywords')}>Keywords</button>{guided&&<label className="ab-own-response"><input type="checkbox" checked={!!guided.holdResponses?.[seat]} onChange={e=>runGuided(s=>setAshenResponseMode(s,seat,e.target.checked),{type:'responseMode',hold:e.target.checked})}/> Full control<small>Also pause so you can respond to your own cards.</small></label>}{guided&&display.canFullscreen&&<button onClick={()=>void display.enterFullscreen()}>{display.fullscreen?'Exit fullscreen':'Enter fullscreen'}</button>}<button className="ab-viewer-toggle" onClick={()=>setViewerOpen(open=>!open)}>Card viewer</button>
   </div>;
- const battlefield=<div className={`ab-shell ab-arena ${fullscreen?'ab-expanded':''} ${practice?'ab-practice':''} ${guided?'ab-duel':''} ${practice||guided&&learningMode?'ab-learning-mode':''} ${viewerOpen?'ab-viewer-open':''} ${mobile?'ab-mobile-duel':''} ${phone&&!mobile?'ab-browser-phone':''}`} data-remote={!!remote} role={guided?'region':undefined} aria-label={practice?'Ashen Throne practice battlefield':guided?'Ashen Throne duel room':undefined}>
+ const battlefield=<div ref={arena} className={`ab-shell ab-arena ${fullscreen?'ab-expanded':''} ${practice?'ab-practice':''} ${guided?'ab-duel':''} ${practice||guided&&learningMode?'ab-learning-mode':''} ${viewerOpen?'ab-viewer-open':''} ${mobile?'ab-mobile-duel':''} ${phone&&!mobile?'ab-browser-phone':''}`} data-remote={!!remote} role={guided?'region':undefined} aria-label={practice?'Ashen Throne practice battlefield':guided?'Ashen Throne duel room':undefined}>
   {guided||mobile?<header className="ab-compact-toolbar"><strong>{practice?'AT · Practice':'Ashen Throne'}</strong><details className="ab-settings-menu" onKeyDown={event=>{if(event.key==='Escape'){event.currentTarget.open=false;event.currentTarget.querySelector('summary')?.focus();}}}>
    <summary aria-label="Duel settings">⚙</summary><div className="ab-mobile-menu-panel" onClick={event=>{if((event.target as HTMLElement).closest('button')){const details=event.currentTarget.closest('details');if(details)details.open=false;}}}>{toolbarActions}</div>
   </details></header>:  <header className="ab-toolbar"><div><span className="eyebrow">{practice?'ASHEN THRONE · PRACTICE':'ASHEN THRONE · COMMAND SIEGE'}</span><h2>The battlefield</h2><small>{state.preview?'Populated layout preview':'Playtest table'} · {guided?'AT duel · Command Siege rules':assisted?'AT effects sandbox':'Manual effects & costs'}</small></div>{toolbarActions}</header>}
@@ -169,7 +167,7 @@ export default function AshenBattlefield({remote,initialState,onAgain,onExit,lea
   </div><AshenCardInspector state={state} id={hovered||selected||undefined} seat={seat} onClose={()=>setViewerOpen(false)}/></div>
   <section className="ab-hand" aria-label="Your hand"><header><strong>YOUR HAND <small>{st.piles[`${seat}:hand`].length} cards</small></strong><span>Player {seat+1} · {ashenData(state,st.piles[`${seat}:command`][0])?.faction}</span><button disabled={!!guided} onClick={()=>act({type:'DRAW',seat})}>Draw card</button></header><div className="ab-hand-cards">{st.piles[`${seat}:hand`].map(id=>renderCard(id,true))}</div></section>
   {viewerOpen&&<button className="ab-viewer-scrim" aria-label="Close card viewer" onClick={()=>setViewerOpen(false)}/>}
-  <p className="ab-notice" role="status">{notice}</p><p className="ab-footnote">Saves in this browser. Manual controls bypass rules. Start a New AT duel for phases, Clash responses and combat. Manual table controls bypass rules.</p>
+  <p className="ab-notice" role="status">{display.displayNotice||notice}</p><p className="ab-footnote">Your duel is saved on this device. </p>
   {assisted&&!guided&&<p className="ab-effect-banner">Effects sandbox: click a card and choose its play action for cards in the first AT prototype. Printed essence costs and deployment fatigue are applied. Manual moves bypass rules. Clash timing, combat, and unlisted effects are not automated.</p>}
   {guided&&<AshenOpeningHands state={state} seat={seat} onSeat={remote?undefined:setSeat} onChoice={choice=>{if(runGuided(s=>chooseAshenOpening(s,seat,choice),{type:'opening',choice})){setHistory([]);setSelected(null);setHovered(null);setMenuOpen(false);}}}/>}
   <AshenEffectNotices events={st.events}/>
