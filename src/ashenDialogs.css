@@ -444,3 +444,18 @@
 .ab-refine-card details {text-align:left;}
 .ab-refine-card summary {cursor:pointer;}
 .ab-refine-card details p {font-size:14px;line-height:1.45;white-space:pre-line;}
+
+.ab-effect-choice .ab-choice-card:has(.ab-zoom-card[aria-expanded=true]) {
+  flex-basis: min(310px,72vw,49dvh);
+}
+.ab-effect-choice .ab-zoom-card {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.ab-effect-choice .ab-zoom-card[aria-expanded=true] .ashen-frame-card {
+  width: 100%;
+  max-width: none;
+}

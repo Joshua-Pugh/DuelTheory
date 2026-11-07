@@ -195,3 +195,47 @@
 .ab-arena .ab-card-badges .ab-keyword-icons>span {width:clamp(11px,1.2vw,16px);}
 .ab-arena .ab-fortify {top:15%;left:7%;right:auto;bottom:auto;z-index:3;min-width:15px;height:15px;font-size:9px;}
 .ab-arena .ab-opposing .ab-fortify {top:auto;left:auto;right:7%;bottom:18%;}
+
+/* Rotate the opponent's zone positions while keeping controls readable. */
+.ab-arena.ab-duel.ab-playmat .ab-half.ab-opponent .ab-half-grid {
+  grid-template-columns: clamp(42px,8vw,85px) minmax(0,1fr) minmax(0,1fr) clamp(48px,9vw,120px);
+  grid-template-areas: 'piles support ley command' 'piles unit unit command';
+}
+.ab-arena.ab-duel.ab-playmat .ab-ley .ab-card,
+.ab-arena.ab-duel.ab-playmat .ab-support .ab-card {
+  width: clamp(30px,calc((100cqh - 12px)*.714),86px)!important;
+}
+.ab-arena.ab-duel.ab-playmat .ab-ley .ab-card-row { padding-inline-end: 0; }
+.ab-arena.ab-duel.ab-playmat .ab-ley:has(header button) .ab-card-row { padding-inline-end: 0; }
+.ab-arena.ab-duel.ab-playmat .ab-half.ab-opponent .ab-ley .ab-card-row { flex-direction: row-reverse; }
+.ab-view-fonts { min-height: 26px; }
+.ab-arena .ab-card.ab-advanced-font { box-shadow: 0 0 0 2px #82baff; }
+.ab-hand-preview {
+  position: fixed;
+  z-index: 20;
+  left: 50%;
+  bottom: clamp(70px,19dvh,175px);
+  transform: translateX(-50%);
+  width: min(300px,43dvh,82vw);
+  pointer-events: none;
+}
+.ab-hand-preview .ashen-frame-card { width: 100%; max-width: none; }
+@media (hover:none) {
+  .ab-hand-preview { display: none; }
+}
+.ab-arena.ab-duel.ab-playmat .ab-opponent .ab-player {
+  flex-direction: row-reverse;
+}
+.ab-arena.ab-duel.ab-playmat .ab-opponent .ab-player-hp {
+  margin-left: 0;
+  margin-right: auto;
+}
+.ab-arena.ab-duel.ab-playmat .ab-opponent .ab-ley header:has(button) {
+  right: auto;
+  left: 4px;
+}
+.ab-arena.ab-duel.ab-playmat .ab-unit .ab-card {
+  width: clamp(48px,calc((100cqh - 18px)*.714),116px)!important;
+}
+.ab-arena .ab-opposing .ab-stat-chip { top: 0; bottom: auto; }
+.ab-arena .ab-opposing .ab-readiness { top: 16px; bottom: auto; }

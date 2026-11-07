@@ -51,10 +51,10 @@ it('opens card actions directly in local AT and keeps the viewer read-only',asyn
  const dialog=document.querySelector('dialog.dt-action-dialog')!;expect(dialog.getAttribute('aria-label')).toContain(s.table.cards[id].name);expect(dialog.textContent).toContain('View card');
  await click(Array.from(dialog.querySelectorAll('button')).find(b=>b.textContent==='View card')!);expect(document.querySelector('.dt-action-dialog')).toBeNull();expect(document.querySelector('.ab-viewer-open')).not.toBeNull();expect(document.querySelector('.ab-inspector')?.textContent).not.toContain('Deploy with effects');
 });
-it('uses the same action menu and commands in private AT rooms',async()=>{
+it('burns a ready Font directly in private AT rooms',async()=>{
  const s=setup(),font=Object.values(s.table.cards).find(c=>c.controller===0&&c.type==='Ley Font')!;moveAshenCard(s,font.instanceId,'ley');font.faceDown=false;font.rotated=false;const send=vi.fn();
  await mount(<AshenBattlefield remote={{state:s,seat:0,send}} learning={false}/>);await click(document.querySelector(`[data-ashen-card="${font.instanceId}"]`)!);
- const burn=Array.from(document.querySelectorAll('.dt-action-dialog button')).find(b=>b.textContent?.startsWith('Burn font'))!;expect((burn as HTMLButtonElement).disabled).toBe(false);await click(burn);expect(send).toHaveBeenCalledWith({type:'burn',id:font.instanceId});
+ expect(document.querySelector('.dt-action-dialog')).toBeNull();expect(send).toHaveBeenCalledWith({type:'burn',id:font.instanceId});
 });
 it('repairs old native transcription copies while respecting explicit custom rules',()=>{
  const card={cardId:'ashen-noble-crown-of-dominion',name:'Crown',type:'Relic',description:'Whenever Plan, Refine, or Fortify, draw a card.'};expect(rulesForCard(card).text).toContain('Whenever you Plan');expect(rulesForCard({...card,rulesOverride:true}).text).toBe(card.description);
