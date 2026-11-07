@@ -15,6 +15,7 @@
     "src/ashenText.test.tsx",
     "src/ashenVisualEvents.test.tsx",
     "src/games/ashen/adapter.test.ts",
+    "src/games/ashen/arena/arenaCombat.test.tsx",
     "src/games/ashen/clarityTriggers.test.ts",
     "src/games/ashen/duel.test.ts",
     "src/games/ashen/nobleEffects.test.ts",

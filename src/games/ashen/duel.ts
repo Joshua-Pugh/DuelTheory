@@ -1,5 +1,6 @@
 import {openingHandSize,canRedrawOpeningHand} from '../../framework/openingHand';
 import {ownResponsePassKey} from '../../ashenResponsePolicy';
+import type {AshenCombatReport} from './combatReport';
 import {continueProgram,candidates,matches,executeProgram,openPriority,passPriority,type Priority,type EffectProgram,type EffectContext,type EffectEvent,type EffectStackEntry} from '../../framework';
 import {newBattlefield,emptyBasin,fontEssence,type Battlefield} from '../../ashenBattlefieldState';
 import type {AshenFaction} from '../../ashenDecks';
@@ -9,7 +10,7 @@ import {ashenEffects} from './effectPacks';
 export type Phase='start'|'main1'|'combat'|'main2'|'end';
 export type ClashEntry=EffectStackEntry&{kind:'action'|'ability'|'trigger';bonus?:boolean;key?:string;notified?:boolean};
 type Job={kind:'program';program:EffectProgram;context:EffectContext}|{kind:'ready'|'draw'|'main'|'newTurn'|'endCleanup'}|{kind:'combatDamage';first?:boolean};
-export type AshenDuel={phase:Phase;stack:ClashEntry[];priority:Priority|null;holdResponses?:[boolean,boolean];responseWindow?:boolean;ordering?:boolean;jobs:Job[];sacrificed:[number,number];combat?:{stage:'attack'|'block'|'damage'|'finished';attackers:string[];blockers:Record<string,string[]>;blocked:string[]};winner?:0|1|'draw';first:0|1;opening?:{redraws:[number,number];kept:[boolean,boolean]};callPermission?:string;damagePackets?:{source:string;target:string;amount:number}[]};
+export type AshenDuel={phase:Phase;stack:ClashEntry[];priority:Priority|null;holdResponses?:[boolean,boolean];responseWindow?:boolean;ordering?:boolean;jobs:Job[];sacrificed:[number,number];combat?:{stage:'attack'|'block'|'damage'|'finished';attackers:string[];blockers:Record<string,string[]>;blocked:string[];report?:AshenCombatReport};winner?:0|1|'draw';first:0|1;opening?:{redraws:[number,number];kept:[boolean,boolean]};callPermission?:string;damagePackets?:{source:string;target:string;amount:number}[]};
 const duel=(s:Battlefield)=>{const d=s.rules?.duel;if(!d)throw Error('Start a Brute duel first.');return d;};
 const active=(s:Battlefield)=>String(s.table.active);
 const fieldEvent=(s:Battlefield,id:string,kind:string):EffectEvent=>({kind,source:id,player:String(s.table.cards[id].controller),entity:ashenAdapter.entities(s).find(e=>e.id===id),observers:ashenAdapter.entities(s)});
@@ -44,7 +45,7 @@ export function chooseAshenOpening(original:Battlefield,seat:0|1,choice:'keep'|'
 }
 function requireOpeningKept(s:Battlefield){if(ashenOpeningPlayer(s)!==null)throw Error('Both players must keep their opening hands first.');}
 export function checkAshenVictory(s:Battlefield){const d=duel(s);if(s.table.health[0]<=0||s.table.health[1]<=0)d.winner=s.table.health[0]<=0&&s.table.health[1]<=0?'draw':s.table.health[0]<=0?1:0;else if(!s.table.piles['0:deck'].length&&!s.table.piles['1:deck'].length)d.winner=s.table.health[0]===s.table.health[1]?'draw':s.table.health[0]>s.table.health[1]?0:1;return s;}
-function requireIdle(s:Battlefield){requireOpeningKept(s);if(s.rules?.pending||s.rules?.resumeAfterTriggers?.length||duel(s).stack.length||duel(s).jobs.length||duel(s).callPermission||duel(s).responseWindow||duel(s).ordering)throw Error('Finish the current Clash or choice first.');if(duel(s).winner!==undefined)throw Error('This duel is over.');}
+function requireIdle(s:Battlefield){requireOpeningKept(s);if(s.rules?.pending||s.rules?.resumeAfterTriggers?.length||duel(s).stack.length||duel(s).priority||duel(s).jobs.length||duel(s).callPermission||duel(s).responseWindow||duel(s).ordering)throw Error('Finish the current Clash or choice first.');if(duel(s).winner!==undefined)throw Error('This duel is over.');}
 function reactive(s:Battlefield,id:string,p?:EffectProgram){const c=s.table.cards[id];return p?!!p.cost&&!['rig-outfit','lance-outfit'].includes(p.id):c?.type==='Tactic';}
 function ensureTiming(s:Battlefield,id:string,context:EffectContext,ability?:EffectProgram){requireOpeningKept(s);const d=duel(s),c=s.table.cards[id];if(d.winner!==undefined||s.rules?.pending||d.ordering)throw Error('Resolve the current choice first.');if(!c||String(c.controller)!==context.player)throw Error('You do not control this card.');if(d.priority){if(d.priority.holder!==context.player)throw Error('Another player has priority.');if(!reactive(s,id,ability))throw Error('Only Tactics and reactive abilities may join the Clash.');}else if((context.player!==active(s)&&!(d.phase==='combat'&&d.combat?.stage==='block'&&reactive(s,id,ability)))||!['main1','main2','combat'].includes(d.phase)||(!reactive(s,id,ability)&&!['main1','main2'].includes(d.phase)))throw Error('This action is not legal in this phase.');}
 function prepareAshenAction(s:Battlefield,id:string,context:EffectContext,abilityId?:string){
@@ -193,7 +194,33 @@ export function settleAshenDuel(initial:Battlefield):Battlefield{
 }
 
 export function canBlockAshen(s:Battlefield,attacker:string,blocker:string){if(!alive(s,attacker)||!alive(s,blocker))return false;const a=s.table.cards[attacker],b=s.table.cards[blocker],ak=ashenStats(s,attacker).keywords,bk=ashenStats(s,blocker).keywords;if(a.controller===b.controller||b.faceDown||(b.rotated&&!bk.includes('Standfast'))||ak.includes('Evade'))return false;if(ak.includes('Ranged')&&!bk.includes('Ranged'))return false;if(ak.includes('Soar')&&!bk.some(k=>['Soar','Ranged'].includes(k)))return false;if(bk.includes('Siege')&&ak.some(k=>['Soar','Ranged'].includes(k)))return false;return true;}
-export function declareAshenAttackers(original:Battlefield,ids:string[]){let s=structuredClone(original);requireIdle(s);const d=duel(s),combat=d.combat;if(d.phase!=='combat'||combat?.stage!=='attack')throw Error('Not the attacker declaration step.');if(new Set(ids).size!==ids.length||ids.some(id=>!alive(s,id)||s.table.cards[id].controller!==s.table.active||s.table.cards[id].rotated||s.table.cards[id].faceDown))throw Error('Choose distinct Ready friendly Units.');const mandatory=s.table.piles[`${s.table.active}:unit`].filter(id=>!s.table.cards[id].rotated&&ashenStats(s,id).keywords.includes('Reckless'));if(mandatory.some(id=>!ids.includes(id)))throw Error('Reckless Units must attack if able.');combat.attackers=[...ids];combat.stage=ids.length?'block':'finished';
+export function canChooseAshenCombat(s:Battlefield,stage:'attack'|'block'){
+ try{requireIdle(s);return duel(s).phase==='combat'&&duel(s).combat?.stage===stage;}catch{return false;}
+}
+export function inspectAshenAttacker(s:Battlefield,id:string){
+ try{requireIdle(s);}catch{return {allowed:false,reason:'Finish the current card effect or response first.'};}
+ if(duel(s).phase!=='combat'||duel(s).combat?.stage!=='attack')return {allowed:false,reason:'Choose attackers during the Skirmish.'};
+ const c=s.table.cards[id];
+ if(!alive(s,id)||c.controller!==s.table.active||c.faceDown)return {allowed:false,reason:'Choose one of your face-up Units.'};
+ return c.rotated?{allowed:false,reason:'This Unit is fatigued.'}:{allowed:true,reason:''};
+}
+export function inspectAshenBlocker(s:Battlefield,attacker:string,blocker:string){
+ try{requireIdle(s);}catch{return {allowed:false,reason:'Finish the current card effect or response first.'};}
+ const combat=duel(s).combat;
+ if(combat?.stage!=='block'||!combat.attackers.includes(attacker)||!alive(s,attacker))return {allowed:false,reason:'Choose an attacking Unit first.'};
+ if(Object.values(combat.blockers).some(ids=>ids.includes(blocker)))return {allowed:false,reason:'This Unit is already blocking.'};
+ if(canBlockAshen(s,attacker,blocker))return {allowed:true,reason:''};
+ const a=ashenStats(s,attacker).keywords,b=s.table.cards[blocker],bk=ashenStats(s,blocker).keywords;
+ const reason=!alive(s,blocker)||b.controller===s.table.cards[attacker].controller||b.faceDown?'Choose a defending face-up Unit.':b.rotated&&!bk.includes('Standfast')?'This Unit is fatigued and does not have Standfast.':a.includes('Evade')?'This attacker has Evade and cannot be blocked.':a.includes('Ranged')&&!bk.includes('Ranged')?'Only a Ranged Unit can block this attacker.':a.includes('Soar')&&!bk.some(k=>['Soar','Ranged'].includes(k))?'This attacker needs a Soar or Ranged blocker.':'A Siege Unit cannot block a Soar or Ranged attacker.';
+ return {allowed:false,reason};
+}
+export function inspectAshenAttackSelection(s:Battlefield,ids:string[]){
+ if(!canChooseAshenCombat(s,'attack'))return {allowed:false,reason:'Finish the current choice or response before attacking.'};
+ if(new Set(ids).size!==ids.length||ids.some(id=>!inspectAshenAttacker(s,id).allowed))return {allowed:false,reason:'Choose distinct Ready friendly Units.'};
+ const missing=s.table.piles[`${s.table.active}:unit`].filter(id=>inspectAshenAttacker(s,id).allowed&&ashenStats(s,id).keywords.includes('Reckless')&&!ids.includes(id));
+ return missing.length?{allowed:false,reason:'Reckless Units must attack if able.'}:{allowed:true,reason:''};
+}
+export function declareAshenAttackers(original:Battlefield,ids:string[]){let s=structuredClone(original);requireIdle(s);const d=duel(s),combat=d.combat;if(d.phase!=='combat'||combat?.stage!=='attack')throw Error('Not the attacker declaration step.');const check=inspectAshenAttackSelection(s,ids);if(!check.allowed)throw Error(check.reason);combat.attackers=[...ids];combat.stage=ids.length?'block':'finished';
  const originals=[...ids];for(const id of originals)s.table.cards[id].rotated=true;
  for(const id of originals){const c=s.table.cards[id],slug=c.cardId,ctx={player:active(s),source:id};
   const add=(p:EffectProgram,context:EffectContext=ctx)=>duel(s).stack.push({kind:'trigger',program:p,context});
@@ -209,12 +236,16 @@ export function declareAshenAttackers(original:Battlefield,ids:string[]){let s=s
  s.table.events.push(`Declared Siege with ${combat.attackers.length} Units.`);return settleAshenDuel(s);}
 export function orderAshenTrigger(original:Battlefield,index:number){const s=structuredClone(original),d=duel(s);if(!Number.isInteger(index)||index<0||index>=d.stack.length||d.stack.some(e=>e.kind!=='trigger'||e.context.player!==active(s))||!d.ordering)throw Error('Order simultaneous friendly triggers before responses.');const [entry]=d.stack.splice(index,1);d.stack.push(entry);return s;}
 export function confirmAshenTriggerOrder(original:Battlefield){const s=structuredClone(original);if(!duel(s).ordering)throw Error('No trigger order to confirm.');duel(s).ordering=false;return settleAshenDuel(s);}
-export function assignAshenBlocker(original:Battlefield,attacker:string,blocker:string){const s=structuredClone(original);requireIdle(s);const c=duel(s).combat;if(c?.stage!=='block'||!c.attackers.includes(attacker)||!canBlockAshen(s,attacker,blocker))throw Error('Illegal blocker.');for(const ids of Object.values(c.blockers))if(ids.includes(blocker))throw Error('A Unit cannot block multiple attackers.');(c.blockers[attacker]??=[]).push(blocker);if(!c.blocked.includes(attacker))c.blocked.push(attacker);return s;}
+export function assignAshenBlocker(original:Battlefield,attacker:string,blocker:string){const s=structuredClone(original);requireIdle(s);const c=duel(s).combat;const check=inspectAshenBlocker(s,attacker,blocker);if(!check.allowed)throw Error(check.reason);if(!c)throw Error('Not blocking.');(c.blockers[attacker]??=[]).push(blocker);if(!c.blocked.includes(attacker))c.blocked.push(attacker);return s;}
+export function removeAshenBlocker(original:Battlefield,blocker:string){
+ const s=structuredClone(original);requireIdle(s);const c=duel(s).combat;if(c?.stage!=='block'||!alive(s,blocker)||s.table.cards[blocker].controller===s.table.active)throw Error('Choose one of your assigned blockers.');
+ const entry=Object.entries(c.blockers).find(([,ids])=>ids.includes(blocker));if(!entry)throw Error('This Unit is not blocking.');const [attacker,ids]=entry;c.blockers[attacker]=ids.filter(id=>id!==blocker);if(!c.blockers[attacker].length){delete c.blockers[attacker];c.blocked=c.blocked.filter(id=>id!==attacker);}return s;
+}
 export function clearAshenBlockers(original:Battlefield){const s=structuredClone(original);requireIdle(s);const c=duel(s).combat;if(c?.stage!=='block')throw Error('Not blocking.');c.blockers={};c.blocked=[];return s;}
 export function resolveAshenCombat(original:Battlefield){let s=structuredClone(original);requireIdle(s);const d=duel(s),c=d.combat;if(c?.stage!=='block')throw Error('Assign blockers first.');c.stage='damage';
  for(const [a,blockers] of Object.entries(c.blockers))for(const b of blockers)if(alive(s,a)&&alive(s,b)&&s.table.cards[b].cardId==='ashen-brute-crude-spearthrower'&&ashenStats(s,a).keywords.includes('Soar')){const p=program('spear-block','Crude Spearthrower deals pre-combat damage',[{op:'damage',targets:'targets',amount:1}]);duel(s).stack.push({kind:'trigger',program:{...p,targets:{filter:{zones:['unit']},count:1,label:'Blocked Soar Unit'}},context:{player:String(s.table.cards[b].controller),source:b,targets:[a]}});}
  duel(s).jobs.push({kind:'combatDamage'});duel(s).responseWindow=true;duel(s).priority=openPriority(['0','1'],String(s.table.active===0?1:0));return settleAshenDuel(s);}
-function applyCombatDamage(s:Battlefield,first:boolean){const d=duel(s),c=d.combat!;
+function applyCombatDamage(s:Battlefield,first:boolean){const d=duel(s),c=d.combat!;if(first||!c.report)c.report={serial:++s.rules!.serial,hits:[],fallen:[]};
  const wave=()=>{const packets:{source:string;target:string;amount:number}[]=[];
   for(const a of c.attackers.filter(id=>alive(s,id))){const ak=ashenStats(s,a),bs=(c.blockers[a]||[]).filter(id=>alive(s,id));
    if((ak.keywords.includes('Duelist’s Edge')||ak.keywords.includes("Duelist's Edge"))===first){let remaining=Math.max(0,ak.attack);for(const b of bs){const n=Math.min(remaining,Math.max(0,ashenStats(s,b).defense-ashenStats(s,b).damage));packets.push({source:a,target:b,amount:n});remaining-=n;}
@@ -222,7 +253,8 @@ function applyCombatDamage(s:Battlefield,first:boolean){const d=duel(s),c=d.comb
    }
    for(const b of bs){const bk=ashenStats(s,b);if((bk.keywords.includes('Duelist’s Edge')||bk.keywords.includes("Duelist's Edge"))===first)packets.push({source:b,target:a,amount:Math.max(0,bk.attack)});}
   }
+  for(const p of packets)if(p.amount>0)c.report!.hits.push({...p,sourceName:s.table.cards[p.source]?.name||'Unit',targetName:s.table.cards[p.target]?.name||'Unit',station:s.table.cards[p.target]?.zone==='command'});
   const observers=ashenAdapter.entities(s),stationEvents:EffectEvent[]=[];for(const p of packets){const target=s.table.cards[p.target];if(!target)continue;if(target.zone==='command'){s.table.health[target.controller]-=p.amount;if(p.amount>0)stationEvents.push({kind:'dealt-station',source:p.source,player:String(s.table.cards[p.source].controller),entity:observers.find(e=>e.id===p.source),target:observers.find(e=>e.id===p.target),amount:p.amount,observers});}else{s.rules!.damage[p.target]=(s.rules!.damage[p.target]||0)+p.amount;}}
-  const dead=observers.filter(e=>e.zone==='unit'&&(s.rules!.damage[e.id]||0)>=ashenStats(s,e.id).defense),events:EffectEvent[]=[...stationEvents];for(const e of dead)if(ashenAdapter.destroy(s,e.id))events.push({kind:'destroyed',source:e.id,player:e.controller,entity:e,observers});s=drainTriggers(s,events);
+  const dead=observers.filter(e=>e.zone==='unit'&&(s.rules!.damage[e.id]||0)>=ashenStats(s,e.id).defense),events:EffectEvent[]=[...stationEvents];for(const e of dead){const name=s.table.cards[e.id]?.name||'Unit';if(ashenAdapter.destroy(s,e.id)){c.report!.fallen.push({id:e.id,name});events.push({kind:'destroyed',source:e.id,player:e.controller,entity:e,observers});}}s=drainTriggers(s,events);
  };
  wave();if(first)duel(s).jobs.unshift({kind:'combatDamage',first:false});else{duel(s).combat!.stage='finished';s.table.events.push('Skirmish damage resolved.');}return s;}

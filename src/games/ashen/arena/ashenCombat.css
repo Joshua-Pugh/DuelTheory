@@ -1,0 +1,39 @@
+/* Combat affordances live with arena components, not the card-frame assets or rules. */
+.ab-arena .ab-card-wrap {z-index:4;}
+.ab-arena .ab-combat-attack {outline:2px solid #dec27c;outline-offset:2px;}
+.ab-arena .ab-combat-attack[aria-pressed=true] {outline:3px solid #ffe4a1;box-shadow:0 0 0 5px #b67a2855;translate:0 -5px;}
+.ab-arena .ab-combat-target {outline:2px solid #db9d71;outline-offset:2px;}
+.ab-arena .ab-combat-target[aria-pressed=true] {outline:3px solid #ffe3c4;}
+.ab-arena .ab-combat-block {outline:3px solid #a2e5bc;outline-offset:2px;}
+.ab-arena .ab-blocking {box-shadow:0 0 0 3px #548d75;}
+.ab-arena .ab-attacking .ab-card-face {box-shadow:0 0 0 2px #d49a61;}
+.ab-arena .ab-readiness {position:absolute;bottom:16px;left:0;right:0;background:#0b1814ee;color:#f3ebd7;font-size:9px;line-height:15px;text-align:center;border-top:1px solid #8d9b7b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ab-arena .ab-damaged .ab-stat-chip {color:#fff5e6;background:#783d2f;border:1px solid #ffc59f;}
+.ab-arena .ab-stat-chip {bottom:0;left:0;right:0;text-align:center;}
+.ab-arena .ab-stat-chip small {font-size:9px;}
+.ab-arena .ab-combat-tag {position:absolute;left:-2px;right:-2px;top:30px;padding:2px;background:#17271bf5;color:#ffe2a1;border:1px solid #d5ad63;font-size:9px;font-weight:700;line-height:12px;white-space:normal;text-align:center;}
+.ab-arena .ab-combat-block .ab-combat-tag,.ab-arena .ab-blocking .ab-combat-tag {background:#12382af5;color:#d8ffe5;border-color:#94d7ae;}
+.ab-arena .ab-combat-read {position:absolute;right:-2px;top:0;z-index:6;width:28px;height:28px;min-height:28px;padding:3px;border:1px solid #e0c995;background:#14291ff5;color:#fff3d2;border-radius:3px;}
+.ab-combat-connections {position:absolute;inset:0;z-index:3;pointer-events:none;width:100%;height:100%;overflow:visible;}
+.ab-combat-link {fill:none!important;stroke-width:3;filter:drop-shadow(0 1px 2px #000);}
+.ab-combat-link.ab-link-attack {stroke:#f4b16e;}
+.ab-combat-link.ab-link-block {stroke:#9de4be;}
+marker .ab-link-attack {fill:#f4b16e;}
+marker .ab-link-block {fill:#9de4be;}
+.ab-link-preview {stroke-dasharray:6 5;}
+.ab-arena .ab-center {position:relative;}
+.ab-combat-summary {position:absolute;right:6px;top:3px;z-index:20;font-size:11px;}
+.ab-combat-summary>summary {cursor:pointer;border:1px solid #b49b63;border-radius:3px;padding:3px 7px;min-height:24px;background:#14271f;color:#f4dfb2;}
+.ab-combat-summary>div {position:fixed;right:12px;bottom:26px;z-index:200;width:min(440px,calc(100vw - 24px));max-height:calc(100dvh - 90px);padding:14px;border:1px solid #c8ac72;background:#10251ffb;color:#f1eadb;box-shadow:0 8px 28px #000b;overflow:auto;overscroll-behavior:contain;line-height:1.4;}
+.ab-combat-summary p {display:flex;flex-wrap:wrap;gap:5px 9px;align-items:center;margin:8px 0;font-size:13px;}
+.ab-combat-summary header {display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;}
+.ab-combat-summary button {padding:4px 7px;min-height:28px;}
+.ab-combat-summary section {border-top:1px solid #8e9870;padding-top:10px;margin-top:12px;}
+.ab-combat-legend span:first-child {color:#ffc78c;}
+.ab-combat-legend span+span {color:#b7efcf;}
+.ab-combat-feedback {position:absolute;inset:0;z-index:30;pointer-events:none;}
+.ab-combat-feedback span {position:absolute;transform:translate(-50%,-50%);padding:3px 8px;border:1px solid #ffba97;background:#712d24f5;color:#fff5e6;border-radius:4px;font:bold 21px Georgia,serif;box-shadow:0 2px 6px #000;animation:ab-hit-rise 1.8s ease-out both;white-space:nowrap;}
+.ab-combat-feedback .ab-destroyed-pop {font:bold 12px system-ui;transform:translate(-50%,65%);background:#17211ff5;}
+@keyframes ab-hit-rise {0%{opacity:1;translate:0 3px;}70%{opacity:1;}100%{opacity:0;translate:0 -24px;}}
+@media(max-height:500px) {.ab-arena .ab-combat-tag {font-size:8px;line-height:10px;top:26px;}.ab-arena .ab-readiness {font-size:8px;line-height:12px;bottom:13px;}.ab-arena .ab-fatigue-counter {width:18px;height:18px;font-size:11px;}.ab-combat-summary {font-size:9px;}.ab-combat-summary>summary {min-height:24px;}}
+@media(prefers-reduced-motion:reduce) {.ab-combat-feedback span {animation:none;}.ab-arena .ab-combat-attack[aria-pressed=true] {translate:none;}}

@@ -16,6 +16,8 @@ GOAT, Event Hub and Creator Studio remain in source for invitation-only developm
 
 ## Build order
 
+Milestone 2 follow-up: the [combat clarity implementation](ashen-combat-clarity.md) adds direct legal selection, connections, authoritative damage feedback and clearer card states. Finish real-device acceptance and resolve playtest findings before moving into milestone 3's broader effects work.
+
 1. **Production boundaries.** Separate public/private entry graphs, assets and API permissions. Implement revocable scoped access, simplify navigation, classify all tests into owned suites, and remove only verified redundant files. The default public release does not run every private simulator test or ship private modules.
 2. **Playable battlefield.** Desktop and landscape-phone arena with both Frontlines and Stations visible, a usable hand and inspector, contextual legal actions, compact phases, readable opening hands and a distinct Clash interface. Normal match play needs no page scrolling.
 3. **Rules baseline and presentation.** Pin approved rules/card versions, audit critical interactions, then add short, skippable Essence, summon, damage, destruction and Clash effects. Preserve reduced motion and reproducible action logs.

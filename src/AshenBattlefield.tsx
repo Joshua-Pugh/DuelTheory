@@ -1,10 +1,15 @@
+import AshenCombatConnections from './games/ashen/arena/AshenCombatConnections';
+import AshenCombatFeedback from './games/ashen/arena/AshenCombatFeedback';
+import AshenCombatSummary from './games/ashen/arena/AshenCombatSummary';
+import './games/ashen/arena/ashenCombat.css';
+import AshenBattlefieldCard from './games/ashen/arena/AshenBattlefieldCard';
+import {combatCardView} from './games/ashen/arena/combatView';
 import {useArenaDisplay} from './games/ashen/arena/useArenaDisplay';
 import AshenClashQueue from './games/ashen/arena/AshenClashQueue';
 import AshenOpeningHands from './AshenOpeningHands';
 import {useDuelViewport} from './duelUi/useDuelViewport';
 import CardBack from './duelUi/CardBack';
 import AshenCardInspector,{AshenCardReading} from './games/ashen/arena/AshenCardInspector';
-import AshenCommandCost from './AshenCommandCost';
 import AshenEffectNotices from './AshenEffectNotices';
 import AshenCardAnimations from './AshenCardAnimations';
 import CardActionMenu,{type CardMenuAction} from './duelUi/CardActionMenu';
@@ -19,13 +24,13 @@ import {Eye,ChevronRight,Undo2} from 'lucide-react';
 import AshenCardFrame from './AshenCardFrame';
 import AshenEffectDecision from './AshenEffectDecision';
 import {RESOURCES,type Resource} from './ashenPresentation';
-import {BATTLEFIELD_KEY,ashenFaceVisible,ashenTurnNumber,battlefieldDispatch,fontEssence,newBattlefield,readBattlefield,type Battlefield,type BattlefieldAction} from './ashenBattlefieldState';
+import {BATTLEFIELD_KEY,ashenTurnNumber,battlefieldDispatch,fontEssence,newBattlefield,readBattlefield,type Battlefield,type BattlefieldAction} from './ashenBattlefieldState';
 import './ashenBattlefield.css';
 import './ashenDialogs.css';
 import './games/ashen/arena/ashenArena.css';
 import {ashenEffects,ASHEN_EFFECT_PACK} from './games/ashen/effectPacks';
-import {ashenData,ashenStats,effectChoices,playProgram,resolveAshenEffect,resolveBurnEffect,availableAshenAbilities,pendingAshenChoices,resumeAshenEffect} from './games/ashen/adapter';
-import {setAshenResponseMode,chooseAshenOpening,advanceAshenTo,inspectAshenAction,canBlockAshen,confirmAshenTriggerOrder,orderAshenTrigger,newBruteDuel,submitAshenAction,resumeBruteDuel,burnInBruteDuel,nextAshenPhase,passAshenPriority,declareAshenAttackers,assignAshenBlocker,clearAshenBlockers,resolveAshenCombat,korgathCallChoices,chooseKorgathForCall} from './games/ashen/duel';
+import {ashenData,effectChoices,playProgram,resolveAshenEffect,resolveBurnEffect,availableAshenAbilities,pendingAshenChoices,resumeAshenEffect} from './games/ashen/adapter';
+import {inspectAshenAttacker,inspectAshenBlocker,removeAshenBlocker,setAshenResponseMode,chooseAshenOpening,advanceAshenTo,inspectAshenAction,confirmAshenTriggerOrder,orderAshenTrigger,newBruteDuel,submitAshenAction,resumeBruteDuel,burnInBruteDuel,nextAshenPhase,passAshenPriority,declareAshenAttackers,assignAshenBlocker,clearAshenBlockers,resolveAshenCombat,korgathCallChoices,chooseKorgathForCall} from './games/ashen/duel';
 import type {EffectProgram,EffectContext} from './framework';
 
 const NAMES:Record<Resource,string>={untuned:'Untuned',oath:'Oath',fury:'Fury',ash:'Ash',veil:'Veil'};
@@ -63,6 +68,11 @@ export default function AshenBattlefield({remote,initialState,onAgain,onExit,lea
  useEffect(()=>{if(remote||practice)return;try{localStorage.setItem(BATTLEFIELD_KEY,JSON.stringify(state));}catch{setNotice('Browser storage unavailable. Keep this tab open or export the table.');}},[state,!!practice]);
  useEffect(()=>{if(!fullscreen)return;const previous=document.body.style.overflow;document.body.style.overflow='hidden';return()=>{document.body.style.overflow=previous;};},[fullscreen]);
  useEffect(()=>{const escape=(event:KeyboardEvent)=>{if(event.key==='Escape'){if(reference)setReference(null);else if(menuOpen)setMenuOpen(false);else if(viewerOpen)setViewerOpen(false);else if(effectFlow)setEffectFlow(null);else if(pile)setPile(null);else if(!guided)setExpanded(false);}};window.addEventListener('keydown',escape);return()=>window.removeEventListener('keydown',escape);},[pile,effectFlow,reference,viewerOpen,guided,menuOpen]);
+ useEffect(()=>{
+  setAttackIds(ids=>{const next=ids.filter(id=>state.rules?.duel?.combat?.stage==='attack'&&state.table.cards[id]?.zone==='unit'&&state.table.cards[id].controller===state.table.active&&!state.table.cards[id].rotated&&!state.table.cards[id].faceDown);return next.length===ids.length?ids:next;});
+  setBlockAttack(id=>id&&state.rules?.duel?.combat?.stage==='block'&&state.rules.duel.combat.attackers.includes(id)&&state.table.cards[id]?.zone==='unit'?id:null);
+ },[state]);
+ useEffect(()=>{const combat=state.rules?.duel?.combat;if(combat?.stage==='finished')setNotice('Combat resolved. Review the result, then continue to your second main phase.');else if(combat?.stage==='attack')setNotice('Tap highlighted Units to choose your attackers.');else if(combat?.stage==='block')setNotice('Choose an attacker, then a highlighted blocker.');},[state.rules?.duel?.combat?.stage]);
  const choicePlayer=state.rules?.pending?.flow.context.player;
  const completeChoice=(ids:string[])=>{if(choicePlayer!==undefined&&choicePlayer!==String(seat)){setNotice(`Player ${Number(choicePlayer)+1} must make this effect choice.`);return;}if(remote){remote.send({type:'choice',ids});setPendingIds([]);return;}try{const next=guided?resumeBruteDuel(state,ids):resumeAshenEffect(state,ids);setState(next);setPendingIds([]);setNotice(next.table.events.at(-1)||'Effect resolved.');}catch(e){setNotice(e instanceof Error?e.message:String(e));}};
  const runGuided=(fn:(s:Battlefield)=>Battlefield,command?:AshenCommand)=>{if(remote){if(command)remote.send(command);return !!command;}try{const next=fn(state);setHistory(h=>[...h.slice(-29),state]);setState(next);setNotice(next.table.events.at(-1)||'Updated.');return true;}catch(e){setNotice(e instanceof Error?e.message:String(e));return false;}};
@@ -88,18 +98,16 @@ export default function AshenBattlefield({remote,initialState,onAgain,onExit,lea
  };
  const clickCard=(id:string)=>{setSelected(id);setMenuOpen(true);};
  const renderCard=(id:string,hand=false)=>{
-  const c=st.cards[id],known=c.controller===seat||(c.zone!=='hand'&&!c.faceDown),face=ashenFaceVisible(c,seat);
-  const d=ashenData(state,id),label=known?c.name:'Face-down card';
-  return <div className="ab-card-wrap" key={id}>
-   <button type="button" className={`ab-card ${c.controller!==seat&&!hand?'ab-opposing':''} ${c.rotated?'ab-fatigued':''} ${c.zone==='ley'&&c.faceDown?'ab-font-spent':''} ${selected===id||attackIds.includes(id)?'ab-selected':''}`} data-ashen-card={id} aria-label={`${label}${c.zone==='ley'&&c.faceDown?' · spent':''}`} title={label} draggable={!guided&&c.controller===seat} onDragStart={e=>e.dataTransfer.setData('application/x-ashen-card',id)} onMouseEnter={()=>setHovered(id)} onMouseLeave={()=>setHovered(null)} onFocus={()=>setHovered(id)} onBlur={()=>setHovered(null)} onClick={()=>clickCard(id)} onContextMenu={e=>{e.preventDefault();clickCard(id);}}>
-    <span className="ab-card-face">{face&&d?<AshenCardFrame card={d} size="mini"/>:<span className="ab-card-back"><CardBack/></span>}</span>
-    {['unit','support'].includes(c.zone)&&c.rotated&&<span className="ab-fatigue-counter" aria-label="1 Fatigue counter">F</span>}{c.counters>0&&<span className="ab-counter">+{c.counters}</span>}{Object.entries(state.rules?.counters?.[id]||{}).filter(([,n])=>n>0).map(([name,n])=><span className="ab-counter" key={name}>{name}: {n}</span>)}
-    {c.zone==='unit'&&known&&<span className="ab-stat-chip">{ashenStats(state,id).attack}/{ashenStats(state,id).defense}{ashenStats(state,id).damage?` · ${ashenStats(state,id).damage} dmg`:''}</span>}
-    {c.zone==='ley'&&c.faceDown&&<span className="ab-spent">Spent</span>}
-   </button>
-
-   {hand&&c.controller===seat&&<AshenCommandCost state={state} id={id} compact/>}
-  </div>;
+  const combat=combatCardView(state,id,seat,attackIds,blockAttack);
+  const selectAttack=()=>setAttackIds(ids=>ids.includes(id)?ids.filter(x=>x!==id):[...ids,id]);
+  const choose=()=>{
+   if(combat.intent==='attack'){selectAttack();return;}
+   if(combat.intent==='target'){setBlockAttack(id);setNotice('Now choose a highlighted blocker. Tap Read to inspect a card.');return;}
+   if(combat.intent==='block'&&blockAttack){runGuided(s=>assignAshenBlocker(s,blockAttack,id),{type:'block',attacker:blockAttack,blocker:id});return;}
+   if(combat.intent==='unblock'){runGuided(s=>removeAshenBlocker(s,id),{type:'unblock',blocker:id});return;}
+   if(combat.reason)setNotice(combat.reason);clickCard(id);
+  };
+  return <AshenBattlefieldCard key={id} state={state} id={id} seat={seat} hand={hand} selected={selected===id} combat={combat} onClick={choose} onActions={()=>clickCard(id)} onRead={()=>{setSelected(id);setViewerOpen(true);}} onHover={setHovered} onDrag={e=>e.dataTransfer.setData('application/x-ashen-card',id)}/>;
  };
  const zone=(who:0|1,id:string,label:string)=>{
   const ids=st.piles[`${who}:${id}`];
@@ -138,8 +146,8 @@ export default function AshenBattlefield({remote,initialState,onAgain,onExit,lea
    let reason='';try{if(guided)burnInBruteDuel(state,card.instanceId,seat);else if(card.faceDown||card.rotated)throw Error('This Font is spent.');}catch(e){reason=e instanceof Error?e.message:String(e);}
    cardActions.push({id:'burn',label:`Burn font · +1 ${NAMES[fontEssence(card.cardId)]}`,disabled:!!reason,reason:reason||undefined,run:()=>burn(card.instanceId)});
   }
-  if(guided?.phase==='combat'&&guided.combat?.stage==='attack'&&!guided.priority&&seat===st.active&&card.zone==='unit'&&!card.rotated&&!card.faceDown)cardActions.push({id:'select-attacker',label:attackIds.includes(card.instanceId)?'Remove from attackers':'Select as attacker',run:()=>setAttackIds(ids=>ids.includes(card.instanceId)?ids.filter(id=>id!==card.instanceId):[...ids,card.instanceId])});
-  if(guided?.combat?.stage==='block'&&!guided.priority&&seat!==st.active&&card.zone==='unit'&&blockAttack){const allowed=canBlockAshen(state,blockAttack,card.instanceId);cardActions.push({id:'block',label:`Block ${st.cards[blockAttack]?.name}`,disabled:!allowed,reason:allowed?undefined:'This Unit cannot block that attacker.',run:()=>runGuided(s=>assignAshenBlocker(s,blockAttack,card.instanceId),{type:'block',attacker:blockAttack,blocker:card.instanceId})});}
+  if(guided&&seat===st.active&&inspectAshenAttacker(state,card.instanceId).allowed)cardActions.push({id:'select-attacker',label:attackIds.includes(card.instanceId)?'Remove from attackers':'Select as attacker',run:()=>setAttackIds(ids=>ids.includes(card.instanceId)?ids.filter(id=>id!==card.instanceId):[...ids,card.instanceId])});
+  if(guided?.combat?.stage==='block'&&!guided.priority&&seat!==st.active&&card.zone==='unit'&&blockAttack){const check=inspectAshenBlocker(state,blockAttack,card.instanceId),allowed=check.allowed;cardActions.push({id:'block',label:`Block ${st.cards[blockAttack]?.name}`,disabled:!allowed,reason:allowed?undefined:check.reason,run:()=>runGuided(s=>assignAshenBlocker(s,blockAttack,card.instanceId),{type:'block',attacker:blockAttack,blocker:card.instanceId})});}
   if(!guided){
    if(card.zone==='hand')cardActions.push({id:'place',label:'Place manually',run:()=>move(card.instanceId,seat,card.type==='Unit'?'unit':card.type==='Ley Font'?'ley':'support')});
    cardActions.push({id:'ready',label:card.rotated?'Ready':'Fatigue',run:()=>act({type:'ROTATE',instanceId:card.instanceId})},{id:'flip',label:card.faceDown?'Turn face-up':'Turn face-down',run:()=>act({type:'FLIP',instanceId:card.instanceId})},{id:'counter',label:'+ Counter',run:()=>act({type:'COUNTER',instanceId:card.instanceId,delta:1})},{id:'uncounter',label:'− Counter',disabled:!card.counters,run:()=>act({type:'COUNTER',instanceId:card.instanceId,delta:-1})});
@@ -161,8 +169,9 @@ export default function AshenBattlefield({remote,initialState,onAgain,onExit,lea
   </details></header>:  <header className="ab-toolbar"><div><span className="eyebrow">{practice?'ASHEN THRONE · PRACTICE':'ASHEN THRONE · COMMAND SIEGE'}</span><h2>The battlefield</h2><small>{state.preview?'Populated layout preview':'Playtest table'} · {guided?'AT duel · Command Siege rules':assisted?'AT effects sandbox':'Manual effects & costs'}</small></div>{toolbarActions}</header>}
   {practice?<section className="ab-practice-panel">{practice.panel}</section>:guided&&learningMode&&(!mobile||mobileHelp)&&<section className="ab-learning" aria-label="Duel guide" aria-live="polite"><strong>{ashenGuidance(state).title}</strong><span>{ashenGuidance(state).text}</span></section>}
   <div className="ab-workspace"><div className="ab-table" ref={board}>
+   {guided&&<><AshenCombatConnections state={state} selected={attackIds} board={board}/><AshenCombatFeedback state={state} board={board}/></>}
    <div className="ab-opponent-hand" aria-label={`Opponent hand · ${st.piles[`${opponent}:hand`].length} cards`}>{st.piles[`${opponent}:hand`].map(id=><span className="ab-card-back" data-ashen-card={id} key={id}><CardBack/></span>)}</div>
-   {half(opponent)}<div className="ab-center"><small className="ab-turn">Turn {ashenTurnNumber(state)} · Player {st.active+1}{guided?` · ${ashenPhaseName(guided.phase)}`:''}</small><AshenClashQueue state={state} onInspect={clickCard}/>{guided?<AshenPhaseControls state={state} seat={seat} attackIds={attackIds} blockAttack={blockAttack} onSeat={remote?undefined:setSeat} onAdvance={phase=>{if(phase==='end')setFades(([0,1] as const).map(who=>({seat:who,resources:RESOURCES.filter(r=>state.basins[who][r]>0)})));runGuided(s=>advanceAshenTo(s,phase),{type:'phase',phase});}} onNext={()=>{if(guided.phase==='main2')setFades(([0,1] as const).map(who=>({seat:who,resources:RESOURCES.filter(r=>state.basins[who][r]>0)})));runGuided(nextAshenPhase,{type:'next'});}} onPass={()=>runGuided(s=>passAshenPriority(s,seat),{type:'pass'})} onSelectAll={()=>setAttackIds(st.piles[`${st.active}:unit`].filter(id=>!st.cards[id].rotated&&!st.cards[id].faceDown))} onAttack={()=>{if(runGuided(s=>declareAshenAttackers(s,attackIds),{type:'attack',ids:attackIds}))setAttackIds([]);}} onClearBlockers={()=>runGuided(clearAshenBlockers,{type:'clearBlockers'})} onCombat={()=>runGuided(resolveAshenCombat,{type:'combat'})} onOrder={index=>runGuided(s=>orderAshenTrigger(s,index),{type:'order',index})} onConfirmOrder={()=>runGuided(confirmAshenTriggerOrder,{type:'confirmOrder'})}/>:<button onClick={()=>{act({type:'END_TURN'});setSelected(null);}}>End turn <ChevronRight size={14}/></button>}</div>{half(seat)}
+   {half(opponent)}<div className="ab-center"><small className="ab-turn">Turn {ashenTurnNumber(state)} · Player {st.active+1}{guided?` · ${ashenPhaseName(guided.phase)}`:''}</small><AshenCombatSummary state={state} onInspect={id=>{setSelected(id);setViewerOpen(true);}}/><AshenClashQueue state={state} onInspect={clickCard}/>{guided?<AshenPhaseControls state={state} seat={seat} attackIds={attackIds} blockAttack={blockAttack} onSeat={remote?undefined:setSeat} onAdvance={phase=>{if(phase==='end')setFades(([0,1] as const).map(who=>({seat:who,resources:RESOURCES.filter(r=>state.basins[who][r]>0)})));runGuided(s=>advanceAshenTo(s,phase),{type:'phase',phase});}} onNext={()=>{if(guided.phase==='main2')setFades(([0,1] as const).map(who=>({seat:who,resources:RESOURCES.filter(r=>state.basins[who][r]>0)})));runGuided(nextAshenPhase,{type:'next'});}} onPass={()=>runGuided(s=>passAshenPriority(s,seat),{type:'pass'})} onSelectAll={()=>setAttackIds(st.piles[`${st.active}:unit`].filter(id=>inspectAshenAttacker(state,id).allowed))} onAttack={()=>{if(runGuided(s=>declareAshenAttackers(s,attackIds),{type:'attack',ids:attackIds}))setAttackIds([]);}} onClearBlockers={()=>runGuided(clearAshenBlockers,{type:'clearBlockers'})} onCombat={()=>runGuided(resolveAshenCombat,{type:'combat'})} onOrder={index=>runGuided(s=>orderAshenTrigger(s,index),{type:'order',index})} onConfirmOrder={()=>runGuided(confirmAshenTriggerOrder,{type:'confirmOrder'})}/>:<button onClick={()=>{act({type:'END_TURN'});setSelected(null);}}>End turn <ChevronRight size={14}/></button>}</div>{half(seat)}
    {flights.map(f=><span key={f.id} className={`ab-essence-flight ab-${f.resource}`} style={{left:f.x,top:f.y,'--flight-x':`${f.dx}px`,'--flight-y':`${f.dy}px`} as CSSProperties} onAnimationEnd={()=>setFlights(all=>all.filter(i=>i.id!==f.id))}><img src={`/ashen/costs/${f.resource}.png`} alt=""/></span>)}
   </div><AshenCardInspector state={state} id={hovered||selected||undefined} seat={seat} onClose={()=>setViewerOpen(false)}/></div>
   <section className="ab-hand" aria-label="Your hand"><header><strong>YOUR HAND <small>{st.piles[`${seat}:hand`].length} cards</small></strong><span>Player {seat+1} · {ashenData(state,st.piles[`${seat}:command`][0])?.faction}</span><button disabled={!!guided} onClick={()=>act({type:'DRAW',seat})}>Draw card</button></header><div className="ab-hand-cards">{st.piles[`${seat}:hand`].map(id=>renderCard(id,true))}</div></section>
