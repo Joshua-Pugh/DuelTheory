@@ -27,7 +27,7 @@ describe('first Brute effects through the shared framework',()=>{
   s=battlefieldDispatch(s,{type:'END_TURN'});expect(ashenStats(s,unit).attack).toBe(attack);
  });
  it('pays exhaust/resource activation once and rejects repeat activation',()=>{
-  const start=hand(newBattlefield(false,()=>.4),'feral-axebreaker');let s=deploy(start.s,start.id);s=battlefieldDispatch(s,{type:'ROTATE',instanceId:start.id});
+  const start=hand(newBattlefield(false,()=>.4),'feral-axebreaker');let s=deploy(start.s,start.id);s.table.cards[start.id].unready=false;
   const p=bruteEffects[s.table.cards[start.id].cardId].activated![0];s=resolveAshenEffect(s,p,{player:'0',source:start.id});expect(s.table.cards[start.id].rotated).toBe(true);
   expect(()=>resolveAshenEffect(s,p,{player:'0',source:start.id})).toThrow('exhausted');
  });
@@ -109,7 +109,7 @@ it('Rites damages only the destroyed Rune controller, and not for a Relic',()=>{
 describe('Brute effect continuations',()=>{
  it('draws before Raider discard, keeps costs paid once, and resumes from a saved state',()=>{
   let start=hand(newBattlefield(false,()=>.4),'bloodfang-raider'),s=deploy(start.s,start.id);
-  s=battlefieldDispatch(s,{type:'ROTATE',instanceId:start.id});const deck=s.table.piles['0:deck'].length,drawn=s.table.piles['0:deck'][0];
+  s.table.cards[start.id].unready=false;const deck=s.table.piles['0:deck'].length,drawn=s.table.piles['0:deck'][0];
   const p=bruteEffects[s.table.cards[start.id].cardId].activated![0];s=resolveAshenEffect(s,p,{source:start.id,player:'0'});
   expect(s.table.cards[drawn].zone).toBe('hand');expect(s.table.piles['0:deck']).toHaveLength(deck-1);expect(s.table.cards[start.id].rotated).toBe(true);
   expect(pendingAshenChoices(s)?.entities.some(e=>e.id===drawn)).toBe(true);
@@ -142,7 +142,7 @@ describe('Brute effect continuations',()=>{
  it('Fury Offering creates recovery tokens without sacrificing, damaging or drawing',()=>{
   const start=hand(newBattlefield(false,()=>.4),'fury-offering');const s=deploy(start.s,start.id);
   expect(s.table.piles['0:unit']).toHaveLength(3);expect(s.table.piles['0:deck']).toHaveLength(start.s.table.piles['0:deck'].length);expect(s.table.health).toEqual([20,20]);
-  expect(s.table.piles['0:unit'].every(id=>s.table.cards[id].rotated)).toBe(true);expect(s.rules?.pending).toBeUndefined();
+  expect(s.table.piles['0:unit'].every(id=>s.table.cards[id].unready&&!s.table.cards[id].rotated)).toBe(true);expect(s.rules?.pending).toBeUndefined();
  });
 });
 

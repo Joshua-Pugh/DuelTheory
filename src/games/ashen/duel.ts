@@ -58,6 +58,7 @@ function prepareAshenAction(s:Battlefield,id:string,context:EffectContext,abilit
   const temp=structuredClone(s);if(card.zone==='graveyard')moveAshenCard(temp,id,'hand');p=playProgram(temp,id);
   if(d.callPermission===id)p={...p,cost:{}};
  }
+ if(p.cost?.exhaust&&card.zone==='unit'&&card.unready)throw Error('This Unit is Unready and cannot Exhaust.');
  if(nextCallBlocked(s,id))throw Error('Finish Korgath’s Call before another action.');
  const useKey=`${s.rules!.turn}:${id}:${p.id}`;if(p.oncePerTurn&&s.rules!.abilityUses?.[useKey])throw Error('This ability has already been used this turn.');
  return {card,ability,p};
@@ -123,7 +124,7 @@ function resolveTopEntry(s:Battlefield){const d=duel(s),entry=d.stack.pop();if(!
  if(entry.kind==='trigger'&&!entry.notified)s.table.events.push(`Triggered: Player ${Number(entry.context.player)+1} · ${c?.name||entry.program.label} · ${entry.program.label}.`);
  if(entry.kind==='action'){
   const zone=c.type==='Unit'?'unit':c.type==='Ley Font'?'ley':['Rune','Relic'].includes(c.type)?'support':'graveyard';moveAshenCard(s,id,zone);
-  if(c.type==='Unit'){s.table.cards[id].rotated=!ashenStats(s,id).keywords.includes('Charge');if(entry.bonus){ashenAdapter.modify(s,id,{attack:3},['Charge'],'turn');s.table.cards[id].rotated=false;}}
+  if(c.type==='Unit'){s.table.cards[id].rotated=false;s.table.cards[id].unready=true;if(entry.bonus){ashenAdapter.modify(s,id,{attack:3},['Charge'],'turn');s.table.cards[id].rotated=false;}}
   if(c.type==='Ley Font')s.table.cards[id].faceDown=!!ashenEffects[c.cardId]?.entersSpent;
   if(['unit','support','ley'].includes(zone)){
    if(entry.program.steps.length)d.stack.push({...entry,kind:'trigger',program:{...entry.program,cost:undefined}});
@@ -202,7 +203,7 @@ export function assertAshenPhaseAdvance(s:Battlefield,target:Phase){
  if(!['combat','main2','end'].includes(target)||order.indexOf(target)<=order.indexOf(d.phase))throw Error('Choose a later phase.');
  if(d.phase==='combat'&&!['attack','finished'].includes(d.combat?.stage||''))throw Error('Finish the Skirmish before advancing.');
  if(['main2','end'].includes(target)&&(d.phase==='main1'||d.phase==='combat'&&d.combat?.stage==='attack')){
-  if(s.table.piles[`${s.table.active}:unit`].some(id=>!s.table.cards[id].rotated&&!s.table.cards[id].faceDown&&ashenStats(s,id).keywords.includes('Reckless')))throw Error('Reckless Units must attack if able. Finish the Skirmish first.');
+  if(s.table.piles[`${s.table.active}:unit`].some(id=>!attackReadinessReason(s,id)&&!s.table.cards[id].faceDown&&ashenStats(s,id).keywords.includes('Reckless')))throw Error('Reckless Units must attack if able. Finish the Skirmish first.');
  }
 }
 export function advanceAshenTo(original:Battlefield,target:Phase){
@@ -232,7 +233,7 @@ export function settleAshenDuel(initial:Battlefield):Battlefield{
   const job=d.jobs.shift();if(!job)return s;
   if(job.kind==='program'){d.stack.push({kind:'trigger',program:job.program,context:job.context});d.priority=openPriority(['0','1'],job.context.player);}
   else if(job.kind==='ready'){
-   for(const zone of ['unit','support','ley'])for(const id of s.table.piles[`${s.table.active}:${zone}`]){const c=s.table.cards[id],was=c.rotated||c.faceDown;c.rotated=false;if(zone==='ley')c.faceDown=false;const p=was?ashenEffects[c.cardId]?.onReady:undefined;if(p)d.jobs.unshift({kind:'program',program:p,context:{player:active(s),source:id}});}
+   for(const zone of ['unit','support','ley'])for(const id of s.table.piles[`${s.table.active}:${zone}`]){const c=s.table.cards[id],was=c.rotated||c.faceDown||c.unready;c.rotated=false;delete c.unready;if(zone==='ley')c.faceDown=false;const p=was?ashenEffects[c.cardId]?.onReady:undefined;if(p)d.jobs.unshift({kind:'program',program:p,context:{player:active(s),source:id}});}
   }else if(job.kind==='draw'){const before=new Set(s.table.piles[`${s.table.active}:hand`]);ashenAdapter.draw(s,active(s),1);s=drainTriggers(s,ashenAdapter.entities(s).filter(e=>e.zone==='hand'&&e.controller===active(s)&&!before.has(e.id)).map(entity=>({kind:'drawn',source:s.table.piles[`${s.table.active}:command`][0],player:active(s),entity})));}
   else if(job.kind==='main')d.phase='main1';
   else if(job.kind==='newTurn'){
@@ -246,16 +247,23 @@ export function settleAshenDuel(initial:Battlefield):Battlefield{
  throw Error('Duel resolution limit reached.');
 }
 
-export function canBlockAshen(s:Battlefield,attacker:string,blocker:string){if(!alive(s,attacker)||!alive(s,blocker))return false;const a=s.table.cards[attacker],b=s.table.cards[blocker],ak=ashenStats(s,attacker).keywords,bk=ashenStats(s,blocker).keywords;if(a.controller===b.controller||b.faceDown||(b.rotated&&!bk.includes('Standfast'))||ak.includes('Evade'))return false;if(ak.includes('Ranged')&&!bk.includes('Ranged'))return false;if(ak.includes('Soar')&&!bk.some(k=>['Soar','Ranged'].includes(k)))return false;if(bk.includes('Siege')&&ak.some(k=>['Soar','Ranged'].includes(k)))return false;return true;}
+export function canBlockAshen(s:Battlefield,attacker:string,blocker:string){if(!alive(s,attacker)||!alive(s,blocker))return false;const a=s.table.cards[attacker],b=s.table.cards[blocker],ak=ashenStats(s,attacker).keywords,bk=ashenStats(s,blocker).keywords;if(a.controller===b.controller||b.faceDown||b.rotated||(b.unready&&!bk.includes('Standfast'))||ak.includes('Evade'))return false;if(ak.includes('Ranged')&&!bk.includes('Ranged'))return false;if(ak.includes('Soar')&&!bk.some(k=>['Soar','Ranged'].includes(k)))return false;if(bk.includes('Siege')&&ak.some(k=>['Soar','Ranged'].includes(k)))return false;return true;}
 export function canChooseAshenCombat(s:Battlefield,stage:'attack'|'block'){
  try{requireIdle(s);return duel(s).phase==='combat'&&duel(s).combat?.stage===stage;}catch{return false;}
+}
+function attackReadinessReason(s:Battlefield,id:string){
+ const card=s.table.cards[id];
+ if(card.rotated)return 'This Unit is fatigued.';
+ if(card.unready&&!ashenStats(s,id).keywords.includes('Charge'))return 'This Unit is Unready and needs Charge to attack.';
+ return '';
 }
 export function inspectAshenAttacker(s:Battlefield,id:string){
  try{requireIdle(s);}catch{return {allowed:false,reason:'Finish the current card effect or response first.'};}
  if(duel(s).phase!=='combat'||duel(s).combat?.stage!=='attack')return {allowed:false,reason:'Choose attackers during the Skirmish.'};
  const c=s.table.cards[id];
  if(!alive(s,id)||c.controller!==s.table.active||c.faceDown)return {allowed:false,reason:'Choose one of your face-up Units.'};
- return c.rotated?{allowed:false,reason:'This Unit is fatigued.'}:{allowed:true,reason:''};
+ const reason=attackReadinessReason(s,id);
+ return {allowed:!reason,reason};
 }
 export function inspectAshenBlocker(s:Battlefield,attacker:string,blocker:string){
  try{requireIdle(s);}catch{return {allowed:false,reason:'Finish the current card effect or response first.'};}
@@ -264,17 +272,17 @@ export function inspectAshenBlocker(s:Battlefield,attacker:string,blocker:string
  if(Object.values(combat.blockers).some(ids=>ids.includes(blocker)))return {allowed:false,reason:'This Unit is already blocking.'};
  if(canBlockAshen(s,attacker,blocker))return {allowed:true,reason:''};
  const a=ashenStats(s,attacker).keywords,b=s.table.cards[blocker],bk=ashenStats(s,blocker).keywords;
- const reason=!alive(s,blocker)||b.controller===s.table.cards[attacker].controller||b.faceDown?'Choose a defending face-up Unit.':b.rotated&&!bk.includes('Standfast')?'This Unit is fatigued and does not have Standfast.':a.includes('Evade')?'This attacker has Evade and cannot be blocked.':a.includes('Ranged')&&!bk.includes('Ranged')?'Only a Ranged Unit can block this attacker.':a.includes('Soar')&&!bk.some(k=>['Soar','Ranged'].includes(k))?'This attacker needs a Soar or Ranged blocker.':'A Siege Unit cannot block a Soar or Ranged attacker.';
+ const reason=!alive(s,blocker)||b.controller===s.table.cards[attacker].controller||b.faceDown?'Choose a defending face-up Unit.':b.rotated?'This Unit is fatigued.':b.unready&&!bk.includes('Standfast')?'This Unit is Unready and needs Standfast to block.':a.includes('Evade')?'This attacker has Evade and cannot be blocked.':a.includes('Ranged')&&!bk.includes('Ranged')?'Only a Ranged Unit can block this attacker.':a.includes('Soar')&&!bk.some(k=>['Soar','Ranged'].includes(k))?'This attacker needs a Soar or Ranged blocker.':'A Siege Unit cannot block a Soar or Ranged attacker.';
  return {allowed:false,reason};
 }
 export function inspectAshenAttackSelection(s:Battlefield,ids:string[]){
  if(!canChooseAshenCombat(s,'attack'))return {allowed:false,reason:'Finish the current choice or response before attacking.'};
- if(new Set(ids).size!==ids.length||ids.some(id=>!inspectAshenAttacker(s,id).allowed))return {allowed:false,reason:'Choose distinct Ready friendly Units.'};
+ if(new Set(ids).size!==ids.length||ids.some(id=>!inspectAshenAttacker(s,id).allowed))return {allowed:false,reason:'Choose distinct friendly Units that can attack.'};
  const missing=s.table.piles[`${s.table.active}:unit`].filter(id=>inspectAshenAttacker(s,id).allowed&&ashenStats(s,id).keywords.includes('Reckless')&&!ids.includes(id));
  return missing.length?{allowed:false,reason:'Reckless Units must attack if able.'}:{allowed:true,reason:''};
 }
 export function declareAshenAttackers(original:Battlefield,ids:string[]){let s=structuredClone(original);requireIdle(s);const d=duel(s),combat=d.combat;if(d.phase!=='combat'||combat?.stage!=='attack')throw Error('Not the attacker declaration step.');const check=inspectAshenAttackSelection(s,ids);if(!check.allowed)throw Error(check.reason);combat.attackers=[...ids];combat.stage=ids.length?'block':'finished';
- const originals=[...ids];for(const id of originals)s.table.cards[id].rotated=true;
+ const originals=[...ids];for(const id of originals)if(!ashenStats(s,id).keywords.includes('Standfast'))s.table.cards[id].rotated=true;
  for(const id of originals){const c=s.table.cards[id],slug=c.cardId,ctx={player:active(s),source:id};
   const add=(p:EffectProgram,context:EffectContext=ctx)=>duel(s).stack.push({kind:'trigger',program:p,context});
   if(Object.entries(s.rules?.attachments||{}).some(([relic,target])=>target===id&&s.table.cards[relic]?.zone==='support'&&s.table.cards[relic].cardId==='ashen-noble-ashenfield-lance'))add(program('lance-siege','Ashenfield Lance: gain Siege',[{op:'modify',targets:'source',stats:{},keywords:['Siege'],duration:'turn'}]));

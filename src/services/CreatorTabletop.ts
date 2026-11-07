@@ -2,7 +2,7 @@ import type {AshenCardData} from '../ashenPresentation';
 /** Rules-neutral manual tabletop. Explicit actions only; never reports rules-verified results. */
 export type TabletopZone = {id:string;label:string;slots:number;faceDownDefault?:boolean};
 export type GameDefinition = {schemaVersion:1;id:string;version:string;name:string;startingHand:number;healthLabel:string;startingHealth:number;zones:TabletopZone[];pileLabels?:Record<string,string>};
-export type TabletopCard = {instanceId:string;cardId:string;name:string;image?:string;presentation?:AshenCardData;type:string;owner:0|1;controller:0|1;zone:string;faceDown:boolean;rotated:boolean;counters:number};
+export type TabletopCard = {instanceId:string;cardId:string;name:string;image?:string;presentation?:AshenCardData;type:string;owner:0|1;controller:0|1;zone:string;faceDown:boolean;rotated:boolean;unready?:boolean;counters:number};
 export type TabletopState = {schemaVersion:1;definition:GameDefinition;cards:Record<string,TabletopCard>;piles:Record<string,string[]>;health:[number,number];turn:number;active:0|1;events:string[];verified:false};
 export type TabletopAction =
  | {type:'MOVE';instanceId:string;seat:0|1;zone:string;faceDown?:boolean}

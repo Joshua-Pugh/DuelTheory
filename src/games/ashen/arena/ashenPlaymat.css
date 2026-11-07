@@ -55,6 +55,9 @@
   z-index: 5;
   height: auto;
 }
+.ab-arena.ab-duel.ab-playmat .ab-zone .ab-unready .ab-readiness {
+  display: block;
+}
 .ab-arena.ab-duel.ab-playmat .ab-card-row { height: 100%; }
 .ab-arena.ab-duel.ab-playmat .ab-ley:has(header button) .ab-card-row { padding-inline-end: 74px; }
 .ab-font-cascade {

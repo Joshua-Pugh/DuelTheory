@@ -11,7 +11,7 @@
       "rarity": "Iron",
       "attack": 1,
       "defense": 1,
-      "effectText": "Charge (Frenzied Grunt may attack the same turn it enters the Frontline. Ignores deployment fatigue.)",
+      "effectText": "Charge (Frenzied Grunt can attack while Unready.)",
       "effectStatus": "source-transcribed",
       "artStatus": "placeholder",
       "sourceDeck": "Clan of the Broken Fist",

@@ -41,10 +41,12 @@ it('offers repeatable Cauldron recovery and locks both activations after Exhaust
  for(const ability of bruteEffects['ashen-brute-blood-cauldron'].activated!)expect(()=>submitAshenAction(s,source,{source,player:'0'},ability.id)).toThrow();
 });
 it('Offering makes three on an empty Frontline, two otherwise, and Banner grants their Charge',()=>{
- for(const existing of [false,true]){let s=setup();if(existing){put(s,'frenzied-grunt');put(s,'banner-of-the-broken-fist',0,'support');}const source=put(s,'fury-offering',0,'hand');s=finish(submitAshenAction(s,source,{source,player:'0'}));expect(tokens(s)).toHaveLength(existing?2:3);for(const id of tokens(s))expect(s.table.cards[id].rotated).toBe(!existing);}
+ for(const existing of [false,true]){let s=setup();if(existing){put(s,'frenzied-grunt');put(s,'banner-of-the-broken-fist',0,'support');}const source=put(s,'fury-offering',0,'hand');s=finish(submitAshenAction(s,source,{source,player:'0'}));expect(tokens(s)).toHaveLength(existing?2:3);for(const id of tokens(s))expect(s.table.cards[id]).toMatchObject({unready:true,rotated:false});}
 });
-it('Standfast permits fatigued defense but preserves aerial restrictions and revised costs',()=>{
- const s=setup(),ground=put(s,'frenzied-grunt'),air=put(s,'ashen-warhawk'),shield=put(s,'shieldbearer-noble',1),archer=put(s,'crown-archer',1);s.table.cards[shield].rotated=true;s.table.cards[archer].rotated=true;
+it('Standfast permits Unready defense but preserves aerial restrictions and revised costs',()=>{
+ const s=setup(),ground=put(s,'frenzied-grunt'),air=put(s,'ashen-warhawk'),shield=put(s,'shieldbearer-noble',1),archer=put(s,'crown-archer',1);s.table.cards[shield].unready=true;s.table.cards[archer].unready=true;
  expect(canBlockAshen(s,ground,shield)).toBe(true);expect(canBlockAshen(s,air,shield)).toBe(false);expect(canBlockAshen(s,air,archer)).toBe(true);
+ s.table.cards[archer].rotated=true;
+ expect(canBlockAshen(s,air,archer)).toBe(false);
  const source=put(s,'bloodpit-initiate',0,'hand');expect(playProgram(s,source).cost).toMatchObject({generic:1,resources:{fury:1}});expect(ashenAdapter.stats!(s,source).cost).toBe(2);
 });

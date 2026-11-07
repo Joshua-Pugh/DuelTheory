@@ -16,9 +16,10 @@ export default function AshenBattlefieldCard({state,id,seat,hand,showKeywords,dr
  const stats=c.zone==='unit'&&known?ashenStats(state,id):undefined;
  const spent=c.zone==='ley'&&c.faceDown,fatigued=['unit','support'].includes(c.zone)&&c.rotated;
  const label=known?c.name:'Face-down card',remaining=stats?Math.max(0,stats.defense-stats.damage):0;
- const status=spent?'Spent':fatigued?'Fatigued':!hand&&['unit','support','ley'].includes(c.zone)?'Ready':'';
+ const unready=c.zone==='unit'&&!!c.unready;
+ const status=spent?'Spent':fatigued&&unready?'Fatigued · Unready':fatigued?'Fatigued':unready?'Unready':!hand&&['unit','support','ley'].includes(c.zone)?'Ready':'';
  return <div className="ab-card-wrap">
-  <button type="button" className={['ab-card',dragBlocker?'ab-drag-blocker':'',dragTarget?'ab-drag-target':'',c.controller!==seat&&!hand?'ab-opposing':'',fatigued?'ab-fatigued':'',spent?'ab-font-spent':'',selected||combat.selected?'ab-selected':'',combat.intent?'ab-combat-'+combat.intent:'',combat.attacking?'ab-attacking':'',combat.blocking?'ab-blocking':'',stats?.damage?'ab-damaged':''].filter(Boolean).join(' ')}
+  <button type="button" className={['ab-card',dragBlocker?'ab-drag-blocker':'',dragTarget?'ab-drag-target':'',c.controller!==seat&&!hand?'ab-opposing':'',fatigued?'ab-fatigued':'',unready?'ab-unready':'',spent?'ab-font-spent':'',selected||combat.selected?'ab-selected':'',combat.intent?'ab-combat-'+combat.intent:'',combat.attacking?'ab-attacking':'',combat.blocking?'ab-blocking':'',stats?.damage?'ab-damaged':''].filter(Boolean).join(' ')}
    data-ashen-card={id} data-combat-action={combat.intent} aria-label={`${label}${spent?' · spent':''}`} aria-pressed={combat.intent==='attack'||combat.intent==='target'||combat.intent==='effect-target'?!!combat.selected:undefined} aria-description={[combat.label,combat.reason,status,stats?.keywords.filter(k=>['Ranged','Soar','Siege'].includes(k)).join(', '),stats?`${stats.attack} Attack, ${remaining} of ${stats.defense} Defense remaining`:null].filter(Boolean).join('. ')} title={[label,combat.label||combat.reason,status].filter(Boolean).join(' · ')} draggable={!state.rules?.duel&&c.controller===seat} onDragStart={onDrag} onMouseEnter={()=>onHover(id)} onMouseLeave={()=>onHover(null)} onFocus={()=>onHover(id)} onBlur={()=>onHover(null)} onClick={onClick} onContextMenu={e=>{e.preventDefault();onActions();}}>
    <span className="ab-card-face">{face&&data?<AshenCardFrame card={data} size="mini"/>:<span className="ab-card-back"><CardBack/></span>}</span>
    {fatigued&&<span className="ab-fatigue-counter" aria-label="1 Fatigue counter">F</span>}
@@ -27,7 +28,7 @@ export default function AshenBattlefieldCard({state,id,seat,hand,showKeywords,dr
    {stats&&<span className="ab-stat-chip" title={`${stats.attack} Attack · ${remaining} of ${stats.defense} Defense remaining`}>{stats.attack}/{remaining}{stats.damage>0&&<small> · {stats.damage} dmg</small>}</span>}
    {showKeywords&&stats&&<AshenKeywordIcons keywords={stats.keywords}/>}
    {spent&&<span className="ab-spent">Spent</span>}
-   {!hand&&!spent&&status&&<span className="ab-readiness">{status}{fatigued&&stats?.keywords.includes('Standfast')?' · Standfast':''}</span>}
+   {!hand&&!spent&&status&&<span className="ab-readiness">{status}</span>}
    {(combat.label||combat.attacking||combat.blocking)&&<span className="ab-combat-tag">{combat.label||(combat.blocking?'Blocking':'Attacking')}</span>}
   </button>
   {known&&combat.intent!=='effect-target'&&(combat.intent||combat.reason||combat.attacking||combat.blocking)&&<button className="ab-combat-read" aria-label={`Read ${label}`} title="Read card" onClick={onRead}><Eye size={15}/></button>}

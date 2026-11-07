@@ -82,7 +82,7 @@ export default function AshenBattlefield({remote,initialState,onAgain,onExit,lea
  const completeChoice=(ids:string[])=>{if(choicePlayer!==undefined&&choicePlayer!==String(seat)){setNotice(`Player ${Number(choicePlayer)+1} must make this effect choice.`);return;}if(remote){remote.send({type:'choice',ids});setPendingIds([]);return;}try{const next=guided?resumeBruteDuel(state,ids):resumeAshenEffect(state,ids);setState(next);setPendingIds([]);setNotice(next.table.events.at(-1)||'Effect resolved.');}catch(e){setNotice(e instanceof Error?e.message:String(e));}};
  const runGuided=(fn:(s:Battlefield)=>Battlefield,command?:AshenCommand)=>{if(remote){if(command)remote.send(command);return !!command;}try{const next=fn(state);setHistory(h=>[...h.slice(-29),state]);setState(next);setNotice(next.table.events.at(-1)||'Updated.');return true;}catch(e){setNotice(e instanceof Error?e.message:String(e));return false;}};
  const act=(action:BattlefieldAction)=>{
-  try{if(guided){if(action.type==='BURN'){return runGuided(s=>burnInBruteDuel(s,action.instanceId,seat),{type:'burn',id:action.instanceId});}throw Error('Use the card actions and phase buttons to play this duel.');}let next=battlefieldDispatch(state,action);if(assisted&&action.type==='BURN')next=resolveBurnEffect(next,action.instanceId);if(assisted&&action.type==='END_TURN'){for(const zone of ['unit','support'])for(const id of next.table.piles[`${next.table.active}:${zone}`])next.table.cards[id].rotated=false;}setHistory(h=>[...h.slice(-29),state]);setState(next);setNotice(next.table.events.at(-1)||'Updated.');return true;}
+  try{if(guided){if(action.type==='BURN'){return runGuided(s=>burnInBruteDuel(s,action.instanceId,seat),{type:'burn',id:action.instanceId});}throw Error('Use the card actions and phase buttons to play this duel.');}let next=battlefieldDispatch(state,action);if(assisted&&action.type==='BURN')next=resolveBurnEffect(next,action.instanceId);if(assisted&&action.type==='END_TURN'){for(const zone of ['unit','support'])for(const id of next.table.piles[`${next.table.active}:${zone}`]){next.table.cards[id].rotated=false;delete next.table.cards[id].unready;}}setHistory(h=>[...h.slice(-29),state]);setState(next);setNotice(next.table.events.at(-1)||'Updated.');return true;}
   catch(e){setNotice(e instanceof Error?e.message:String(e));return false;}
  };
 
@@ -187,7 +187,7 @@ export default function AshenBattlefield({remote,initialState,onAgain,onExit,lea
    cardActions.push({id:'deploy',label:card.type==='Ley Font'?'Play Ley Font':`Play ${card.type}`,disabled:!check.allowed,reason:check.allowed?undefined:check.reason,run:deployEffect});
   }
   if(assisted&&['unit','support','ley'].includes(card.zone))for(const program of availableAshenAbilities(state,card.instanceId)){
-   const check=guided?inspectAshenAction(state,card.instanceId,seat,program.id):{allowed:!(program.cost?.exhaust&&(card.rotated||card.faceDown)),reason:'This card is fatigued.'};
+   const check=guided?inspectAshenAction(state,card.instanceId,seat,program.id):{allowed:!(program.cost?.exhaust&&(card.rotated||card.faceDown||card.unready)),reason:card.unready?'This Unit is Unready.':'This card is fatigued.'};
    cardActions.push({id:program.id,label:program.label,disabled:!check.allowed,reason:check.allowed?undefined:check.reason,run:()=>beginEffect(program)});
   }
   if(card.type==='Ley Font'&&card.zone==='ley'){
@@ -225,7 +225,7 @@ export default function AshenBattlefield({remote,initialState,onAgain,onExit,lea
   <section className="ab-hand" aria-label="Your hand"><header><strong>YOUR HAND <small>{st.piles[`${seat}:hand`].length} cards</small></strong><span>Player {seat+1} · {ashenData(state,st.piles[`${seat}:command`][0])?.faction}</span><button disabled={!!guided} onClick={()=>act({type:'DRAW',seat})}>Draw card</button></header><div className="ab-hand-cards">{st.piles[`${seat}:hand`].map(id=>renderCard(id,true))}</div></section>
   {viewerOpen&&<button className="ab-viewer-scrim" aria-label="Close card viewer" onClick={()=>setViewerOpen(false)}/>}
   <p className="ab-notice" role="status">{display.displayNotice||notice}</p><p className="ab-footnote">{skirmish?'Skirmish preview':'Your duel is saved on this device.'}</p>
-  {assisted&&!guided&&<p className="ab-effect-banner">Effects sandbox: click a card and choose its play action for cards in the first AT prototype. Printed essence costs and deployment fatigue are applied. Manual moves bypass rules. Clash timing, combat, and unlisted effects are not automated.</p>}
+  {assisted&&!guided&&<p className="ab-effect-banner">Effects sandbox: click a card and choose its play action for cards in the first AT prototype. Printed essence costs and deployment readiness are applied. Manual moves bypass rules. Clash timing, combat, and unlisted effects are not automated.</p>}
   {guided&&<AshenOpeningHands state={state} seat={seat} onSeat={remote?undefined:setSeat} onChoice={choice=>{if(runGuided(s=>chooseAshenOpening(s,seat,choice),{type:'opening',choice})){setHistory([]);setSelected(null);setHovered(null);setMenuOpen(false);}}}/>}
   <AshenEffectNotices events={st.events}/>
   <AshenCardAnimations key={`motions-${seat}`} state={state} seat={seat} board={board}/>

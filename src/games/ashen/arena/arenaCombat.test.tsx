@@ -28,13 +28,13 @@ it('uses actual legal actions for attack highlights and excludes fatigued Units 
  s.table.cards[a].rotated=false;s.rules!.duel!.priority={holder:'0',players:['0','1'],passed:[]};expect(inspectAshenAttacker(s,a).allowed).toBe(false);
 });
 it('keeps Standfast, aerial restrictions, single-blocker assignment and authenticated removal aligned',()=>{
- let s=fixture();const a=put(s,'ashen-brute-ashen-warhawk',0),ground=put(s,'ashen-noble-shieldbearer-noble',1),archer=put(s,'ashen-noble-crown-archer',1);s.table.cards[archer].rotated=true;s=declareAshenAttackers(s,[a]);
+ let s=fixture();const a=put(s,'ashen-brute-ashen-warhawk',0),ground=put(s,'ashen-noble-shieldbearer-noble',1),archer=put(s,'ashen-noble-crown-archer',1);s.table.cards[archer].unready=true;s=declareAshenAttackers(s,[a]);
  expect(inspectAshenBlocker(s,a,ground)).toMatchObject({allowed:false,reason:'This attacker needs a Soar or Ranged blocker.'});expect(combatCardView(s,archer,1,[],a).intent).toBe('block');
  s=assignAshenBlocker(s,a,archer);expect(combatLinks(s,[])).toEqual([{from:archer,to:a,kind:'block',preview:false}]);expect(inspectAshenBlocker(s,a,archer).allowed).toBe(false);expect(combatCardView(s,archer,1,[],a).intent).toBe('unblock');
  expect(()=>applyAshenCommand(s,0,{type:'unblock',blocker:archer})).toThrow('defender');s=applyAshenCommand(s,1,{type:'unblock',blocker:archer});expect(s.rules!.duel!.combat!.blocked).toEqual([]);expect(inspectAshenBlocker(s,a,archer).allowed).toBe(true);
 });
 it('reports resolved simultaneous damage and destroyed Units without changing combat results',()=>{
- let s=fixture();const a=put(s,'ashen-brute-frenzied-grunt',0),b=put(s,'ashen-noble-crown-archer',1);s.table.cards[b].rotated=true;s=declareAshenAttackers(s,[a]);s=assignAshenBlocker(s,a,b);s=resolveAshenCombat(s);
+ let s=fixture();const a=put(s,'ashen-brute-frenzied-grunt',0),b=put(s,'ashen-noble-crown-archer',1);s.table.cards[b].unready=true;s=declareAshenAttackers(s,[a]);s=assignAshenBlocker(s,a,b);s=resolveAshenCombat(s);
  expect(s.table.cards[a].zone).toBe('graveyard');expect(s.table.cards[b].zone).toBe('graveyard');const report=s.rules!.duel!.combat!.report!;expect(report.hits.map(h=>h.amount)).toEqual([2,2]);expect(report.fallen.map(c=>c.name)).toEqual(expect.arrayContaining(['Frenzied Grunt','Crown Archer']));expect(s.table.health).toEqual([20,20]);
  const html=renderToStaticMarkup(<AshenCombatSummary state={JSON.parse(JSON.stringify(s))} onInspect={()=>{}}/>);expect(html).toContain('Combat result');expect(html).toContain('Damage dealt');expect(html).toContain('Destroyed:');
 });
@@ -69,8 +69,8 @@ it('assigns a legal blocker with a pointer drag and rejects an illegal drop',asy
   expect(send).toHaveBeenCalledExactlyOnceWith({type:'block',attacker,blocker:archer});
  }finally{hit.mockRestore();capture.mockRestore();}
 });
-it('labels remaining Defense, damage and fatigued Standfast separately',()=>{
- const s=fixture(),id=put(s,'ashen-noble-crown-archer',1);s.table.cards[id].rotated=true;s.rules!.damage[id]=1;
+it('labels remaining Defense, damage and Unready separately',()=>{
+ const s=fixture(),id=put(s,'ashen-noble-crown-archer',1);s.table.cards[id].unready=true;s.rules!.damage[id]=1;
  const html=renderToStaticMarkup(<AshenBattlefieldCard state={s} seat={1} id={id} hand={false} selected={false} combat={{attacking:false,blocking:false}} onClick={()=>{}} onActions={()=>{}} onRead={()=>{}} onHover={()=>{}} onDrag={()=>{}}/>);
- expect(html).toContain('2 Attack, 1 of 2 Defense remaining');expect(html).toContain('Fatigued · Standfast');expect(html).toContain('1 dmg');
+ expect(html).toContain('2 Attack, 1 of 2 Defense remaining');expect(html).toContain('Unready');expect(html).toContain('1 dmg');
 });
